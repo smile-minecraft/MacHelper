@@ -1,0 +1,596 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ is running": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 正在執行"
+          }
+        }
+      }
+    },
+    "%lld items not processed: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 項未處理：%@"
+          }
+        }
+      }
+    },
+    "App Group declared by the app": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 宣告的 App Group"
+          }
+        }
+      }
+    },
+    "App bundle": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 本體"
+          }
+        }
+      }
+    },
+    "App data (Application Support)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 資料（Application Support）"
+          }
+        }
+      }
+    },
+    "App is running": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 正在執行"
+          }
+        }
+      }
+    },
+    "Background items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景啟動項目"
+          }
+        }
+      }
+    },
+    "Background items for all users": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有使用者的背景項目"
+          }
+        }
+      }
+    },
+    "Built-in Apple app, managed by macOS": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 內建 App，由 macOS 管理"
+          }
+        }
+      }
+    },
+    "Bundle ID matches": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bundle ID 相符"
+          }
+        }
+      }
+    },
+    "Caches": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快取"
+          }
+        }
+      }
+    },
+    "Clears the preview thumbnail cache and reloads QuickLook plug-ins, fixing wrong or stale thumbnails.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除預覽縮圖快取並重新載入 QuickLook 外掛，修正縮圖錯誤或過時。"
+          }
+        }
+      }
+    },
+    "Commands (~/.local/bin)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指令（~/.local/bin）"
+          }
+        }
+      }
+    },
+    "Container metadata names the app": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器資訊指向這個 App"
+          }
+        }
+      }
+    },
+    "Crash reports": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "當機報告"
+          }
+        }
+      }
+    },
+    "Data in your home folder (~/.name)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "家目錄裡的資料（~/.名稱）"
+          }
+        }
+      }
+    },
+    "Delete unavailable simulators": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除無法使用的模擬器"
+          }
+        }
+      }
+    },
+    "Docker cleanup": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker 清理"
+          }
+        }
+      }
+    },
+    "Fixes duplicate or wrong entries in the Open With menu. Resets default apps for file types and takes a few minutes.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修正「打開方式」選單重複或錯誤。會重置檔案類型的預設 App，需要幾分鐘。"
+          }
+        }
+      }
+    },
+    "Flush the DNS cache": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除 DNS 快取"
+          }
+        }
+      }
+    },
+    "Free inactive memory": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "釋放閒置記憶體"
+          }
+        }
+      }
+    },
+    "Helper or extension inside the app": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 內的輔助程式或延伸功能"
+          }
+        }
+      }
+    },
+    "Homebrew: remove old versions": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 清理舊版本"
+          }
+        }
+      }
+    },
+    "Its app no longer exists": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "對應的 App 已不存在"
+          }
+        }
+      }
+    },
+    "It’s a git repository, possibly your own settings or project": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "是 git 儲存庫，可能是你自己的設定或專案"
+          }
+        }
+      }
+    },
+    "Listed by Homebrew": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 清單列出"
+          }
+        }
+      }
+    },
+    "Logs": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日誌"
+          }
+        }
+      }
+    },
+    "MacHelper itself": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 自己"
+          }
+        }
+      }
+    },
+    "MacHelper rule": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 規則"
+          }
+        }
+      }
+    },
+    "MacHelper rule: doesn’t belong to this app": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 規則：不屬於這個 App"
+          }
+        }
+      }
+    },
+    "Matched by app name, please check": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依 App 名稱比對，請確認"
+          }
+        }
+      }
+    },
+    "Matched by developer name, please check": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依開發者名稱比對，請確認"
+          }
+        }
+      }
+    },
+    "Plug-ins and extensions": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外掛與延伸功能"
+          }
+        }
+      }
+    },
+    "Preferences": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "偏好設定"
+          }
+        }
+      }
+    },
+    "Purges the disk cache (purge). macOS manages this itself, so it’s rarely needed; file reads are slower for a while afterwards.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空磁碟快取（purge）。macOS 本來就會自動管理，通常不需要；之後一段時間檔案讀取會變慢。"
+          }
+        }
+      }
+    },
+    "Rebuild the LaunchServices database": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重建 LaunchServices 資料庫"
+          }
+        }
+      }
+    },
+    "Related bundle ID": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "相關的 bundle ID"
+          }
+        }
+      }
+    },
+    "Removes iOS simulators whose runtime no longer exists (xcrun simctl delete unavailable).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除對應 runtime 已不存在的 iOS 模擬器（xcrun simctl delete unavailable）。"
+          }
+        }
+      }
+    },
+    "Removes old versions of installed packages and stale downloads (brew cleanup).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除已安裝套件的舊版本與過期下載（brew cleanup）。"
+          }
+        }
+      }
+    },
+    "Removes stopped containers, unused networks, dangling images and build cache (docker system prune -f). Docker must be running.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除停止的容器、未使用的網路、懸空映像與建置快取（docker system prune -f）。需要 Docker 正在執行。"
+          }
+        }
+      }
+    },
+    "Reset QuickLook thumbnail cache": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置 QuickLook 縮圖快取"
+          }
+        }
+      }
+    },
+    "Restart Finder": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新啟動 Finder"
+          }
+        }
+      }
+    },
+    "Restart the Dock": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新啟動 Dock"
+          }
+        }
+      }
+    },
+    "Run periodic maintenance scripts": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "執行系統例行維護腳本"
+          }
+        }
+      }
+    },
+    "Runs a program inside the app": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "執行的程式在 App 裡"
+          }
+        }
+      }
+    },
+    "Runs the daily / weekly / monthly scripts (rotates and compresses system logs, cleans temporary files).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "執行 daily / weekly / monthly 例行腳本（輪替與壓縮系統日誌、清理暫存）。"
+          }
+        }
+      }
+    },
+    "Same developer team": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同一個開發團隊"
+          }
+        }
+      }
+    },
+    "Sandbox containers (Containers)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沙盒容器（Containers）"
+          }
+        }
+      }
+    },
+    "Saved window state": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "視窗狀態"
+          }
+        }
+      }
+    },
+    "Shared containers (Group Containers)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共用容器（Group Containers）"
+          }
+        }
+      }
+    },
+    "System daemons": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統常駐程式"
+          }
+        }
+      }
+    },
+    "The command %@ also uses it; it may be a separately installed command-line tool": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指令 %@ 也在使用它，可能是另外安裝的指令列工具"
+          }
+        }
+      }
+    },
+    "Useful when Dock or Launchpad icons misbehave. The Dock flickers briefly, then comes back.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock 或 Launchpad 圖示異常時有用。Dock 會閃一下後恢復。"
+          }
+        }
+      }
+    },
+    "Useful when Finder hangs or shows wrong icons. Copies in progress are interrupted.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder 卡住或圖示異常時有用。進行中的拷貝會被中斷。"
+          }
+        }
+      }
+    },
+    "Useful when name resolution goes wrong or right after changing DNS settings.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網域解析錯誤或剛改過 DNS 設定時有用。"
+          }
+        }
+      }
+    },
+    "Uses the app’s data": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "會用到 App 的資料"
+          }
+        }
+      }
+    },
+    "Web data": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁資料"
+          }
+        }
+      }
+    },
+    "Your background items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的背景項目"
+          }
+        }
+      }
+    },
+    "~/%@ belongs to the separately installed command-line tool %@ and isn’t removed with the app": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/%@ 屬於獨立安裝的指令列工具 %@，不會跟著 App 刪除"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

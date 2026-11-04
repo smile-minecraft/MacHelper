@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "detectors": [
+    {
+      "id": "node",
+      "title": "Node.js",
+      "markers": [
+        "package.json"
+      ],
+      "artifacts": [
+        "node_modules",
+        ".next",
+        ".nuxt",
+        ".turbo",
+        ".parcel-cache",
+        ".svelte-kit",
+        ".angular"
+      ]
+    },
+    {
+      "id": "rust",
+      "title": "Rust (Cargo)",
+      "markers": [
+        "Cargo.toml"
+      ],
+      "artifacts": [
+        "target"
+      ]
+    },
+    {
+      "id": "swiftpm",
+      "title": "Swift Package",
+      "markers": [
+        "Package.swift"
+      ],
+      "artifacts": [
+        ".build"
+      ]
+    },
+    {
+      "id": "xcode",
+      "title": "Xcode projects",
+      "markers": [
+        "*.xcodeproj",
+        "*.xcworkspace"
+      ],
+      "artifacts": [
+        "build",
+        "DerivedData"
+      ]
+    },
+    {
+      "id": "gradle",
+      "title": "Gradle",
+      "markers": [
+        "build.gradle",
+        "build.gradle.kts",
+        "settings.gradle",
+        "settings.gradle.kts"
+      ],
+      "artifacts": [
+        "build",
+        ".gradle"
+      ]
+    },
+    {
+      "id": "maven",
+      "title": "Maven",
+      "markers": [
+        "pom.xml"
+      ],
+      "artifacts": [
+        "target"
+      ]
+    },
+    {
+      "id": "python",
+      "title": "Python",
+      "markers": [
+        "pyproject.toml",
+        "requirements.txt",
+        "setup.py",
+        "Pipfile"
+      ],
+      "artifacts": [
+        ".venv",
+        "venv",
+        ".tox",
+        ".nox",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+        "__pycache__"
+      ]
+    },
+    {
+      "id": "cmake",
+      "title": "CMake",
+      "markers": [
+        "CMakeLists.txt"
+      ],
+      "artifacts": [
+        "build",
+        "cmake-build-debug",
+        "cmake-build-release"
+      ]
+    },
+    {
+      "id": "dotnet",
+      "title": ".NET",
+      "markers": [
+        "*.csproj",
+        "*.fsproj",
+        "*.sln"
+      ],
+      "artifacts": [
+        "bin",
+        "obj"
+      ]
+    },
+    {
+      "id": "php",
+      "title": "PHP (Composer)",
+      "markers": [
+        "composer.json"
+      ],
+      "artifacts": [
+        "vendor"
+      ]
+    },
+    {
+      "id": "elixir",
+      "title": "Elixir",
+      "markers": [
+        "mix.exs"
+      ],
+      "artifacts": [
+        "_build",
+        "deps"
+      ]
+    },
+    {
+      "id": "dart",
+      "title": "Dart / Flutter",
+      "markers": [
+        "pubspec.yaml"
+      ],
+      "artifacts": [
+        ".dart_tool",
+        "build"
+      ]
+    },
+    {
+      "id": "unity",
+      "title": "Unity",
+      "markers": [
+        "ProjectSettings/ProjectVersion.txt"
+      ],
+      "artifacts": [
+        "Library",
+        "Temp",
+        "Obj",
+        "Logs"
+      ]
+    },
+    {
+      "id": "zig",
+      "title": "Zig",
+      "markers": [
+        "build.zig"
+      ],
+      "artifacts": [
+        "zig-cache",
+        ".zig-cache",
+        "zig-out"
+      ]
+    },
+    {
+      "id": "haskell",
+      "title": "Haskell (Stack)",
+      "markers": [
+        "stack.yaml"
+      ],
+      "artifacts": [
+        ".stack-work"
+      ]
+    },
+    {
+      "id": "scala",
+      "title": "Scala (sbt)",
+      "markers": [
+        "build.sbt"
+      ],
+      "artifacts": [
+        "target",
+        "project/target"
+      ]
+    },
+    {
+      "id": "godot",
+      "title": "Godot",
+      "markers": [
+        "project.godot"
+      ],
+      "artifacts": [
+        ".godot"
+      ]
+    },
+    {
+      "id": "ruby",
+      "title": "Ruby (Bundler)",
+      "markers": [
+        "Gemfile"
+      ],
+      "artifacts": [
+        "vendor/bundle"
+      ]
+    }
+  ]
+}

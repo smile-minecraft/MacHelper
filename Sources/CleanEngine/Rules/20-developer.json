@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "xcode.derived-data",
+      "title": "Xcode DerivedData",
+      "description": "Intermediate build products and indexes, regenerated on the next build (which is slower the first time).",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/Library/Developer/Xcode/DerivedData/*"
+      ],
+      "skipIfRunning": [
+        "com.apple.dt.Xcode"
+      ]
+    },
+    {
+      "id": "xcode.previews",
+      "title": "SwiftUI previews cache",
+      "description": "Simulated environments for Xcode Previews, rebuilt when needed.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/Library/Developer/Xcode/UserData/Previews/*"
+      ],
+      "skipIfRunning": [
+        "com.apple.dt.Xcode"
+      ]
+    },
+    {
+      "id": "xcode.device-support",
+      "title": "Device support files (iOS / watchOS / tvOS DeviceSupport)",
+      "description": "Symbols downloaded when debugging on a device. Versions unused for 30 days are downloaded again the next time you connect such a device.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/Library/Developer/Xcode/iOS DeviceSupport/*",
+        "~/Library/Developer/Xcode/watchOS DeviceSupport/*",
+        "~/Library/Developer/Xcode/tvOS DeviceSupport/*",
+        "~/Library/Developer/Xcode/visionOS DeviceSupport/*"
+      ],
+      "minAgeDays": 30
+    },
+    {
+      "id": "xcode.archives",
+      "title": "Xcode Archives (older than 180 days)",
+      "description": "Archives of old builds. Without them you can’t symbolicate crash reports from those versions, so make sure you no longer need them.",
+      "category": "developer",
+      "risk": "medium",
+      "paths": [
+        "~/Library/Developer/Xcode/Archives/*/*.xcarchive"
+      ],
+      "minAgeDays": 180,
+      "selectedByDefault": false
+    },
+    {
+      "id": "simulator.caches",
+      "title": "Simulator caches",
+      "description": "CoreSimulator’s dynamic caches. Apps and data inside simulators are not affected.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/Library/Developer/CoreSimulator/Caches/*"
+      ],
+      "skipIfRunning": [
+        "com.apple.iphonesimulator"
+      ]
+    },
+    {
+      "id": "dev.swiftpm",
+      "title": "Swift Package Manager cache",
+      "description": "Downloaded package sources, downloaded again when needed.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/org.swift.swiftpm/*"
+      ]
+    },
+    {
+      "id": "dev.npm",
+      "title": "npm cache",
+      "description": "npm’s download cache (_cacache), downloaded again when needed.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/.npm/_cacache",
+        "~/.npm/_npx"
+      ]
+    },
+    {
+      "id": "dev.yarn",
+      "title": "Yarn cache",
+      "category": "developer",
+      "description": "Yarn’s package cache.",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/Yarn/*",
+        "~/.yarn/berry/cache"
+      ]
+    },
+    {
+      "id": "dev.pnpm",
+      "title": "pnpm cache",
+      "description": "pnpm’s metadata cache. The package store is not included; use pnpm store prune for that.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/pnpm/*"
+      ]
+    },
+    {
+      "id": "dev.pip",
+      "title": "pip cache",
+      "category": "developer",
+      "description": "Python package download cache.",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/pip/*",
+        "~/Library/Caches/pypoetry/cache",
+        "~/Library/Caches/uv/*"
+      ]
+    },
+    {
+      "id": "dev.homebrew",
+      "title": "Homebrew download cache",
+      "description": "Downloaded installers. Installed packages are not affected.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/Homebrew/*"
+      ]
+    },
+    {
+      "id": "dev.cargo",
+      "title": "Cargo registry cache",
+      "description": "Rust crate archives and extracted sources, downloaded again when needed.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/.cargo/registry/cache/*",
+        "~/.cargo/registry/src/*"
+      ]
+    },
+    {
+      "id": "dev.gradle",
+      "title": "Gradle cache",
+      "description": "Dependency and build caches. The next build downloads them again and may take longer.",
+      "category": "developer",
+      "risk": "medium",
+      "paths": [
+        "~/.gradle/caches/*"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "dev.cocoapods",
+      "title": "CocoaPods cache",
+      "category": "developer",
+      "description": "Pod download cache.",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/CocoaPods/*"
+      ]
+    },
+    {
+      "id": "dev.go",
+      "title": "Go build cache",
+      "category": "developer",
+      "description": "The go build cache, rebuilt automatically.",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/go-build/*"
+      ]
+    },
+    {
+      "id": "dev.node-gyp",
+      "title": "node-gyp headers cache",
+      "category": "developer",
+      "description": "Headers used to compile native Node modules.",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/node-gyp/*"
+      ]
+    },
+    {
+      "id": "dev.playwright",
+      "title": "Playwright browsers",
+      "description": "Test browsers downloaded by Playwright; run npx playwright install to get them again.",
+      "category": "developer",
+      "risk": "medium",
+      "paths": [
+        "~/Library/Caches/ms-playwright/*"
+      ],
+      "selectedByDefault": false
+    }
+  ]
+}

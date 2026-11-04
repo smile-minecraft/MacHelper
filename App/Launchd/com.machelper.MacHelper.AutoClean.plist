@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.machelper.MacHelper.AutoClean</string>
+	<!-- Runs the embedded CLI as the user. It exits immediately unless auto clean is enabled and due. -->
+	<key>BundleProgram</key>
+	<string>Contents/MacOS/machelper-cli</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>machelper-cli</string>
+		<string>autoclean</string>
+		<string>--run-if-due</string>
+	</array>
+	<key>StartInterval</key>
+	<integer>3600</integer>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>LowPriorityIO</key>
+	<true/>
+	<key>Nice</key>
+	<integer>10</integer>
+	<key>AssociatedBundleIdentifiers</key>
+	<array>
+		<string>com.machelper.MacHelper</string>
+	</array>
+</dict>
+</plist>

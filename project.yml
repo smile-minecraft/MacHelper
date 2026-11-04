@@ -1,0 +1,137 @@
+name: MacHelper
+options:
+  bundleIdPrefix: com.machelper
+  developmentLanguage: en
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+# Signing lives in Config/Signing.xcconfig (ad-hoc by default) + optional git-ignored
+# Config/Local.xcconfig with your team. The XPC peer checks adapt to either automatically.
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_HARDENED_RUNTIME: YES
+    DEAD_CODE_STRIPPING: YES
+    # Compiler-driven string extraction keeps the String Catalogs in sync with the code (type-aware
+    # format specifiers: %lld for integers, %@ for strings).
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+
+packages:
+  MacHelperKit:
+    path: .
+  ArgumentParser:
+    url: https://github.com/apple/swift-argument-parser
+    from: 1.5.0
+
+targets:
+  MacHelper:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+        excludes: ["Launchd/**"]
+      - path: Helper/Launchd/com.machelper.MacHelper.Helper.plist
+        buildPhase:
+          copyFiles:
+            destination: wrapper
+            subpath: Contents/Library/LaunchDaemons
+      - path: App/Launchd/com.machelper.MacHelper.AutoClean.plist
+        buildPhase:
+          copyFiles:
+            destination: wrapper
+            subpath: Contents/Library/LaunchAgents
+    dependencies:
+      - package: MacHelperKit
+        products: [HelperProtocol, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage]
+      - target: MacHelperHelper
+        embed: true
+        codeSign: false
+        copy:
+          destination: executables
+      - target: machelper-cli
+        embed: true
+        codeSign: false
+        copy:
+          destination: executables
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: MacHelper
+        LSApplicationCategoryType: public.app-category.utilities
+        LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
+        NSHumanReadableCopyright: "MIT License"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.machelper.MacHelper
+        PRODUCT_NAME: MacHelper
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+
+  MacHelperHelper:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Helper/Sources
+    dependencies:
+      - package: MacHelperKit
+        products: [HelperProtocol, SMCKit, FanControl, Metrics]
+    info:
+      path: Helper/Info.plist
+      properties:
+        CFBundleIdentifier: com.machelper.MacHelper.Helper
+        CFBundleName: MacHelperHelper
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.machelper.MacHelper.Helper
+        PRODUCT_NAME: MacHelperHelper
+        # A bare executable cannot embed a provisioning profile. Automatic signing would add
+        # com.apple.application-identifier, a restricted entitlement, and AMFI then kills the
+        # daemon at launch (OS_REASON_CODESIGNING). Sign manually with the same identity instead.
+        CODE_SIGN_STYLE: Manual
+        PROVISIONING_PROFILE_SPECIFIER: ""
+        # Root daemon: never debuggable (drops get-task-allow).
+        CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
+        ENTITLEMENTS_REQUIRED: NO
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        SKIP_INSTALL: YES
+
+  # The `machelper` CLI, embedded at MacHelper.app/Contents/MacOS/machelper (used by the auto-clean agent).
+  # Same sources as the SwiftPM executable target.
+  machelper-cli:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Sources/machelper
+    dependencies:
+      - package: MacHelperKit
+        products: [CleanEngine, DiskScan, Metrics, SMCKit, Storage]
+      - package: ArgumentParser
+        product: ArgumentParser
+    info:
+      path: Config/CLI-Info.plist
+      properties:
+        CFBundleIdentifier: com.machelper.MacHelper.cli
+        CFBundleName: machelper
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+    settings:
+      base:
+        # Not "machelper": /Applications is case-insensitive and would collide with the app binary "MacHelper".
+        PRODUCT_NAME: machelper-cli
+        PRODUCT_BUNDLE_IDENTIFIER: com.machelper.MacHelper.cli
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        CODE_SIGN_STYLE: Manual
+        PROVISIONING_PROFILE_SPECIFIER: ""
+        CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
+        ENTITLEMENTS_REQUIRED: NO
+        SKIP_INSTALL: YES

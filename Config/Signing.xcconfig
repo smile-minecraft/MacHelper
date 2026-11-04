@@ -1,0 +1,16 @@
+// Code signing. Defaults to ad-hoc so anyone can build without an Apple account.
+//
+// To sign with your own team (recommended: the root Helper cannot be updated in place
+// when ad-hoc signed — launchd pins its cdhash), create Config/Local.xcconfig (git-ignored):
+//
+//   DEVELOPMENT_TEAM = ABCDE12345
+//   CODE_SIGN_STYLE = Automatic
+//   CODE_SIGN_IDENTITY = Apple Development
+//
+// A free Apple ID "Personal Team" works for local development.
+
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = -
+DEVELOPMENT_TEAM =
+
+#include? "Local.xcconfig"

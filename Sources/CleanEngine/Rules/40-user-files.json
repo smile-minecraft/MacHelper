@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "user.trash",
+      "title": "Trash",
+      "description": "Permanently deletes the items in the Trash. This can’t be undone.",
+      "category": "trash",
+      "risk": "medium",
+      "paths": [
+        "~/.Trash/*"
+      ],
+      "action": "delete",
+      "selectedByDefault": true
+    },
+    {
+      "id": "user.installers",
+      "title": "Installers in Downloads",
+      "description": "DMG, PKG, XIP and ISO installers, usually no longer needed once the app is installed.",
+      "category": "downloads",
+      "risk": "medium",
+      "paths": [
+        "~/Downloads/*.dmg",
+        "~/Downloads/*.pkg",
+        "~/Downloads/*.mpkg",
+        "~/Downloads/*.xip",
+        "~/Downloads/*.iso"
+      ],
+      "minAgeDays": 7,
+      "selectedByDefault": false
+    },
+    {
+      "id": "user.old-downloads",
+      "title": "Files in Downloads older than 90 days",
+      "description": "Check the list first: there may be files here you want to keep.",
+      "category": "downloads",
+      "risk": "high",
+      "paths": [
+        "~/Downloads/*"
+      ],
+      "minAgeDays": 90,
+      "selectedByDefault": false
+    },
+    {
+      "id": "user.ios-backups",
+      "title": "iPhone / iPad backups",
+      "description": "Local device backups made by Finder. Make sure you have another backup (such as iCloud) before deleting.",
+      "category": "backups",
+      "risk": "high",
+      "paths": [
+        "~/Library/Application Support/MobileSync/Backup/*"
+      ],
+      "selectedByDefault": false,
+      "needsFullDiskAccess": true
+    },
+    {
+      "id": "user.mail-downloads",
+      "title": "Mail attachment downloads",
+      "description": "Copies of attachments opened in Mail. The original messages are not affected.",
+      "category": "mail",
+      "risk": "medium",
+      "paths": [
+        "~/Library/Containers/com.apple.mail/Data/Library/Mail Downloads/*"
+      ],
+      "skipIfRunning": [
+        "com.apple.mail"
+      ],
+      "selectedByDefault": false,
+      "needsFullDiskAccess": true
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "user.caches",
+      "title": "App caches",
+      "description": "Each app’s cache folder, rebuilt by the app when needed. Caches of Apple system components are not included.",
+      "category": "caches",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/*"
+      ],
+      "exclude": [
+        "~/Library/Caches/com.apple.*",
+        "~/Library/Caches/CloudKit",
+        "~/Library/Caches/FamilyCircle",
+        "~/Library/Caches/GeoServices",
+        "~/Library/Caches/MacHelper*",
+        "~/Library/Caches/com.machelper.*"
+      ]
+    },
+    {
+      "id": "user.logs",
+      "title": "App logs and crash reports",
+      "description": "Logs and DiagnosticReports written by apps. MacHelper’s own operation log is never removed.",
+      "category": "logs",
+      "risk": "low",
+      "paths": [
+        "~/Library/Logs/*",
+        "~/Library/Logs/DiagnosticReports/*"
+      ],
+      "exclude": [
+        "~/Library/Logs/MacHelper",
+        "~/Library/Logs/DiagnosticReports"
+      ]
+    }
+  ]
+}

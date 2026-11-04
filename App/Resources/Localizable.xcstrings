@@ -1,0 +1,3976 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ files": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 個檔案"
+          }
+        }
+      }
+    },
+    "%@ is running. Quit it first.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 正在執行，請先結束。"
+          }
+        }
+      }
+    },
+    "%@ items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 個項目"
+          }
+        }
+      }
+    },
+    "%@ selected": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已選 %@"
+          }
+        }
+      }
+    },
+    "%@ selected, %lld maintenance tasks": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已選 %@，%lld 項維護工作"
+          }
+        }
+      }
+    },
+    "%@ × %lld": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ × %lld"
+          }
+        }
+      }
+    },
+    "%@; selected together with “Also remove app data”": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，跟著「一併移除 App 資料」一起選"
+          }
+        }
+      }
+    },
+    "%lld GB": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld GB"
+          }
+        }
+      }
+    },
+    "%lld folders couldn’t be read; the results are incomplete.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 個資料夾無法讀取，結果不完整。"
+          }
+        }
+      }
+    },
+    "%lld groups · %@ reclaimable": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 組 · 可釋放 %@"
+          }
+        }
+      }
+    },
+    "%lld items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 項"
+          }
+        }
+      }
+    },
+    "%lld items · %@ to the Trash · %@ deleted": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 項 · 移到垃圾桶 %@ · 已刪除 %@"
+          }
+        }
+      }
+    },
+    "%lld local snapshots": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本機快照 %lld 個"
+          }
+        }
+      }
+    },
+    "%lld rpm/s": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld rpm/秒"
+          }
+        }
+      }
+    },
+    "%lld s": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 秒"
+          }
+        }
+      }
+    },
+    "%lld° %lld%%": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld度 %lld%%"
+          }
+        }
+      }
+    },
+    "1 hour": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 小時"
+          }
+        }
+      }
+    },
+    "15 min": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 分"
+          }
+        }
+      }
+    },
+    "24 hours": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "24 小時"
+          }
+        }
+      }
+    },
+    "5 min": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 分"
+          }
+        }
+      }
+    },
+    "7 days": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 天"
+          }
+        }
+      }
+    },
+    "A fixed speed needs the app to keep running; %lld seconds after the app quits, control returns to the system.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "固定轉速需要 App 持續執行；App 結束 %lld 秒後會自動交還系統。"
+          }
+        }
+      }
+    },
+    "Activity": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讀寫活動"
+          }
+        }
+      }
+    },
+    "Add": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入"
+          }
+        }
+      }
+    },
+    "Add Project Folder…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入專案資料夾…"
+          }
+        }
+      }
+    },
+    "Add Rule": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增規則"
+          }
+        }
+      }
+    },
+    "Add point": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增控制點"
+          }
+        }
+      }
+    },
+    "Add the folders where you keep projects to find rebuildable artifacts such as node_modules, target and .build.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入你放專案的資料夾，就能找出 node_modules、target、.build 等可以重建的產物。"
+          }
+        }
+      }
+    },
+    "Add to Collector": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入收集籃"
+          }
+        }
+      }
+    },
+    "Alerts": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通知"
+          }
+        }
+      }
+    },
+    "All kinds": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有類型"
+          }
+        }
+      }
+    },
+    "All operations are logged in ~/Library/Logs/MacHelper/operations.jsonl": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有操作都記錄在 ~/Library/Logs/MacHelper/operations.jsonl"
+          }
+        }
+      }
+    },
+    "Allow MacHelper to run in the background in System Settings → General → Login Items.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請在「系統設定 → 一般 → 登入項目」允許 MacHelper 在背景執行。"
+          }
+        }
+      }
+    },
+    "Also remove app data (Application Support, Containers, ~/.name: may contain your documents, settings or sign-in data)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一併移除 App 資料（Application Support、Containers、~/.名稱：可能有你的文件、設定或登入資訊）"
+          }
+        }
+      }
+    },
+    "Any time": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不限時間"
+          }
+        }
+      }
+    },
+    "App Caches": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 快取"
+          }
+        }
+      }
+    },
+    "App signature": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 簽章"
+          }
+        }
+      }
+    },
+    "Applied": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已套用"
+          }
+        }
+      }
+    },
+    "Apply": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "套用"
+          }
+        }
+      }
+    },
+    "Apps": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App"
+          }
+        }
+      }
+    },
+    "Apps may slow down. Quit apps you don’t need, or check the top processes in MacHelper.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 可能會變慢。請結束用不到的 App，或在 MacHelper 查看最耗資源的程序。"
+          }
+        }
+      }
+    },
+    "Archives": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "壓縮檔"
+          }
+        }
+      }
+    },
+    "At most one notification of each kind every %lld minutes.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同一類通知每 %lld 分鐘最多一次。"
+          }
+        }
+      }
+    },
+    "Audio": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音訊"
+          }
+        }
+      }
+    },
+    "Auto Clean": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動清理"
+          }
+        }
+      }
+    },
+    "Auto Clean: On": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動清理：開"
+          }
+        }
+      }
+    },
+    "Auto Clean…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動清理…"
+          }
+        }
+      }
+    },
+    "Automatic (System)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動（系統）"
+          }
+        }
+      }
+    },
+    "Averages per %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每 %@ 平均"
+          }
+        }
+      }
+    },
+    "Background items that apps register themselves are managed in Login Items.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 自行註冊的背景項目請到「登入項目」管理。"
+          }
+        }
+      }
+    },
+    "Balanced": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平衡"
+          }
+        }
+      }
+    },
+    "Bar": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "長條"
+          }
+        }
+      }
+    },
+    "Battery": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電池"
+          }
+        }
+      }
+    },
+    "Browsers": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "瀏覽器"
+          }
+        }
+      }
+    },
+    "CPU at %@. Check the top processes below.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 目前 %@，看看下方最耗資源的程序。"
+          }
+        }
+      }
+    },
+    "CPU die %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 晶片 %@"
+          }
+        }
+      }
+    },
+    "CPU temperature above": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 溫度高於"
+          }
+        }
+      }
+    },
+    "CPU temperature has been %@ for over 2 minutes.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 溫度已維持在 %@ 超過 2 分鐘。"
+          }
+        }
+      }
+    },
+    "Calibration sensor": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "校準感測器"
+          }
+        }
+      }
+    },
+    "Can’t uninstall: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法解除安裝：%@"
+          }
+        }
+      }
+    },
+    "Capacity": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容量"
+          }
+        }
+      }
+    },
+    "Changes": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "變化"
+          }
+        }
+      }
+    },
+    "Charge": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電量"
+          }
+        }
+      }
+    },
+    "Choose": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇"
+          }
+        }
+      }
+    },
+    "Choose a location to analyze, then click Scan. Scanning only reads; it never changes any files.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇要分析的位置，然後按「掃描」。掃描只會讀取，不會修改任何檔案。"
+          }
+        }
+      }
+    },
+    "Choose an App to Uninstall": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇要解除安裝的 App"
+          }
+        }
+      }
+    },
+    "Clean": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理"
+          }
+        }
+      }
+    },
+    "Clean Up": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理"
+          }
+        }
+      }
+    },
+    "Clean the selected %@?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理已選的 %@？"
+          }
+        }
+      }
+    },
+    "Cleaned %lld items.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已清理 %lld 項。"
+          }
+        }
+      }
+    },
+    "Cleaned caches free space immediately and can’t be restored from the Trash (apps rebuild this data themselves).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清掉的快取會立刻釋放空間，無法從垃圾桶復原（這些都是 App 會自己重建的資料）。"
+          }
+        }
+      }
+    },
+    "Cleaned items go to the Trash; the space is freed once you empty it.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清掉的項目會移到垃圾桶，要清空垃圾桶後才會真正釋放空間。"
+          }
+        }
+      }
+    },
+    "Cleaning Complete": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理完成"
+          }
+        }
+      }
+    },
+    "Cleaning…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在清理…"
+          }
+        }
+      }
+    },
+    "Clean…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理…"
+          }
+        }
+      }
+    },
+    "Click a block to open its folder; right-click or drag items to the collector.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點一下區塊進入該資料夾；右鍵或拖到右側收集籃。"
+          }
+        }
+      }
+    },
+    "Click a ring to open a folder, click the center to go up; right-click or drag items to the collector.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點一下圓環進入資料夾，點中心返回上一層；右鍵或拖到右側收集籃。"
+          }
+        }
+      }
+    },
+    "Clone": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "複製體"
+          }
+        }
+      }
+    },
+    "Collect All but the Oldest": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留最舊的，其餘加入收集籃"
+          }
+        }
+      }
+    },
+    "Collector": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收集籃"
+          }
+        }
+      }
+    },
+    "Command-line tool": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指令列工具"
+          }
+        }
+      }
+    },
+    "Compact (name above value)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "精簡顯示（名稱在上、數值在下）"
+          }
+        }
+      }
+    },
+    "Compared with the scan of %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "與 %@ 的掃描相比"
+          }
+        }
+      }
+    },
+    "Comparing file contents…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在比對檔案內容…"
+          }
+        }
+      }
+    },
+    "Compressed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已壓縮"
+          }
+        }
+      }
+    },
+    "Connected": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已連線"
+          }
+        }
+      }
+    },
+    "Contents": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "內容"
+          }
+        }
+      }
+    },
+    "Copy Label": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷貝標籤"
+          }
+        }
+      }
+    },
+    "Copy Path": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷貝路徑"
+          }
+        }
+      }
+    },
+    "Cores": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各核心"
+          }
+        }
+      }
+    },
+    "Couldn’t load the cleaning rules": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法載入清理規則"
+          }
+        }
+      }
+    },
+    "Couldn’t save settings: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法儲存設定：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t set up the background schedule: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景排程設定失敗：%@"
+          }
+        }
+      }
+    },
+    "Critical": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "嚴重"
+          }
+        }
+      }
+    },
+    "Current": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前"
+          }
+        }
+      }
+    },
+    "Curve temperature %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "曲線溫度 %@"
+          }
+        }
+      }
+    },
+    "Custom": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自訂"
+          }
+        }
+      }
+    },
+    "Daily": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天"
+          }
+        }
+      }
+    },
+    "Delete directly, skipping the Trash": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直接刪除，不經過垃圾桶"
+          }
+        }
+      }
+    },
+    "Delete permanently: %@. This empties what’s already in the Trash and can’t be undone.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永久刪除：%@，這是清空垃圾桶裡原本的東西，無法復原。"
+          }
+        }
+      }
+    },
+    "Details": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "詳細資訊"
+          }
+        }
+      }
+    },
+    "Developer Tools": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開發工具"
+          }
+        }
+      }
+    },
+    "Developer files": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開發檔案"
+          }
+        }
+      }
+    },
+    "Device Backups": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "裝置備份"
+          }
+        }
+      }
+    },
+    "Device sensor %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "裝置感測器 %@"
+          }
+        }
+      }
+    },
+    "Disabled": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已停用"
+          }
+        }
+      }
+    },
+    "Disk": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁碟"
+          }
+        }
+      }
+    },
+    "Disk Analysis": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁碟分析"
+          }
+        }
+      }
+    },
+    "Disk images and installers": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁碟映像與安裝檔"
+          }
+        }
+      }
+    },
+    "Disk used %@ of %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁碟已用 %@ / %@"
+          }
+        }
+      }
+    },
+    "Documents": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
+          }
+        }
+      }
+    },
+    "Download": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載"
+          }
+        }
+      }
+    },
+    "Downloads": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載"
+          }
+        }
+      }
+    },
+    "Drag items you want to delete here, then move them to the Trash in one go.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把要刪除的項目拖到這裡，確認後一次移到垃圾桶。"
+          }
+        }
+      }
+    },
+    "Duplicates": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重複"
+          }
+        }
+      }
+    },
+    "Efficiency cores": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "節能核心"
+          }
+        }
+      }
+    },
+    "Empty Trash": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空垃圾桶"
+          }
+        }
+      }
+    },
+    "Enable Auto Clean": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟用自動清理"
+          }
+        }
+      }
+    },
+    "Enabled": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟用"
+          }
+        }
+      }
+    },
+    "Every %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每 %@"
+          }
+        }
+      }
+    },
+    "Every item is recorded in the operation log so you can review it later.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每一項都會記錄在操作紀錄裡，之後可以查看。"
+          }
+        }
+      }
+    },
+    "Everything looks good": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一切正常"
+          }
+        }
+      }
+    },
+    "Fan %lld": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "風扇 %lld"
+          }
+        }
+      }
+    },
+    "Fan %lld: %lld rpm (%lld–%lld), %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "風扇 %1$lld：%2$lld rpm（%3$lld–%4$lld），%5$@"
+          }
+        }
+      }
+    },
+    "Fan control needs the Helper (%@)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "風扇控制需要 Helper（%@）"
+          }
+        }
+      }
+    },
+    "Fan curve": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "風扇曲線"
+          }
+        }
+      }
+    },
+    "Fans": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "風扇"
+          }
+        }
+      }
+    },
+    "Fans on this Mac can’t be controlled (%@)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這台 Mac 的風扇無法控制（%@）"
+          }
+        }
+      }
+    },
+    "Find Duplicates": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尋找重複檔案"
+          }
+        }
+      }
+    },
+    "Find Leftovers of Removed Apps": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜尋已移除 App 的殘留"
+          }
+        }
+      }
+    },
+    "Finds files of 1 MB or more with identical content in this scan.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在這次掃描的結果中，找出 1 MB 以上、內容完全相同的檔案。"
+          }
+        }
+      }
+    },
+    "Fixed Speed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "固定轉速"
+          }
+        }
+      }
+    },
+    "Found %@ in %@ files, %@ s": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描到 %@，%@ 個檔案，%@ 秒"
+          }
+        }
+      }
+    },
+    "Found but Kept": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找到但不會刪除"
+          }
+        }
+      }
+    },
+    "Free": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用"
+          }
+        }
+      }
+    },
+    "Free disk space below": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用磁碟空間低於"
+          }
+        }
+      }
+    },
+    "Freed %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已釋放 %@"
+          }
+        }
+      }
+    },
+    "Freed permanently": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已永久釋放"
+          }
+        }
+      }
+    },
+    "Frequency": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "頻率"
+          }
+        }
+      }
+    },
+    "GPU %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPU %@"
+          }
+        }
+      }
+    },
+    "GPU power": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPU 功耗"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一般"
+          }
+        }
+      }
+    },
+    "Gone or now small": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已移除或變小"
+          }
+        }
+      }
+    },
+    "Handshake": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連線測試"
+          }
+        }
+      }
+    },
+    "Hasn’t run yet": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還沒有執行過"
+          }
+        }
+      }
+    },
+    "Helper": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper"
+          }
+        }
+      }
+    },
+    "Helper not enabled": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 未啟用"
+          }
+        }
+      }
+    },
+    "Helper running": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 執行中"
+          }
+        }
+      }
+    },
+    "Helper status": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 狀態"
+          }
+        }
+      }
+    },
+    "Helper target %lld rpm": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 指定 %lld rpm"
+          }
+        }
+      }
+    },
+    "High risk": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高風險"
+          }
+        }
+      }
+    },
+    "Home Folder": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "個人資料夾"
+          }
+        }
+      }
+    },
+    "Hottest": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取最高值"
+          }
+        }
+      }
+    },
+    "Hottest %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最高溫 %@"
+          }
+        }
+      }
+    },
+    "Hottest CPU sensor": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 晶片最高溫"
+          }
+        }
+      }
+    },
+    "Hottest GPU sensor": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPU 最高溫"
+          }
+        }
+      }
+    },
+    "Hysteresis": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "遲滯"
+          }
+        }
+      }
+    },
+    "Idle": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閒置"
+          }
+        }
+      }
+    },
+    "Images": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圖片"
+          }
+        }
+      }
+    },
+    "In use": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用中"
+          }
+        }
+      }
+    },
+    "Install": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安裝"
+          }
+        }
+      }
+    },
+    "Interface": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網路介面"
+          }
+        }
+      }
+    },
+    "Interval": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "頻率"
+          }
+        }
+      }
+    },
+    "Items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "監控項目"
+          }
+        }
+      }
+    },
+    "Items go to the Trash and can be restored from there. System and important personal folders are protected and never removed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "項目會移到垃圾桶，可以從垃圾桶復原。系統與個人重要資料夾受保護，不會被移除。"
+          }
+        }
+      }
+    },
+    "Items not processed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未處理的項目"
+          }
+        }
+      }
+    },
+    "Kept running": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保持執行"
+          }
+        }
+      }
+    },
+    "Kind": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "類型"
+          }
+        }
+      }
+    },
+    "Language": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "語言"
+          }
+        }
+      }
+    },
+    "Largest": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最大檔案"
+          }
+        }
+      }
+    },
+    "Last 5 minutes, updated live": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近 5 分鐘，即時更新"
+          }
+        }
+      }
+    },
+    "Last Run": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次執行"
+          }
+        }
+      }
+    },
+    "Last used %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次使用 %@"
+          }
+        }
+      }
+    },
+    "Least Recently Used": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最久沒用"
+          }
+        }
+      }
+    },
+    "Leftovers of Removed Apps": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已移除 App 的殘留"
+          }
+        }
+      }
+    },
+    "Line": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "折線"
+          }
+        }
+      }
+    },
+    "Live": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即時"
+          }
+        }
+      }
+    },
+    "Load": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "負載"
+          }
+        }
+      }
+    },
+    "Load average (1 · 5 · 15 min)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均負載（1 · 5 · 15 分）"
+          }
+        }
+      }
+    },
+    "Loaded": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已載入"
+          }
+        }
+      }
+    },
+    "Loading": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "載入中"
+          }
+        }
+      }
+    },
+    "Local IP": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "區域 IP"
+          }
+        }
+      }
+    },
+    "Logs": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日誌"
+          }
+        }
+      }
+    },
+    "Low risk": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "低風險"
+          }
+        }
+      }
+    },
+    "Mac is running hot": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 溫度過高"
+          }
+        }
+      }
+    },
+    "MacHelper": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper"
+          }
+        }
+      }
+    },
+    "MacHelper System Monitor": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 系統監控"
+          }
+        }
+      }
+    },
+    "MacHelper alerts are on": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 通知已開啟"
+          }
+        }
+      }
+    },
+    "MacHelper also finds the caches, settings and data it left behind, and you decide item by item what to delete.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "會一併找出它在「資源庫」裡留下的快取、設定與資料，你可以逐項決定要不要刪。"
+          }
+        }
+      }
+    },
+    "MacHelper records one averaged sample per minute while it runs, and keeps 7 days.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 執行時每分鐘記錄一筆平均值，保留 7 天。"
+          }
+        }
+      }
+    },
+    "Macintosh HD (Data)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Macintosh HD（資料）"
+          }
+        }
+      }
+    },
+    "Mail": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "郵件"
+          }
+        }
+      }
+    },
+    "Maintenance": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "維護工作"
+          }
+        }
+      }
+    },
+    "Manual": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手動"
+          }
+        }
+      }
+    },
+    "Max ramp rate": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "變化速率上限"
+          }
+        }
+      }
+    },
+    "Medium risk": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中風險"
+          }
+        }
+      }
+    },
+    "Memory": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體"
+          }
+        }
+      }
+    },
+    "Memory is getting tight": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體快不夠了"
+          }
+        }
+      }
+    },
+    "Memory is under pressure": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體吃緊"
+          }
+        }
+      }
+    },
+    "Memory pressure becomes critical": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體壓力達到嚴重"
+          }
+        }
+      }
+    },
+    "Memory pressure is critical": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體壓力已達嚴重"
+          }
+        }
+      }
+    },
+    "Menu Bar": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選單列"
+          }
+        }
+      }
+    },
+    "Menu bar": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選單列"
+          }
+        }
+      }
+    },
+    "Mode": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模式"
+          }
+        }
+      }
+    },
+    "Model": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "型號"
+          }
+        }
+      }
+    },
+    "Modified": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修改時間"
+          }
+        }
+      }
+    },
+    "Monitor": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "監控"
+          }
+        }
+      }
+    },
+    "Move %lld items (%@) to the Trash?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把 %lld 個項目（%@）移到垃圾桶？"
+          }
+        }
+      }
+    },
+    "Move the selected leftovers (%@) to the Trash?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把選取的殘留檔（%@）移到垃圾桶？"
+          }
+        }
+      }
+    },
+    "Move to Trash": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移到垃圾桶"
+          }
+        }
+      }
+    },
+    "Move to Trash…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移到垃圾桶…"
+          }
+        }
+      }
+    },
+    "Move to the Trash: %@. Anything removed by mistake can be restored from the Trash.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移到垃圾桶：%@，刪錯了可以從垃圾桶拿回來。"
+          }
+        }
+      }
+    },
+    "Moved %@ to the Trash. The space is freed when you empty the Trash.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已移到垃圾桶：%@。清空垃圾桶後才會真正釋放空間。"
+          }
+        }
+      }
+    },
+    "Moved to Trash": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移到垃圾桶"
+          }
+        }
+      }
+    },
+    "Moved to the Trash: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已移到垃圾桶：%@"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名稱"
+          }
+        }
+      }
+    },
+    "Needs Full Disk Access": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要完整磁碟取用權限"
+          }
+        }
+      }
+    },
+    "Needs Helper": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要 Helper"
+          }
+        }
+      }
+    },
+    "Needs an administrator to change": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要管理員權限才能變更"
+          }
+        }
+      }
+    },
+    "Network": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網路"
+          }
+        }
+      }
+    },
+    "Never go below the speed the system asks for (recommended)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永不低於系統要求的轉速（建議）"
+          }
+        }
+      }
+    },
+    "New": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增"
+          }
+        }
+      }
+    },
+    "Next: after about %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下次：約 %@ 之後"
+          }
+        }
+      }
+    },
+    "No data yet": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還沒有資料"
+          }
+        }
+      }
+    },
+    "No folder changed by more than 50 MB.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有資料夾變化超過 50 MB。"
+          }
+        }
+      }
+    },
+    "Normal": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正常"
+          }
+        }
+      }
+    },
+    "Not applicable on this Mac": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這台 Mac 不適用"
+          }
+        }
+      }
+    },
+    "Not installed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未安裝"
+          }
+        }
+      }
+    },
+    "Not loaded": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未載入"
+          }
+        }
+      }
+    },
+    "Not processed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未處理"
+          }
+        }
+      }
+    },
+    "Not supported on this Mac": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此機型不支援"
+          }
+        }
+      }
+    },
+    "Nothing to clean": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有可清理的項目"
+          }
+        }
+      }
+    },
+    "Notifications are turned off for MacHelper in System Settings → Notifications.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 的通知已在「系統設定 → 通知」中關閉。"
+          }
+        }
+      }
+    },
+    "Now: %@ (%@)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前：%1$@（%2$@）"
+          }
+        }
+      }
+    },
+    "Number": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "數字"
+          }
+        }
+      }
+    },
+    "Offline": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "離線"
+          }
+        }
+      }
+    },
+    "Oldest copy (suggested to keep)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最舊的一份（建議保留）"
+          }
+        }
+      }
+    },
+    "On Battery": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用電池時"
+          }
+        }
+      }
+    },
+    "On battery": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用電池"
+          }
+        }
+      }
+    },
+    "On the Power Adapter": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接上電源時"
+          }
+        }
+      }
+    },
+    "On the power adapter": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接上電源"
+          }
+        }
+      }
+    },
+    "Only %@ free. Open Optimize to free up space.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只剩 %@ 可用。打開「一鍵優化」釋放空間。"
+          }
+        }
+      }
+    },
+    "Only %@ free. Optimize can free up space.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只剩 %@ 可用，「一鍵優化」可以釋放空間。"
+          }
+        }
+      }
+    },
+    "Only increase": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只加不減"
+          }
+        }
+      }
+    },
+    "Only items whose program is missing": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只看程式已不存在的項目"
+          }
+        }
+      }
+    },
+    "Open Folder": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "進入資料夾"
+          }
+        }
+      }
+    },
+    "Open Full Disk Access Settings": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開啟「完整磁碟取用權限」設定"
+          }
+        }
+      }
+    },
+    "Open Helper Diagnostics": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開啟 Helper 診斷"
+          }
+        }
+      }
+    },
+    "Open Login Items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開啟登入項目"
+          }
+        }
+      }
+    },
+    "Open MacHelper": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打開 MacHelper"
+          }
+        }
+      }
+    },
+    "Open at login": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入時開啟"
+          }
+        }
+      }
+    },
+    "Optimize": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一鍵優化"
+          }
+        }
+      }
+    },
+    "Other": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他"
+          }
+        }
+      }
+    },
+    "Other Rules": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他規則"
+          }
+        }
+      }
+    },
+    "Other smaller items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他較小項目"
+          }
+        }
+      }
+    },
+    "Overview": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "概覽"
+          }
+        }
+      }
+    },
+    "P-cores %@ · E-cores %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "效能核心 %@ · 節能核心 %@"
+          }
+        }
+      }
+    },
+    "Partial": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分"
+          }
+        }
+      }
+    },
+    "Per-core usage": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各核心使用率"
+          }
+        }
+      }
+    },
+    "Performance": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "效能"
+          }
+        }
+      }
+    },
+    "Performance cores": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "效能核心"
+          }
+        }
+      }
+    },
+    "Power": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "功耗"
+          }
+        }
+      }
+    },
+    "Process": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "程序"
+          }
+        }
+      }
+    },
+    "Processes": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "程序"
+          }
+        }
+      }
+    },
+    "Profile": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定檔"
+          }
+        }
+      }
+    },
+    "Program missing": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "程式已不存在"
+          }
+        }
+      }
+    },
+    "Project Build Artifacts": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專案建置產物"
+          }
+        }
+      }
+    },
+    "Project Build Artifacts (%@)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專案建置產物（%@）"
+          }
+        }
+      }
+    },
+    "Purgeable %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可清除 %@"
+          }
+        }
+      }
+    },
+    "Quick Look": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快速查看"
+          }
+        }
+      }
+    },
+    "Quiet": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安靜"
+          }
+        }
+      }
+    },
+    "Quit": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結束"
+          }
+        }
+      }
+    },
+    "Quit %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結束 %@"
+          }
+        }
+      }
+    },
+    "Quit apps you don’t need to free memory.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結束用不到的 App 來釋放記憶體。"
+          }
+        }
+      }
+    },
+    "Read": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讀取"
+          }
+        }
+      }
+    },
+    "Read fans via Helper": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "透過 Helper 讀取風扇"
+          }
+        }
+      }
+    },
+    "Recently used": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近使用"
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新整理"
+          }
+        }
+      }
+    },
+    "Register": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "註冊"
+          }
+        }
+      }
+    },
+    "Regularly clean low-risk items in the background": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "定期在背景清理低風險項目"
+          }
+        }
+      }
+    },
+    "Regularly cleans low-risk items in the background: app caches, logs, browser and developer tool caches. Running apps are skipped, the Trash is never emptied, and MacHelper doesn’t need to be open.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "定期在背景清理「低風險」項目：App 快取、日誌、瀏覽器與開發工具快取。正在執行的 App 會略過，不會清空垃圾桶，也不需要開著 MacHelper。"
+          }
+        }
+      }
+    },
+    "Relaunch": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新啟動"
+          }
+        }
+      }
+    },
+    "Remove": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除"
+          }
+        }
+      }
+    },
+    "Remove %@?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除 %@？"
+          }
+        }
+      }
+    },
+    "Remove apps together with everything they left behind.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連同殘留檔一起移除 App。"
+          }
+        }
+      }
+    },
+    "Remove point": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除控制點"
+          }
+        }
+      }
+    },
+    "Removed %lld items; %lld not processed: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已移除 %lld 項，%lld 項未處理：%@"
+          }
+        }
+      }
+    },
+    "Remove…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除…"
+          }
+        }
+      }
+    },
+    "Rescan": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新掃描"
+          }
+        }
+      }
+    },
+    "Return to System Control": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交還系統控制"
+          }
+        }
+      }
+    },
+    "Review what starts on its own at login.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢查登入時會自動啟動的項目。"
+          }
+        }
+      }
+    },
+    "Ring": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圓環"
+          }
+        }
+      }
+    },
+    "Run %lld maintenance tasks.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "執行 %lld 項維護工作。"
+          }
+        }
+      }
+    },
+    "Run Now": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即執行一次"
+          }
+        }
+      }
+    },
+    "Run “machelper --help” in Terminal. ~/.local/bin must be in your PATH.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在「終端機」執行「machelper --help」。~/.local/bin 需要在 PATH 裡。"
+          }
+        }
+      }
+    },
+    "Running": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "執行中"
+          }
+        }
+      }
+    },
+    "SSD": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSD"
+          }
+        }
+      }
+    },
+    "Scan": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描"
+          }
+        }
+      }
+    },
+    "Scan %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描 %@"
+          }
+        }
+      }
+    },
+    "Scan Again": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再掃描一次"
+          }
+        }
+      }
+    },
+    "Scan Failed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描失敗"
+          }
+        }
+      }
+    },
+    "Scan caches, logs and leftovers, then clean what you pick.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描快取、日誌與殘留檔，再清理你勾選的項目。"
+          }
+        }
+      }
+    },
+    "Scan first to list what can be cleaned. Nothing is cleaned until you’ve reviewed and checked it; by default items go to the Trash and can be restored.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "先掃描並列出可清理的項目。你看過、勾選之後才會清理；預設移到垃圾桶，可以復原。"
+          }
+        }
+      }
+    },
+    "Scan the same location again later to see which folders grew or shrank.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "之後再掃描同一個位置，就能看到哪些資料夾變大或變小。"
+          }
+        }
+      }
+    },
+    "Scanned %@ files · %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已掃描 %@ 個檔案 · %@"
+          }
+        }
+      }
+    },
+    "Scanning for items to clean…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在掃描可清理的項目…"
+          }
+        }
+      }
+    },
+    "Search": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜尋"
+          }
+        }
+      }
+    },
+    "Search Again": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新搜尋"
+          }
+        }
+      }
+    },
+    "Search Apps": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜尋 App"
+          }
+        }
+      }
+    },
+    "See where the space goes, find duplicates and what grew.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "看空間用在哪裡，找出重複檔案與變大的資料夾。"
+          }
+        }
+      }
+    },
+    "Send Test Notification": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "傳送測試通知"
+          }
+        }
+      }
+    },
+    "Series": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系列"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定"
+          }
+        }
+      }
+    },
+    "Shares storage with another copy; deleting it alone frees almost nothing.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "與另一份共用儲存空間，單獨刪除它幾乎不會釋放空間。"
+          }
+        }
+      }
+    },
+    "Show in Dock": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Dock 顯示"
+          }
+        }
+      }
+    },
+    "Show in Finder": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Finder 中顯示"
+          }
+        }
+      }
+    },
+    "Size": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大小"
+          }
+        }
+      }
+    },
+    "Skipped %lld items: they contain git-tracked files or a nested repository.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已略過 %lld 項：含有 git 追蹤的檔案或巢狀 repository。"
+          }
+        }
+      }
+    },
+    "Skipped: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "略過：%@"
+          }
+        }
+      }
+    },
+    "Some items weren’t processed (%lld): %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分項目未處理（%lld 項）：%@"
+          }
+        }
+      }
+    },
+    "Space macOS frees automatically when needed (mostly local Time Machine snapshots and system caches).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 需要時會自動釋放的空間（大多是 Time Machine 本機快照與系統快取）。"
+          }
+        }
+      }
+    },
+    "Space used by items in the Trash is freed when you empty the Trash.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移到垃圾桶的空間要等清空垃圾桶後才會釋放。"
+          }
+        }
+      }
+    },
+    "Speed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "轉速"
+          }
+        }
+      }
+    },
+    "Start Scan": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始掃描"
+          }
+        }
+      }
+    },
+    "Starts at login": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入時啟動"
+          }
+        }
+      }
+    },
+    "Starts on demand": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要時才啟動"
+          }
+        }
+      }
+    },
+    "Startup Items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟動項目"
+          }
+        }
+      }
+    },
+    "Startup disk is almost full": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟動磁碟快滿了"
+          }
+        }
+      }
+    },
+    "Status": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "狀態"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止"
+          }
+        }
+      }
+    },
+    "Stop and Move to Trash": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止並移到垃圾桶"
+          }
+        }
+      }
+    },
+    "Style": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "樣式"
+          }
+        }
+      }
+    },
+    "Sunburst": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旭日圖"
+          }
+        }
+      }
+    },
+    "Sunburst: %@, %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旭日圖：%@，%@"
+          }
+        }
+      }
+    },
+    "Swap": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap"
+          }
+        }
+      }
+    },
+    "Switch profiles automatically": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動切換設定檔"
+          }
+        }
+      }
+    },
+    "System": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "整機"
+          }
+        }
+      }
+    },
+    "System (kernel)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統"
+          }
+        }
+      }
+    },
+    "System Default": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統預設"
+          }
+        }
+      }
+    },
+    "System Level (needs an administrator; remove manually)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統層級（需要管理員權限，請手動移除）"
+          }
+        }
+      }
+    },
+    "System control": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統控制"
+          }
+        }
+      }
+    },
+    "System control (target %lld)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統控制（目標 %lld）"
+          }
+        }
+      }
+    },
+    "Temperature": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溫度"
+          }
+        }
+      }
+    },
+    "Temperature Curve": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溫度曲線"
+          }
+        }
+      }
+    },
+    "Temperature exceeded the safety limit; control was handed back to the system": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溫度超過安全上限，已暫時交還系統控制"
+          }
+        }
+      }
+    },
+    "Temperature source": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溫度來源"
+          }
+        }
+      }
+    },
+    "Temperatures": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溫度"
+          }
+        }
+      }
+    },
+    "Temperatures, memory and disk space are all in a healthy range.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溫度、記憶體與磁碟空間都在健康範圍內。"
+          }
+        }
+      }
+    },
+    "The %lld selected items (%@) will be moved to the Trash, where you can get them back. App Store apps may ask for an administrator password.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已選的 %lld 個項目（%@）會移到垃圾桶，需要時可以拿回來。App Store 的 App 可能會要求輸入管理員密碼。"
+          }
+        }
+      }
+    },
+    "The background schedule needs your approval in Login Items.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景排程需要你在「登入項目」允許。"
+          }
+        }
+      }
+    },
+    "The firmware doesn’t seem to apply the Helper’s speed. On some models manual control only takes effect after the system has started the fans.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "韌體似乎沒有套用 Helper 的轉速。部分機型要等系統先啟動風扇後，手動控制才會生效。"
+          }
+        }
+      }
+    },
+    "The first matching rule wins. When none matches, the setting you applied above is used.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由上往下，第一條符合的規則生效；都不符合時，使用你在上方套用的設定。"
+          }
+        }
+      }
+    },
+    "The job is stopped and its plist goes to the Trash. The app that installed it may add it again.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "會停止這個項目，並把它的 plist 移到垃圾桶。安裝它的 App 之後可能會再加回來。"
+          }
+        }
+      }
+    },
+    "The macOS firmware controls the fans based on temperature. This is the safest setting.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由 macOS 韌體依溫度自行控制風扇。這是最安全的設定。"
+          }
+        }
+      }
+    },
+    "The new language is used after MacHelper relaunches.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新啟動 MacHelper 後套用新的語言。"
+          }
+        }
+      }
+    },
+    "These items are named after a bundle ID whose app can no longer be found; for background items, the program they start no longer exists. This is a guess: review each item before checking it. Nothing is checked by default.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這些項目以 bundle ID 命名，但對應的 App 已經找不到；背景啟動項目則是它要啟動的程式已不存在。這是推測，請逐項確認後再勾選，預設全部不勾。"
+          }
+        }
+      }
+    },
+    "Things still run fine, but swapping may start soon.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前還順，但可能很快會開始使用置換空間。"
+          }
+        }
+      }
+    },
+    "This Mac": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這台 Mac"
+          }
+        }
+      }
+    },
+    "This is only a preview; nothing is deleted until you click Clean.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前只是預覽，按「清理」之前不會刪除任何東西。"
+          }
+        }
+      }
+    },
+    "Time": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間"
+          }
+        }
+      }
+    },
+    "Tools": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工具"
+          }
+        }
+      }
+    },
+    "Top processes": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高佔用程序"
+          }
+        }
+      }
+    },
+    "Top processes by CPU": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最耗 CPU 的程序"
+          }
+        }
+      }
+    },
+    "Top processes by memory": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最耗記憶體的程序"
+          }
+        }
+      }
+    },
+    "Total": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "總計"
+          }
+        }
+      }
+    },
+    "Trash": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "垃圾桶"
+          }
+        }
+      }
+    },
+    "Treemap": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "矩形樹狀圖"
+          }
+        }
+      }
+    },
+    "Treemap: %@, click a block to open it": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "矩形樹狀圖：%@，點一下區塊進入"
+          }
+        }
+      }
+    },
+    "Unchanged for %lld days": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 天未修改"
+          }
+        }
+      }
+    },
+    "Uninstall": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解除安裝"
+          }
+        }
+      }
+    },
+    "Uninstall %@?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解除安裝 %@？"
+          }
+        }
+      }
+    },
+    "Uninstalled %@; %@ moved to the Trash.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已解除安裝 %@，%@ 已移到垃圾桶。"
+          }
+        }
+      }
+    },
+    "Uninstall…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解除安裝…"
+          }
+        }
+      }
+    },
+    "Unregister": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消註冊"
+          }
+        }
+      }
+    },
+    "Up %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已開機 %@"
+          }
+        }
+      }
+    },
+    "Upload": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上傳"
+          }
+        }
+      }
+    },
+    "Usage": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用率"
+          }
+        }
+      }
+    },
+    "Usage history": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用歷程"
+          }
+        }
+      }
+    },
+    "Used": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已使用"
+          }
+        }
+      }
+    },
+    "User": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用者"
+          }
+        }
+      }
+    },
+    "Utilization": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用率"
+          }
+        }
+      }
+    },
+    "Value": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "數值"
+          }
+        }
+      }
+    },
+    "Version %@ (%@)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本 %1$@（%2$@）"
+          }
+        }
+      }
+    },
+    "Videos": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "影片"
+          }
+        }
+      }
+    },
+    "Warning": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "警告"
+          }
+        }
+      }
+    },
+    "Weekly": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週"
+          }
+        }
+      }
+    },
+    "When an App Is Running…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "某個 App 執行時…"
+          }
+        }
+      }
+    },
+    "While %@ is running": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 執行時"
+          }
+        }
+      }
+    },
+    "Wired": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "核心佔用"
+          }
+        }
+      }
+    },
+    "Without the Dock icon, MacHelper lives in the menu bar; its window opens from there.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不在 Dock 顯示時，MacHelper 只會出現在選單列，可以從那裡打開視窗。"
+          }
+        }
+      }
+    },
+    "Write": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "寫入"
+          }
+        }
+      }
+    },
+    "You can also run it from the command line: machelper autoclean --now": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排程也可以用指令執行：machelper autoclean --now"
+          }
+        }
+      }
+    },
+    "Your Mac is running hot": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 溫度偏高"
+          }
+        }
+      }
+    },
+    "You’ll be notified like this when a threshold is crossed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超過門檻時，你會收到像這樣的通知。"
+          }
+        }
+      }
+    },
+    "free of %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用，共 %@"
+          }
+        }
+      }
+    },
+    "~/.local/bin/machelper already exists and isn’t a link; remove it first.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/.local/bin/machelper 已存在且不是連結，請先移除。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

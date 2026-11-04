@@ -1,0 +1,9 @@
+.build/
+build/
+*.xcodeproj/
+App/Info.plist
+Helper/Info.plist
+.DS_Store
+xcuserdata/
+Config/Local.xcconfig
+Config/CLI-Info.plist

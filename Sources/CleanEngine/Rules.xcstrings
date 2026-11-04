@@ -1,0 +1,1224 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "detector.cmake.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CMake"
+          }
+        }
+      }
+    },
+    "detector.dart.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dart / Flutter"
+          }
+        }
+      }
+    },
+    "detector.dotnet.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ".NET"
+          }
+        }
+      }
+    },
+    "detector.elixir.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elixir"
+          }
+        }
+      }
+    },
+    "detector.godot.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Godot"
+          }
+        }
+      }
+    },
+    "detector.gradle.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gradle"
+          }
+        }
+      }
+    },
+    "detector.haskell.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haskell (Stack)"
+          }
+        }
+      }
+    },
+    "detector.maven.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maven"
+          }
+        }
+      }
+    },
+    "detector.node.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node.js"
+          }
+        }
+      }
+    },
+    "detector.php.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PHP (Composer)"
+          }
+        }
+      }
+    },
+    "detector.python.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Python"
+          }
+        }
+      }
+    },
+    "detector.ruby.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ruby (Bundler)"
+          }
+        }
+      }
+    },
+    "detector.rust.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rust (Cargo)"
+          }
+        }
+      }
+    },
+    "detector.scala.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scala (sbt)"
+          }
+        }
+      }
+    },
+    "detector.swiftpm.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swift Package"
+          }
+        }
+      }
+    },
+    "detector.unity.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unity"
+          }
+        }
+      }
+    },
+    "detector.xcode.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 專案"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode projects"
+          }
+        }
+      }
+    },
+    "detector.zig.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zig"
+          }
+        }
+      }
+    },
+    "rule.browser.arc.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁與程式碼快取。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web and code caches."
+          }
+        }
+      }
+    },
+    "rule.browser.arc.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc cache"
+          }
+        }
+      }
+    },
+    "rule.browser.brave.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁與程式碼快取。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web and code caches."
+          }
+        }
+      }
+    },
+    "rule.browser.brave.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brave 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brave cache"
+          }
+        }
+      }
+    },
+    "rule.browser.chrome.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁與程式碼快取。不影響書籤、密碼與擴充功能。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web and code caches. Bookmarks, passwords and extensions are not affected."
+          }
+        }
+      }
+    },
+    "rule.browser.chrome.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Chrome 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Chrome cache"
+          }
+        }
+      }
+    },
+    "rule.browser.edge.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁與程式碼快取。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web and code caches."
+          }
+        }
+      }
+    },
+    "rule.browser.edge.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft Edge 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft Edge cache"
+          }
+        }
+      }
+    },
+    "rule.browser.firefox.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁快取（cache2）。不影響設定檔與書籤。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web cache (cache2). Profiles and bookmarks are not affected."
+          }
+        }
+      }
+    },
+    "rule.browser.firefox.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firefox 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firefox cache"
+          }
+        }
+      }
+    },
+    "rule.browser.safari.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁快取，下次瀏覽時會重新下載。不影響書籤、歷史紀錄與登入狀態。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web cache, downloaded again as you browse. Bookmarks, history and sign-ins are not affected."
+          }
+        }
+      }
+    },
+    "rule.browser.safari.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari cache"
+          }
+        }
+      }
+    },
+    "rule.dev.cargo.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rust crate 的壓縮檔與解壓縮後的原始碼，需要時會重新下載。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rust crate archives and extracted sources, downloaded again when needed."
+          }
+        }
+      }
+    },
+    "rule.dev.cargo.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargo 套件快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargo registry cache"
+          }
+        }
+      }
+    },
+    "rule.dev.cocoapods.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pod 下載快取。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pod download cache."
+          }
+        }
+      }
+    },
+    "rule.dev.cocoapods.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CocoaPods 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CocoaPods cache"
+          }
+        }
+      }
+    },
+    "rule.dev.go.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "go build 的快取，會自動重建。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The go build cache, rebuilt automatically."
+          }
+        }
+      }
+    },
+    "rule.dev.go.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go 建置快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go build cache"
+          }
+        }
+      }
+    },
+    "rule.dev.gradle.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依賴與建置快取。下次建置會重新下載，可能需要較久時間。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dependency and build caches. The next build downloads them again and may take longer."
+          }
+        }
+      }
+    },
+    "rule.dev.gradle.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gradle 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gradle cache"
+          }
+        }
+      }
+    },
+    "rule.dev.homebrew.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已下載的安裝檔。已安裝的套件不受影響。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloaded installers. Installed packages are not affected."
+          }
+        }
+      }
+    },
+    "rule.dev.homebrew.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 下載快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew download cache"
+          }
+        }
+      }
+    },
+    "rule.dev.node-gyp.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編譯原生 Node 模組用的標頭檔。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Headers used to compile native Node modules."
+          }
+        }
+      }
+    },
+    "rule.dev.node-gyp.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "node-gyp 標頭檔快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "node-gyp headers cache"
+          }
+        }
+      }
+    },
+    "rule.dev.npm.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 的下載快取（_cacache），需要時會重新下載。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm’s download cache (_cacache), downloaded again when needed."
+          }
+        }
+      }
+    },
+    "rule.dev.npm.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm cache"
+          }
+        }
+      }
+    },
+    "rule.dev.pip.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Python 套件下載快取。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Python package download cache."
+          }
+        }
+      }
+    },
+    "rule.dev.pip.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pip 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pip cache"
+          }
+        }
+      }
+    },
+    "rule.dev.playwright.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright 下載的測試用瀏覽器，執行 npx playwright install 可重新下載。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test browsers downloaded by Playwright; run npx playwright install to get them again."
+          }
+        }
+      }
+    },
+    "rule.dev.playwright.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright 瀏覽器"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright browsers"
+          }
+        }
+      }
+    },
+    "rule.dev.pnpm.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm 的中繼資料快取。套件存放區（store）不在此列，請用 pnpm store prune。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm’s metadata cache. The package store is not included; use pnpm store prune for that."
+          }
+        }
+      }
+    },
+    "rule.dev.pnpm.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm cache"
+          }
+        }
+      }
+    },
+    "rule.dev.swiftpm.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載過的套件來源，需要時會重新下載。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloaded package sources, downloaded again when needed."
+          }
+        }
+      }
+    },
+    "rule.dev.swiftpm.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swift Package Manager 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swift Package Manager cache"
+          }
+        }
+      }
+    },
+    "rule.dev.yarn.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn 的套件快取。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn’s package cache."
+          }
+        }
+      }
+    },
+    "rule.dev.yarn.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn cache"
+          }
+        }
+      }
+    },
+    "rule.simulator.caches.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CoreSimulator 的動態快取，不影響模擬器裡的 App 與資料。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CoreSimulator’s dynamic caches. Apps and data inside simulators are not affected."
+          }
+        }
+      }
+    },
+    "rule.simulator.caches.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模擬器快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulator caches"
+          }
+        }
+      }
+    },
+    "rule.user.caches.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各 App 的快取資料夾，App 需要時會重建。Apple 系統元件的快取不在此列。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each app’s cache folder, rebuilt by the app when needed. Caches of Apple system components are not included."
+          }
+        }
+      }
+    },
+    "rule.user.caches.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App caches"
+          }
+        }
+      }
+    },
+    "rule.user.installers.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DMG、PKG、XIP、ISO 安裝檔。App 安裝完後通常就不需要了。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DMG, PKG, XIP and ISO installers, usually no longer needed once the app is installed."
+          }
+        }
+      }
+    },
+    "rule.user.installers.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「下載」裡的安裝檔"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installers in Downloads"
+          }
+        }
+      }
+    },
+    "rule.user.ios-backups.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder 建立的本機裝置備份。刪除前請確認你有其他備份（例如 iCloud）。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local device backups made by Finder. Make sure you have another backup (such as iCloud) before deleting."
+          }
+        }
+      }
+    },
+    "rule.user.ios-backups.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone / iPad 備份"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone / iPad backups"
+          }
+        }
+      }
+    },
+    "rule.user.logs.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 寫下的日誌與 DiagnosticReports。MacHelper 自己的操作紀錄不會被清除。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logs and DiagnosticReports written by apps. MacHelper’s own operation log is never removed."
+          }
+        }
+      }
+    },
+    "rule.user.logs.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 日誌與當機報告"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App logs and crash reports"
+          }
+        }
+      }
+    },
+    "rule.user.mail-downloads.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從「郵件」打開過的附件副本，原始郵件不受影響。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copies of attachments opened in Mail. The original messages are not affected."
+          }
+        }
+      }
+    },
+    "rule.user.mail-downloads.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "郵件附件下載"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mail attachment downloads"
+          }
+        }
+      }
+    },
+    "rule.user.old-downloads.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請先確認清單：這裡可能有你想保留的檔案。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check the list first: there may be files here you want to keep."
+          }
+        }
+      }
+    },
+    "rule.user.old-downloads.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「下載」裡超過 90 天的檔案"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files in Downloads older than 90 days"
+          }
+        }
+      }
+    },
+    "rule.user.trash.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永久刪除垃圾桶裡的項目，無法復原。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permanently deletes the items in the Trash. This can’t be undone."
+          }
+        }
+      }
+    },
+    "rule.user.trash.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "垃圾桶"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trash"
+          }
+        }
+      }
+    },
+    "rule.xcode.archives.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "舊版本的封存檔。刪除後就無法用它來符號化舊版的當機報告，請確認不再需要。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archives of old builds. Without them you can’t symbolicate crash reports from those versions, so make sure you no longer need them."
+          }
+        }
+      }
+    },
+    "rule.xcode.archives.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode Archives（超過 180 天）"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode Archives (older than 180 days)"
+          }
+        }
+      }
+    },
+    "rule.xcode.derived-data.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "建置中間產物與索引。下次建置會重新產生（第一次會比較慢）。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intermediate build products and indexes, regenerated on the next build (which is slower the first time)."
+          }
+        }
+      }
+    },
+    "rule.xcode.derived-data.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode DerivedData"
+          }
+        }
+      }
+    },
+    "rule.xcode.device-support.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連接實機除錯時下載的符號檔。超過 30 天未用的版本，下次接上該版本裝置時會重新下載。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbols downloaded when debugging on a device. Versions unused for 30 days are downloaded again the next time you connect such a device."
+          }
+        }
+      }
+    },
+    "rule.xcode.device-support.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "裝置支援檔（iOS / watchOS / tvOS DeviceSupport）"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Device support files (iOS / watchOS / tvOS DeviceSupport)"
+          }
+        }
+      }
+    },
+    "rule.xcode.previews.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode Previews 的模擬環境，需要時會重建。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulated environments for Xcode Previews, rebuilt when needed."
+          }
+        }
+      }
+    },
+    "rule.xcode.previews.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SwiftUI 預覽快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SwiftUI previews cache"
+          }
+        }
+      }
+    }
+  }
+}

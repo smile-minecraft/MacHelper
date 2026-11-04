@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "browser.safari",
+      "title": "Safari cache",
+      "description": "Web cache, downloaded again as you browse. Bookmarks, history and sign-ins are not affected.",
+      "category": "browsers",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/com.apple.Safari/*",
+        "~/Library/Containers/com.apple.Safari/Data/Library/Caches/*"
+      ],
+      "skipIfRunning": [
+        "com.apple.Safari"
+      ],
+      "needsFullDiskAccess": true
+    },
+    {
+      "id": "browser.chrome",
+      "title": "Google Chrome cache",
+      "description": "Web and code caches. Bookmarks, passwords and extensions are not affected.",
+      "category": "browsers",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/Google/Chrome/*",
+        "~/Library/Application Support/Google/Chrome/*/Code Cache",
+        "~/Library/Application Support/Google/Chrome/*/GPUCache",
+        "~/Library/Application Support/Google/Chrome/*/Service Worker/CacheStorage"
+      ],
+      "skipIfRunning": [
+        "com.google.Chrome"
+      ]
+    },
+    {
+      "id": "browser.edge",
+      "title": "Microsoft Edge cache",
+      "description": "Web and code caches.",
+      "category": "browsers",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/Microsoft Edge/*",
+        "~/Library/Application Support/Microsoft Edge/*/Code Cache",
+        "~/Library/Application Support/Microsoft Edge/*/GPUCache"
+      ],
+      "skipIfRunning": [
+        "com.microsoft.edgemac"
+      ]
+    },
+    {
+      "id": "browser.brave",
+      "title": "Brave cache",
+      "description": "Web and code caches.",
+      "category": "browsers",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/BraveSoftware/Brave-Browser/*",
+        "~/Library/Application Support/BraveSoftware/Brave-Browser/*/Code Cache",
+        "~/Library/Application Support/BraveSoftware/Brave-Browser/*/GPUCache"
+      ],
+      "skipIfRunning": [
+        "com.brave.Browser"
+      ]
+    },
+    {
+      "id": "browser.arc",
+      "title": "Arc cache",
+      "description": "Web and code caches.",
+      "category": "browsers",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/Arc/*",
+        "~/Library/Caches/company.thebrowser.Browser/*"
+      ],
+      "skipIfRunning": [
+        "company.thebrowser.Browser"
+      ]
+    },
+    {
+      "id": "browser.firefox",
+      "title": "Firefox cache",
+      "description": "Web cache (cache2). Profiles and bookmarks are not affected.",
+      "category": "browsers",
+      "risk": "low",
+      "paths": [
+        "~/Library/Caches/Firefox/Profiles/*/cache2"
+      ],
+      "skipIfRunning": [
+        "org.mozilla.firefox"
+      ]
+    }
+  ]
+}
