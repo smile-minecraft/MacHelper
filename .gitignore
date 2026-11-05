@@ -7,3 +7,4 @@ Helper/Info.plist
 xcuserdata/
 Config/Local.xcconfig
 Config/CLI-Info.plist
+.vscode/
