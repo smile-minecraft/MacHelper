@@ -14,17 +14,22 @@ public struct ScanOptions: Sendable {
     public init() {}
 }
 
-public struct ScanProgress: Sendable {
+public struct ScanProgress: Sendable, Codable {
     public var files: Int
     public var directories: Int
     public var bytes: UInt64
     public var unreadableDirectories: Int
+    /// Directories that were skipped because they are cloud-only (dataless) or failed with EDEADLK.
+    /// They are also counted in `unreadableDirectories`, so partial results are never reported as complete.
+    public var cloudOnlyDirectories: Int
 
-    public init(files: Int, directories: Int, bytes: UInt64, unreadableDirectories: Int) {
+    public init(files: Int, directories: Int, bytes: UInt64, unreadableDirectories: Int,
+                cloudOnlyDirectories: Int = 0) {
         self.files = files
         self.directories = directories
         self.bytes = bytes
         self.unreadableDirectories = unreadableDirectories
+        self.cloudOnlyDirectories = cloudOnlyDirectories
     }
 }
 
@@ -49,6 +54,8 @@ public final class DiskScanner: @unchecked Sendable {
     private var seenHardLinks = Set<UInt64>()
     private var seenClones = Set<UInt64>()
     private var cancelled = false
+    /// Test seam: replaces the low-level directory attribute read for instances that set it.
+    var directoryEnumeration: ((Int32, UnsafeMutablePointer<MHDirEntry>, Int32) -> Int32)? = nil
 
     public init(options: ScanOptions = ScanOptions()) { self.options = options }
 
@@ -60,6 +67,10 @@ public final class DiskScanner: @unchecked Sendable {
 
     /// Blocking. Call from a background task.
     public func scan(_ url: URL) throws -> ScanResult {
+        try ThreadMaterializePolicy.withBan { try scanProtected(url) }
+    }
+
+    private func scanProtected(_ url: URL) throws -> ScanResult {
         let start = Date()
         let rootPath = url.standardizedFileURL.resolvingSymlinksInPath().path
         var st = stat()
@@ -68,17 +79,35 @@ public final class DiskScanner: @unchecked Sendable {
         let root = DiskNode(name: (rootPath as NSString).lastPathComponent, isDirectory: true,
                             modified: Date(timeIntervalSince1970: TimeInterval(st.st_mtimespec.tv_sec)),
                             parent: nil, rootPath: rootPath)
+        // Listing a dataless folder would fetch its contents from the cloud. Report the root instead
+        // of opening it; with the policy installed, opening it would fail with EDEADLK anyway.
+        if (st.st_mode & S_IFMT) == S_IFDIR, st.st_flags & UInt32(SF_DATALESS) != 0 {
+            root.skippedCloudOnly = true
+            counters.unreadableDirectories = 1
+            counters.cloudOnlyDirectories = 1
+            return ScanResult(root: root, progress: progress, elapsed: Date().timeIntervalSince(start),
+                              cancelled: isCancelled)
+        }
 
         let queue = WorkQueue(initial: (root, rootPath))
         let group = DispatchGroup()
+        // Each worker installs the ban on its own thread before touching anything; a worker
+        // that cannot install it does no I/O and stops the whole scan.
+        let policyFailed = ScanFlag()
         for _ in 0..<options.threads {
             group.enter()
             let thread = Thread { [self] in
                 let capacity = 2048
                 let buffer = UnsafeMutablePointer<MHDirEntry>.allocate(capacity: capacity)
                 defer { buffer.deallocate(); group.leave() }
+                guard ThreadMaterializePolicy.install() else {
+                    policyFailed.set()
+                    while let _ = queue.take() { queue.finish(adding: []) }
+                    return
+                }
+                defer { ThreadMaterializePolicy.restore() }
                 while let (node, path) = queue.take() {
-                    let subdirs = isCancelled ? [] : readDirectory(node, path: path, rootDevice: rootDevice,
+                    let subdirs = isCancelled || policyFailed.isSet ? [] : readDirectory(node, path: path, rootDevice: rootDevice,
                                                                    buffer: buffer, capacity: capacity)
                     queue.finish(adding: subdirs)
                 }
@@ -88,6 +117,7 @@ public final class DiskScanner: @unchecked Sendable {
             thread.start()
         }
         group.wait()
+        if policyFailed.isSet { throw MaterializeProtectionError.processPolicyUnavailable }
 
         root.finalize()
         return ScanResult(root: root, progress: progress, elapsed: Date().timeIntervalSince(start), cancelled: isCancelled)
@@ -96,10 +126,19 @@ public final class DiskScanner: @unchecked Sendable {
     /// Reads one directory; returns its subdirectories to scan next.
     private func readDirectory(_ node: DiskNode, path: String, rootDevice: Int32,
                                buffer: UnsafeMutablePointer<MHDirEntry>, capacity: Int) -> [(DiskNode, String)] {
+        /// Records a directory read failure once, including the cloud-only distinction.
+        func recordReadFailure(_ code: Int32) {
+            node.readError = code
+            if code == EDEADLK { node.skippedCloudOnly = true }
+            lock.withLock {
+                counters.unreadableDirectories += 1
+                if code == EDEADLK { counters.cloudOnlyDirectories += 1 }
+            }
+        }
+
         let fd = open(path, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
         guard fd >= 0 else {
-            node.readError = errno
-            lock.withLock { counters.unreadableDirectories += 1 }
+            recordReadFailure(errno)
             return []
         }
         defer { close(fd) }
@@ -109,10 +148,14 @@ public final class DiskScanner: @unchecked Sendable {
         var bytes: UInt64 = 0
         // Files whose storage may be shared (hard links, APFS clones); resolved under the global lock.
         var shared: [SharedFile] = []
+        let enumerate = directoryEnumeration ?? mh_read_dir_entries
 
         while true {
-            let n = mh_read_dir_entries(fd, buffer, Int32(capacity))
-            if n < 0 { node.readError = errno; break }
+            let n = enumerate(fd, buffer, Int32(capacity))
+            if n < 0 {
+                recordReadFailure(errno)
+                break
+            }
             if n == 0 { break }
             for i in 0..<Int(n) {
                 let e = buffer[i]
@@ -128,6 +171,15 @@ public final class DiskScanner: @unchecked Sendable {
                     if options.skipPaths.contains(childPath) { continue }
                     let child = DiskNode(name: name, isDirectory: true, modified: modified, parent: node)
                     node.children.append(child)
+                    // Never open a cloud-only folder: listing it would download its contents.
+                    if e.flags & UInt32(SF_DATALESS) != 0 {
+                        child.skippedCloudOnly = true
+                        lock.withLock {
+                            counters.unreadableDirectories += 1
+                            counters.cloudOnlyDirectories += 1
+                        }
+                        continue
+                    }
                     subdirs.append((child, childPath))
                     continue
                 }
@@ -214,4 +266,12 @@ private final class WorkQueue: @unchecked Sendable {
         active -= 1
         if !subdirs.isEmpty || active == 0 { cond.broadcast() }
     }
+}
+
+/// A one-way flag shared by the scan's worker threads.
+private final class ScanFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value = false
+    func set() { lock.withLock { value = true } }
+    var isSet: Bool { lock.withLock { value } }
 }

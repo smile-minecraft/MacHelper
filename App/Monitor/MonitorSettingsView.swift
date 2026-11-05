@@ -8,7 +8,7 @@ struct MonitorSettingsView: View {
 
     var body: some View {
         Form {
-            Section {
+            Section("Menu Bar") {
                 Toggle("Compact (name above value)", isOn: $settings.configuration.compact)
             }
             if let alerts { AlertSettingsSection(alerts: alerts) }
@@ -18,12 +18,13 @@ struct MonitorSettingsView: View {
                         ModuleRow(module: m, config: binding(m))
                     } else {
                         LabeledContent(m.title, value: String(localized: "Not supported on this Mac"))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Palette.textMuted)
                     }
                 }
             }
         }
         .formStyle(.grouped)
+        .settingsSurface()
     }
 
     private func binding(_ m: MonitorModule) -> Binding<ModuleConfig> {
@@ -38,20 +39,20 @@ private struct ModuleRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Toggle(module.title, isOn: $config.enabled)
-                .frame(width: 90, alignment: .leading)
+                .frame(minWidth: 90, alignment: .leading)
             Toggle("Menu bar", isOn: $config.inMenuBar)
                 .disabled(!config.enabled)
             Picker("Style", selection: $config.style) {
                 ForEach(module.supportedStyles) { Text($0.title).tag($0) }
             }
             .labelsHidden()
-            .frame(width: 80)
+            .frame(minWidth: 80)
             .disabled(!config.enabled || !config.inMenuBar)
             Picker("Interval", selection: $config.interval) {
                 ForEach([1.0, 2, 5, 10, 30], id: \.self) { Text("\(Int($0)) s").tag($0) }
             }
             .labelsHidden()
-            .frame(width: 80)
+            .frame(minWidth: 80)
             .disabled(!config.enabled)
         }
     }
@@ -91,7 +92,8 @@ struct LanguagePicker: View {
             }
         }
         if changed {
-            Text("The new language is used after MacHelper relaunches.").font(.caption).foregroundStyle(.secondary)
+            Text("The new language is used after MacHelper relaunches.")
+                .settingsCaption()
         }
     }
 
@@ -120,13 +122,16 @@ struct CommandLineToolRow: View {
         LabeledContent("Command-line tool") {
             HStack {
                 Text(installed ? "~/.local/bin/machelper" : String(localized: "Not installed"))
-                    .font(.caption.monospaced()).foregroundStyle(.secondary)
+                    .font(.caption.monospaced()).foregroundStyle(Palette.textMuted)
                 Button(installed ? "Remove" : "Install") { toggle() }
             }
         }
-        if let error { Text(error).font(.caption).foregroundStyle(.orange) }
+        if let error {
+            Text(error).settingsCaption(Theme.rose)
+        }
         if installed {
-            Text("Run “machelper --help” in Terminal. ~/.local/bin must be in your PATH.").font(.caption).foregroundStyle(.secondary)
+            Text("Run “machelper --help” in Terminal. ~/.local/bin must be in your PATH.")
+                .settingsCaption()
         }
     }
 

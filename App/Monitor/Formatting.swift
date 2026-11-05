@@ -39,7 +39,7 @@ enum Fmt {
     }
 
     static func celsius(_ c: Double?) -> String {
-        guard let c else { return "–" }
+        guard let c else { return String(localized: "n/a") }
         return "\(Int(c.rounded()))°"
     }
 
@@ -49,7 +49,7 @@ enum Fmt {
     }
 
     static func watts(_ w: Double?) -> String {
-        guard let w else { return "–" }
+        guard let w else { return String(localized: "n/a") }
         return w < 10 ? String(format: "%.1fW", w) : String(format: "%.0fW", w)
     }
 }

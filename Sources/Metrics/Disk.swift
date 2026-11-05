@@ -13,14 +13,15 @@ public struct DiskReading: Sendable, Hashable, Codable {
 public final class DiskSampler: @unchecked Sendable {
     private let lock = NSLock()
     private var previous: (read: UInt64, write: UInt64, time: Date)?
-    private let volume: URL
+    private let volumePath: String
 
-    public init(volume: URL = URL(fileURLWithPath: "/")) { self.volume = volume }
+    public init(volume: URL = URL(fileURLWithPath: "/")) { self.volumePath = volume.path }
 
     public func sample() -> DiskReading? {
         let (r, w) = Self.ioTotals()
         let now = Date()
-        let values = try? volume.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey, .volumeTotalCapacityKey])
+        // Use a fresh URL: a reused URL caches resource values, so freed space would not update.
+        let values = try? URL(fileURLWithPath: volumePath).resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey, .volumeTotalCapacityKey])
         let available = values?.volumeAvailableCapacityForImportantUsage ?? 0
         let total = Int64(values?.volumeTotalCapacity ?? 0)
         return lock.withLock {

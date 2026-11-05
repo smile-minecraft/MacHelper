@@ -21,6 +21,11 @@ public final class DiskNode: @unchecked Sendable, Identifiable {
     public internal(set) var smallFilesCount: Int = 0
     /// errno if the directory could not be read (permission denied etc.).
     public internal(set) var readError: Int32 = 0
+    /// True when this node stands for a cloud-only (dataless) folder that was skipped, never opened or read.
+    public internal(set) var skippedCloudOnly = false
+    /// True when this node was rebuilt from a saved scan instead of a live one.
+    /// Restored trees are records of the past: browse them, never collect, trash, or hash them.
+    public internal(set) var restoredFromCache = false
 
     /// Root nodes carry the absolute path they were scanned from.
     let rootPath: String?

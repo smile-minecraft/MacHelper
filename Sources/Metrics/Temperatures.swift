@@ -47,8 +47,8 @@ public final class HIDTemperatureSensors: @unchecked Sendable {
                       let event = IOHIDServiceClientCopyEvent(service, Int64(MH_HID_EVENT_TYPE_TEMPERATURE), 0, 0)
                 else { continue }
                 let value = IOHIDEventGetFloatValue(event, Int32(MH_HID_EVENT_FIELD_TEMPERATURE))
-                guard value > -40, value < 150 else { continue }
-                result.append(TemperatureReading(name: name, celsius: value, category: Self.categorize(name)))
+                guard let celsius = SMCThermal.celsius(value) else { continue }
+                result.append(TemperatureReading(name: name, celsius: celsius, category: Self.categorize(name)))
             }
             // Several sensors can share a name; keep the hottest.
             let merged = Dictionary(result.map { ($0.name, $0) }) { $0.celsius >= $1.celsius ? $0 : $1 }
@@ -72,8 +72,8 @@ public final class HIDTemperatureSensors: @unchecked Sendable {
 public enum SMCTemperatures {
     public static func read(_ smc: SMC, keys: [FourCC]) -> [TemperatureReading] {
         keys.compactMap { key in
-            guard let v = try? smc.readDouble(key), v > 0, v < 150 else { return nil }
-            return TemperatureReading(name: key.description, celsius: v, category: category(for: key))
+            guard let celsius = SMCThermal.celsius(try? smc.readDouble(key)) else { return nil }
+            return TemperatureReading(name: key.description, celsius: celsius, category: category(for: key))
         }
     }
 
@@ -94,7 +94,7 @@ public enum SMCTemperatures {
         let s = key.description
         // TPD*/TRD* mirror the HID "PMU tdie*"/"PMU2 tdie*" die sensors on Apple Silicon (verified on M4).
         if s.hasPrefix("Tp") || s.hasPrefix("Te") || s.hasPrefix("TC") || s.hasPrefix("TPD") || s.hasPrefix("TRD") { return .cpu }
-        if s.hasPrefix("Tg") || s.hasPrefix("TG") { return .gpu }
+        if SMCThermal.isGPUKey(key) { return .gpu }
         if s.hasPrefix("TB") { return .battery }
         if s.hasPrefix("TH") || s.hasPrefix("TN") { return .storage }
         if s.hasPrefix("Tm") || s.hasPrefix("TM") { return .memory }

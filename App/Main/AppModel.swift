@@ -46,6 +46,7 @@ final class AppModel {
 
     let settings = MonitorSettingsStore()
     let store: MonitorStore
+    let backgroundRecording: BackgroundRecordingModel
     let fanModel = FanControlModel()
     let fanSwitcher = FanAutoSwitcher()
     let diskModel = DiskAnalysisModel()
@@ -61,6 +62,7 @@ final class AppModel {
 
     private init() {
         store = MonitorStore(settings: settings)
+        backgroundRecording = BackgroundRecordingModel(settings: settings, availableModules: store.availableModules)
     }
 
     func show(_ section: AppSection) {

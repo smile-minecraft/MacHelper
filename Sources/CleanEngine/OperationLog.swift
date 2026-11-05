@@ -66,4 +66,34 @@ public struct OperationLog: Sendable {
             try? decoder.decode(Entry.self, from: Data($0.utf8))
         }
     }
+
+    /// Every readable entry, newest first. Lines that can't be decoded are left out and counted,
+    /// so a viewer can say that part of the file was skipped.
+    public func readAll() -> ReadResult {
+        guard let text = try? String(contentsOf: url, encoding: .utf8) else {
+            return ReadResult(entries: [], skippedLines: 0)
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        var entries: [Entry] = []
+        var skipped = 0
+        for line in text.split(whereSeparator: \.isNewline) {
+            guard let entry = try? decoder.decode(Entry.self, from: Data(line.utf8)) else {
+                skipped += 1
+                continue
+            }
+            entries.append(entry)
+        }
+        return ReadResult(entries: entries.reversed(), skippedLines: skipped)
+    }
+
+    public struct ReadResult: Sendable {
+        public let entries: [Entry]
+        public let skippedLines: Int
+
+        public init(entries: [Entry], skippedLines: Int) {
+            self.entries = entries
+            self.skippedLines = skippedLines
+        }
+    }
 }

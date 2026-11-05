@@ -10,8 +10,11 @@ struct UninstallView: View {
                 Text("App").tag(UninstallModel.Tab.apps)
                 Text("Leftovers of Removed Apps").tag(UninstallModel.Tab.orphans)
             }
-            .pickerStyle(.segmented).labelsHidden().frame(width: 320).padding(10)
-            Divider()
+            .pickerStyle(.segmented).labelsHidden()
+            .frame(width: 340)
+            .padding(.horizontal, 12).padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
             switch model.tab {
             case .apps: appsTab
             case .orphans: OrphansTab(model: model)
@@ -24,7 +27,7 @@ struct UninstallView: View {
     private var appsTab: some View {
         HSplitView {
             VStack(spacing: 0) {
-                HStack {
+                HStack(spacing: 10) {
                     TextField("Search Apps", text: $model.search).textFieldStyle(.roundedBorder)
                     Picker("", selection: $model.sort) {
                         Text("Name").tag(UninstallModel.Sort.name)
@@ -33,24 +36,26 @@ struct UninstallView: View {
                     }
                     .labelsHidden().frame(width: 100)
                 }
-                .padding(8)
+                .padding(.horizontal, 10).padding(.vertical, 8)
+                .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
                 if model.loadingApps && model.apps.isEmpty {
-                    ProgressView().frame(maxHeight: .infinity)
+                    ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List(model.visibleApps, selection: $model.selectedAppID) { app in
                         HStack {
                             Image(nsImage: model.icon(for: app)).resizable().frame(width: 24, height: 24)
                             VStack(alignment: .leading, spacing: 1) {
-                                Text(app.name).lineLimit(1)
+                                Text(app.name).lineLimit(1).foregroundStyle(Palette.text)
                                 Text(app.lastUsed.map { String(localized: "Last used \($0.formatted(date: .abbreviated, time: .omitted))") } ?? app.bundleID)
-                                    .font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                                    .font(.caption2).foregroundStyle(Palette.textMuted).lineLimit(1)
                             }
                             Spacer()
-                            Text(Fmt.bytes(Int64(clamping: app.size))).font(.caption).monospacedDigit().foregroundStyle(.secondary)
+                            Text(Fmt.bytes(Int64(clamping: app.size))).font(.caption).monospacedDigit().foregroundStyle(Palette.textMuted)
                         }
                         .opacity(app.canUninstall ? 1 : 0.5)
                         .tag(app.id)
                     }
+                    .scrollContentBackground(.hidden)
                 }
             }
             .frame(minWidth: 300, idealWidth: 330, maxWidth: 420)
@@ -74,29 +79,37 @@ private struct AppDetail: View {
     @State private var confirm = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                Image(nsImage: model.icon(for: app)).resizable().frame(width: 56, height: 56)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(app.name).font(.title2.bold())
-                    Text("\(app.version ?? "") · \(app.bundleID)").font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
-                    Text(app.path).font(.caption2).foregroundStyle(.tertiary)
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    Image(nsImage: model.icon(for: app)).resizable().frame(width: 56, height: 56)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(app.name).font(.title2.bold()).foregroundStyle(Palette.text)
+                        Text("\(app.version ?? "") · \(app.bundleID)").font(.caption).foregroundStyle(Palette.textMuted).textSelection(.enabled)
+                        Text(app.path).font(.caption2).foregroundStyle(Palette.textFaint).lineLimit(1).truncationMode(.middle)
+                            .help(app.path)
+                    }
+                }
+                if let reason = app.protectedReason {
+                    Label("Can’t uninstall: \(reason)", systemImage: "lock.fill").foregroundStyle(Palette.textMuted)
+                } else if app.isRunning {
+                    HStack {
+                        Label("\(app.name) is running. Quit it first.", systemImage: "exclamationmark.triangle.fill").foregroundStyle(Theme.orange)
+                        Button("Quit \(app.name)") { Task { await model.quitApp() } }
+                    }
                 }
             }
-            if let reason = app.protectedReason {
-                Label("Can’t uninstall: \(reason)", systemImage: "lock.fill").foregroundStyle(.secondary)
-            } else if app.isRunning {
-                HStack {
-                    Label("\(app.name) is running. Quit it first.", systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
-                    Button("Quit \(app.name)") { Task { await model.quitApp() } }
-                }
-            }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 12)
 
             if model.loadingPlan {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let plan = model.plan {
                 Toggle("Also remove app data (Application Support, Containers, ~/.name: may contain your documents, settings or sign-in data)", isOn: $model.includeUserData)
                     .font(.callout)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
                 List {
                     ForEach(LeftoverKind.allCases, id: \.self) { kind in
                         let items = plan.items.filter { $0.kind == kind }
@@ -107,14 +120,14 @@ private struct AppDetail: View {
                                         Toggle(isOn: Binding(get: { item.selected }, set: { _ in model.toggle(item) })) { EmptyView() }
                                             .labelsHidden()
                                         VStack(alignment: .leading, spacing: 1) {
-                                            Text(Fmt.shortPath(item.path)).lineLimit(1).truncationMode(.middle)
+                                            Text(Fmt.shortPath(item.path)).lineLimit(1).truncationMode(.middle).foregroundStyle(Palette.text)
                                             Text(item.followsUserData && !item.kind.mayContainUserData
                                                  ? String(localized: "\(item.evidence.title); selected together with “Also remove app data”") : item.evidence.title)
                                                 .font(.caption2)
-                                                .foregroundStyle(item.needsConfirmation ? AnyShapeStyle(.orange) : AnyShapeStyle(.secondary))
+                                                .foregroundStyle(item.needsConfirmation ? AnyShapeStyle(Theme.orange) : AnyShapeStyle(Palette.textMuted))
                                         }
                                         Spacer()
-                                        Text(Fmt.bytes(Int64(clamping: item.size))).monospacedDigit().foregroundStyle(.secondary)
+                                        Text(Fmt.bytes(Int64(clamping: item.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
                                     }
                                     .contextMenu { Button("Show in Finder") { model.reveal(item.path) } }
                                 }
@@ -125,8 +138,8 @@ private struct AppDetail: View {
                         Section("Found but Kept") {
                             ForEach(plan.kept, id: \.self) { k in
                                 VStack(alignment: .leading, spacing: 1) {
-                                    Text(Fmt.shortPath(k.path)).font(.caption)
-                                    Text(k.reason).font(.caption2).foregroundStyle(.secondary)
+                                    Text(Fmt.shortPath(k.path)).font(.caption).foregroundStyle(Palette.text)
+                                    Text(k.reason).font(.caption2).foregroundStyle(Palette.textMuted)
                                 }
                             }
                         }
@@ -134,28 +147,33 @@ private struct AppDetail: View {
                     if !plan.systemItems.isEmpty {
                         Section("System Level (needs an administrator; remove manually)") {
                             ForEach(plan.systemItems, id: \.self) { p in
-                                Text(p).font(.caption).foregroundStyle(.secondary)
+                                Text(p).font(.caption).foregroundStyle(Palette.textMuted)
                                     .contextMenu { Button("Show in Finder") { model.reveal(p) } }
                             }
                         }
                     }
                 }
-                HStack {
-                    if let m = model.message { Text(m).font(.caption).foregroundStyle(.secondary).lineLimit(2) }
-                    Spacer()
-                    Text("\(Fmt.bytes(Int64(clamping: plan.selectedSize))) selected").monospacedDigit()
+                .scrollContentBackground(.hidden)
+                HStack(spacing: 12) {
+                    if let m = model.message { Text(m).font(.caption).foregroundStyle(Palette.textMuted).lineLimit(2) }
+                    Spacer(minLength: 8)
+                    Text("\(Fmt.bytes(Int64(clamping: plan.selectedSize))) selected").monospacedDigit().foregroundStyle(Palette.text)
                     Button("Uninstall…") { confirm = true }
                         .buttonStyle(.borderedProminent)
                         .disabled(!app.canUninstall || app.isRunning || plan.selectedSize == 0)
                 }
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(Palette.card)
+                .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
                 .confirmationDialog("Uninstall \(app.name)?", isPresented: $confirm, titleVisibility: .visible) {
                     Button("Move to Trash", role: .destructive) { Task { await model.uninstall() } }
                 } message: {
                     Text("The \(plan.items.filter(\.selected).count) selected items (\(Fmt.bytes(Int64(clamping: plan.selectedSize)))) will be moved to the Trash, where you can get them back. App Store apps may ask for an administrator password.")
                 }
+            } else {
+                Spacer()
             }
         }
-        .padding(16)
     }
 }
 
@@ -164,35 +182,38 @@ private struct OrphansTab: View {
     @State private var confirm = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 0) {
             Text("These items are named after a bundle ID whose app can no longer be found; for background items, the program they start no longer exists. This is a guess: review each item before checking it. Nothing is checked by default.")
-                .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                .font(.callout).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
+                .padding(12)
+                .background(Palette.inset, in: RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
+                .padding(16)
             if let orphans = model.orphans {
                 List {
                     ForEach(orphans) { item in
                         HStack {
                             Toggle(isOn: Binding(get: { item.selected }, set: { _ in model.toggleOrphan(item) })) { EmptyView() }
                                 .labelsHidden()
-                            Text(item.kind.title).font(.caption).foregroundStyle(.secondary).frame(width: 90, alignment: .leading)
-                            Text(Fmt.shortPath(item.path)).lineLimit(1).truncationMode(.middle)
+                            Text(item.kind.title).font(.caption).foregroundStyle(Palette.textMuted).frame(width: 90, alignment: .leading)
+                            Text(Fmt.shortPath(item.path)).lineLimit(1).truncationMode(.middle).foregroundStyle(Palette.text)
                             Spacer()
-                            Text(Fmt.bytes(Int64(clamping: item.size))).monospacedDigit().foregroundStyle(.secondary)
+                            Text(Fmt.bytes(Int64(clamping: item.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
                         }
                         .contextMenu { Button("Show in Finder") { model.reveal(item.path) } }
                     }
                 }
-                HStack {
-                    if let m = model.message { Text(m).font(.caption).foregroundStyle(.secondary) }
-                    Spacer()
+                .scrollContentBackground(.hidden)
+                HStack(spacing: 12) {
+                    if let m = model.message { Text(m).font(.caption).foregroundStyle(Palette.textMuted) }
+                    Spacer(minLength: 8)
                     Button("Search Again") { Task { await model.loadOrphans() } }
                     Button("Move to Trash…") { confirm = true }
                         .buttonStyle(.borderedProminent)
                         .disabled(model.selectedOrphanBytes == 0)
                 }
-                .confirmationDialog("Move the selected leftovers (\(Fmt.bytes(Int64(clamping: model.selectedOrphanBytes)))) to the Trash?",
-                                    isPresented: $confirm, titleVisibility: .visible) {
-                    Button("Move to Trash", role: .destructive) { Task { await model.removeSelectedOrphans() } }
-                }
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(Palette.card)
+                .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
             } else {
                 VStack(spacing: 10) {
                     if model.loadingOrphans { ProgressView() } else {
@@ -202,6 +223,9 @@ private struct OrphansTab: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .padding(16)
+        .confirmationDialog("Move the selected leftovers (\(Fmt.bytes(Int64(clamping: model.selectedOrphanBytes)))) to the Trash?",
+                            isPresented: $confirm, titleVisibility: .visible) {
+            Button("Move to Trash", role: .destructive) { Task { await model.removeSelectedOrphans() } }
+        }
     }
 }

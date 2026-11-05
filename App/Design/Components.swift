@@ -3,6 +3,7 @@ import SwiftUI
 /// Top-level tabs: the selected one sits on a raised pill (magpie-style).
 struct TabStrip<Value: Hashable>: View {
     let items: [(Value, LocalizedStringKey)]
+    var icons: [Value: String] = [:]
     @Binding var selection: Value
     @Namespace private var ns
 
@@ -11,19 +12,22 @@ struct TabStrip<Value: Hashable>: View {
             ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                 let selected = item.0 == selection
                 Button { selection = item.0 } label: {
-                    Text(item.1)
-                        .font(.system(size: 13, weight: selected ? .semibold : .medium))
-                        .foregroundStyle(selected ? Palette.text : Palette.textMuted)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background {
-                            if selected {
-                                RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Palette.raised)
-                                    .shadow(color: .black.opacity(0.12), radius: 1, y: 0.5)
-                                    .matchedGeometryEffect(id: "tab", in: ns)
-                            }
+                    HStack(spacing: 5) {
+                        if let icon = icons[item.0] { PixelIcon(name: icon, size: 14) }
+                        Text(item.1)
+                            .font(.system(size: 13, weight: selected ? .semibold : .medium))
+                            .foregroundStyle(selected ? Palette.text : Palette.textMuted)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background {
+                        if selected {
+                            RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Palette.raised)
+                                .shadow(color: .black.opacity(0.12), radius: 1, y: 0.5)
+                                .matchedGeometryEffect(id: "tab", in: ns)
                         }
-                        .contentShape(Rectangle())
+                    }
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
@@ -160,6 +164,30 @@ struct IconButton: View {
         .help(help)
         .accessibilityLabel(help)
         .onHover { hover = $0 }
+    }
+}
+
+/// A settings caption or warning: wraps instead of truncating and keeps the shared muted color
+/// unless a warning tone is passed in.
+struct SettingsCaption: ViewModifier {
+    var color: Color = Palette.textMuted
+
+    func body(content: Content) -> some View {
+        content
+            .font(.caption)
+            .foregroundStyle(color)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+extension View {
+    func settingsCaption(_ color: Color = Palette.textMuted) -> some View {
+        modifier(SettingsCaption(color: color))
+    }
+
+    /// The surface under a settings form, matching the main window while keeping native controls.
+    func settingsSurface() -> some View {
+        scrollContentBackground(.hidden).background(Palette.base)
     }
 }
 

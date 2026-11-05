@@ -4,8 +4,8 @@ import Storage
 
 struct Stats: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Show recorded metric history (per-minute averages kept for 7 days while MacHelper runs).",
-        discussion: "--range accepts 1h, 24h, 7d (or any number with m/h/d). Read-only."
+        abstract: "Show recorded metric history (per-minute averages; 7-day default retention, configurable in the app).",
+        discussion: "--range accepts 1h, 24h, 7d (or any number with m/h/d). Read-only. Change the retention in Settings → General → Data management."
     )
 
     @OptionGroup var output: OutputOptions
@@ -20,7 +20,7 @@ struct Stats: ParsableCommand {
         guard let seconds = Self.parse(range) else { throw ValidationError("Invalid --range \(range)") }
         let bucketSeconds = TimeInterval((bucket ?? (seconds <= 3600 ? 1 : seconds <= 86_400 ? 5 : 30)) * 60)
         guard FileManager.default.fileExists(atPath: MetricsHistory.defaultURL.path) else {
-            throw ValidationError("No history yet: MacHelper records it while the app runs.")
+            throw ValidationError("No history yet: MacHelper hasn’t recorded any samples.")
         }
         let history = try MetricsHistory(readOnly: true)
         let samples = try history.samples(since: Date().addingTimeInterval(-seconds), bucket: bucketSeconds)

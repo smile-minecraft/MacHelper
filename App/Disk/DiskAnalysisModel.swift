@@ -84,14 +84,26 @@ final class DiskAnalysisModel {
         var id: String { rawValue }
     }
 
-    var targets = ScanTarget.available()
-    var target: ScanTarget
+    var targets: [ScanTarget]
+    var target: ScanTarget {
+        didSet {
+            guard target != oldValue else { return }
+            cancel()
+            resetDisplay()
+            isLoadingSavedScan = false
+            revision += 1
+            loadVolume()
+            loadSavedScan()
+        }
+    }
     private(set) var phase: Phase = .idle
     private(set) var progress = ScanProgress(files: 0, directories: 0, bytes: 0, unreadableDirectories: 0)
     private(set) var root: DiskNode?
     private(set) var focus: DiskNode?
     private(set) var elapsed: TimeInterval = 0
     private(set) var volume: VolumeSummary?
+    /// When the tree on screen came from a saved scan, the time that scan was taken. Nil for a live scan.
+    private(set) var restoredAt: Date?
     /// Bumped whenever the tree changes, so charts rebuild their layout.
     private(set) var revision = 0
     var hover: HoverInfo?
@@ -103,6 +115,9 @@ final class DiskAnalysisModel {
     // Duplicate files (found on request).
     private(set) var duplicates: [DuplicateGroup]?
     private(set) var findingDuplicates = false
+    /// Why the duplicate list is empty or incomplete: cloud-only files skipped, unreadable files,
+    /// or the search not running at all.
+    private(set) var duplicatesMessage: String?
     // Filters for the largest-files list.
     var kindFilter: FileKind?
     var olderThanDays: Int?
@@ -110,32 +125,132 @@ final class DiskAnalysisModel {
     var previewURL: URL?
 
     @ObservationIgnored private var scanner: DiskScanner?
+    @ObservationIgnored private let cache = ScanResultCache()
+    @ObservationIgnored private var restoreGeneration = 0
+    @ObservationIgnored private var isLoadingSavedScan = false
 
-    init() { target = ScanTarget.available()[0] }
+    init() {
+        let available = ScanTarget.available()
+        targets = available
+        let saved = UserDefaults.standard.string(forKey: Self.lastScanTargetKey)
+        target = available.first { $0.id == saved } ?? available[0]
+    }
+
+    /// The location of the last completed scan, so reopening the screen shows that location's result.
+    private static let lastScanTargetKey = "diskAnalysis.lastScanTarget"
 
     var collectorSize: UInt64 { collector.reduce(0) { $0 + $1.size } }
     var breadcrumbs: [DiskNode] { focus?.lineage ?? [] }
+    /// True while the tree on screen came from a saved scan: it can be browsed, but collecting,
+    /// moving to the Trash, and hashing file contents all need a live scan.
+    var isShowingSavedScan: Bool {
+        guard let root else { return false }
+        return !ScanCacheSafety.isLiveScan(root)
+    }
+
+    // MARK: Saved scans
+
+    /// Loads the saved result for `target` when the screen has nothing to show. Only the snapshot
+    /// file is read; nothing under the saved root is opened or listed.
+    func restoreSavedScanIfNeeded() {
+        guard root == nil, phase == .idle, !isLoadingSavedScan else { return }
+        loadSavedScan()
+    }
+
+    /// Removes the saved result of the current location and returns to the empty state.
+    func clearSavedScan() {
+        guard isShowingSavedScan else { return }
+        do {
+            try cache.clear(rootPath: cacheKey(for: target.url))
+        } catch {
+            lastMessage = String(localized: "The saved scan could not be cleared: \(error.localizedDescription)")
+            return
+        }
+        resetDisplay()
+        isLoadingSavedScan = false
+        revision += 1
+    }
+
+    private func loadSavedScan() {
+        restoreGeneration += 1
+        let generation = restoreGeneration
+        isLoadingSavedScan = true
+        let key = cacheKey(for: target.url)
+        let cache = cache
+        Task { [weak self] in
+            let loaded = await Task.detached(priority: .userInitiated) { () -> (ScanResultSnapshot, DiskNode)? in
+                guard let snapshot = cache.load(rootPath: key), let tree = snapshot.rebuildTree() else { return nil }
+                return (snapshot, tree)
+            }.value
+            guard let self, self.restoreGeneration == generation else { return }
+            self.isLoadingSavedScan = false
+            guard let (snapshot, tree) = loaded else { return }
+            self.root = tree
+            self.focus = tree
+            self.progress = snapshot.progress
+            self.elapsed = snapshot.elapsed
+            self.restoredAt = snapshot.scannedAt
+            self.phase = .done
+            self.revision += 1
+            self.loadVolume()
+        }
+    }
+
+    /// The cache key for a scan location: the same resolved path the scanner records.
+    private func cacheKey(for url: URL) -> String {
+        url.standardizedFileURL.resolvingSymlinksInPath().path
+    }
+
+    private func loadVolume() {
+        volume = nil
+        let url = target.url
+        Task.detached(priority: .userInitiated) { [weak self] in
+            let summary = VolumeSummary.load(for: url)
+            await MainActor.run {
+                guard let self, self.target.url == url else { return }
+                self.volume = summary
+            }
+        }
+    }
+
+    private func resetDisplay() {
+        restoredAt = nil
+        root = nil
+        focus = nil
+        progress = ScanProgress(files: 0, directories: 0, bytes: 0, unreadableDirectories: 0)
+        elapsed = 0
+        collector = []
+        duplicates = nil
+        duplicatesMessage = nil
+        changes = []
+        changesSince = nil
+        hover = nil
+        lastMessage = nil
+        phase = .idle
+    }
 
     // MARK: Scanning
 
     func scan() {
         cancel()
+        restoreGeneration += 1
+        isLoadingSavedScan = false
         let scanner = DiskScanner()
         self.scanner = scanner
         phase = .scanning
+        restoredAt = nil
         root = nil
         focus = nil
         collector = []
         duplicates = nil
+        duplicatesMessage = nil
         changes = []
         changesSince = nil
         let url = target.url
-        volume = nil
+        let targetID = target.id
+        loadVolume()
+        let cache = cache
 
-        Task.detached(priority: .userInitiated) { [weak self] in
-            let summary = VolumeSummary.load(for: url)
-            await MainActor.run { self?.volume = summary }
-        }
         // Progress poll.
         Task { [weak self] in
             while let self, self.phase == .scanning {
@@ -149,12 +264,16 @@ final class DiskAnalysisModel {
                 var changes: [ScanSnapshot.Change] = []
                 var since: Date?
                 if !result.cancelled {
-                    let snapshot = ScanSnapshot(root: result.root)
+                    // The saved scan is only replaced by a completed one; a cancelled scan keeps
+                    // whatever was saved before it.
+                    let scannedAt = Date()
+                    let snapshot = ScanSnapshot(root: result.root, date: scannedAt)
                     if let previous = ScanSnapshot.load(root: snapshot.root) {
                         changes = snapshot.changes(since: previous)
                         since = previous.date
                     }
                     try? snapshot.save()
+                    try? cache.save(result: result, scannedAt: scannedAt)
                 }
                 await MainActor.run {
                     guard let self, self.scanner === scanner else { return }
@@ -166,9 +285,20 @@ final class DiskAnalysisModel {
                     self.changes = changes
                     self.changesSince = since
                     self.revision += 1
+                    if !result.cancelled {
+                        UserDefaults.standard.set(targetID, forKey: Self.lastScanTargetKey)
+                    }
+                }
+            } catch is MaterializeProtectionError {
+                await MainActor.run {
+                    guard let self, self.scanner === scanner else { return }
+                    self.phase = .failed(String(localized: "Scanning did not run because macOS would not stop automatic downloads of cloud-only files."))
                 }
             } catch {
-                await MainActor.run { self?.phase = .failed("\(error)") }
+                await MainActor.run {
+                    guard let self, self.scanner === scanner else { return }
+                    self.phase = .failed("\(error)")
+                }
             }
         }
     }
@@ -183,18 +313,39 @@ final class DiskAnalysisModel {
     }
 
     func findDuplicates() async {
-        guard let root, !findingDuplicates else { return }
+        guard let root, ScanCacheSafety.isLiveScan(root), !findingDuplicates else { return }
         findingDuplicates = true
+        defer { findingDuplicates = false }
         var paths: [String] = []
         root.forEach { if !$0.isDirectory { paths.append($0.path) } }
-        let found = await Task.detached(priority: .userInitiated) { DuplicateFinder.find(paths: paths, minSize: 1 << 20) }.value
-        guard self.root === root else { return }
-        duplicates = found
-        findingDuplicates = false
+        do {
+            let result = try await Task.detached(priority: .userInitiated) {
+                try DuplicateFinder.findChecked(paths: paths, minSize: 1 << 20)
+            }.value
+            guard self.root === root else { return }
+            duplicates = result.groups
+            var notes: [String] = []
+            if result.cloudOnlyFiles > 0 {
+                notes.append(String(localized: "\(result.cloudOnlyFiles) cloud-only files were skipped and not downloaded."))
+            }
+            if result.unreadableFiles > 0 {
+                notes.append(String(localized: "\(result.unreadableFiles) files could not be read."))
+            }
+            duplicatesMessage = notes.isEmpty ? nil : notes.joined(separator: " ")
+        } catch is MaterializeProtectionError {
+            guard self.root === root else { return }
+            duplicates = nil
+            duplicatesMessage = String(localized: "Duplicate search did not run because macOS would not stop automatic downloads of cloud-only files.")
+        } catch {
+            guard self.root === root else { return }
+            duplicates = nil
+            duplicatesMessage = String(localized: "Duplicate search failed: \(error.localizedDescription)")
+        }
     }
 
     /// Puts every copy except the oldest into the collector.
     func collectDuplicates(_ group: DuplicateGroup) {
+        guard let root, ScanCacheSafety.isLiveScan(root) else { return }
         for f in group.files.dropFirst() { addToCollector(path: f.path) }
     }
 
@@ -221,6 +372,7 @@ final class DiskAnalysisModel {
     // MARK: Collector
 
     func addToCollector(_ node: DiskNode) {
+        guard ScanCacheSafety.isLiveScan(node) else { return }
         // Adding a folder supersedes anything already collected inside it, and vice versa.
         guard !collector.contains(where: { $0 === node || node.path.hasPrefix($0.path + "/") }) else { return }
         collector.removeAll { $0.path.hasPrefix(node.path + "/") }
@@ -237,6 +389,7 @@ final class DiskAnalysisModel {
 
     /// Moves everything in the collector to the Trash (with the safety checks and operation log).
     func trashCollector() async {
+        guard !collector.isEmpty, collector.allSatisfy(ScanCacheSafety.isLiveScan) else { return }
         let items = collector.map { RemovalItem(path: $0.path, source: "analyzer", bytes: $0.size, action: .trash) }
         let report = await Task.detached {
             CleanExecutor(safety: .forAnalysis()).execute(items, dryRun: false, command: "analyze")
@@ -269,7 +422,14 @@ final class DiskAnalysisModel {
 
     func hoverInfo(for node: DiskNode?, otherSize: UInt64 = 0, otherCount: Int = 0) -> HoverInfo? {
         if let node {
-            let detail = node.isDirectory ? String(localized: "\(node.fileCount.formatted()) files") : node.modified.formatted(date: .abbreviated, time: .omitted)
+            let detail: String
+            if node.skippedCloudOnly {
+                detail = String(localized: "Only in the cloud; contents were not downloaded")
+            } else if node.isDirectory {
+                detail = String(localized: "\(node.fileCount.formatted()) files")
+            } else {
+                detail = node.modified.formatted(date: .abbreviated, time: .omitted)
+            }
             return HoverInfo(title: node.name, size: node.size, path: node.path, detail: detail)
         }
         guard otherSize > 0 else { return nil }

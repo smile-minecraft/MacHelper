@@ -3,7 +3,7 @@ import ServiceManagement
 import SMCKit
 import SwiftUI
 
-/// Temporary diagnostics window for the Helper spike. Replaced by the real UI later.
+/// Helper registration, status and diagnostics shown in the settings window.
 struct HelperDiagnosticsView: View {
     @State private var status = HelperClient.shared.status
     @State private var log: [String] = []
@@ -12,45 +12,64 @@ struct HelperDiagnosticsView: View {
     private let client = HelperClient.shared
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            LabeledContent("Helper status", value: status.label)
-            if let info = CodeSigning.currentProcess() {
-                LabeledContent("App signature", value: info.isAdHoc ? "ad-hoc" : "Team \(info.teamID ?? "")")
-            }
+        Form {
+            Section("Helper") {
+                LabeledContent("Helper status", value: status.label)
+                if let info = CodeSigning.currentProcess() {
+                    LabeledContent("App signature", value: info.isAdHoc ? "ad-hoc" : "Team \(info.teamID ?? "")")
+                }
 
-            HStack {
-                Button("Register") { act("register") { try client.register() } }
-                Button("Open Login Items") { client.openLoginItemsSettings() }
-                Button("Unregister") { act("unregister") { try await client.unregister() } }
-            }
-            HStack {
-                Button("Handshake") {
-                    act("handshake") {
-                        let r = try await client.handshake()
-                        append("helper protocol v\(r.protocolVersion), version \(r.helperVersion)")
+                HStack {
+                    Button("Register") { act("register") { try client.register() } }
+                    Button("Open Login Items") { client.openLoginItemsSettings() }
+                    Button("Unregister") { act("unregister") { try await client.unregister() } }
+                }
+                HStack {
+                    Button("Handshake") {
+                        act("handshake") {
+                            let r = try await client.handshake()
+                            append("helper protocol v\(r.protocolVersion), version \(r.helperVersion)")
+                        }
+                    }
+                    Button("Read fans via Helper") {
+                        act("readFans") { fans = try await client.readFans() }
                     }
                 }
-                Button("Read fans via Helper") {
-                    act("readFans") { fans = try await client.readFans() }
+            }
+
+            if !fans.isEmpty {
+                Section("Fans") {
+                    ForEach(fans) { f in
+                        Text("Fan \(f.id): \(Int(f.actualRPM)) rpm (\(Int(f.minRPM))–\(Int(f.maxRPM))), \(String(describing: f.mode))")
+                            .monospacedDigit()
+                            .foregroundStyle(Palette.text)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
 
-            ForEach(fans) { f in
-                Text("Fan \(f.id): \(Int(f.actualRPM)) rpm (\(Int(f.minRPM))–\(Int(f.maxRPM))), \(String(describing: f.mode))")
-                    .monospacedDigit()
-            }
-
-            Divider()
-            ScrollView {
-                VStack(alignment: .leading) {
-                    ForEach(Array(log.enumerated()), id: \.offset) { Text($0.element).font(.caption.monospaced()) }
+            Section {
+                if log.isEmpty {
+                    Text("No data yet").settingsCaption()
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 2) {
+                            ForEach(Array(log.enumerated()), id: \.offset) {
+                                Text($0.element)
+                                    .font(.caption.monospaced())
+                                    .foregroundStyle(Palette.text)
+                                    .textSelection(.enabled)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(height: 140)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(height: 140)
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .formStyle(.grouped)
+        .settingsSurface()
     }
 
     private func append(_ line: String) { log.append(line) }

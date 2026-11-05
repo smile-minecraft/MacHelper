@@ -38,12 +38,25 @@ struct MonitorPanel: View {
     var scrollable = true
     @AppStorage("panel.module") private var tab: Tab = .cpu
 
-    enum Tab: String, CaseIterable { case cpu, gpu, memory, disk, network }
+    enum Tab: String, CaseIterable {
+        case cpu, gpu, memory, disk, network
+
+        var icon: String {
+            switch self {
+            case .cpu: "px.cpu"
+            case .gpu: "px.gpu"
+            case .memory: "px.memory"
+            case .disk: "px.ssd"
+            case .network: "px.network"
+            }
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             header
             TabStrip(items: [(.cpu, "CPU"), (.gpu, "GPU"), (.memory, "Memory"), (.disk, "SSD"), (.network, "Network")],
+                     icons: Dictionary(uniqueKeysWithValues: Tab.allCases.map { ($0, $0.icon) }),
                      selection: $tab)
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
@@ -222,6 +235,7 @@ private struct CPUTab: View {
                 if let w = store.power?.systemWatts {
                     KeyValueRow(label: String(localized: "Power"), value: Fmt.watts(w), dot: Theme.amber)
                 }
+                KeyValueRow(label: String(localized: "CPU power"), value: Fmt.watts(store.power?.cpuWatts), dot: Theme.blue)
             }
 
             HairlineHeader(text: "Top processes")
@@ -264,7 +278,7 @@ private struct GPUTab: View {
                 KeyValueRow(label: String(localized: "Model"), value: store.gpu?.name ?? "–")
                 KeyValueRow(label: String(localized: "Utilization"), value: Fmt.percent(store.gpu?.utilization), dot: Theme.violet)
                 if let w = store.power?.gpuWatts { KeyValueRow(label: String(localized: "GPU power"), value: Fmt.watts(w), dot: Theme.amber) }
-                if let t = gpuTemp { KeyValueRow(label: String(localized: "Hottest GPU sensor"), value: Fmt.celsius(t), dot: Series.tempColor(t)) }
+                KeyValueRow(label: String(localized: "Hottest GPU sensor"), value: Fmt.celsius(gpuTemp), dot: Series.tempColor(gpuTemp))
             }
             let sensors = store.temperatures.filter { $0.category == .gpu }.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
             if !sensors.isEmpty {

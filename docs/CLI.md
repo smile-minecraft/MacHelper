@@ -40,13 +40,23 @@ inside the app follows the app's language; a standalone build prints English.
 | `machelper startup` | Launch agents / daemons; `--disable`, `--enable`, `--remove LABEL --yes`, `--broken` |
 | `machelper analyze [PATH]` | Where the space goes (allocated size, hard links and APFS clones counted once) |
 | `machelper duplicates [PATH]` | Files with identical content (size → 64 KB head/tail → SHA-256), clones marked |
-| `machelper stats --range 24h` | Recorded per-minute metric history (kept 7 days while the app runs) |
+| `machelper stats --range 24h` | Recorded per-minute metric history (retention defaults to 7 days and is adjustable in Settings → General → Data management; background recording continues after the app quits when enabled) |
 | `machelper status` | CPU, GPU, memory, disk, network, temperatures, fans, power, battery |
 | `machelper rules` | Lists rule ids, maintenance task ids and artifact detectors |
 | `machelper history` | The operation log |
 
 All accept `--json`. Root-only tasks (`dns.flush`, `memory.purge`) run through the app's Helper and show
 as unavailable in the CLI.
+
+## History
+
+`machelper stats` reads the per-minute monitoring history. The same database holds two optional kinds of
+history, both off by default and enabled under **Settings → General → Data management**: process history and
+sensor and core history. Process history stores only the process name, CPU use and memory (no paths, command-line
+arguments or user names), with each minute’s top 10 by CPU and by memory. Sensor and core history stores one
+average per minute for every temperature sensor and CPU core cluster, so it grows faster. Both use the same
+retention as the monitoring history (7 days by default, adjustable to 1, 3, 7, 14 or 30 days) and can be
+cleared separately in the app.
 
 ## Recipes
 

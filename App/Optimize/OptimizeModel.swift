@@ -33,9 +33,14 @@ final class OptimizeModel {
     private(set) var taskResults: [TaskResult] = []
     private(set) var loadError: String?
 
-    @ObservationIgnored private static let rootsKey = "optimize.artifactRoots"
+    @ObservationIgnored nonisolated static let rootsKey = "optimize.artifactRoots"
 
     init() {
+        artifactRoots = UserDefaults.standard.stringArray(forKey: Self.rootsKey) ?? ArtifactScanner.defaultRoots()
+    }
+
+    /// Re-reads the stored scan roots after settings are imported.
+    func reload() {
         artifactRoots = UserDefaults.standard.stringArray(forKey: Self.rootsKey) ?? ArtifactScanner.defaultRoots()
     }
 

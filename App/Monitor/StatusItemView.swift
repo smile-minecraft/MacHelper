@@ -56,7 +56,7 @@ struct StatusItemView: View {
         let items = store.menuBarItems()
         HStack(spacing: 8) {
             if items.isEmpty {
-                Image(systemName: "gauge.with.dots.needle.33percent")
+                PixelIcon(name: "px.monitor", size: 16, label: "MacHelper")
             }
             ForEach(items) { item in
                 MenuBarItemView(item: item, style: store.settings[item.module].style, compact: compact)

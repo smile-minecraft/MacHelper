@@ -23,6 +23,14 @@ public enum ChipFamily: Sendable, Hashable, CustomStringConvertible {
         return false
     }
 
+    /// Base M4 (not Pro/Max/Ultra). The SMC CPU rail layout used by the power sampler is verified
+    /// there; later chips expose different rails. Used to keep the fallback from reading another
+    /// part's power.
+    public var isBaseM4: Bool {
+        if case .apple(generation: 4, variant: nil) = self { return true }
+        return false
+    }
+
     public var description: String {
         switch self {
         case .intel: "Intel"

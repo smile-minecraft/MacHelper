@@ -15,9 +15,9 @@ final class FanAutoSwitcher {
     private(set) var activeRule: FanAutoRule?
     private(set) var lastError: String?
 
-    @ObservationIgnored private static let rulesKey = "fan.autoRules.v1"
-    @ObservationIgnored private static let enabledKey = "fan.autoEnabled"
-    @ObservationIgnored static let baseKey = "fan.basePolicy.v1"
+    @ObservationIgnored nonisolated static let rulesKey = "fan.autoRules.v1"
+    @ObservationIgnored nonisolated static let enabledKey = "fan.autoEnabled"
+    @ObservationIgnored nonisolated static let baseKey = "fan.basePolicy.v1"
     @ObservationIgnored private var applied: FanPolicy?
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
     @ObservationIgnored private var timer: Timer?
@@ -31,6 +31,13 @@ final class FanAutoSwitcher {
     static var basePolicy: FanPolicy {
         get { UserDefaults.standard.data(forKey: baseKey).flatMap { try? JSONDecoder().decode(FanPolicy.self, from: $0) } ?? .automatic }
         set { UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: baseKey) }
+    }
+
+    /// Re-reads the stored preferences after settings are imported.
+    func reload() {
+        enabled = UserDefaults.standard.bool(forKey: Self.enabledKey)
+        rules = UserDefaults.standard.data(forKey: Self.rulesKey)
+            .flatMap { try? JSONDecoder().decode([FanAutoRule].self, from: $0) } ?? []
     }
 
     func start() {

@@ -100,7 +100,7 @@ struct MonitorConfiguration: Codable, Hashable, Sendable {
 @MainActor
 @Observable
 final class MonitorSettingsStore {
-    private static let key = "monitor.configuration.v1"
+    nonisolated static let key = "monitor.configuration.v1"
 
     var configuration: MonitorConfiguration {
         didSet { save() }
@@ -118,6 +118,16 @@ final class MonitorSettingsStore {
     subscript(module: MonitorModule) -> ModuleConfig {
         get { configuration.config(module) }
         set { configuration.modules[module] = newValue }
+    }
+
+    /// Re-reads the stored configuration after settings are imported.
+    func reload() {
+        if let data = UserDefaults.standard.data(forKey: Self.key),
+           let saved = try? JSONDecoder().decode(MonitorConfiguration.self, from: data) {
+            configuration = saved
+        } else {
+            configuration = .default
+        }
     }
 
     private func save() {

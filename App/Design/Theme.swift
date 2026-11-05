@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Shared look: section accents (matching the pixel palette), cards, pixel icons, numerals.
 enum Theme {
-    // Data colors: desaturated (< 80 %) so they sit on neutral zinc instead of shouting.
+    // Chart colors: desaturated (< 80 %) so they sit on neutral zinc instead of shouting.
     static let blue = Color(red: 0.36, green: 0.55, blue: 0.86)
     static let cyan = Color(red: 0.25, green: 0.66, blue: 0.74)
     static let mint = Color(red: 0.24, green: 0.66, blue: 0.48)
@@ -51,9 +51,16 @@ enum Palette {
 struct PixelIcon: View {
     let name: String
     var size: CGFloat = 16
+    /// Set only when the icon carries meaning; decorative icons stay hidden from VoiceOver.
+    var label: LocalizedStringKey? = nil
 
-    var body: some View {
-        Image(name).interpolation(.none).resizable().frame(width: size, height: size).accessibilityHidden(true)
+    @ViewBuilder var body: some View {
+        let image = Image(name).interpolation(.none).resizable().frame(width: size, height: size)
+        if let label {
+            image.accessibilityLabel(label)
+        } else {
+            image.accessibilityHidden(true)
+        }
     }
 }
 

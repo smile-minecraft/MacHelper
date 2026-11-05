@@ -28,13 +28,19 @@ final class AlertCenter {
     }
     private(set) var authorizationDenied = false
 
-    @ObservationIgnored private static let key = "alerts.settings"
+    @ObservationIgnored nonisolated static let key = "alerts.settings"
     @ObservationIgnored private var lastSent: [Kind: Date] = [:]
     @ObservationIgnored private var hotSince: Date?
 
     init() {
         settings = UserDefaults.standard.data(forKey: Self.key).flatMap { try? JSONDecoder().decode(AlertSettings.self, from: $0) }
             ?? AlertSettings()
+    }
+
+    /// Re-reads the stored settings after settings are imported.
+    func reload() {
+        settings = UserDefaults.standard.data(forKey: Self.key)
+            .flatMap { try? JSONDecoder().decode(AlertSettings.self, from: $0) } ?? AlertSettings()
     }
 
     func check(cpuCelsius: Double?, memory: MemoryReading?, disk: DiskReading?, now: Date = Date()) {

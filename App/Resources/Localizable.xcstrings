@@ -81,6 +81,36 @@
         }
       }
     },
+    "%lld cloud-only files were skipped and not downloaded.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已略過 %lld 個僅限雲端的檔案，未下載其內容。"
+          }
+        }
+      }
+    },
+    "%lld cloud-only folders were skipped; their contents were not downloaded.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已略過 %lld 個僅限雲端的資料夾，未下載其內容。"
+          }
+        }
+      }
+    },
+    "%lld files could not be read.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 個檔案無法讀取。"
+          }
+        }
+      }
+    },
     "%lld folders couldn’t be read; the results are incomplete.": {
       "localizations": {
         "zh-Hant": {
@@ -501,6 +531,16 @@
         }
       }
     },
+    "Background recording": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景記錄"
+          }
+        }
+      }
+    },
     "Balanced": {
       "localizations": {
         "zh-Hant": {
@@ -541,6 +581,16 @@
         }
       }
     },
+    "CPU %@ · GPU %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU %@ · GPU %@"
+          }
+        }
+      }
+    },
     "CPU at %@. Check the top processes below.": {
       "localizations": {
         "zh-Hant": {
@@ -557,6 +607,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "CPU 晶片 %@"
+          }
+        }
+      }
+    },
+    "CPU power": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 功耗"
           }
         }
       }
@@ -751,6 +811,16 @@
         }
       }
     },
+    "Clear Saved Scan": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除已儲存的掃描"
+          }
+        }
+      }
+    },
     "Click a block to open its folder; right-click or drag items to the collector.": {
       "localizations": {
         "zh-Hant": {
@@ -787,6 +857,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "保留最舊的，其餘加入收集籃"
+          }
+        }
+      }
+    },
+    "Collecting is disabled for a saved scan. Scan again to update it.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已儲存的掃描不能收集項目，請重新掃描以更新。"
+          }
+        }
+      }
+    },
+    "Collecting, removing, and duplicate search are disabled for a saved scan.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已儲存的掃描只能瀏覽：收集、移到垃圾桶和重複檔案比對已停用。"
           }
         }
       }
@@ -921,12 +1011,42 @@
         }
       }
     },
+    "Couldn’t save the background recording settings: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法儲存背景記錄設定：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t set up background recording: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法設定背景記錄：%@"
+          }
+        }
+      }
+    },
     "Couldn’t set up the background schedule: %@": {
       "localizations": {
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "背景排程設定失敗：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t stop background recording: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法停止背景記錄：%@"
           }
         }
       }
@@ -1151,6 +1271,36 @@
         }
       }
     },
+    "Duplicate search did not run because macOS would not stop automatic downloads of cloud-only files.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重複檔案比對沒有執行，因為 macOS 無法停止自動下載僅限雲端的檔案。"
+          }
+        }
+      }
+    },
+    "Duplicate search failed: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重複檔案比對失敗：%@"
+          }
+        }
+      }
+    },
+    "Duplicate search is disabled for a saved scan. Scan again to update it.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已儲存的掃描不能比對重複檔案，請重新掃描以更新。"
+          }
+        }
+      }
+    },
     "Duplicates": {
       "localizations": {
         "zh-Hant": {
@@ -1201,6 +1351,16 @@
         }
       }
     },
+    "Enabled, but the recorder is not reporting in": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已啟用，但記錄器沒有回報"
+          }
+        }
+      }
+    },
     "Every %@": {
       "localizations": {
         "zh-Hant": {
@@ -1227,6 +1387,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "一切正常"
+          }
+        }
+      }
+    },
+    "Failed: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失敗：%@"
           }
         }
       }
@@ -1671,6 +1841,16 @@
         }
       }
     },
+    "Keep recording after MacHelper quits": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 結束後繼續記錄"
+          }
+        }
+      }
+    },
     "Kept running": {
       "localizations": {
         "zh-Hant": {
@@ -1901,12 +2081,12 @@
         }
       }
     },
-    "MacHelper records one averaged sample per minute while it runs, and keeps 7 days.": {
+    "MacHelper records one averaged sample per minute. Monitoring history is kept for 7 days by default; change the retention in Settings → General → Data management. Turn on Background recording in Settings to keep history after MacHelper quits.": {
       "localizations": {
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 執行時每分鐘記錄一筆平均值，保留 7 天。"
+            "value": "MacHelper 每分鐘記錄一筆平均值。監控歷史預設保留 7 天，可在「設定」→「一般」→「資料管理」調整保留天數。若要在結束 MacHelper 後繼續保留歷史，請在設定中開啟背景記錄。"
           }
         }
       }
@@ -2161,6 +2341,16 @@
         }
       }
     },
+    "n/a": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不可用"
+          }
+        }
+      }
+    },
     "Name": {
       "localizations": {
         "zh-Hant": {
@@ -2257,6 +2447,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "沒有資料夾變化超過 50 MB。"
+          }
+        }
+      }
+    },
+    "No menu bar metrics selected": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有選取選單列指標"
           }
         }
       }
@@ -2361,6 +2561,16 @@
         }
       }
     },
+    "Off": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉"
+          }
+        }
+      }
+    },
     "Offline": {
       "localizations": {
         "zh-Hant": {
@@ -2437,6 +2647,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "只剩 %@ 可用，「一鍵優化」可以釋放空間。"
+          }
+        }
+      }
+    },
+    "Only in the cloud; contents were not downloaded": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅限雲端，未下載內容"
           }
         }
       }
@@ -2781,6 +3001,16 @@
         }
       }
     },
+    "Recording": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記錄中"
+          }
+        }
+      }
+    },
     "Refresh": {
       "localizations": {
         "zh-Hant": {
@@ -2981,6 +3211,16 @@
         }
       }
     },
+    "Saved scan from %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次掃描時間：%@"
+          }
+        }
+      }
+    },
     "Scan": {
       "localizations": {
         "zh-Hant": {
@@ -3061,6 +3301,16 @@
         }
       }
     },
+    "Scanning did not run because macOS would not stop automatic downloads of cloud-only files.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描沒有執行，因為 macOS 無法停止自動下載僅限雲端的檔案。"
+          }
+        }
+      }
+    },
     "Scanning for items to clean…": {
       "localizations": {
         "zh-Hant": {
@@ -3107,6 +3357,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "看空間用在哪裡，找出重複檔案與變大的資料夾。"
+          }
+        }
+      }
+    },
+    "Segment": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "區段"
           }
         }
       }
@@ -3561,6 +3821,16 @@
         }
       }
     },
+    "The saved scan could not be cleared: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法清除已儲存的掃描：%@"
+          }
+        }
+      }
+    },
     "These items are named after a bundle ID whose app can no longer be found; for background items, the program they start no longer exists. This is a guess: review each item before checking it. Nothing is checked by default.": {
       "localizations": {
         "zh-Hant": {
@@ -3597,6 +3867,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "目前只是預覽，按「清理」之前不會刪除任何東西。"
+          }
+        }
+      }
+    },
+    "This result may be out of date. Scan again to update it.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這份結果可能已過時，請重新掃描以更新。"
           }
         }
       }
@@ -3687,6 +3967,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "矩形樹狀圖：%@，點一下區塊進入"
+          }
+        }
+      }
+    },
+    "Turn on at least one metric in Settings → Menu Bar to record its history. Process usage history has its own switch in Settings → General → Data management.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請在「設定」→「選單列」開啟至少一個指標，才會記錄它的歷史。程序用量歷史有自己的開關，位於「設定」→「一般」→「資料管理」。"
           }
         }
       }
@@ -3851,6 +4141,16 @@
         }
       }
     },
+    "Waiting for approval in Login Items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待「登入項目」核准"
+          }
+        }
+      }
+    },
     "Warning": {
       "localizations": {
         "zh-Hant": {
@@ -3877,6 +4177,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "某個 App 執行時…"
+          }
+        }
+      }
+    },
+    "When this is on, MacHelper keeps recording history in the background after you quit the app. Process usage history is still recorded even when no menu bar items are selected, as long as Record process usage is on in Data management. macOS may ask you to allow MacHelper in Login Items.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開啟後，即使結束 MacHelper，仍會在背景繼續記錄歷史。只要「資料管理」中的「記錄程序用量」保持開啟，即使沒有選取任何選單列項目，仍會記錄程序用量歷史。macOS 可能會要求你在「登入項目」中允許 MacHelper。"
           }
         }
       }
@@ -3967,6 +4277,1136 @@
           "stringUnit": {
             "state": "translated",
             "value": "~/.local/bin/machelper 已存在且不是連結，請先移除。"
+          }
+        }
+      }
+    },
+    "%lld lines couldn't be read and were skipped.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 行無法讀取，已略過。"
+          }
+        }
+      }
+    },
+    "30 days": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 天"
+          }
+        }
+      }
+    },
+    "All time": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部時間"
+          }
+        }
+      }
+    },
+    "All types": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有類型"
+          }
+        }
+      }
+    },
+    "Cleaning": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理"
+          }
+        }
+      }
+    },
+    "Deleted permanently": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永久刪除"
+          }
+        }
+      }
+    },
+    "Failed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失敗"
+          }
+        }
+      }
+    },
+    "History": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "歷史紀錄"
+          }
+        }
+      }
+    },
+    "No operations logged yet.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還沒有操作紀錄。"
+          }
+        }
+      }
+    },
+    "No records match these filters.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有符合篩選條件的紀錄。"
+          }
+        }
+      }
+    },
+    "Showing %lld of %lld records": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示 %lld / %lld 筆紀錄"
+          }
+        }
+      }
+    },
+    "Sizes are recorded in the operation log; they don't measure how much disk space changed. Items moved to the Trash still use space until the Trash is emptied.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大小取自操作紀錄，不代表磁碟空間的變化。移到垃圾桶的項目在清空垃圾桶前仍占用空間。"
+          }
+        }
+      }
+    },
+    "Skipped": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已略過"
+          }
+        }
+      }
+    },
+    "Succeeded": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成功"
+          }
+        }
+      }
+    },
+    "This page only reads the log. It never removes anything.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個頁面只讀取紀錄，不會移除任何項目。"
+          }
+        }
+      }
+    },
+    "Today": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天"
+          }
+        }
+      }
+    },
+    "Type": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "類型"
+          }
+        }
+      }
+    },
+    "1 day": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 天"
+          }
+        }
+      }
+    },
+    "3 days": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 天"
+          }
+        }
+      }
+    },
+    "14 days": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "14 天"
+          }
+        }
+      }
+    },
+    "Changing the retention doesn’t delete anything right away. Samples older than the new limit are removed the next time history is recorded.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "變更保留天數不會立刻刪除資料。超過新天數的舊資料，會在下一次記錄歷史時移除。"
+          }
+        }
+      }
+    },
+    "Clear Monitoring History": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除監控歷史"
+          }
+        }
+      }
+    },
+    "Clear monitoring history?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要清除監控歷史嗎？"
+          }
+        }
+      }
+    },
+    "Clear…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除…"
+          }
+        }
+      }
+    },
+    "Couldn’t clear monitoring history: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法清除監控歷史：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t read monitoring history: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法讀取監控歷史：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t read process history: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法讀取程序歷史：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t save the retention setting: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法儲存保留天數設定：%@"
+          }
+        }
+      }
+    },
+    "Data management": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "資料管理"
+          }
+        }
+      }
+    },
+    "Keep monitoring history for": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留監控歷史"
+          }
+        }
+      }
+    },
+    "Monitoring history": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "監控歷史"
+          }
+        }
+      }
+    },
+    "This permanently deletes all per-minute monitoring history and every metric it contains. It can’t be undone. Process usage history, sensor and core history, other settings, and the operation history are not affected.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這會永久刪除每分鐘的監控歷史，包含其中所有指標。此操作無法復原。程序用量歷史、感測器與核心歷史、其他設定與操作紀錄都不受影響。"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
+          }
+        }
+      }
+    },
+    "Clear Monitoring History…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除監控歷史…"
+          }
+        }
+      }
+    },
+    "Record process usage": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記錄程序用量"
+          }
+        }
+      }
+    },
+    "Clear Process Usage History…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除程序用量歷史…"
+          }
+        }
+      }
+    },
+    "Clear process usage history?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要清除程序用量歷史嗎？"
+          }
+        }
+      }
+    },
+    "Clear Process Usage History": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除程序用量歷史"
+          }
+        }
+      }
+    },
+    "Record sensor and core usage": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記錄感測器與核心用量"
+          }
+        }
+      }
+    },
+    "Clear Sensor and Core History…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除感測器與核心歷史…"
+          }
+        }
+      }
+    },
+    "Clear sensor and core history?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要清除感測器與核心歷史嗎？"
+          }
+        }
+      }
+    },
+    "Clear Sensor and Core History": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除感測器與核心歷史"
+          }
+        }
+      }
+    },
+    "Couldn’t save the sensor and core usage setting: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法儲存感測器與核心用量設定：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t clear sensor and core history: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法清除感測器與核心歷史：%@"
+          }
+        }
+      }
+    },
+    "Sensor and core history": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "感測器與核心歷史"
+          }
+        }
+      }
+    },
+    "Choose sensors": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇感測器"
+          }
+        }
+      }
+    },
+    "Temperature sensors": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溫度感測器"
+          }
+        }
+      }
+    },
+    "CPU core clusters": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 核心群組"
+          }
+        }
+      }
+    },
+    "Last seen": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最後出現"
+          }
+        }
+      }
+    },
+    "No longer reporting": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已不再回報"
+          }
+        }
+      }
+    },
+    "No sensor or core history yet": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚無感測器與核心歷史"
+          }
+        }
+      }
+    },
+    "Choose at least one sensor to show history.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請至少選擇一個感測器來顯示歷史。"
+          }
+        }
+      }
+    },
+    "Records one average per minute for every temperature sensor and CPU core cluster from the CPU and temperature samples. This adds several dozen rows per minute, so leave it off unless you need the detail. The switch applies to MacHelper and to background recording, but it needs the matching CPU or temperature menu bar item to be on. Turning this off stops new sensor and core sampling. Stored history stays until the next recording removes samples past the retention, or until you clear it.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每分鐘從 CPU 與溫度取樣中，為每個溫度感測器與 CPU 核心群組記錄一筆平均值。開啟後每分鐘會增加數十列資料，不需要細節時請保持關閉。這個開關同時適用於 MacHelper 與背景記錄，但需要開啟對應的 CPU 或溫度選單列項目。關閉後會停止新的感測器與核心取樣。已儲存的歷史會保留到下一次記錄移除超過保留期限的資料，或由你清除。"
+          }
+        }
+      }
+    },
+    "This permanently deletes every stored sensor temperature and CPU core cluster history. It can’t be undone. Monitoring history, process history, settings, and the operation history are not affected.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這會永久刪除所有已儲存的感測器溫度與 CPU 核心群組歷史，無法復原。監控歷史、程序歷史、設定與操作歷史都不受影響。"
+          }
+        }
+      }
+    },
+    "Individual sensor temperatures and CPU core use are recorded once a minute. Turn on Record sensor and core usage in Settings → General → Data management, then check back.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "個別感測器溫度與 CPU 核心用量每分鐘記錄一次。請在「設定」→「一般」→「資料管理」開啟「記錄感測器與核心用量」，稍後再回來查看。"
+          }
+        }
+      }
+    },
+    "This permanently deletes every stored process name, its CPU use, and its memory use. It can’t be undone. Monitoring history, sensor and core history, settings, and the operation history are not affected.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這會永久刪除所有已儲存的程序名稱、CPU 用量與記憶體用量，無法復原。監控歷史、感測器與核心歷史、設定與操作紀錄都不受影響。"
+          }
+        }
+      }
+    },
+    "Couldn’t save the process usage setting: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法儲存程序用量設定：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t clear process usage history: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法清除程序用量歷史：%@"
+          }
+        }
+      }
+    },
+    "Process history": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "程序歷史"
+          }
+        }
+      }
+    },
+    "Only each minute’s top 10 processes by CPU and by memory are kept, so a process missing from a minute may still have been running. Averages cover only the minutes a process appears in.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每分鐘只保留 CPU 與記憶體用量前 10 名的程序，因此某分鐘沒出現的程序，當時可能仍在執行。平均值只計算該程序實際出現的分鐘。"
+          }
+        }
+      }
+    },
+    "Up to %lld processes per minute couldn’t be read and are not included.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每分鐘最多有 %lld 個程序無法讀取，未列入排行。"
+          }
+        }
+      }
+    },
+    "No process history yet": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還沒有程序歷史"
+          }
+        }
+      }
+    },
+    "Process rankings appear after a minute of recording. Turn on Record process usage in Settings → General → Data management, then check back.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始記錄滿一分鐘後就會出現程序排行。請在設定 → 一般 → 資料管理開啟「記錄程序用量」，再回來查看。"
+          }
+        }
+      }
+    },
+    "No data in this range": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個時間範圍沒有資料"
+          }
+        }
+      }
+    },
+    "%lld of %lld min": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld 分鐘"
+          }
+        }
+      }
+    },
+    "Only the process name, CPU use, and memory are recorded. Paths, command-line arguments, and user names are never saved. Process history follows the retention above and can be cleared at any time. The switch applies to MacHelper and to background recording; background recording keeps collecting process history even when no menu bar items are selected. Turning this off stops new process history sampling. Stored history stays until the next recording removes samples past the retention, or until you clear it. This switch only controls history recording; the live process list on the Monitor screen is not affected.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只記錄程序名稱、CPU 用量與記憶體用量，不會儲存路徑、命令列參數或使用者名稱。程序歷史與上方設定的保留期限相同，而且可以隨時清除。這個開關同時適用於 MacHelper 與背景記錄；即使沒有選取任何選單列項目，背景記錄仍會收集程序歷史。關閉後會停止新的程序歷史取樣。已儲存的歷史會保留到下一次記錄移除超過保留期限的資料，或由你清除。這個開關只控制歷史記錄；監控畫面的即時程序列表不受影響。"
+          }
+        }
+      }
+    },
+    "Alert thresholds and cooldown": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通知門檻與冷卻時間"
+          }
+        }
+      }
+    },
+    "Apply Import": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "套用匯入"
+          }
+        }
+      }
+    },
+    "Backup & Restore": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "備份與還原"
+          }
+        }
+      }
+    },
+    "Cleaning Whitelist": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理白名單"
+          }
+        }
+      }
+    },
+    "Couldn’t export settings: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法匯出設定：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t import %@: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法匯入%@：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t import settings: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法匯入設定：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t read %@.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法讀取 %@。"
+          }
+        }
+      }
+    },
+    "Couldn’t read the custom rules: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法讀取自訂規則：%@"
+          }
+        }
+      }
+    },
+    "Couldn’t read the file: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法讀取檔案：%@"
+          }
+        }
+      }
+    },
+    "Custom Cleaning Rules": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自訂清理規則"
+          }
+        }
+      }
+    },
+    "Dock and language settings": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock 與語言設定"
+          }
+        }
+      }
+    },
+    "Export": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯出"
+          }
+        }
+      }
+    },
+    "Export Selected Settings…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯出勾選的設定…"
+          }
+        }
+      }
+    },
+    "Export the settings you select to one file, or import a file on this or another Mac. Settings files never include monitoring history, scan caches, operation logs, background recording, or the Helper registration.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把勾選的設定匯出成一個檔案，或在這一台或另一台 Mac 上匯入。設定檔不含監控歷史、掃描快取、操作紀錄、背景記錄，也不含 Helper 註冊資訊。"
+          }
+        }
+      }
+    },
+    "Exported by MacHelper %@ on %@.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由 MacHelper %@ 於 %@ 匯出。"
+          }
+        }
+      }
+    },
+    "Exported to %@.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已匯出到 %@。"
+          }
+        }
+      }
+    },
+    "Extra Purge Folders": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額外清除資料夾"
+          }
+        }
+      }
+    },
+    "Fan profiles and curve": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "風扇設定與曲線"
+          }
+        }
+      }
+    },
+    "File: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檔案：%@"
+          }
+        }
+      }
+    },
+    "Import Settings": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯入設定"
+          }
+        }
+      }
+    },
+    "Import Settings…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯入設定…"
+          }
+        }
+      }
+    },
+    "Imported rules are not selected by default.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯入的規則不會預設選取。"
+          }
+        }
+      }
+    },
+    "Importing replaces each category marked “Will replace”. Categories that aren’t in the file are left as they are.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯入時會取代標示「將被取代」的類別。檔案中沒有的類別不會變動。"
+          }
+        }
+      }
+    },
+    "Invalid": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "內容無效"
+          }
+        }
+      }
+    },
+    "Menu bar modules and update intervals": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選單列模組與更新間隔"
+          }
+        }
+      }
+    },
+    "No change": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有變更"
+          }
+        }
+      }
+    },
+    "Not compatible": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法匯入"
+          }
+        }
+      }
+    },
+    "Nothing in this file will replace a setting on this Mac. No changes will be made.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個檔案沒有可取代的設定，不會變更任何內容。"
+          }
+        }
+      }
+    },
+    "Optimize Scan Folders": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "優化掃描資料夾"
+          }
+        }
+      }
+    },
+    "Review what each category will do. Nothing changes until you choose Apply Import.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "確認每個類別會做什麼。在你選擇「套用匯入」之前，不會變更任何設定。"
+          }
+        }
+      }
+    },
+    "Settings files never include monitoring history, scan caches, operation logs, or background recording.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定檔不含監控歷史、掃描快取、操作紀錄或背景記錄。"
+          }
+        }
+      }
+    },
+    "Settings imported.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定已匯入。"
+          }
+        }
+      }
+    },
+    "The cooldown must be a positive number.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通知冷卻時間必須是正數。"
+          }
+        }
+      }
+    },
+    "The current value is invalid: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前的值無效：%@"
+          }
+        }
+      }
+    },
+    "The disk threshold must be between 5 and 200 GB.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁碟門檻必須介於 5 到 200 GB。"
+          }
+        }
+      }
+    },
+    "The file contains an unknown menu bar module.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檔案含有未知的選單列模組。"
+          }
+        }
+      }
+    },
+    "The language must be en, zh-Hant, or null.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "語言必須是 en、zh-Hant 或 null。"
+          }
+        }
+      }
+    },
+    "The menu bar interval must be 1, 2, 5, 10, or 30 seconds.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選單列更新間隔必須是 1、2、5、10 或 30 秒。"
+          }
+        }
+      }
+    },
+    "The temperature threshold must be between 70 and 105 °C.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溫度門檻必須介於 70 到 105 °C。"
+          }
+        }
+      }
+    },
+    "These categories could not be restored: %@.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下列類別無法還原：%@。"
+          }
+        }
+      }
+    },
+    "This file isn’t a MacHelper settings file. Nothing was changed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這不是 MacHelper 的設定檔。沒有變更任何設定。"
+          }
+        }
+      }
+    },
+    "This file was created by a newer version of MacHelper and can’t be imported. Nothing was changed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個檔案由較新版本的 MacHelper 建立，無法匯入。沒有變更任何設定。"
+          }
+        }
+      }
+    },
+    "Will replace": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "將被取代"
+          }
+        }
+      }
+    },
+    "The cleaning whitelist and extra purge folders are replaced as a whole list. Comments and blank lines in the current text files aren’t kept.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理白名單與額外清除資料夾會整份取代。目前文字檔中的註解與空行不會保留。"
+          }
+        }
+      }
+    },
+    "The rules file contains duplicate rule ids.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "規則檔含有重複的規則 ID。"
+          }
+        }
+      }
+    },
+    "This category is empty in the file. Importing clears the current value.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個類別在檔案中是空的。匯入會清除目前的值。"
           }
         }
       }

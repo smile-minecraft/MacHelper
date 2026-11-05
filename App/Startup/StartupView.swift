@@ -7,15 +7,14 @@ struct StartupView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
+            HStack(spacing: 10) {
                 TextField("Search", text: $model.search).textFieldStyle(.roundedBorder).frame(maxWidth: 260)
                 Toggle("Only items whose program is missing", isOn: $model.onlyBroken).toggleStyle(.checkbox)
                 Spacer()
-                Button { Task { await model.load() } } label: { Image(systemName: "arrow.clockwise") }
-                    .help("Refresh")
+                IconButton(symbol: "arrow.clockwise", help: "Refresh") { Task { await model.load() } }
             }
-            .padding(10)
-            Divider()
+            .padding(.horizontal, 12).padding(.vertical, 10)
+            .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
             if model.loading && model.items.isEmpty {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -26,26 +25,30 @@ struct StartupView: View {
                             Section {
                                 ForEach(group) { item in row(item) }
                             } header: {
-                                HStack {
+                                HStack(spacing: 8) {
                                     Text(scope.title)
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundStyle(Palette.textMuted)
                                     if scope.needsAdmin {
-                                        Text("Needs an administrator to change").font(.caption).foregroundStyle(.secondary)
+                                        Text("Needs an administrator to change").font(.caption).foregroundStyle(Palette.textFaint)
                                     }
                                 }
                             }
                         }
                     }
                 }
+                .scrollContentBackground(.hidden)
             }
-            Divider()
-            HStack {
-                if let m = model.message { Text(m).font(.caption).foregroundStyle(.orange).lineLimit(2) }
-                Spacer()
+            HStack(spacing: 12) {
+                if let m = model.message { Text(m).font(.caption).foregroundStyle(Theme.orange).lineLimit(2) }
+                Spacer(minLength: 8)
                 Text("Background items that apps register themselves are managed in Login Items.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Palette.textMuted)
                 Button("Open Login Items") { model.openLoginItems() }
             }
-            .padding(10)
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .background(Palette.card)
+            .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
         }
         .frame(minWidth: 680, minHeight: 480)
         .task { await model.load() }
@@ -64,19 +67,19 @@ struct StartupView: View {
             Image(nsImage: model.icon(for: item)).resizable().frame(width: 28, height: 28)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
-                    Text(item.ownerName ?? item.label).bold().lineLimit(1)
+                    Text(item.ownerName ?? item.label).bold().lineLimit(1).foregroundStyle(Palette.text)
                     StateBadge(item: item)
                     if item.programMissing {
                         Label("Program missing", systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption2).foregroundStyle(.orange)
+                            .font(.caption2).foregroundStyle(Theme.orange)
                     }
                 }
                 if item.ownerName != nil {
-                    Text(item.label).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+                    Text(item.label).font(.caption).foregroundStyle(Palette.textMuted).textSelection(.enabled)
                 }
-                Text(item.commandLine).font(.caption2.monospaced()).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
+                Text(item.commandLine).font(.caption2.monospaced()).foregroundStyle(Palette.textFaint).lineLimit(1).truncationMode(.middle)
                     .help(item.commandLine)
-                Text(schedule(item)).font(.caption2).foregroundStyle(.secondary)
+                Text(schedule(item)).font(.caption2).foregroundStyle(Palette.textMuted)
             }
             Spacer()
             if !item.scope.needsAdmin {
@@ -111,10 +114,10 @@ private struct StateBadge: View {
     let item: StartupItem
     var body: some View {
         let (text, color): (String, Color) =
-            if item.isDisabled { (String(localized: "Disabled"), .secondary) }
-            else if item.pid != nil { (String(localized: "Running"), .green) }
-            else if item.isLoaded { (String(localized: "Loaded"), .blue) }
-            else { (String(localized: "Not loaded"), .secondary) }
+            if item.isDisabled { (String(localized: "Disabled"), Palette.textMuted) }
+            else if item.pid != nil { (String(localized: "Running"), Theme.mint) }
+            else if item.isLoaded { (String(localized: "Loaded"), Theme.blue) }
+            else { (String(localized: "Not loaded"), Palette.textMuted) }
         Text(text)
             .font(.caption2.bold())
             .padding(.horizontal, 5).padding(.vertical, 1)

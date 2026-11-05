@@ -13,15 +13,28 @@ final class MetricSources: @unchecked Sendable {
     let network = NetworkSampler()
     let disk = DiskSampler()
     let fans: FanDriver?
-    let smcTemperatureKeys: [FourCC]
+    private let keyLock = NSLock()
+    private var discoveredKeys: [FourCC]?
+
+    /// Walking the SMC key table is slow, so it happens on first use, which is a sample taken
+    /// off the main actor. On Apple Silicon `isAvailable` never needs it because HID exists.
+    var smcTemperatureKeys: [FourCC] {
+        keyLock.withLock {
+            if let discoveredKeys { return discoveredKeys }
+            let keys = smc.map { SMCTemperatures.discoverKeys($0) } ?? []
+            discoveredKeys = keys
+            return keys
+        }
+    }
 
     init() {
         let smc = try? SMC()
         self.smc = smc
         power = PowerSampler(smc: smc)
         fans = smc.map { FanDriver(smc: $0) }
-        // Intel has no HID temperature sensors; fall back to SMC keys there.
-        smcTemperatureKeys = (smc != nil && !ChipFamily.current.isAppleSilicon) ? SMCTemperatures.discoverKeys(smc!) : []
+        // HID is preferred when it works; when it does not, both writers fall back to the
+        // same discovered SMC keys, so the stored temperature column keeps one meaning.
+        // Discovery is deferred to `smcTemperatureKeys`.
     }
 
     func isAvailable(_ m: MonitorModule) -> Bool {
@@ -36,18 +49,19 @@ final class MetricSources: @unchecked Sendable {
 
     func sample(_ m: MonitorModule) -> ModuleSample? {
         switch m {
-        case .cpu: cpu.sample().map(ModuleSample.cpu)
-        case .gpu: GPUSampler.sample().first.map(ModuleSample.gpu)
-        case .memory: MemorySampler.sample().map(ModuleSample.memory)
-        case .disk: disk.sample().map(ModuleSample.disk)
-        case .network: network.sample().map(ModuleSample.network)
-        case .battery: BatterySampler.sample().map(ModuleSample.battery)
-        case .fan: fans.map { .fan($0.readFans()) }
-        case .power: power?.sample().map(ModuleSample.power)
+        case .cpu: return cpu.sample().map(ModuleSample.cpu)
+        case .gpu: return GPUSampler.sample().first.map(ModuleSample.gpu)
+        case .memory: return MemorySampler.sample().map(ModuleSample.memory)
+        case .disk: return disk.sample().map(ModuleSample.disk)
+        case .network: return network.sample().map(ModuleSample.network)
+        case .battery: return BatterySampler.sample().map(ModuleSample.battery)
+        case .fan: return fans.map { .fan($0.readFans()) }
+        case .power: return power?.sample().map(ModuleSample.power)
         case .temperature:
-            if let hid { .temperature(hid.read()) }
-            else if let smc { .temperature(SMCTemperatures.read(smc, keys: smcTemperatureKeys)) }
-            else { nil }
+            // One merge rule shared with the background recorder: HID first, SMC GPU keys
+            // only when HID has no GPU category, and never the same name twice.
+            return TemperatureSources.readings(hid: hid, smc: smc, smcKeys: smcTemperatureKeys)
+                .map(ModuleSample.temperature)
         }
     }
 }
@@ -109,10 +123,21 @@ final class MonitorStore {
     private(set) var processes: ProcessSnapshot?
     @ObservationIgnored private let processSampler = ProcessSampler()
     /// Persistent per-minute history (nil if the database can't be opened).
-    @ObservationIgnored let persistentHistory: MetricsHistory? = try? MetricsHistory()
+    @ObservationIgnored let persistentHistory: MetricsHistory? = {
+        do {
+            return try MetricsHistory()
+        } catch {
+            NSLog("MacHelper history database unavailable: %@", error.localizedDescription)
+            return nil
+        }
+    }()
     @ObservationIgnored private var minute = MinuteAccumulator()
     @ObservationIgnored let alerts = AlertCenter()
     @ObservationIgnored private var processTask: Task<Void, Never>?
+    @ObservationIgnored private var processHistoryTask: Task<Void, Never>?
+    @ObservationIgnored private var seriesSwitchTask: Task<Void, Never>?
+    @ObservationIgnored private var seriesMinute = SeriesMinuteAccumulator()
+    @ObservationIgnored private var seriesCollectionEnabled = false
 
     let settings: MonitorSettingsStore
     let availableModules: Set<MonitorModule>
@@ -126,11 +151,13 @@ final class MonitorStore {
         availableModules = Set(MonitorModule.allCases.filter(sources.isAvailable))
         reconfigure()
         observeSettings()
+        startProcessHistoryCollection()
+        startSeriesCollection()
     }
 
     /// Hottest CPU-die sensor, the number shown for "temperature".
     var cpuCelsius: Double? {
-        temperatures.filter { $0.category == .cpu }.map(\.celsius).max()
+        MonitorHistorySample.cpuCelsius(temperatures)
     }
 
     var hottestCelsius: Double? { temperatures.map(\.celsius).max() }
@@ -187,6 +214,61 @@ final class MonitorStore {
                                hiddenCount: new.hiddenCount)
     }
 
+    /// Process history is collected whether or not a view is open. Each cycle re-reads the
+    /// shared switch from the database; while it is off the sampler is never called, so no
+    /// process name is read at all.
+    private func startProcessHistoryCollection() {
+        guard let db = persistentHistory, let store = try? HistoryStore(readOnly: true) else { return }
+        processHistoryTask = Task.detached(priority: .utility) {
+            var accumulator = ProcessMinuteAccumulator()
+            let sampler = ProcessSampler()
+            while !Task.isCancelled {
+                if (try? store.isProcessCollectionEnabled()) == true {
+                    let readings = Self.processReadings(sampler.sample(top: 20))
+                    if let finished = accumulator.add(readings) {
+                        do {
+                            try db.recordProcessMinute(finished)
+                        } catch {
+                            NSLog("MacHelper process history write failed: %@", error.localizedDescription)
+                        }
+                    }
+                } else {
+                    accumulator = ProcessMinuteAccumulator()
+                }
+                try? await Task.sleep(for: .seconds(MonitorAgentRecorder.processSampleInterval))
+            }
+        }
+    }
+
+    /// The series switch lives in the shared database. It is polled on the same cadence as
+    /// the process switch; once it is off the open minute is dropped, and the store refuses
+    /// a series write inside its transaction, so a stale flag cannot persist anything.
+    private func startSeriesCollection() {
+        guard persistentHistory != nil, let store = try? HistoryStore(readOnly: true) else { return }
+        seriesSwitchTask = Task.detached(priority: .utility) { [weak self] in
+            while !Task.isCancelled {
+                let enabled = (try? store.isSeriesCollectionEnabled()) == true
+                await self?.setSeriesCollectionEnabled(enabled)
+                try? await Task.sleep(for: .seconds(MonitorAgentRecorder.processSampleInterval))
+            }
+        }
+    }
+
+    private func setSeriesCollectionEnabled(_ enabled: Bool) {
+        guard enabled != seriesCollectionEnabled else { return }
+        seriesCollectionEnabled = enabled
+        if !enabled { seriesMinute = SeriesMinuteAccumulator() }
+    }
+
+    private nonisolated static func processReadings(_ snapshot: ProcessSnapshot) -> ProcessUsageReadings {
+        func reading(_ usage: ProcessUsage) -> ProcessUsageReading {
+            ProcessUsageReading(pid: usage.pid, name: usage.name, cpu: usage.cpu, memoryBytes: usage.memoryBytes)
+        }
+        return ProcessUsageReadings(byCPU: snapshot.byCPU.map(reading),
+                                    byMemory: snapshot.byMemory.map(reading),
+                                    hiddenCount: snapshot.hiddenCount)
+    }
+
     /// Per-process sampling runs only while someone looks at it (panel open, overview or monitor shown).
     /// Calls are counted: every `true` needs a matching `false`.
     func watchProcesses(_ on: Bool) {
@@ -225,40 +307,68 @@ final class MonitorStore {
         switch sample {
         case .cpu(let r):
             cpu = r
-            record(.cpu, r.total, now)
+            recordHistory(MonitorHistorySample.cpu(r), now)
             if let p = r.performance { record(.cpuP, p, now) }
             if let e = r.efficiency { record(.cpuE, e, now) }
+            recordSeries(SeriesValues.cpu(performance: r.performance, efficiency: r.efficiency), now)
         case .gpu(let r):
             gpu = r
-            record(.gpu, r.utilization, now)
+            recordHistory(MonitorHistorySample.gpu(r), now)
         case .memory(let r):
             memory = r
             alerts.check(cpuCelsius: nil, memory: r, disk: nil)
-            if r.totalBytes > 0 { record(.memory, Double(r.usedBytes) / Double(r.totalBytes), now) }
+            recordHistory(MonitorHistorySample.memory(r), now)
         case .disk(let r):
             disk = r
             alerts.check(cpuCelsius: nil, memory: nil, disk: r)
-            record(.diskRead, r.readBytesPerSecond, now)
-            record(.diskWrite, r.writeBytesPerSecond, now)
+            recordHistory(MonitorHistorySample.disk(r), now)
         case .network(let r):
             network = r
-            record(.netIn, r.inBytesPerSecond, now)
-            record(.netOut, r.outBytesPerSecond, now)
+            recordHistory(MonitorHistorySample.network(r), now)
         case .battery(let r):
             battery = r
-            record(.battery, r.charge, now)
+            recordHistory(MonitorHistorySample.battery(r), now)
         case .temperature(let r):
             temperatures = r
             alerts.check(cpuCelsius: cpuCelsius, memory: nil, disk: nil)
-            if let c = cpuCelsius { record(.temperature, c, now) }
+            recordHistory(MonitorHistorySample.temperature(r), now)
+            recordSeries(SeriesValues.temperature(r.map { (name: $0.name, celsius: $0.celsius) }), now)
         case .fan(let r):
             fans = r
-            if let f = r.first { record(.fan, f.actualRPM, now) }
+            recordHistory(MonitorHistorySample.fan(r), now)
         case .power(let r):
             power = r
-            if let w = r.systemWatts ?? r.gpuWatts { record(.power, w, now) }
+            recordHistory(MonitorHistorySample.power(r), now)
         }
     }
+
+    /// Persists the columns produced by the shared mapping. The in-memory series mirrors
+    /// them for the live charts.
+    private func recordHistory(_ values: [String: Double], _ date: Date) {
+        for (column, value) in values {
+            guard let key = Self.seriesByHistoryColumn[column] else { continue }
+            record(key, value, date)
+        }
+    }
+
+    /// Stores the individual values for the sensor and core charts. The values come from the
+    /// same reading that produced the overview column, so nothing samples the hardware twice.
+    private func recordSeries(_ values: [String: Double], _ date: Date) {
+        guard seriesCollectionEnabled, let db = persistentHistory else { return }
+        guard let finished = seriesMinute.add(values, at: date) else { return }
+        Task.detached(priority: .background) {
+            do {
+                try db.recordSeriesMinute(finished)
+            } catch {
+                NSLog("MacHelper sensor series write failed: %@", error.localizedDescription)
+            }
+        }
+    }
+
+    private static let seriesByHistoryColumn: [String: SeriesKey] = Dictionary(
+        uniqueKeysWithValues: SeriesKey.allCases.compactMap { key in
+            key.historyColumn.map { ($0, key) }
+        })
 
     private func record(_ key: SeriesKey, _ value: Double, _ date: Date) {
         var points = history[key, default: []]
@@ -268,8 +378,16 @@ final class MonitorStore {
             points.removeAll { $0.date < cutoff }
         }
         history[key] = points
-        if let column = key.historyColumn, let finished = minute.add(column, value, at: date), let db = persistentHistory {
-            Task.detached(priority: .background) { try? db.append(finished) }
+        if let column = key.historyColumn,
+           let finished = minute.addTracked(column, value, at: date),
+           let db = persistentHistory {
+            Task.detached(priority: .background) {
+                do {
+                    try db.recordMinute(finished)
+                } catch {
+                    NSLog("MacHelper history write failed: %@", error.localizedDescription)
+                }
+            }
         }
     }
 }

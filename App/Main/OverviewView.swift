@@ -11,29 +11,29 @@ struct OverviewView: View {
             VStack(alignment: .leading, spacing: 22) {
                 Hero(store: store)
                 HairlinePanel(columns: 4) {
-                    MetricTile(title: "CPU", symbol: "cpu", color: Theme.blue,
+                    MetricTile(title: "CPU", icon: "px.cpu", color: Theme.blue,
                                value: Fmt.percent(store.cpu?.total), detail: cpuDetail,
                                series: store.history[.cpu], maxValue: 1)
-                    MetricTile(title: "GPU", symbol: "square.stack.3d.up", color: Theme.violet,
+                    MetricTile(title: "GPU", icon: "px.gpu", color: Theme.violet,
                                value: Fmt.percent(store.gpu?.utilization), detail: store.gpu?.name,
                                series: store.history[.gpu], maxValue: 1)
-                    MetricTile(title: "Memory", symbol: "memorychip", color: Theme.cyan,
+                    MetricTile(title: "Memory", icon: "px.memory", color: Theme.cyan,
                                value: memoryValue, detail: memoryDetail, series: store.history[.memory], maxValue: 1)
-                    MetricTile(title: "Temperature", symbol: "thermometer.medium", color: Theme.orange,
+                    MetricTile(title: "Temperature", icon: "px.temperature", color: Theme.orange,
                                value: Fmt.celsius(store.cpuCelsius), detail: String(localized: "Hottest CPU sensor"),
                                series: store.history[.temperature], maxValue: nil)
-                    MetricTile(title: "Fans", symbol: "fanblades", color: Theme.mint,
+                    MetricTile(title: "Fans", icon: "px.fans", color: Theme.mint,
                                value: store.fans.first.map { "\(Fmt.rpm($0.actualRPM)) rpm" } ?? "–",
                                detail: fanDetail, series: store.history[.fan], maxValue: store.fans.first?.maxRPM)
-                    MetricTile(title: "Power", symbol: "bolt", color: Theme.amber,
+                    MetricTile(title: "Power", icon: "px.power", color: Theme.amber,
                                value: Fmt.watts(store.power?.systemWatts ?? store.power?.gpuWatts),
-                               detail: store.power.map { String(localized: "GPU \(Fmt.watts($0.gpuWatts))") },
+                               detail: store.power.map { String(localized: "CPU \(Fmt.watts($0.cpuWatts)) · GPU \(Fmt.watts($0.gpuWatts))") },
                                series: store.history[.power], maxValue: nil)
-                    MetricTile(title: "Network", symbol: "network", color: Theme.blue,
+                    MetricTile(title: "Network", icon: "px.network", color: Theme.blue,
                                value: store.network.map { "↓ \(Fmt.rate($0.inBytesPerSecond))/s" } ?? "–",
                                detail: store.network.map { "↑ \(Fmt.rate($0.outBytesPerSecond))/s" },
                                series: store.history[.netIn], maxValue: nil)
-                    MetricTile(title: "Disk", symbol: "internaldrive", color: Theme.violet,
+                    MetricTile(title: "Disk", icon: "px.ssd", color: Theme.violet,
                                value: store.disk.map { Fmt.bytes($0.availableBytes) } ?? "–",
                                detail: store.disk.map { String(localized: "free of \(Fmt.bytes($0.totalBytes))") },
                                series: store.history[.diskRead], maxValue: nil)
@@ -148,7 +148,7 @@ enum Host {
 
 private struct MetricTile: View {
     let title: LocalizedStringKey
-    let symbol: String
+    let icon: String
     let color: Color
     let value: String
     let detail: String?
@@ -158,7 +158,7 @@ private struct MetricTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 6) {
-                RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 7, height: 7)
+                PixelIcon(name: icon, size: 16)
                 Text(title).font(Theme.label).foregroundStyle(Palette.textMuted)
             }
             Text(value).font(Theme.numeral).foregroundStyle(Palette.text).lineLimit(1).minimumScaleFactor(0.6)

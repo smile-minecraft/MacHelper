@@ -30,7 +30,7 @@ final class FanControlModel {
     var mode: UIMode = .automatic
     var fixedFraction: Double = 0.5
     var profile: FanProfile = .balanced { didSet { if let c = profile.presetCurve { points = c.points } } }
-    var points: [FanCurve.Point] = FanCurve.balanced.points
+    var points: [FanCurve.Point] = defaultPoints
     var source: TemperatureSource = .hottest
     var hysteresis: Double = 3
     var slew: Double = 300
@@ -41,7 +41,10 @@ final class FanControlModel {
     @ObservationIgnored private let client = HelperClient.shared
     /// Lets automatic switching know which policy the user picked by hand.
     @ObservationIgnored var onUserApplied: ((FanPolicy) -> Void)?
-    @ObservationIgnored private static let customCurveKey = "fan.customCurve.v1"
+    /// The curve the model starts with, and the one the editor shows when no custom curve has been
+    /// saved yet.
+    @ObservationIgnored nonisolated static let defaultPoints = FanCurve.balanced.points
+    @ObservationIgnored nonisolated static let customCurveKey = "fan.customCurve.v1"
 
     /// Fan 0's range, for showing RPM next to fractions.
     var primaryRange: ClosedRange<Double>? {
@@ -136,6 +139,19 @@ final class FanControlModel {
             points = saved
         } else {
             profile = p
+        }
+    }
+
+    /// Re-reads the saved custom curve after settings are imported, so the open curve editor
+    /// shows the imported points. An import without a custom curve removes the saved one; the
+    /// editor then shows the same default curve as a fresh model.
+    func reload() {
+        guard profile == .custom else { return }
+        if let data = UserDefaults.standard.data(forKey: Self.customCurveKey),
+           let saved = try? JSONDecoder().decode([FanCurve.Point].self, from: data) {
+            points = saved
+        } else {
+            points = Self.defaultPoints
         }
     }
 

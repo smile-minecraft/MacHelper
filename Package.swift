@@ -13,6 +13,7 @@ let package = Package(
         .library(name: "DiskScan", targets: ["DiskScan"]),
         .library(name: "CleanEngine", targets: ["CleanEngine"]),
         .library(name: "Storage", targets: ["Storage"]),
+        .library(name: "SettingsPortability", targets: ["SettingsPortability"]),
         .executable(name: "machelper", targets: ["machelper"]),
         .executable(name: "mhprobe", targets: ["mhprobe"]),
     ],
@@ -37,6 +38,7 @@ let package = Package(
         .target(name: "CleanEngine", dependencies: ["DiskScan"], resources: [.copy("Rules"), .copy("Artifacts"), .copy("UninstallRules"),
                                                                   .process("Localizable.xcstrings"), .process("Rules.xcstrings")]),
         .target(name: "Storage", dependencies: [.product(name: "GRDB", package: "GRDB.swift")]),
+        .target(name: "SettingsPortability", dependencies: ["CleanEngine", "FanControl"]),
         .executableTarget(
             name: "machelper",
             dependencies: ["CleanEngine", "DiskScan", "Metrics", "SMCKit", "Storage",
@@ -49,5 +51,6 @@ let package = Package(
         .testTarget(name: "DiskScanTests", dependencies: ["DiskScan"]),
         .testTarget(name: "CleanEngineTests", dependencies: ["CleanEngine"]),
         .testTarget(name: "StorageTests", dependencies: ["Storage"]),
+        .testTarget(name: "SettingsPortabilityTests", dependencies: ["SettingsPortability", "CleanEngine", "FanControl"]),
     ]
 )

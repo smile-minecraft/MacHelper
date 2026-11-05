@@ -6,24 +6,27 @@ import Testing
     @Test func accumulatorAveragesPerMinute() {
         var acc = MinuteAccumulator()
         let t0 = Date(timeIntervalSince1970: 1_800_000_000)   // a whole minute
-        #expect(acc.add("cpu", 0.2, at: t0) == nil)
-        #expect(acc.add("cpu", 0.4, at: t0.addingTimeInterval(30)) == nil)
-        #expect(acc.add("memory", 0.5, at: t0.addingTimeInterval(59)) == nil)
-        let done = acc.add("cpu", 0.9, at: t0.addingTimeInterval(61))
+        #expect(acc.addTracked("cpu", 0.2, at: t0) == nil)
+        #expect(acc.addTracked("cpu", 0.4, at: t0.addingTimeInterval(30)) == nil)
+        #expect(acc.addTracked("memory", 0.5, at: t0.addingTimeInterval(59)) == nil)
+        let done = acc.addTracked("cpu", 0.9, at: t0.addingTimeInterval(61))
         #expect(done?.time == t0)
-        #expect(abs((done?.cpu ?? 0) - 0.3) < 1e-9)
-        #expect(done?.memory == 0.5)
-        #expect(done?.gpu == nil)
+        #expect(abs((done?.totals["cpu"]?.average ?? 0) - 0.3) < 1e-9)
+        #expect(done?.totals["memory"]?.average == 0.5)
+        #expect(done?.totals["gpu"] == nil)
     }
 
     @Test func bucketsAndRetention() throws {
         let h = try MetricsHistory(inMemory: (), retention: 3600)
         let now = Date()
         let base = Date(timeIntervalSince1970: (now.timeIntervalSince1970 / 600).rounded(.down) * 600 - 1800)
-        for i in 0..<10 {
-            try h.append(MetricSample(time: base.addingTimeInterval(Double(i) * 60), cpu: Double(i)))
+        func write(_ time: Date, _ value: Double) throws {
+            try h.recordMinute(FinishedMinute(time: time, totals: ["cpu": ColumnTotals(sum: value, count: 1)]), now: now)
         }
-        try h.append(MetricSample(time: now.addingTimeInterval(-7200), cpu: 99))   // pruned right away
+        for i in 0..<10 {
+            try write(base.addingTimeInterval(Double(i) * 60), Double(i))
+        }
+        try write(now.addingTimeInterval(-7200), 99)   // pruned right away
         #expect(try h.count() == 10)
         let buckets = try h.samples(since: base, bucket: 300)
         #expect(buckets.count == 2)

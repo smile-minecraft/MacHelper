@@ -34,7 +34,7 @@ struct OptimizeView: View {
                         message: "Scan first to list what can be cleaned. Nothing is cleaned until you’ve reviewed and checked it; by default items go to the Trash and can be restored.") {
             VStack(spacing: 8) {
                 Button("Start Scan") { Task { await model.scan() } }.buttonStyle(.borderedProminent).controlSize(.large)
-                if let e = model.loadError { Text(e).font(.caption).foregroundStyle(.red) }
+                if let e = model.loadError { Text(e).font(.caption).foregroundStyle(Theme.rose) }
             }
         }
     }
@@ -42,7 +42,7 @@ struct OptimizeView: View {
     private func progress(_ text: String) -> some View {
         VStack(spacing: 14) {
             ScanningArt(art: "px.empty.clean")
-            Text(text).font(.callout).foregroundStyle(.secondary)
+            Text(text).font(.callout).foregroundStyle(Palette.textMuted)
             ProgressView().controlSize(.small)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -65,14 +65,14 @@ struct OptimizeView: View {
                             Toggle(isOn: $row.selected) { EmptyView() }.labelsHidden().disabled(!row.available)
                             VStack(alignment: .leading, spacing: 2) {
                                 HStack {
-                                    Text(row.task.title)
+                                    Text(row.task.title).foregroundStyle(Palette.text)
                                     RiskBadge(risk: row.task.risk)
-                                    if row.task.requiresRoot { Text("Needs Helper").font(.caption2).foregroundStyle(.secondary) }
+                                    if row.task.requiresRoot { Text("Needs Helper").font(.caption2).foregroundStyle(Palette.textMuted) }
                                 }
-                                Text(row.task.description).font(.caption).foregroundStyle(.secondary)
+                                Text(row.task.description).font(.caption).foregroundStyle(Palette.textMuted)
                                 if !row.available {
                                     Text(row.task.requiresRoot && row.task.isAvailable ? "Helper not enabled" : "Not applicable on this Mac")
-                                        .font(.caption2).foregroundStyle(.orange)
+                                        .font(.caption2).foregroundStyle(Theme.amber)
                                 }
                             }
                         }
@@ -80,19 +80,23 @@ struct OptimizeView: View {
                     }
                 }
             }
-            Divider()
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("\(Fmt.bytes(Int64(clamping: model.selectedBytes))) selected, \(model.selectedTaskCount) maintenance tasks").bold()
-                    Text("This is only a preview; nothing is deleted until you click Clean.").font(.caption).foregroundStyle(.secondary)
+            .scrollContentBackground(.hidden)
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(Fmt.bytes(Int64(clamping: model.selectedBytes))) selected, \(model.selectedTaskCount) maintenance tasks")
+                        .font(Theme.smallNumeral)
+                        .foregroundStyle(Palette.text)
+                    Text("This is only a preview; nothing is deleted until you click Clean.").font(.caption).foregroundStyle(Palette.textMuted)
                 }
-                Spacer()
+                Spacer(minLength: 12)
                 Button("Rescan") { Task { await model.scan() } }
                 Button("Clean…") { confirm = true }
                     .buttonStyle(.borderedProminent)
                     .disabled(model.selectedBytes == 0 && model.selectedTaskCount == 0)
             }
-            .padding(12)
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .background(Palette.card)
+            .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
         }
         .confirmationDialog("Clean the selected \(Fmt.bytes(Int64(clamping: model.selectedBytes)))?", isPresented: $confirm,
                             titleVisibility: .visible) {
@@ -126,11 +130,12 @@ struct OptimizeView: View {
                         .labelsHidden()
                     VStack(alignment: .leading, spacing: 1) {
                         Text((art.path as NSString).lastPathComponent + "  ·  " + (art.projectPath as NSString).lastPathComponent)
-                        Text(art.path).font(.caption2).foregroundStyle(.secondary).lineLimit(1).truncationMode(.head)
+                            .foregroundStyle(Palette.text)
+                        Text(art.path).font(.caption2).foregroundStyle(Palette.textMuted).lineLimit(1).truncationMode(.head)
                     }
-                    if art.recentlyUsed { Text("Recently used").font(.caption2).foregroundStyle(.orange) }
+                    if art.recentlyUsed { Text("Recently used").font(.caption2).foregroundStyle(Theme.amber) }
                     Spacer()
-                    Text(Fmt.bytes(Int64(clamping: art.size))).monospacedDigit().foregroundStyle(.secondary)
+                    Text(Fmt.bytes(Int64(clamping: art.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
                 }
             }
             rootsEditor
@@ -144,7 +149,7 @@ struct OptimizeView: View {
     private var rootsOnlySection: some View {
         Section("Project Build Artifacts") {
             Text("Add the folders where you keep projects to find rebuildable artifacts such as node_modules, target and .build.")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(Palette.textMuted)
             rootsEditor
         }
     }
@@ -153,8 +158,8 @@ struct OptimizeView: View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(model.artifactRoots, id: \.self) { root in
                 HStack {
-                    Image(systemName: "folder")
-                    Text(root).font(.caption).lineLimit(1).truncationMode(.head)
+                    Image(systemName: "folder").foregroundStyle(Palette.textMuted)
+                    Text(root).font(.caption).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.head)
                     Spacer()
                     Button { model.removeArtifactRoot(root) } label: { Image(systemName: "minus.circle") }.buttonStyle(.plain)
                 }
@@ -166,41 +171,48 @@ struct OptimizeView: View {
     // MARK: Results
 
     private var results: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Label("Cleaning Complete", systemImage: "checkmark.seal.fill").font(.title2).foregroundStyle(.green)
-            Grid(alignment: .leading, verticalSpacing: 6) {
-                GridRow { Text("Moved to Trash"); Text(Fmt.bytes(Int64(clamping: model.trashedBytes))).monospacedDigit().bold() }
-                GridRow { Text("Freed permanently"); Text(Fmt.bytes(Int64(clamping: model.freedBytes))).monospacedDigit().bold() }
-                if !model.failures.isEmpty { GridRow { Text("Not processed"); Text("\(model.failures.count) items").foregroundStyle(.orange) } }
-            }
-            if model.trashedBytes > 0 {
-                HStack {
-                    Text("Space used by items in the Trash is freed when you empty the Trash.").font(.callout).foregroundStyle(.secondary)
-                    Button("Empty Trash") { Task { await model.emptyTrash() } }
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 14) {
+                Label("Cleaning Complete", systemImage: "checkmark.seal.fill").font(.title2).foregroundStyle(Theme.mint)
+                Grid(alignment: .leading, verticalSpacing: 6) {
+                    GridRow { Text("Moved to Trash").foregroundStyle(Palette.textMuted); Text(Fmt.bytes(Int64(clamping: model.trashedBytes))).monospacedDigit().bold().foregroundStyle(Palette.text) }
+                    GridRow { Text("Freed permanently").foregroundStyle(Palette.textMuted); Text(Fmt.bytes(Int64(clamping: model.freedBytes))).monospacedDigit().bold().foregroundStyle(Palette.text) }
+                    if !model.failures.isEmpty { GridRow { Text("Not processed").foregroundStyle(Palette.textMuted); Text("\(model.failures.count) items").foregroundStyle(Theme.amber) } }
                 }
-            }
-            if !model.taskResults.isEmpty {
-                Divider()
-                ForEach(model.taskResults) { t in
-                    Label(t.title + (t.ok ? "" : ": \(t.output.prefix(120))"), systemImage: t.ok ? "checkmark.circle" : "xmark.circle")
-                        .foregroundStyle(t.ok ? Color.primary : Color.orange)
-                }
-            }
-            if !model.failures.isEmpty {
-                DisclosureGroup("Items not processed") {
-                    ForEach(model.failures, id: \.path) { f in
-                        Text(verbatim: "\(f.path): \(f.message ?? "")").font(.caption).foregroundStyle(.secondary)
+                .card(padding: 16)
+                if model.trashedBytes > 0 {
+                    HStack {
+                        Text("Space used by items in the Trash is freed when you empty the Trash.").font(.callout).foregroundStyle(Palette.textMuted)
+                        Button("Empty Trash") { Task { await model.emptyTrash() } }
                     }
                 }
-            }
-            Spacer()
-            HStack {
-                Text("All operations are logged in ~/Library/Logs/MacHelper/operations.jsonl").font(.caption).foregroundStyle(.secondary)
+                if !model.taskResults.isEmpty {
+                    Divider()
+                    ForEach(model.taskResults) { t in
+                        Label(t.title + (t.ok ? "" : ": \(t.output.prefix(120))"), systemImage: t.ok ? "checkmark.circle" : "xmark.circle")
+                            .foregroundStyle(t.ok ? Palette.text : Theme.orange)
+                    }
+                }
+                if !model.failures.isEmpty {
+                    DisclosureGroup("Items not processed") {
+                        ForEach(model.failures, id: \.path) { f in
+                            Text(verbatim: "\(f.path): \(f.message ?? "")").font(.caption).foregroundStyle(Palette.textMuted)
+                        }
+                    }
+                }
                 Spacer()
+            }
+            .padding(.horizontal, 20).padding(.vertical, 18)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            HStack(spacing: 12) {
+                Text("All operations are logged in ~/Library/Logs/MacHelper/operations.jsonl").font(.caption).foregroundStyle(Palette.textMuted)
+                Spacer(minLength: 12)
                 Button("Scan Again") { Task { await model.scan() } }
             }
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .background(Palette.card)
+            .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
         }
-        .padding(20)
     }
 }
 
@@ -212,14 +224,14 @@ private struct RuleRow: View {
     var body: some View {
         if result.candidates.isEmpty {
             HStack {
-                Text(result.rule.title).foregroundStyle(.secondary)
+                Text(result.rule.title).foregroundStyle(Palette.textMuted)
                 Spacer()
                 if let reason = result.skippedReason {
-                    Text("Skipped: \(reason)").font(.caption).foregroundStyle(.secondary)
+                    Text("Skipped: \(reason)").font(.caption).foregroundStyle(Palette.textMuted)
                 } else if result.rule.needsFullDiskAccess {
                     Button("Needs Full Disk Access") { model.openFullDiskAccessSettings() }.buttonStyle(.link).font(.caption)
                 } else {
-                    Text("Nothing to clean").font(.caption).foregroundStyle(.tertiary)
+                    Text("Nothing to clean").font(.caption).foregroundStyle(Palette.textFaint)
                 }
             }
         } else {
@@ -230,10 +242,10 @@ private struct RuleRow: View {
                             EmptyView()
                         }
                         .labelsHidden()
-                        Text((c.path as NSString).lastPathComponent).lineLimit(1).truncationMode(.middle)
-                        if let note = c.note { Text(note).font(.caption2).foregroundStyle(.orange) }
+                        Text((c.path as NSString).lastPathComponent).lineLimit(1).truncationMode(.middle).foregroundStyle(Palette.text)
+                        if let note = c.note { Text(note).font(.caption2).foregroundStyle(Theme.amber) }
                         Spacer()
-                        Text(Fmt.bytes(Int64(clamping: c.size))).monospacedDigit().foregroundStyle(.secondary)
+                        Text(Fmt.bytes(Int64(clamping: c.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
                     }
                     .font(.callout)
                     .help(c.path)
@@ -245,27 +257,27 @@ private struct RuleRow: View {
                         .labelsHidden()
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
-                            Text(result.rule.title)
+                            Text(result.rule.title).foregroundStyle(Palette.text)
                             RiskBadge(risk: result.rule.risk)
-                            if model.isRuleSelected(result.rule.id) == nil { Text("Partial").font(.caption2).foregroundStyle(.secondary) }
+                            if model.isRuleSelected(result.rule.id) == nil { Text("Partial").font(.caption2).foregroundStyle(Palette.textMuted) }
                         }
-                        Text(result.rule.description).font(.caption).foregroundStyle(.secondary)
+                        Text(result.rule.description).font(.caption).foregroundStyle(Palette.textMuted)
                     }
                     Spacer()
-                    Text(Fmt.bytes(Int64(clamping: result.totalSize))).monospacedDigit()
+                    Text(Fmt.bytes(Int64(clamping: result.totalSize))).monospacedDigit().foregroundStyle(Palette.text)
                 }
             }
         }
     }
 }
 
-struct RiskBadge: View {
+private struct RiskBadge: View {
     let risk: RiskLevel
     var body: some View {
         let (text, color): (String, Color) = switch risk {
-        case .low: (String(localized: "Low risk"), .green)
-        case .medium: (String(localized: "Medium risk"), .orange)
-        case .high: (String(localized: "High risk"), .red)
+        case .low: (String(localized: "Low risk"), Theme.mint)
+        case .medium: (String(localized: "Medium risk"), Theme.amber)
+        case .high: (String(localized: "High risk"), Theme.rose)
         }
         Text(text)
             .font(.caption2.bold())

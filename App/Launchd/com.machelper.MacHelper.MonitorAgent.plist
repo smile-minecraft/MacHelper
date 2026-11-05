@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.machelper.MacHelper.MonitorAgent</string>
+	<!-- Runs the embedded CLI as the user; registered only when the user enables background recording. -->
+	<key>BundleProgram</key>
+	<string>Contents/MacOS/machelper-cli</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>machelper-cli</string>
+		<string>monitor</string>
+		<string>--record</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>LowPriorityIO</key>
+	<true/>
+	<key>Nice</key>
+	<integer>10</integer>
+	<key>ThrottleInterval</key>
+	<integer>60</integer>
+	<key>AssociatedBundleIdentifiers</key>
+	<array>
+		<string>com.machelper.MacHelper</string>
+	</array>
+</dict>
+</plist>

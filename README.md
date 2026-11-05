@@ -7,7 +7,13 @@ one-click cleanup, disk analysis, an app uninstaller and startup-item management
 
 - **Menu-bar monitor** — CPU (P/E cores), GPU, memory pressure, disk and network throughput, temperatures,
   fans, power and battery, each configurable as text, line, bar or ring. Top processes by CPU and memory.
-- **History** — per-minute averages kept for 7 days (SQLite), browsable for 1 h / 24 h / 7 d.
+- **History** — per-minute averages (SQLite) kept for 7 days by default; choose 1, 3, 7, 14 or 30 days
+  in Settings → General → Data management. Browsable for 1 h / 24 h / 7 d.
+- **Optional process, sensor and core history** — off by default; enable each under Settings → General → Data
+  management. Process history stores only the process name, CPU use and memory (no paths, command-line
+  arguments or user names), keeping each minute’s top 10 by CPU and by memory. Sensor and core history stores
+  one average per minute for every temperature sensor and CPU core cluster, adding several dozen rows per
+  minute. Both use the same retention setting and can be cleared separately.
 - **Alerts** — notifications for high CPU temperature, critical memory pressure and low disk space.
 - **Fan control** — automatic, fixed speed or temperature curves (quiet / balanced / performance / custom),
   "only increase" mode, hard safety limits, and automatic profile switching by running app or power source.

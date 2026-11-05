@@ -153,17 +153,29 @@ def star(cv, cx, cy, r, mat, flat=False):
     cv.fill(lambda x, y: abs(x - cx) ** k + abs(y - cy) ** k <= r ** k, mat, flat)
 
 
+def stamp(cv, rows):
+    """Paint a hand-authored sprite (used where a curved primitive would lose the silhouette)."""
+    for y, row in enumerate(rows):
+        for x, c in enumerate(row):
+            if c != '.':
+                cv.set(x, y, c)
+
+
 # ---------------------------------------------------------------- 16×16 sidebar icons
 
 def icon_overview():
+    """A speedometer: a beveled arc with a light needle over the dark dial and a pale hub."""
     cv = Canvas(16)
-    cx, cy = 8, 11.5
-    cv.fill(lambda x, y: y <= cy and 16 <= (x - cx) ** 2 + (y - cy) ** 2 <= 52, 'b')
+    cx, cy = 8, 12.5
+    cv.fill(lambda x, y: y <= cy and 14 <= (x - cx) ** 2 + (y - cy) ** 2 <= 50, 'b')
     cv.bevel()
-    cv.line(8, 11, 11, 7, 'K')
-    cv.line(8, 10, 10, 7, 'K')
-    cv.disc(cx, cy, 1.3, 's', flat=True)
+    cv.disc(cx, cy, 1.5, 's')
+    cv.bevel()
     cv.outline()
+    # Needle and hub go on top of the outlined dial so they keep their shape at 16 px.
+    cv.line(8, 11, 11, 6, 'S', flat=True)
+    cv.disc(cx, cy, 1.2, 's', flat=True)
+    cv.set(cx, 12, 'W', flat=True)
     return cv
 
 
@@ -238,6 +250,123 @@ def icon_settings():
         tooth = 6.6 if (math.cos(a * 8) > 0.15) else 5.0
         return r <= tooth and r >= 2.0
     cv.fill(gear, 's')
+    cv.bevel()
+    cv.outline()
+    return cv
+
+
+def icon_cpu():
+    """A processor: gold pins, a blue package and a lighter die in the middle."""
+    cv = Canvas(16)
+    for x in (4, 7, 10):
+        cv.rect(x, 1, x + 1, 2, 'a')
+        cv.rect(x, 13, x + 1, 14, 'a')
+    for y in (4, 7, 10):
+        cv.rect(1, y, 2, y + 1, 'a')
+        cv.rect(13, y, 14, y + 1, 'a')
+    cv.round_rect(3, 3, 12, 12, 1, 'b')
+    cv.rect(6, 6, 9, 9, 'q', flat=True)
+    cv.rect(6, 6, 8, 8, 'B', flat=True)
+    cv.bevel()
+    cv.outline()
+    return cv
+
+
+def icon_gpu():
+    """A graphics card: a fan on a violet board, a bracket and a gold edge connector."""
+    cv = Canvas(16)
+    cv.rect(1, 2, 2, 13, 's')                 # bracket
+    cv.round_rect(3, 3, 14, 12, 1, 'v')       # board
+    cv.disc(8, 7, 3.8, 'V')                   # fan shroud
+    cv.disc(8, 7, 2.7, 'v')                   # fan recess
+    cv.disc(8, 7, 1.0, 'V')                   # hub
+    for x, y in ((8, 3), (8, 10), (4, 7), (11, 7)):
+        cv.line(8, 7, x, y, 'V', flat=True)   # blades
+    for x in (4, 6, 8, 10, 12):
+        cv.rect(x, 13, x, 14, 'a')            # edge connector
+    cv.bevel()
+    cv.outline()
+    return cv
+
+
+def icon_memory():
+    """A memory module: three chips on a cyan board and a gold contact edge."""
+    cv = Canvas(16)
+    cv.round_rect(1, 4, 14, 10, 1, 'c')
+    for x in (2, 6, 10):
+        cv.rect(x, 5, x + 2, 8, 'u', flat=True)
+        cv.rect(x, 5, x + 2, 5, 'C', flat=True)
+    cv.rect(2, 11, 13, 12, 'a', flat=True)
+    for x in range(3, 13, 2):
+        cv.rect(x, 11, x, 12, 'o', flat=True)
+    cv.bevel()
+    cv.outline()
+    return cv
+
+
+def icon_ssd():
+    """A solid-state drive: a violet case, a light label, a controller chip and gold connectors."""
+    cv = Canvas(16)
+    cv.round_rect(2, 2, 13, 12, 2, 'v')
+    cv.rect(4, 4, 11, 7, 'V', flat=True)
+    cv.rect(10, 4, 11, 5, 's', flat=True)
+    cv.rect(4, 9, 11, 10, 'y', flat=True)
+    cv.rect(4, 13, 8, 14, 'a')
+    cv.rect(10, 13, 11, 14, 'a')
+    cv.set(3, 3, 'y', flat=True)
+    cv.set(12, 3, 'y', flat=True)
+    cv.bevel()
+    cv.outline()
+    return cv
+
+
+def icon_network():
+    """A globe: three meridians and an equator on a blue disc."""
+    cv = Canvas(16)
+    cv.disc(8, 8, 6.6, 'b')
+    cv.bevel()
+    for y in range(2, 14):
+        dx = 3.0 * (1 - ((y - 8) / 6.0) ** 2)
+        cv.set(round(8 - dx), y, 'K', flat=True)
+        cv.set(round(8 + dx), y, 'K', flat=True)
+    cv.line(2, 8, 13, 8, 'K', flat=True)
+    cv.outline()
+    return cv
+
+
+def icon_temperature():
+    """A thermometer: warm bulb, stem, red mercury and a glass highlight."""
+    cv = Canvas(16)
+    cv.rect(6, 2, 9, 10, 'n')
+    cv.disc(8, 11.5, 3.2, 'n')
+    cv.bevel()
+    cv.rect(7, 6, 8, 10, 'r', flat=True)
+    cv.disc(8, 11, 1.5, 'r', flat=True)
+    cv.set(7, 4, 'W', flat=True)
+    cv.outline()
+    return cv
+
+
+def icon_battery():
+    """A battery: a mint cell, a light charge bar and a terminal."""
+    cv = Canvas(16)
+    cv.round_rect(2, 5, 13, 11, 1, 'm')
+    cv.rect(4, 7, 9, 9, 'M', flat=True)
+    cv.rect(14, 7, 15, 9, 'm')
+    cv.bevel()
+    cv.outline()
+    return cv
+
+
+def icon_power():
+    """A power plug: two silver prongs, a beveled amber body and a short cord."""
+    cv = Canvas(16)
+    cv.rect(5, 1, 6, 3, 'S', flat=True)   # left prong
+    cv.rect(9, 1, 10, 3, 'S', flat=True)  # right prong
+    cv.round_rect(4, 4, 11, 10, 2, 'n')   # plug body
+    cv.rect(7, 11, 8, 12, 's')            # cord
+    cv.rect(6, 13, 7, 13, 's')            # cord bend
+    cv.rect(5, 14, 6, 14, 's')
     cv.bevel()
     cv.outline()
     return cv
@@ -346,6 +475,8 @@ def empty_box():
 ICONS = {
     'px.overview': icon_overview, 'px.monitor': icon_monitor, 'px.fans': icon_fans, 'px.optimize': icon_optimize,
     'px.disk': icon_disk, 'px.uninstall': icon_uninstall, 'px.startup': icon_startup, 'px.settings': icon_settings,
+    'px.cpu': icon_cpu, 'px.gpu': icon_gpu, 'px.memory': icon_memory, 'px.ssd': icon_ssd, 'px.network': icon_network,
+    'px.temperature': icon_temperature, 'px.battery': icon_battery, 'px.power': icon_power,
 }
 ART = {'px.mascot': mascot, 'px.empty.clean': empty_clean, 'px.empty.scan': empty_scan, 'px.empty.box': empty_box, 'AppIcon': app_icon}
 

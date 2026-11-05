@@ -6,21 +6,25 @@ struct SettingsView: View {
 
     var body: some View {
         TabView {
-            GeneralSettings()
+            GeneralSettings(app: app)
                 .tabItem { Label("General", systemImage: "gearshape") }
             MonitorSettingsView(settings: app.settings, available: app.store.availableModules)
                 .tabItem { Label("Menu Bar", systemImage: "menubar.rectangle") }
             Form { AlertSettingsSection(alerts: app.store.alerts) }
                 .formStyle(.grouped)
+                .settingsSurface()
                 .tabItem { Label("Alerts", systemImage: "bell.badge") }
             HelperDiagnosticsView()
                 .tabItem { Label("Helper", systemImage: "lock.shield") }
+            OperationHistoryView()
+                .tabItem { Label("History", systemImage: "clock.arrow.circlepath") }
         }
-        .frame(width: 620, height: 520)
+        .frame(minWidth: 760, minHeight: 580)
     }
 }
 
 private struct GeneralSettings: View {
+    let app: AppModel
     @AppStorage("showInDock") private var showInDock = true
     @State private var openAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
@@ -29,15 +33,21 @@ private struct GeneralSettings: View {
         Form {
             Section {
                 HStack(spacing: 14) {
-                    Image(nsImage: NSApp.applicationIconImage).resizable().interpolation(.none).frame(width: 56, height: 56)
+                    Image(nsImage: NSApp.applicationIconImage)
+                        .resizable()
+                        .interpolation(.none)
+                        .frame(width: 56, height: 56)
+                        .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("MacHelper").font(.title3.weight(.semibold))
+                        Text("MacHelper").font(.title3.weight(.semibold)).foregroundStyle(Palette.text)
                         Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""))")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .settingsCaption()
                     }
                 }
             }
-            Section {
+            BackgroundRecordingSection(model: app.backgroundRecording)
+            HistoryManagementSection()
+            Section("General") {
                 Toggle("Show in Dock", isOn: $showInDock)
                     .onChange(of: showInDock) { AppModel.applyDockPreference() }
                 Toggle("Open at login", isOn: $openAtLogin)
@@ -50,15 +60,19 @@ private struct GeneralSettings: View {
                             openAtLogin = SMAppService.mainApp.status == .enabled
                         }
                     }
-                if let loginError { Text(loginError).font(.caption).foregroundStyle(.orange) }
+                if let loginError {
+                    Text(loginError).settingsCaption(Theme.rose)
+                }
                 Text("Without the Dock icon, MacHelper lives in the menu bar; its window opens from there.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .settingsCaption()
             }
             Section {
                 LanguagePicker()
                 CommandLineToolRow()
             }
+            SettingsBackupSection(app: app)
         }
         .formStyle(.grouped)
+        .settingsSurface()
     }
 }

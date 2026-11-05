@@ -17,11 +17,39 @@ struct DiskAnalysisView: View {
     var body: some View {
         VStack(spacing: 0) {
             toolbar
+            if let scannedAt = model.restoredAt { savedScanBanner(scannedAt) }
             Divider()
             content
         }
         .frame(minWidth: 720, minHeight: 560)
         .quickLookPreview($model.previewURL)
+        .task { model.restoreSavedScanIfNeeded() }
+    }
+
+    /// The result on screen is a saved one: it may not match the disk any more.
+    private func savedScanBanner(_ scannedAt: Date) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "clock.arrow.circlepath")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Theme.amber)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Saved scan from \(scannedAt.formatted(date: .abbreviated, time: .shortened))")
+                    .font(.system(size: 12.5, weight: .semibold))
+                    .foregroundStyle(Palette.text)
+                Text("This result may be out of date. Scan again to update it.")
+                    .font(.caption)
+                    .foregroundStyle(Palette.textMuted)
+                Text("Collecting, removing, and duplicate search are disabled for a saved scan.")
+                    .font(.caption2)
+                    .foregroundStyle(Palette.textFaint)
+            }
+            Spacer()
+            Button("Clear Saved Scan") { model.clearSavedScan() }
+                .controlSize(.small)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Palette.inset)
     }
 
     // MARK: Toolbar
@@ -91,8 +119,12 @@ struct DiskAnalysisView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                Text(model.mode == .sunburst ? "Click a ring to open a folder, click the center to go up; right-click or drag items to the collector." : "Click a block to open its folder; right-click or drag items to the collector.")
-                    .font(.caption).foregroundStyle(.secondary)
+                // A saved scan cannot be collected from; the banner explains why, so the
+                // collector hint would contradict the disabled actions.
+                if !model.isShowingSavedScan {
+                    Text(model.mode == .sunburst ? "Click a ring to open a folder, click the center to go up; right-click or drag items to the collector." : "Click a block to open its folder; right-click or drag items to the collector.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
             }
             .padding(12)
 
@@ -168,10 +200,17 @@ struct DiskAnalysisView: View {
             }
         }
         .font(.caption).foregroundStyle(.secondary)
-        if model.progress.unreadableDirectories > 0 {
+        if model.progress.cloudOnlyDirectories > 0 {
+            HStack {
+                Image(systemName: "icloud.slash").foregroundStyle(.orange)
+                Text("\(model.progress.cloudOnlyDirectories) cloud-only folders were skipped; their contents were not downloaded.")
+            }
+            .font(.caption)
+        }
+        if model.progress.unreadableDirectories > model.progress.cloudOnlyDirectories {
             HStack {
                 Image(systemName: "lock.fill").foregroundStyle(.orange)
-                Text("\(model.progress.unreadableDirectories) folders couldn’t be read; the results are incomplete.")
+                Text("\(model.progress.unreadableDirectories - model.progress.cloudOnlyDirectories) folders couldn’t be read; the results are incomplete.")
                 Button("Open Full Disk Access Settings") { model.openFullDiskAccessSettings() }.buttonStyle(.link)
             }
             .font(.caption)
@@ -195,8 +234,9 @@ struct DiskAnalysisView: View {
 
     private func row(_ node: DiskNode, total: UInt64) -> some View {
         HStack {
-            Image(systemName: node.isDirectory ? "folder.fill" : "doc")
-                .foregroundStyle(node.isDirectory ? Color.accentColor : .secondary)
+            Image(systemName: node.isDirectory ? (node.skippedCloudOnly ? "icloud.slash" : "folder.fill") : "doc")
+                .foregroundStyle(node.skippedCloudOnly ? Color.orange : node.isDirectory ? Color.accentColor : .secondary)
+                .help(node.skippedCloudOnly ? String(localized: "Only in the cloud; contents were not downloaded") : "")
             VStack(alignment: .leading, spacing: 1) {
                 Text(node.name).lineLimit(1).truncationMode(.middle)
                 if sideTab == .largest {
@@ -223,7 +263,9 @@ struct DiskAnalysisView: View {
                 Text(Fmt.bytes(Int64(clamping: model.collectorSize))).monospacedDigit()
             }
             if model.collector.isEmpty {
-                Text("Drag items you want to delete here, then move them to the Trash in one go.")
+                Text(model.isShowingSavedScan
+                     ? LocalizedStringKey("Collecting is disabled for a saved scan. Scan again to update it.")
+                     : LocalizedStringKey("Drag items you want to delete here, then move them to the Trash in one go."))
                     .font(.caption).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, minHeight: 50)
             } else {
@@ -245,12 +287,14 @@ struct DiskAnalysisView: View {
                 Button("Move to Trash…") { confirmTrash = true }
                     .frame(maxWidth: .infinity)
                     .buttonStyle(.borderedProminent)
+                    .disabled(model.isShowingSavedScan)
             }
             if let m = model.lastMessage { Text(m).font(.caption2).foregroundStyle(.secondary) }
         }
         .padding(10)
-        .background(dropTargeted ? Color.accentColor.opacity(0.15) : Color.clear)
+        .background(dropTargeted && !model.isShowingSavedScan ? Color.accentColor.opacity(0.15) : Color.clear)
         .dropDestination(for: URL.self) { urls, _ in
+            guard !model.isShowingSavedScan else { return false }
             for u in urls { model.addToCollector(path: u.standardizedFileURL.path) }
             return !urls.isEmpty
         } isTargeted: { dropTargeted = $0 }
@@ -285,6 +329,9 @@ private struct DuplicatesList: View {
     var body: some View {
         if let groups = model.duplicates {
             let total = groups.reduce(0) { $0 + $1.reclaimable }
+            if let note = model.duplicatesMessage {
+                Text(note).font(.caption).foregroundStyle(.orange)
+            }
             Text("\(groups.count) groups · \(Fmt.bytes(Int64(clamping: total))) reclaimable")
                 .font(.caption).foregroundStyle(.secondary)
             List {
@@ -325,9 +372,20 @@ private struct DuplicatesList: View {
                 }
             }
             .listStyle(.plain)
+        } else if model.isShowingSavedScan {
+            VStack(spacing: 8) {
+                Spacer()
+                Text("Duplicate search is disabled for a saved scan. Scan again to update it.")
+                    .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity).padding()
         } else {
             VStack(spacing: 8) {
                 Spacer()
+                if let note = model.duplicatesMessage {
+                    Text(note).font(.caption).foregroundStyle(.orange).multilineTextAlignment(.center)
+                }
                 if model.findingDuplicates {
                     ProgressView()
                     Text("Comparing file contents…").font(.caption).foregroundStyle(.secondary)

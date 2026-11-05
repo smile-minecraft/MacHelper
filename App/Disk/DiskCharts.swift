@@ -393,6 +393,7 @@ struct NodeMenu: View {
     var body: some View {
         if node.isDirectory { Button("Open Folder") { model.zoom(to: node) } }
         Button("Add to Collector") { model.addToCollector(node) }
+            .disabled(model.isShowingSavedScan)
         Button("Show in Finder") { model.revealInFinder(node) }
         Button("Quick Look") { model.quickLook(node) }
         Divider()

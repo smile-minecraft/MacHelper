@@ -49,9 +49,14 @@ targets:
           copyFiles:
             destination: wrapper
             subpath: Contents/Library/LaunchAgents
+      - path: App/Launchd/com.machelper.MacHelper.MonitorAgent.plist
+        buildPhase:
+          copyFiles:
+            destination: wrapper
+            subpath: Contents/Library/LaunchAgents
     dependencies:
       - package: MacHelperKit
-        products: [HelperProtocol, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage]
+        products: [HelperProtocol, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, SettingsPortability]
       - target: MacHelperHelper
         embed: true
         codeSign: false

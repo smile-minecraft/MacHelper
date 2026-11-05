@@ -24,16 +24,59 @@ public struct DuplicateGroup: Codable, Sendable, Hashable, Identifiable {
     public let reclaimable: UInt64
 }
 
+/// Outcome of a duplicate search.
+public struct DuplicateSearchResult: Sendable {
+    public let groups: [DuplicateGroup]
+    /// Files skipped before any content was read because they were cloud-only (dataless).
+    public let cloudOnlyFiles: Int
+    /// Files whose content could not be read.
+    public let unreadableFiles: Int
+}
+
 public enum DuplicateFinder {
     /// Finds groups of identical regular files among `paths` (files only, symlinks ignored). Content is
     /// compared by size, then the first and last 64 KB, then a full SHA-256.
+    ///
+    /// Legacy non-throwing entry point for existing callers: on protection failure it performs no I/O,
+    /// prints a notice to stderr and returns an empty array. Prefer `findChecked` when the caller can handle errors.
     public static func find(paths: [String], minSize: UInt64 = 1 << 20,
                             isCancelled: @Sendable () -> Bool = { false }) -> [DuplicateGroup] {
+        do { return try findChecked(paths: paths, minSize: minSize, isCancelled: isCancelled).groups }
+        catch {
+            FileHandle.standardError.write(Data("duplicate search aborted: the system would not let it run without downloading cloud-only files; no files were read\n".utf8))
+            return []
+        }
+    }
+
+    /// Same as `find`, but throws when the materialization ban cannot be installed and
+    /// reports how many files were left out. The ban covers only the calling thread and only
+    /// for the duration of the search.
+    public static func findChecked(paths: [String], minSize: UInt64 = 1 << 20,
+                                   isCancelled: @Sendable () -> Bool = { false }) throws -> DuplicateSearchResult {
+        try ThreadMaterializePolicy.withBan {
+            findProtected(paths: paths, minSize: minSize, isCancelled: isCancelled)
+        }
+    }
+
+    private static func findProtected(paths: [String], minSize: UInt64,
+                                      isCancelled: @Sendable () -> Bool) -> DuplicateSearchResult {
         struct Info { let path: String; let size: UInt64; let dev: Int32; let ino: UInt64; let modified: Date; let clone: UInt64 }
+        var cloudOnlyFiles = 0
+        var unreadableFiles = 0
         var bySize: [UInt64: [Info]] = [:]
         for p in Set(paths) {
             var st = stat()
-            guard lstat(p, &st) == 0, (st.st_mode & S_IFMT) == S_IFREG, UInt64(st.st_size) >= minSize else { continue }
+            guard lstat(p, &st) == 0 else {
+                unreadableFiles += 1
+                continue
+            }
+            guard (st.st_mode & S_IFMT) == S_IFREG, UInt64(st.st_size) >= minSize else { continue }
+            // Cloud-only files keep their logical size, so they pass the size filter. Skip them before
+            // any content is touched; with the ban installed, opening one would fail instead of downloading.
+            if st.st_flags & UInt32(SF_DATALESS) != 0 {
+                cloudOnlyFiles += 1
+                continue
+            }
             let info = Info(path: p, size: UInt64(st.st_size), dev: st.st_dev, ino: st.st_ino,
                             modified: Date(timeIntervalSince1970: TimeInterval(st.st_mtimespec.tv_sec)), clone: cloneID(p))
             bySize[info.size, default: []].append(info)
@@ -48,10 +91,26 @@ public enum DuplicateFinder {
                 if seenInode.insert("\(i.dev):\(i.ino)").inserted { unique.append(i) }
             }
             guard unique.count > 1 else { continue }
-            let byQuick = Dictionary(grouping: unique) { quickHash($0.path, size: size) ?? "" }
-            for (quick, candidates) in byQuick where !quick.isEmpty && candidates.count > 1 {
-                let byFull = Dictionary(grouping: candidates) { fullHash($0.path, isCancelled: isCancelled) ?? "" }
-                for (hash, same) in byFull where !hash.isEmpty && same.count > 1 {
+            // The thread's ban makes a read of a file that is or becomes cloud-only fail instead
+            // of downloading it; such a file is left out and counted as unreadable.
+            var byQuick: [String: [Info]] = [:]
+            for info in unique {
+                if let digest = quickHash(info.path, size: size) {
+                    byQuick[digest, default: []].append(info)
+                } else {
+                    unreadableFiles += 1
+                }
+            }
+            for (quick, candidates) in byQuick where candidates.count > 1 {
+                var byFull: [String: [Info]] = [:]
+                for info in candidates {
+                    if let hash = fullHash(info.path, isCancelled: isCancelled) {
+                        byFull[hash, default: []].append(info)
+                    } else if !isCancelled() {
+                        unreadableFiles += 1
+                    }
+                }
+                for (hash, same) in byFull where same.count > 1 {
                     let clones = Dictionary(grouping: same.filter { $0.clone != 0 }, by: \.clone).filter { $0.value.count > 1 }
                     let cloneIDs = Set(clones.keys)
                     let files = same.sorted { $0.modified < $1.modified }.map {
@@ -64,9 +123,11 @@ public enum DuplicateFinder {
                 }
             }
         }
-        return groups.sorted { $0.reclaimable > $1.reclaimable }
+        return DuplicateSearchResult(groups: groups.sorted { $0.reclaimable > $1.reclaimable },
+                                     cloudOnlyFiles: cloudOnlyFiles, unreadableFiles: unreadableFiles)
     }
 
+    /// SHA-256 of the first and last 64 KB, or nil when the file cannot be read.
     static func quickHash(_ path: String, size: UInt64) -> String? {
         guard let h = FileHandle(forReadingAtPath: path) else { return nil }
         defer { try? h.close() }
@@ -81,6 +142,7 @@ public enum DuplicateFinder {
         return hasher.finalize().map { String(format: "%02x", $0) }.joined()
     }
 
+    /// Full SHA-256, or nil when the file cannot be read or the search was cancelled.
     static func fullHash(_ path: String, isCancelled: @Sendable () -> Bool) -> String? {
         guard let h = FileHandle(forReadingAtPath: path) else { return nil }
         defer { try? h.close() }

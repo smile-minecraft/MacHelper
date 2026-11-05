@@ -55,12 +55,21 @@ public final class MetricsHistory: Sendable {
         self.retention = retention
         var config = Configuration()
         config.readonly = readOnly
+        // Two processes may open this file (app and background recorder). GRDB returns
+        // SQLITE_BUSY immediately by default; wait instead so a lost lock race is not an error.
+        config.busyMode = .timeout(5)
         if !readOnly {
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         }
         let pool = try DatabasePool(path: url.path, configuration: config)
         db = pool
-        if !readOnly { try Self.migrator.migrate(pool) }
+        if !readOnly {
+            try Self.migrator.migrate(pool)
+            try pool.write { db in
+                try db.execute(sql: "INSERT OR IGNORE INTO history_setting (key, value) VALUES ('retentionSeconds', ?)",
+                               arguments: [String(Int(retention))])
+            }
+        }
     }
 
     /// In-memory database, for tests.
@@ -69,6 +78,10 @@ public final class MetricsHistory: Sendable {
         let queue = try DatabaseQueue()
         db = queue
         try Self.migrator.migrate(queue)
+        try queue.write { db in
+            try db.execute(sql: "INSERT OR IGNORE INTO history_setting (key, value) VALUES ('retentionSeconds', ?)",
+                           arguments: [String(Int(retention))])
+        }
     }
 
     static var migrator: DatabaseMigrator {
@@ -79,13 +92,105 @@ public final class MetricsHistory: Sendable {
                 for c in MetricSample.metricColumns { t.column(c, .double) }
             }
         }
+        m.registerMigration("v2") { db in
+            // Per-column running sums and counts, so minute averages stay correct when a
+            // minute was written partly by the app and partly by the background recorder.
+            try db.create(table: "sample_accumulator") { t in
+                t.column("time", .datetime).notNull()
+                t.column("column", .text).notNull()
+                t.column("total_sum", .double).notNull()
+                t.column("total_count", .integer).notNull()
+                t.primaryKey(["time", "column"])
+            }
+        }
+        m.registerMigration("v3") { db in
+            try db.create(table: "history_setting") { t in
+                t.column("key", .text).primaryKey()
+                t.column("value", .text).notNull()
+            }
+        }
+        m.registerMigration("v4") { db in
+            // One row per name that made a minute's top ten by CPU or by memory. Only the
+            // name is stored, never a path or arguments. Sums and counts let two writers
+            // merge a shared minute without averaging averages.
+            try db.create(table: "process_sample") { t in
+                t.column("time", .datetime).notNull()
+                t.column("name", .text).notNull()
+                t.column("cpu_sum", .double).notNull()
+                t.column("cpu_count", .integer).notNull()
+                t.column("memory_sum", .double).notNull()
+                t.column("memory_count", .integer).notNull()
+                t.primaryKey(["time", "name"])
+            }
+            // The unreadable count belongs to the whole minute, not to one name.
+            try db.create(table: "process_sample_minute") { t in
+                t.column("time", .datetime).primaryKey()
+                t.column("hidden_count", .integer).notNull()
+            }
+        }
+        m.registerMigration("v5") { db in
+            // One row per series per minute. Sums and counts let the app and the background
+            // recorder merge a shared minute without averaging averages. Series names are
+            // opaque strings such as "temperature.PMU tdie1" or "cpu.performance".
+            try db.create(table: "series_sample") { t in
+                t.column("time", .datetime).notNull()
+                t.column("series", .text).notNull()
+                t.column("value_sum", .double).notNull()
+                t.column("value_count", .integer).notNull()
+                t.primaryKey(["time", "series"])
+            }
+        }
         return m
     }
 
-    public func append(_ sample: MetricSample) throws {
+    /// Merge-by-column write for minute samples shared by the app and the background
+    /// recorder. A column with an accumulator absorbs the new observations by adding sums
+    /// and counts, so the displayed value stays a true average; a v1 row (average only,
+    /// no counts) is left untouched rather than given an invented weight. A writer with
+    /// no observations for a column never overwrites it. Pruning removes expired process
+    /// rows too, so process names still age out after collection is turned off. A minute at
+    /// or before the last clear of this kind is dropped whole: it was accumulating in
+    /// memory when the user cleared the history.
+    public func recordMinute(_ minute: FinishedMinute, now: Date = Date()) throws {
         try db.write { db in
-            try sample.insert(db)
-            try db.execute(sql: "DELETE FROM sample WHERE time < ?", arguments: [Date().addingTimeInterval(-retention)])
+            let stored: String? = try String.fetchOne(db, sql: "SELECT value FROM history_setting WHERE key = 'retentionSeconds'")
+            let effectiveRetention = stored.flatMap { Double($0) } ?? retention
+            let cutoff = now.addingTimeInterval(-effectiveRetention)
+            let wasCleared = try HistorySetting.wasCleared(minute.time, kind: .minuteSamples, db)
+            if !wasCleared {
+                try db.execute(sql: "INSERT OR IGNORE INTO sample (time) VALUES (?)", arguments: [minute.time])
+                for column in MetricSample.metricColumns {
+                    guard let totals = minute.totals[column], totals.count > 0 else { continue }
+                    let accumulator = try Row.fetchOne(
+                        db, sql: "SELECT total_sum, total_count FROM sample_accumulator WHERE time = ? AND column = ?",
+                        arguments: [minute.time, column])
+                    if let accumulator {
+                        let existingSum: Double = accumulator["total_sum"]
+                        let existingCount: Int64 = accumulator["total_count"]
+                        let mergedSum = existingSum + totals.sum
+                        let mergedCount = existingCount + Int64(totals.count)
+                        try db.execute(sql: "UPDATE sample_accumulator SET total_sum = ?, total_count = ? WHERE time = ? AND column = ?",
+                                       arguments: [mergedSum, mergedCount, minute.time, column])
+                        try db.execute(sql: "UPDATE sample SET \(column) = ? WHERE time = ?",
+                                       arguments: [mergedSum / Double(mergedCount), minute.time])
+                    } else {
+                        // A v1 row has an average but no sample count: keep the legacy value.
+                        let legacy: Double? = try Double.fetchOne(db, sql: "SELECT \(column) FROM sample WHERE time = ?",
+                                                                  arguments: [minute.time])
+                        if legacy == nil {
+                            try db.execute(sql: "INSERT INTO sample_accumulator (time, column, total_sum, total_count) VALUES (?, ?, ?, ?)",
+                                           arguments: [minute.time, column, totals.sum, totals.count])
+                            try db.execute(sql: "UPDATE sample SET \(column) = ? WHERE time = ?",
+                                           arguments: [totals.sum / Double(totals.count), minute.time])
+                        }
+                    }
+                }
+            }
+            try db.execute(sql: "DELETE FROM sample WHERE time < ?", arguments: [cutoff])
+            try db.execute(sql: "DELETE FROM sample_accumulator WHERE time < ?", arguments: [cutoff])
+            try db.execute(sql: "DELETE FROM process_sample WHERE time < ?", arguments: [cutoff])
+            try db.execute(sql: "DELETE FROM process_sample_minute WHERE time < ?", arguments: [cutoff])
+            try db.execute(sql: "DELETE FROM series_sample WHERE time < ?", arguments: [cutoff])
         }
     }
 
@@ -106,22 +211,192 @@ public final class MetricsHistory: Sendable {
     public func count() throws -> Int {
         try db.read { try MetricSample.fetchCount($0) }
     }
+
+    /// Stores one finished minute of process usage. Does nothing while process collection
+    /// is off. Two writers record the same minute by adding their sums and counts, so the
+    /// average keeps every observation. Only the process name is stored. A minute with no
+    /// readable process still keeps its hidden count, and pruning covers both tables. A
+    /// minute at or before the last clear of this kind is dropped whole, names included.
+    public func recordProcessMinute(_ minute: FinishedProcessMinute, now: Date = Date()) throws {
+        try db.write { db in
+            let stored: String? = try String.fetchOne(db, sql: "SELECT value FROM history_setting WHERE key = 'retentionSeconds'")
+            let effectiveRetention = stored.flatMap { Double($0) } ?? retention
+            let cutoff = now.addingTimeInterval(-effectiveRetention)
+
+            let enabled = try HistorySetting.processCollectionEnabled(db)
+            guard enabled else { return }
+            let wasCleared = try HistorySetting.wasCleared(minute.time, kind: .processSamples, db)
+            if !wasCleared {
+                for (name, totals) in minute.processes {
+                    try db.execute(sql: """
+                        INSERT INTO process_sample (time, name, cpu_sum, cpu_count, memory_sum, memory_count)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(time, name) DO UPDATE SET
+                            cpu_sum = cpu_sum + excluded.cpu_sum,
+                            cpu_count = cpu_count + excluded.cpu_count,
+                            memory_sum = memory_sum + excluded.memory_sum,
+                            memory_count = memory_count + excluded.memory_count
+                        """, arguments: [minute.time, name, totals.cpu.sum, totals.cpu.count,
+                                        totals.memoryBytes.sum, totals.memoryBytes.count])
+                }
+                try db.execute(sql: """
+                    INSERT INTO process_sample_minute (time, hidden_count) VALUES (?, ?)
+                    ON CONFLICT(time) DO UPDATE SET hidden_count = MAX(hidden_count, excluded.hidden_count)
+                    """, arguments: [minute.time, minute.hiddenCount])
+            }
+
+            try db.execute(sql: "DELETE FROM sample WHERE time < ?", arguments: [cutoff])
+            try db.execute(sql: "DELETE FROM sample_accumulator WHERE time < ?", arguments: [cutoff])
+            try db.execute(sql: "DELETE FROM process_sample WHERE time < ?", arguments: [cutoff])
+            try db.execute(sql: "DELETE FROM process_sample_minute WHERE time < ?", arguments: [cutoff])
+            try db.execute(sql: "DELETE FROM series_sample WHERE time < ?", arguments: [cutoff])
+        }
+    }
+
+    public func processUsage(since: Date, until: Date = Date(), top: Int = 10) throws -> ProcessUsageHistory {
+        try db.read { db in
+            let rows = try Row.fetchAll(db, sql: """
+                SELECT name, cpu_sum, cpu_count, memory_sum, memory_count
+                FROM process_sample WHERE time >= ? AND time < ?
+                """, arguments: [since, until])
+            var minutesByName: [String: [(Double, Double)]] = [:]
+            for row in rows {
+                let name: String = row["name"]
+                let cpuSum: Double = row["cpu_sum"]
+                let cpuCount: Int64 = row["cpu_count"]
+                let memorySum: Double = row["memory_sum"]
+                let memoryCount: Int64 = row["memory_count"]
+                let cpuAverage = cpuCount > 0 ? cpuSum / Double(cpuCount) : 0
+                let memoryAverage = memoryCount > 0 ? memorySum / Double(memoryCount) : 0
+                minutesByName[name, default: []].append((cpuAverage, memoryAverage))
+            }
+            var cpuRanks: [ProcessUsageRank] = []
+            var memoryRanks: [ProcessUsageRank] = []
+            for (name, minutes) in minutesByName {
+                let averageCPU = minutes.map(\.0).reduce(0, +) / Double(minutes.count)
+                let averageMemory = minutes.map(\.1).reduce(0, +) / Double(minutes.count)
+                let rank = ProcessUsageRank(name: name, averageCPU: averageCPU,
+                                           averageMemoryBytes: averageMemory, minuteCount: minutes.count)
+                cpuRanks.append(rank)
+                memoryRanks.append(rank)
+            }
+            cpuRanks.sort { left, right in
+                if left.averageCPU != right.averageCPU { return left.averageCPU > right.averageCPU }
+                return left.name < right.name
+            }
+            memoryRanks.sort { left, right in
+                if left.averageMemoryBytes != right.averageMemoryBytes { return left.averageMemoryBytes > right.averageMemoryBytes }
+                return left.name < right.name
+            }
+            if top > 0 {
+                cpuRanks = Array(cpuRanks.prefix(top))
+                memoryRanks = Array(memoryRanks.prefix(top))
+            }
+            let hiddenCount: Int64 = try Int64.fetchOne(db, sql: """
+                SELECT COALESCE(MAX(hidden_count), 0) FROM process_sample_minute
+                WHERE time >= ? AND time < ?
+                """, arguments: [since, until]) ?? 0
+            let totalMinuteCount = Int(floor(until.timeIntervalSince(since) / 60.0))
+            return ProcessUsageHistory(byCPU: cpuRanks, byMemory: memoryRanks,
+                                      totalMinuteCount: totalMinuteCount, hiddenCount: Int(hiddenCount))
+        }
+    }
+
+    /// Stores one finished minute of individual series. Does nothing while series
+    /// collection is off. Two writers record the same minute by adding their sums and
+    /// counts, so the average keeps every observation. Pruning must cover the series table.
+    /// A minute at or before the last clear of this kind is dropped whole.
+    public func recordSeriesMinute(_ minute: FinishedSeriesMinute, now: Date = Date()) throws {
+        try db.write { db in
+            let stored: String? = try String.fetchOne(db, sql: "SELECT value FROM history_setting WHERE key = 'retentionSeconds'")
+            let effectiveRetention = stored.flatMap { Double($0) } ?? retention
+            let cutoff = now.addingTimeInterval(-effectiveRetention)
+
+            let enabled = try HistorySetting.seriesCollectionEnabled(db)
+            guard enabled else { return }
+            let wasCleared = try HistorySetting.wasCleared(minute.time, kind: .seriesSamples, db)
+            if !wasCleared {
+                for (series, totals) in minute.totals {
+                    guard totals.count > 0 else { continue }
+                    try db.execute(sql: """
+                        INSERT INTO series_sample (time, series, value_sum, value_count)
+                        VALUES (?, ?, ?, ?)
+                        ON CONFLICT(time, series) DO UPDATE SET
+                            value_sum = value_sum + excluded.value_sum,
+                            value_count = value_count + excluded.value_count
+                        """, arguments: [minute.time, series, totals.sum, totals.count])
+                }
+            }
+
+            try db.execute(sql: "DELETE FROM series_sample WHERE time < ?", arguments: [cutoff])
+        }
+    }
+
+    /// Every series with stored data, ordered by key, and the last minute it was seen.
+    public func availableSeries() throws -> [AvailableSeries] {
+        try db.read { db in
+            try Row.fetchAll(db, sql: """
+                SELECT series, MAX(time) AS lastSeen FROM series_sample
+                GROUP BY series ORDER BY series
+                """).map { row in
+                AvailableSeries(series: row["series"], lastSeen: row["lastSeen"])
+            }
+        }
+    }
+
+    /// Averages for `series` in `since..<until`, one point per stored minute and in time
+    /// order. A minute without an observation is absent, never zero.
+    public func seriesSamples(_ series: String, since: Date, until: Date = Date()) throws -> [SeriesSample] {
+        try db.read { db in
+            try Row.fetchAll(db, sql: """
+                SELECT time, value_sum / value_count AS value
+                FROM series_sample
+                WHERE series = ? AND time >= ? AND time < ?
+                ORDER BY time
+                """, arguments: [series, since, until]).map { row in
+                SeriesSample(time: row["time"], value: row["value"])
+            }
+        }
+    }
+
+    /// `seriesSamples` for several series in one query, keyed by series. A series without
+    /// stored minutes in the window is absent from the result.
+    public func seriesSamples(_ series: [String], since: Date, until: Date = Date()) throws -> [String: [SeriesSample]] {
+        guard !series.isEmpty else { return [:] }
+        return try db.read { db in
+            let placeholders = Array(repeating: "?", count: series.count).joined(separator: ", ")
+            var arguments = StatementArguments(series)
+            arguments += [since, until]
+            var result: [String: [SeriesSample]] = [:]
+            for row in try Row.fetchAll(db, sql: """
+                SELECT series, time, value_sum / value_count AS value
+                FROM series_sample
+                WHERE series IN (\(placeholders)) AND time >= ? AND time < ?
+                ORDER BY series, time
+                """, arguments: arguments) {
+                result[row["series"], default: []].append(SeriesSample(time: row["time"], value: row["value"]))
+            }
+            return result
+        }
+    }
 }
 
-/// Collects readings for the current minute and yields their averages when the minute ends.
+/// Collects readings for the current minute and yields their per-column sums and counts
+/// when the minute ends.
 public struct MinuteAccumulator: Sendable {
     private var minute: Date?
     private var sums: [String: (Double, Int)] = [:]
 
     public init() {}
 
-    /// Adds a reading; returns the finished previous minute's sample when `date` starts a new minute.
-    public mutating func add(_ column: String, _ value: Double, at date: Date = Date()) -> MetricSample? {
+    /// Adds a reading; returns the finished previous minute's totals when `date` starts
+    /// a new minute. The history store turns these totals into averages.
+    public mutating func addTracked(_ column: String, _ value: Double, at date: Date = Date()) -> FinishedMinute? {
         guard value.isFinite else { return nil }
         let m = Date(timeIntervalSince1970: (date.timeIntervalSince1970 / 60).rounded(.down) * 60)
-        var finished: MetricSample?
+        var finished: FinishedMinute?
         if let current = minute, current != m {
-            finished = flush(current)
+            finished = flushTracked(current)
         }
         minute = m
         let (s, n) = sums[column] ?? (0, 0)
@@ -129,12 +404,10 @@ public struct MinuteAccumulator: Sendable {
         return finished
     }
 
-    private mutating func flush(_ time: Date) -> MetricSample? {
+    private mutating func flushTracked(_ time: Date) -> FinishedMinute? {
         defer { sums = [:] }
         guard !sums.isEmpty else { return nil }
-        func avg(_ c: String) -> Double? { sums[c].map { $0.0 / Double($0.1) } }
-        return MetricSample(time: time, cpu: avg("cpu"), gpu: avg("gpu"), memory: avg("memory"), temperature: avg("temperature"),
-                            fan: avg("fan"), power: avg("power"), networkIn: avg("networkIn"), networkOut: avg("networkOut"),
-                            diskRead: avg("diskRead"), diskWrite: avg("diskWrite"), battery: avg("battery"))
+        let totals = sums.mapValues { ColumnTotals(sum: $0.0, count: $0.1) }
+        return FinishedMinute(time: time, totals: totals)
     }
 }

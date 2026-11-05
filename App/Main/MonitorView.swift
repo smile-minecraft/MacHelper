@@ -59,14 +59,19 @@ struct MonitorView: View {
                     return data.isEmpty ? nil : (m, data)
                 }
                 if shown.isEmpty {
-                    PixelEmptyState(art: "px.mascot", title: "No data yet",
-                                    message: "MacHelper records one averaged sample per minute while it runs, and keeps 7 days.") { EmptyView() }
+                    PixelEmptyState(art: "px.mascot",
+                                    title: hasEnabledModules ? "No data yet" : "No menu bar metrics selected",
+                                    message: hasEnabledModules
+                                        ? "MacHelper records one averaged sample per minute. Monitoring history is kept for 7 days by default; change the retention in Settings → General → Data management. Turn on Background recording in Settings to keep history after MacHelper quits."
+                                        : "Turn on at least one metric in Settings → Menu Bar to record its history. Process usage history has its own switch in Settings → General → Data management.") { EmptyView() }
                         .frame(minHeight: 360)
                 } else {
                     HairlinePanel(columns: 2) {
                         ForEach(shown, id: \.0.id) { m, data in chart(m, data) }
                     }
                 }
+                SeriesHistoryView(history: store.persistentHistory, range: range)
+                ProcessHistoryView(history: store.persistentHistory, range: range)
                 TopProcesses(store: store)
             }
             .padding(.horizontal, 28)
@@ -79,6 +84,10 @@ struct MonitorView: View {
         }
         .onAppear { store.watchProcesses(true) }
         .onDisappear { store.watchProcesses(false) }
+    }
+
+    private var hasEnabledModules: Bool {
+        MonitorModule.allCases.contains { store.isActive($0) }
     }
 
     private func points(_ live: SeriesKey, _ stored: KeyPath<MetricSample, Double?>) -> [ChartPoint] {
@@ -98,17 +107,25 @@ struct MonitorView: View {
             }
             Chart {
                 ForEach(data, id: \.0) { name, pts in
-                    ForEach(pts, id: \.date) { p in
-                        LineMark(x: .value("Time", p.date), y: .value("Value", p.value))
-                            .foregroundStyle(by: .value("Series", name))
-                            .interpolationMethod(.monotone)
-                            .lineStyle(StrokeStyle(lineWidth: 1.6))
-                    }
-                    if data.count == 1 {
-                        ForEach(pts, id: \.date) { p in
-                            AreaMark(x: .value("Time", p.date), y: .value("Value", p.value))
-                                .foregroundStyle(LinearGradient(colors: [m.color.opacity(0.25), m.color.opacity(0.02)], startPoint: .top, endPoint: .bottom))
+                    // Break the line where an expected bucket is missing so the chart never
+                    // paints across sleep, shutdown, or a stalled recorder. Each segment gets
+                    // its own series identity; the shared style value keeps one color and
+                    // one legend entry per metric.
+                    let segments = HistorySegments.split(pts, time: \.date, maxGap: segmentGap)
+                    ForEach(Array(segments.enumerated()), id: \.offset) { index, segment in
+                        let seriesKey = "\(name) · segment \(index)"
+                        ForEach(segment, id: \.date) { p in
+                            LineMark(x: .value("Time", p.date), y: .value("Value", p.value), series: .value("Segment", seriesKey))
+                                .foregroundStyle(by: .value("Series", name))
                                 .interpolationMethod(.monotone)
+                                .lineStyle(StrokeStyle(lineWidth: 1.6))
+                        }
+                        if data.count == 1 {
+                            ForEach(segment, id: \.date) { p in
+                                AreaMark(x: .value("Time", p.date), y: .value("Value", p.value), series: .value("Segment", seriesKey))
+                                    .foregroundStyle(LinearGradient(colors: [m.color.opacity(0.25), m.color.opacity(0.02)], startPoint: .top, endPoint: .bottom))
+                                    .interpolationMethod(.monotone)
+                            }
                         }
                     }
                 }
@@ -133,6 +150,12 @@ struct MonitorView: View {
             .transaction { $0.animation = nil }
         }
         .padding(16)
+    }
+
+    /// Live samples are at most 30 s apart; history uses one point per bucket. A delta
+    /// larger than this starts a new segment, so a single missing bucket breaks the line.
+    private var segmentGap: TimeInterval {
+        range == .live ? 45 : range.bucket
     }
 
     private var xFormat: Date.FormatStyle {
