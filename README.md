@@ -1,5 +1,7 @@
 # MacHelper
 
+English · [繁體中文](README.zh-Hant.md) · [简体中文](README.zh-Hans.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md)
+
 An all-in-one, fully local Mac utility for macOS 14 and later: fan control, a menu-bar system monitor,
 one-click cleanup, disk analysis, an app uninstaller and startup-item management. MIT licensed.
 
@@ -35,7 +37,8 @@ one-click cleanup, disk analysis, an app uninstaller and startup-item management
   disk charts.
 - **CLI** — everything scriptable for automation and AI agents: previews by default, `--json` everywhere.
   Run `machelper guide` for an overview and `machelper <command> --help` for each command.
-- **Languages** — English and Traditional Chinese (String Catalogs; see below to add one).
+- **Languages** — English, Traditional Chinese, Simplified Chinese, Japanese, Korean and Spanish (String
+  Catalogs; see below to add one). Settings → General → Language overrides the system language.
 
 ## Install
 
@@ -49,6 +52,10 @@ brew install --cask smile-minecraft/tap/machelper
 MacHelper isn't notarized by Apple yet, so macOS blocks the first launch. Open it once, then go to
 **System Settings → Privacy & Security** and click **Open Anyway**. Fan control and system cleanup need
 the helper: allow it in **System Settings → General → Login Items** when MacHelper asks.
+
+To see the whole disk, turn on MacHelper in **System Settings → Privacy & Security → Full Disk Access**.
+Folders under System Integrity Protection or owned by another user stay unreadable even then; that's
+macOS protecting them, and disk analysis lists them separately as protected.
 
 Checksums for each download are in `SHA256SUMS.txt` on the release page.
 
@@ -101,7 +108,9 @@ CI (`.github/workflows/ci.yml`) runs the tests and an ad-hoc signed build on eve
 Source strings are English. Translations live in String Catalogs:
 `App/Resources/Localizable.xcstrings`, `Sources/CleanEngine/Localizable.xcstrings` and
 `Sources/CleanEngine/Rules.xcstrings` (rule text, keyed `rule.<id>.title`). Open them in Xcode and add a
-language, or use `scripts/l10n/add.py`. After a build, `scripts/l10n/check.py` lists untranslated strings.
+language, or use `scripts/l10n/add.py --lang ja`. After a build, `scripts/l10n/check.py` lists strings missing in any
+shipped language. A new language also goes into `AppLanguage.all` (`App/Main/AppLanguage.swift`) for the language
+picker, and gets a README.
 
 ## License
 

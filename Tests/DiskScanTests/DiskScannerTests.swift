@@ -54,7 +54,7 @@ private final class Fixture {
         // Children sorted largest first; paths reconstruct correctly.
         #expect(root.children.first?.name == "big1.bin")
         let b = try #require(a.children.first { $0.name == "b" })
-        #expect(b.path == fx.root.resolvingSymlinksInPath().appending(path: "a/b").path)
+        #expect(b.path == DiskScanner.canonicalPath(fx.root) + "/a/b")
     }
 
     @Test func hardLinksCountedOnce() throws {

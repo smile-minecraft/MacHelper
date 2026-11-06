@@ -210,7 +210,7 @@ final class DiskAnalysisModel {
 
     /// The cache key for a scan location: the same resolved path the scanner records.
     private func cacheKey(for url: URL) -> String {
-        url.standardizedFileURL.resolvingSymlinksInPath().path
+        DiskScanner.canonicalPath(url)
     }
 
     private func loadVolume() {
@@ -471,6 +471,19 @@ final class DiskAnalysisModel {
 
     func quickLook(_ node: DiskNode) {
         previewURL = node.url
+    }
+
+    /// Folders of the current scan that couldn't be read for the given reason, sorted by path.
+    func unreadableFolders(_ kind: ReadFailure) -> [String] {
+        guard let root else { return [] }
+        var out: [String] = []
+        var stack = [root]
+        while let n = stack.popLast() {
+            if n.isDirectory, n.readError != 0, !n.skippedCloudOnly,
+               ReadFailure.classify(path: n.path, code: n.readError) == kind { out.append(n.path) }
+            stack.append(contentsOf: n.children)
+        }
+        return out.sorted()
     }
 
     func openFullDiskAccessSettings() {

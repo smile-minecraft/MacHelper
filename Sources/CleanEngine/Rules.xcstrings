@@ -181,16 +181,40 @@
     "detector.xcode.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Xcode 專案"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Xcode projects"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proyectos de Xcode"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode プロジェクト"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 프로젝트"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 项目"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 專案"
           }
         }
       }
@@ -215,6 +239,30 @@
             "value": "Web and graphics caches of the LM Studio window, rebuilt when it opens. Models and chats are kept."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés web y gráficas de la ventana de LM Studio, que se rehacen al abrirla. Se conservan los modelos y los chats."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio のウインドウの Web とグラフィックのキャッシュで、開くと作り直されます。モデルとチャットは残ります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio 윈도우의 웹 및 그래픽 캐시로, 열면 다시 만들어집니다. 모델과 채팅은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio 窗口的网页与绘图缓存，打开时会重新创建。模型和对话都会保留。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -230,6 +278,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "LM Studio app cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de la app LM Studio"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio の App キャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio 앱 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio App 缓存"
           }
         },
         "zh-Hant": {
@@ -249,6 +321,30 @@
             "value": "Local server logs older than a week. Models and chats are kept."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros del servidor local de hace más de una semana. Se conservan los modelos y los chats."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 週間より古いローカルサーバのログ。モデルとチャットは残ります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1주가 지난 로컬 서버 로그. 모델과 채팅은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超过一周的本地服务器日志文件。模型和对话都会保留。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -264,6 +360,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "LM Studio server logs"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros del servidor de LM Studio"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio のサーバログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio 서버 로그"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio 服务器日志文件"
           }
         },
         "zh-Hant": {
@@ -283,6 +403,30 @@
             "value": "Rotated server logs (server-1.log and older). The current log and models are kept."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros rotados del servidor (server-1.log y anteriores). Se conservan el registro actual y los modelos."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ローテーション済みのサーバログ（server-1.log とそれ以前）。現在のログとモデルは残ります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "순환된 서버 로그(server-1.log 및 이전). 현재 로그와 모델은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "轮替下来的服务器日志文件（server-1.log 及更旧的）。目前的日志文件和模型都会保留。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -298,6 +442,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ollama old logs"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros antiguos de Ollama"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama の古いログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama 이전 로그"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama 旧日志文件"
           }
         },
         "zh-Hant": {
@@ -317,6 +485,30 @@
             "value": "Saved prompt state that speeds up repeated requests. It is rebuilt as you use oMLX; models are not touched."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estado guardado de los prompts que acelera las peticiones repetidas. Se rehace al usar oMLX; los modelos no se tocan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "繰り返しのリクエストを速くするために保存されたプロンプトの状態です。oMLX を使うと作り直され、モデルには触れません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "반복 요청을 빠르게 하려고 저장한 프롬프트 상태입니다. oMLX를 사용하면 다시 만들어지며 모델은 건드리지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加快重复请求的提示状态缓存，使用 oMLX 时会重新创建；不会动到模型。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -332,6 +524,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "oMLX prompt cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de prompts de oMLX"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oMLX のプロンプトキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oMLX 프롬프트 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oMLX 提示缓存"
           }
         },
         "zh-Hant": {
@@ -351,6 +567,30 @@
             "value": "Rotated server logs from previous days. The current log and models are kept."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros rotados del servidor de días anteriores. Se conservan el registro actual y los modelos."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "前日までのローテーション済みのサーバログ。現在のログとモデルは残ります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 날짜의 순환된 서버 로그. 현재 로그와 모델은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "前几天轮替下来的服务器日志文件。目前的日志文件和模型都会保留。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -366,6 +606,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "oMLX old logs"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros antiguos de oMLX"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oMLX の古いログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oMLX 이전 로그"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oMLX 旧日志文件"
           }
         },
         "zh-Hant": {
@@ -385,6 +649,30 @@
             "value": "Offline caches that websites store through service workers. Sites download them again; pages that work offline need a connection the first time."
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés sin conexión que guardan los sitios web mediante service workers. Los sitios las vuelven a descargar; las páginas que funcionan sin conexión necesitarán conexión la primera vez."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web サイトが Service Worker 経由で保存するオフライン用キャッシュ。サイトが再ダウンロードします。オフラインで動くページは、最初の 1 回だけ接続が必要になります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹사이트가 서비스 워커로 저장하는 오프라인 캐시. 사이트가 다시 내려받으며, 오프라인으로 작동하는 페이지는 처음 한 번 연결이 필요합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网站透过 Service Worker 存的脱机缓存，网站会重新下载；可脱机使用的网页第一次需要连接。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -402,6 +690,30 @@
             "value": "Arc service worker caches"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés de service workers de Arc"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc の Service Worker キャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc 서비스 워커 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc Service Worker 缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -413,16 +725,40 @@
     "rule.browser.arc.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "網頁與程式碼快取。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Web and code caches."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés web y de código."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web とコードのキャッシュ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹 및 코드 캐시."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网页与代码缓存。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁與程式碼快取。"
           }
         }
       }
@@ -430,16 +766,40 @@
     "rule.browser.arc.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arc 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Arc cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Arc"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc 快取"
           }
         }
       }
@@ -447,16 +807,40 @@
     "rule.browser.brave.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "網頁與程式碼快取。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Web and code caches."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés web y de código."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web とコードのキャッシュ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹 및 코드 캐시."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网页与代码缓存。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁與程式碼快取。"
           }
         }
       }
@@ -464,16 +848,40 @@
     "rule.browser.brave.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Brave 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Brave cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Brave"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brave のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brave 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brave 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brave 快取"
           }
         }
       }
@@ -481,16 +889,40 @@
     "rule.browser.chrome.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "網頁與程式碼快取。不影響書籤、密碼與擴充功能。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Web and code caches. Bookmarks, passwords and extensions are not affected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés web y de código. No afecta a los marcadores, las contraseñas ni las extensiones."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web とコードのキャッシュ。ブックマーク、パスワード、拡張機能には影響しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹 및 코드 캐시. 북마크, 암호, 확장 프로그램에는 영향을 주지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网页与代码缓存。不影响书签、密码与扩充功能。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁與程式碼快取。不影響書籤、密碼與擴充功能。"
           }
         }
       }
@@ -498,16 +930,40 @@
     "rule.browser.chrome.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Google Chrome 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Google Chrome cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Google Chrome"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Chrome のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Chrome 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Chrome 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Chrome 快取"
           }
         }
       }
@@ -515,16 +971,40 @@
     "rule.browser.edge.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "網頁與程式碼快取。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Web and code caches."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés web y de código."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web とコードのキャッシュ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹 및 코드 캐시."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网页与代码缓存。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁與程式碼快取。"
           }
         }
       }
@@ -532,16 +1012,40 @@
     "rule.browser.edge.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Microsoft Edge 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Microsoft Edge cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Microsoft Edge"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft Edge のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft Edge 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft Edge 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft Edge 快取"
           }
         }
       }
@@ -549,16 +1053,40 @@
     "rule.browser.firefox.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "網頁快取（cache2）。不影響設定檔與書籤。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Web cache (cache2). Profiles and bookmarks are not affected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché web (cache2). No afecta a los perfiles ni a los marcadores."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web キャッシュ（cache2）。プロファイルとブックマークには影響しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹 캐시(cache2). 프로필과 북마크에는 영향을 주지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网页缓存（cache2）。不影响设置文件与书签。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁快取（cache2）。不影響設定檔與書籤。"
           }
         }
       }
@@ -566,16 +1094,40 @@
     "rule.browser.firefox.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Firefox 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Firefox cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Firefox"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firefox のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firefox 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firefox 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firefox 快取"
           }
         }
       }
@@ -583,16 +1135,40 @@
     "rule.browser.safari.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "網頁快取，下次瀏覽時會重新下載。不影響書籤、歷史紀錄與登入狀態。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Web cache, downloaded again as you browse. Bookmarks, history and sign-ins are not affected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché web que se vuelve a descargar al navegar. No afecta a los marcadores, el historial ni los inicios de sesión."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web キャッシュで、閲覧すると再ダウンロードされます。ブックマーク、履歴、サインインには影響しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹 캐시로, 탐색하면 다시 내려받습니다. 북마크, 방문 기록, 로그인에는 영향을 주지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网页缓存，下次浏览时会重新下载。不影响书签、历史记录与登录状态。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網頁快取，下次瀏覽時會重新下載。不影響書籤、歷史紀錄與登入狀態。"
           }
         }
       }
@@ -600,16 +1176,40 @@
     "rule.browser.safari.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Safari 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Safari cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Safari"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari 快取"
           }
         }
       }
@@ -621,6 +1221,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bun’s package download cache, downloaded again when needed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de descargas de paquetes de Bun; se vuelve a descargar cuando hace falta."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun のパッケージのダウンロードキャッシュで、必要なときに再ダウンロードされます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun의 패키지 다운로드 캐시로, 필요할 때 다시 내려받습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun 的套件下载缓存，需要时会重新下载。"
           }
         },
         "zh-Hant": {
@@ -640,6 +1264,30 @@
             "value": "Bun install cache"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de instalación de Bun"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun のインストールキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun 설치 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun 安装缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -651,16 +1299,40 @@
     "rule.dev.cargo.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rust crate 的壓縮檔與解壓縮後的原始碼，需要時會重新下載。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Rust crate archives and extracted sources, downloaded again when needed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos de crates de Rust y fuentes extraídas; se vuelven a descargar cuando hace falta."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rust の crate アーカイブと展開したソースで、必要なときに再ダウンロードされます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rust 크레이트 압축 파일과 압축 해제된 소스로, 필요할 때 다시 내려받습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rust crate 的压缩档与解压缩后的源代码，需要时会重新下载。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rust crate 的壓縮檔與解壓縮後的原始碼，需要時會重新下載。"
           }
         }
       }
@@ -668,16 +1340,40 @@
     "rule.dev.cargo.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cargo 套件快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Cargo registry cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché del registro de Cargo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargo のレジストリキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargo 레지스트리 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargo 套件缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargo 套件快取"
           }
         }
       }
@@ -685,16 +1381,40 @@
     "rule.dev.cocoapods.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pod 下載快取。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Pod download cache."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de descargas de pods."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pod のダウンロードキャッシュ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pod 다운로드 캐시."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pod 下载缓存。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pod 下載快取。"
           }
         }
       }
@@ -702,16 +1422,40 @@
     "rule.dev.cocoapods.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "CocoaPods 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "CocoaPods cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de CocoaPods"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CocoaPods のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CocoaPods 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CocoaPods 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CocoaPods 快取"
           }
         }
       }
@@ -723,6 +1467,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Package manager versions (pnpm, Yarn) Corepack downloaded, downloaded again when a project needs them."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versiones de gestores de paquetes (pnpm, Yarn) que descargó Corepack; se vuelven a descargar cuando un proyecto las necesita."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corepack がダウンロードしたパッケージマネージャ（pnpm、Yarn）のバージョンで、プロジェクトが必要とすると再ダウンロードされます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corepack이 내려받은 패키지 관리자(pnpm, Yarn) 버전으로, 프로젝트에 필요할 때 다시 내려받습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corepack 下载的套件管理工具版本（pnpm、Yarn），项目需要时会重新下载。"
           }
         },
         "zh-Hant": {
@@ -742,6 +1510,30 @@
             "value": "Corepack cache"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Corepack"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corepack のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corepack 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corepack 缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -757,6 +1549,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cached API responses of the gh command."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuestas de la API que guarda el comando gh."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gh コマンドがキャッシュした API の応答。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gh 명령이 캐시한 API 응답."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gh 指令缓存的 API 回应。"
           }
         },
         "zh-Hant": {
@@ -776,6 +1592,30 @@
             "value": "GitHub CLI cache"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de GitHub CLI"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub CLI のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub CLI 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub CLI 缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -787,16 +1627,40 @@
     "rule.dev.go.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "go build 的快取，會自動重建。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The go build cache, rebuilt automatically."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La caché de compilación de go; se rehace automáticamente."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "go のビルドキャッシュで、自動的に作り直されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "go 빌드 캐시로, 자동으로 다시 만들어집니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "go build 的缓存，会自动重建。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "go build 的快取，會自動重建。"
           }
         }
       }
@@ -804,16 +1668,40 @@
     "rule.dev.go.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Go 建置快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Go build cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de compilación de Go"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go のビルドキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go 빌드 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go 建置缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go 建置快取"
           }
         }
       }
@@ -821,16 +1709,40 @@
     "rule.dev.gradle.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "依賴與建置快取。下次建置會重新下載，可能需要較久時間。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Dependency and build caches. The next build downloads them again and may take longer."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés de dependencias y compilación. La siguiente compilación las descarga de nuevo y puede tardar más."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依存関係とビルドのキャッシュ。次のビルドで再ダウンロードされ、時間がかかることがあります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "종속성 및 빌드 캐시. 다음 빌드에서 다시 내려받으므로 오래 걸릴 수 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依赖与建置缓存。下次建置会重新下载，可能需要较久时间。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依賴與建置快取。下次建置會重新下載，可能需要較久時間。"
           }
         }
       }
@@ -838,16 +1750,40 @@
     "rule.dev.gradle.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gradle 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Gradle cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Gradle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gradle のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gradle 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gradle 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gradle 快取"
           }
         }
       }
@@ -855,16 +1791,40 @@
     "rule.dev.homebrew.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已下載的安裝檔。已安裝的套件不受影響。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Downloaded installers. Installed packages are not affected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instaladores descargados. No afecta a los paquetes instalados."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダウンロードしたインストーラ。インストール済みのパッケージには影響しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내려받은 설치 프로그램. 설치된 패키지에는 영향을 주지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已下载的安装包。已安装的套件不受影响。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已下載的安裝檔。已安裝的套件不受影響。"
           }
         }
       }
@@ -872,16 +1832,40 @@
     "rule.dev.homebrew.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Homebrew 下載快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Homebrew download cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de descargas de Homebrew"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew のダウンロードキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 다운로드 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 下载缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 下載快取"
           }
         }
       }
@@ -889,16 +1873,40 @@
     "rule.dev.node-gyp.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "編譯原生 Node 模組用的標頭檔。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Headers used to compile native Node modules."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabeceras para compilar módulos nativos de Node."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ネイティブの Node モジュールのコンパイルに使うヘッダ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "네이티브 Node 모듈을 컴파일하는 데 쓰는 헤더."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编译原生 Node 模块用的标头档。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編譯原生 Node 模組用的標頭檔。"
           }
         }
       }
@@ -906,16 +1914,40 @@
     "rule.dev.node-gyp.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "node-gyp 標頭檔快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "node-gyp headers cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de cabeceras de node-gyp"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "node-gyp のヘッダキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "node-gyp 헤더 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "node-gyp 标头档缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "node-gyp 標頭檔快取"
           }
         }
       }
@@ -927,6 +1959,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Debug logs npm writes on every run."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros de depuración que npm escribe en cada ejecución."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm が実行のたびに書き出すデバッグログ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm이 실행할 때마다 쓰는 디버그 로그."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 每次运行时写入的调试日志。"
           }
         },
         "zh-Hant": {
@@ -946,6 +2002,30 @@
             "value": "npm logs"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros de npm"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm のログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 로그"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 日志"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -957,16 +2037,40 @@
     "rule.dev.npm.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "npm 的下載快取（_cacache），需要時會重新下載。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "npm’s download cache (_cacache), downloaded again when needed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de descargas de npm (_cacache); se vuelve a descargar cuando hace falta."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm のダウンロードキャッシュ（_cacache）で、必要なときに再ダウンロードされます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 다운로드 캐시(_cacache)로, 필요할 때 다시 내려받습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 的下载缓存（_cacache），需要时会重新下载。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 的下載快取（_cacache），需要時會重新下載。"
           }
         }
       }
@@ -974,16 +2078,40 @@
     "rule.dev.npm.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "npm 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "npm cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de npm"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 快取"
           }
         }
       }
@@ -995,6 +2123,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "npm packages OpenCode downloads for its plug-ins and providers, downloaded again when needed. The OpenCode program itself is not affected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paquetes npm que descarga OpenCode para sus plug-ins y proveedores; se vuelven a descargar cuando hace falta. No afecta al programa OpenCode."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode がプラグインやプロバイダ用にダウンロードする npm パッケージで、必要なときに再ダウンロードされます。OpenCode 本体には影響しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode가 플러그인과 공급자용으로 내려받는 npm 패키지로, 필요할 때 다시 내려받습니다. OpenCode 프로그램 자체에는 영향을 주지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 为插件与模型供应商下载的 npm 套件，需要时会重新下载。OpenCode 程序本身不受影响。"
           }
         },
         "zh-Hant": {
@@ -1014,6 +2166,30 @@
             "value": "OpenCode package cache"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de paquetes de OpenCode"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode のパッケージキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 패키지 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 套件缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1025,16 +2201,40 @@
     "rule.dev.pip.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Python 套件下載快取。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Python package download cache."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de descargas de paquetes de Python."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Python パッケージのダウンロードキャッシュ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Python 패키지 다운로드 캐시."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Python 套件下载缓存。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Python 套件下載快取。"
           }
         }
       }
@@ -1042,16 +2242,40 @@
     "rule.dev.pip.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "pip 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "pip cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de pip"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pip のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pip 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pip 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pip 快取"
           }
         }
       }
@@ -1059,16 +2283,40 @@
     "rule.dev.playwright.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Playwright 下載的測試用瀏覽器，執行 npx playwright install 可重新下載。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Test browsers downloaded by Playwright; run npx playwright install to get them again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navegadores de prueba que descargó Playwright; ejecuta npx playwright install para obtenerlos de nuevo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright がダウンロードしたテスト用ブラウザ。npx playwright install で再取得できます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright가 내려받은 테스트 브라우저. npx playwright install로 다시 받을 수 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright 下载的测试用浏览器，运行 npx playwright install 可重新下载。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright 下載的測試用瀏覽器，執行 npx playwright install 可重新下載。"
           }
         }
       }
@@ -1076,16 +2324,40 @@
     "rule.dev.playwright.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Playwright 瀏覽器"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Playwright browsers"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navegadores de Playwright"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright のブラウザ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright 브라우저"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright 浏览器"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playwright 瀏覽器"
           }
         }
       }
@@ -1093,16 +2365,40 @@
     "rule.dev.pnpm.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "pnpm 的中繼資料快取。套件存放區（store）不在此列，請用 pnpm store prune。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "pnpm’s metadata cache. The package store is not included; use pnpm store prune for that."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de metadatos de pnpm. No incluye el almacén de paquetes; para eso usa pnpm store prune."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm のメタデータキャッシュ。パッケージストアは含みません（それには pnpm store prune を使います）。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm 메타데이터 캐시. 패키지 저장소는 포함하지 않으며, 그것은 pnpm store prune을 사용하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm 的中继数据缓存。套件存放区（store）不在此列，请用 pnpm store prune。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm 的中繼資料快取。套件存放區（store）不在此列，請用 pnpm store prune。"
           }
         }
       }
@@ -1110,16 +2406,40 @@
     "rule.dev.pnpm.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "pnpm 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "pnpm cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de pnpm"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pnpm 快取"
           }
         }
       }
@@ -1127,16 +2447,40 @@
     "rule.dev.swiftpm.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "下載過的套件來源，需要時會重新下載。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Downloaded package sources, downloaded again when needed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuentes de paquetes descargadas; se vuelven a descargar cuando hace falta."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダウンロードしたパッケージのソースで、必要なときに再ダウンロードされます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내려받은 패키지 소스로, 필요할 때 다시 내려받습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载过的套件来源，需要时会重新下载。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載過的套件來源，需要時會重新下載。"
           }
         }
       }
@@ -1144,16 +2488,40 @@
     "rule.dev.swiftpm.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Swift Package Manager 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Swift Package Manager cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Swift Package Manager"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swift Package Manager のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swift Package Manager 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swift Package Manager 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swift Package Manager 快取"
           }
         }
       }
@@ -1165,6 +2533,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Visual Studio Code’s web, code and GPU caches, downloaded extension packages and old logs. Settings, extensions and workspaces are not affected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés web, de código y de GPU de Visual Studio Code, paquetes de extensiones descargados y registros antiguos. No afecta a los ajustes, las extensiones ni los espacios de trabajo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visual Studio Code の Web、コード、GPU のキャッシュ、ダウンロードした拡張機能パッケージ、古いログ。設定、拡張機能、ワークスペースには影響しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visual Studio Code의 웹, 코드, GPU 캐시, 내려받은 확장 프로그램 패키지, 오래된 로그. 설정, 확장 프로그램, 작업 영역에는 영향을 주지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visual Studio Code 的网页、代码与 GPU 缓存、下载过的扩展安装包和旧日志。设置、扩展与工作区不受影响。"
           }
         },
         "zh-Hant": {
@@ -1184,6 +2576,30 @@
             "value": "VS Code caches and logs"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés y registros de VS Code"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VS Code のキャッシュとログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VS Code 캐시 및 로그"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VS Code 缓存与日志"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1195,16 +2611,40 @@
     "rule.dev.yarn.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Yarn 的套件快取。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Yarn’s package cache."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de paquetes de Yarn."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn のパッケージキャッシュ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn 패키지 캐시."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn 的套件缓存。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn 的套件快取。"
           }
         }
       }
@@ -1212,16 +2652,40 @@
     "rule.dev.yarn.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Yarn 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Yarn cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Yarn"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yarn 快取"
           }
         }
       }
@@ -1233,6 +2697,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oh My Zsh’s completion and plug-in cache, regenerated the next time a shell starts (that start is a little slower)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de autocompletado y plug-ins de Oh My Zsh; se regenera la próxima vez que se abre una shell (ese arranque es algo más lento)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh My Zsh の補完とプラグインのキャッシュで、次にシェルを起動したときに作り直されます（その起動は少し遅くなります）。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh My Zsh의 자동 완성 및 플러그인 캐시로, 다음에 셸을 시작할 때 다시 만들어집니다(그때는 조금 느려집니다)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh My Zsh 的补全与插件缓存，下次打开 shell 时重新产生（那次启动会稍慢）。"
           }
         },
         "zh-Hant": {
@@ -1252,6 +2740,30 @@
             "value": "Oh My Zsh cache"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de Oh My Zsh"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh My Zsh のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh My Zsh 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh My Zsh 缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -1263,16 +2775,40 @@
     "rule.simulator.caches.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "CoreSimulator 的動態快取，不影響模擬器裡的 App 與資料。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "CoreSimulator’s dynamic caches. Apps and data inside simulators are not affected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés dinámicas de CoreSimulator. No afecta a las apps ni a los datos de los simuladores."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CoreSimulator の動的キャッシュ。シミュレータ内の App とデータには影響しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CoreSimulator의 동적 캐시. 시뮬레이터 안의 앱과 데이터에는 영향을 주지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CoreSimulator 的动态缓存，不影响模拟器里的 App 与数据。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CoreSimulator 的動態快取，不影響模擬器裡的 App 與資料。"
           }
         }
       }
@@ -1280,16 +2816,40 @@
     "rule.simulator.caches.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "模擬器快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Simulator caches"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés de simuladores"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シミュレータのキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시뮬레이터 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模拟器缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模擬器快取"
           }
         }
       }
@@ -1297,16 +2857,40 @@
     "rule.user.caches.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "各 App 的快取資料夾，App 需要時會重建。Apple 系統元件的快取不在此列。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Each app’s cache folder, rebuilt by the app when needed. Caches of Apple system components are not included."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La carpeta de caché de cada app, que la app rehace cuando hace falta. No incluye las cachés de los componentes del sistema de Apple."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各 App のキャッシュフォルダで、必要なときに App が作り直します。Apple のシステムコンポーネントのキャッシュは含みません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "각 앱의 캐시 폴더로, 필요할 때 앱이 다시 만듭니다. Apple 시스템 구성 요소의 캐시는 포함하지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各 App 的缓存文件夹，App 需要时会重建。Apple 系统组件的缓存不在此列。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各 App 的快取資料夾，App 需要時會重建。Apple 系統元件的快取不在此列。"
           }
         }
       }
@@ -1314,16 +2898,40 @@
     "rule.user.caches.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App 快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "App caches"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés de apps"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 快取"
           }
         }
       }
@@ -1331,16 +2939,40 @@
     "rule.user.installers.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DMG、PKG、XIP、ISO 安裝檔。App 安裝完後通常就不需要了。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "DMG, PKG, XIP and ISO installers, usually no longer needed once the app is installed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instaladores DMG, PKG, XIP e ISO, que normalmente ya no hacen falta una vez instalada la app."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DMG、PKG、XIP、ISO のインストーラ。App をインストールしたあとは通常不要です。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DMG, PKG, XIP, ISO 설치 프로그램. 앱을 설치한 후에는 보통 필요 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DMG、PKG、XIP、ISO 安装包。App 安装完后通常就不需要了。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DMG、PKG、XIP、ISO 安裝檔。App 安裝完後通常就不需要了。"
           }
         }
       }
@@ -1348,16 +2980,40 @@
     "rule.user.installers.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "「下載」裡的安裝檔"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Installers in Downloads"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instaladores en Descargas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「ダウンロード」内のインストーラ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드 폴더의 설치 프로그램"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「下载」里的安装包"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「下載」裡的安裝檔"
           }
         }
       }
@@ -1365,16 +3021,40 @@
     "rule.user.ios-backups.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Finder 建立的本機裝置備份。刪除前請確認你有其他備份（例如 iCloud）。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Local device backups made by Finder. Make sure you have another backup (such as iCloud) before deleting."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copias de seguridad locales de dispositivos hechas con el Finder. Asegúrate de tener otra copia (por ejemplo, en iCloud) antes de eliminarlas."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder が作成したデバイスのローカルバックアップ。削除する前に、別のバックアップ（iCloud など）があることを確認してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder가 만든 기기의 로컬 백업. 삭제하기 전에 다른 백업(iCloud 등)이 있는지 확인하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder 创建的本地设备备份。删除前请确认你有其他备份（例如 iCloud）。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder 建立的本機裝置備份。刪除前請確認你有其他備份（例如 iCloud）。"
           }
         }
       }
@@ -1382,16 +3062,40 @@
     "rule.user.ios-backups.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "iPhone / iPad 備份"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "iPhone / iPad backups"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copias de seguridad de iPhone / iPad"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone / iPad のバックアップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone / iPad 백업"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone / iPad 备份"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone / iPad 備份"
           }
         }
       }
@@ -1399,16 +3103,40 @@
     "rule.user.logs.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App 寫下的日誌與 DiagnosticReports。MacHelper 自己的操作紀錄不會被清除。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Logs and DiagnosticReports written by apps. MacHelper’s own operation log is never removed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros y DiagnosticReports que escriben las apps. Nunca se elimina el registro de operaciones de MacHelper."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App が書き出したログと DiagnosticReports。MacHelper 自身の操作ログは削除されません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱이 남긴 로그와 DiagnosticReports. MacHelper의 작업 기록은 절대 제거되지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 写下的日志与 DiagnosticReports。MacHelper 自己的操作记录不会被清除。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 寫下的日誌與 DiagnosticReports。MacHelper 自己的操作紀錄不會被清除。"
           }
         }
       }
@@ -1416,16 +3144,40 @@
     "rule.user.logs.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App 日誌與當機報告"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "App logs and crash reports"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros e informes de fallos de apps"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App のログとクラッシュレポート"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 로그 및 충돌 보고서"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 日志与当机报告"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 日誌與當機報告"
           }
         }
       }
@@ -1433,16 +3185,40 @@
     "rule.user.mail-downloads.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "從「郵件」打開過的附件副本，原始郵件不受影響。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Copies of attachments opened in Mail. The original messages are not affected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copias de los adjuntos abiertos en Mail. No afecta a los mensajes originales."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メールで開いた添付ファイルのコピー。元のメッセージには影響しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mail에서 연 첨부 파일의 사본. 원본 메시지에는 영향을 주지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从「邮件」打开过的附件副本，原始邮件不受影响。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從「郵件」打開過的附件副本，原始郵件不受影響。"
           }
         }
       }
@@ -1450,16 +3226,40 @@
     "rule.user.mail-downloads.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "郵件附件下載"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Mail attachment downloads"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descargas de adjuntos de Mail"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メールの添付ファイルのダウンロード"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mail 첨부 파일 다운로드"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "邮件附件下载"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "郵件附件下載"
           }
         }
       }
@@ -1467,16 +3267,40 @@
     "rule.user.old-downloads.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "請先確認清單：這裡可能有你想保留的檔案。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Check the list first: there may be files here you want to keep."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revisa primero la lista: puede haber archivos que quieras conservar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "先に一覧を確認してください。残したいファイルがあるかもしれません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "먼저 목록을 확인하십시오. 보관하고 싶은 파일이 있을 수 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请先确认清单：这里可能有你想保留的文件。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請先確認清單：這裡可能有你想保留的檔案。"
           }
         }
       }
@@ -1484,16 +3308,40 @@
     "rule.user.old-downloads.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "「下載」裡超過 90 天的檔案"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Files in Downloads older than 90 days"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos de Descargas con más de 90 días"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「ダウンロード」内の 90 日より古いファイル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다운로드 폴더에서 90일이 지난 파일"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「下载」里超过 90 天的文件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「下載」裡超過 90 天的檔案"
           }
         }
       }
@@ -1501,16 +3349,40 @@
     "rule.user.trash.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "永久刪除垃圾桶裡的項目，無法復原。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Permanently deletes the items in the Trash. This can’t be undone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina de forma permanente los elementos de la Papelera. No se puede deshacer."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゴミ箱の中身を完全に削除します。元に戻せません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "휴지통의 항목을 영구적으로 삭제합니다. 되돌릴 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永久删除废纸篓里的项目，无法撤销。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永久刪除垃圾桶裡的項目，無法復原。"
           }
         }
       }
@@ -1518,16 +3390,40 @@
     "rule.user.trash.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "垃圾桶"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Trash"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Papelera"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゴミ箱"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "휴지통"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "废纸篓"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "垃圾桶"
           }
         }
       }
@@ -1535,16 +3431,40 @@
     "rule.xcode.archives.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "舊版本的封存檔。刪除後就無法用它來符號化舊版的當機報告，請確認不再需要。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Archives of old builds. Without them you can’t symbolicate crash reports from those versions, so make sure you no longer need them."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos de compilaciones antiguas. Sin ellos no puedes simbolizar informes de fallos de esas versiones, así que asegúrate de que ya no los necesitas."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "古いビルドのアーカイブ。これがないとそのバージョンのクラッシュレポートをシンボル化できないので、もう必要ないことを確認してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 빌드의 아카이브. 없으면 해당 버전의 충돌 보고서를 기호화할 수 없으므로 더 이상 필요 없는지 확인하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旧版本的封存盘。删除后就无法用它来符号化旧版的当机报告，请确认不再需要。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "舊版本的封存檔。刪除後就無法用它來符號化舊版的當機報告，請確認不再需要。"
           }
         }
       }
@@ -1552,16 +3472,40 @@
     "rule.xcode.archives.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Xcode Archives（超過 180 天）"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Xcode Archives (older than 180 days)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos de Xcode (más de 180 días)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode のアーカイブ（180 日より古いもの）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 아카이브(180일 경과)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode Archives（超过 180 天）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode Archives（超過 180 天）"
           }
         }
       }
@@ -1569,16 +3513,40 @@
     "rule.xcode.derived-data.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "建置中間產物與索引。下次建置會重新產生（第一次會比較慢）。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Intermediate build products and indexes, regenerated on the next build (which is slower the first time)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Productos intermedios de compilación e índices; se regeneran en la siguiente compilación (que la primera vez es más lenta)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中間ビルド成果物とインデックスで、次のビルドで作り直されます（最初は遅くなります）。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "중간 빌드 산출물과 색인으로, 다음 빌드에서 다시 만들어집니다(처음에는 느림)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "建置中间产物与索引。下次建置会重新产生（第一次会比较慢）。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "建置中間產物與索引。下次建置會重新產生（第一次會比較慢）。"
           }
         }
       }
@@ -1597,16 +3565,40 @@
     "rule.xcode.device-support.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "連接實機除錯時下載的符號檔。超過 30 天未用的版本，下次接上該版本裝置時會重新下載。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Symbols downloaded when debugging on a device. Versions unused for 30 days are downloaded again the next time you connect such a device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Símbolos descargados al depurar en un dispositivo. Las versiones sin usar en 30 días se vuelven a descargar la próxima vez que conectes ese dispositivo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デバイスでデバッグするときにダウンロードされたシンボル。30 日使われていないバージョンは、そのデバイスを次に接続したときに再ダウンロードされます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기기에서 디버깅할 때 내려받은 기호. 30일 동안 쓰지 않은 버전은 해당 기기를 다음에 연결할 때 다시 내려받습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接实机调试时下载的符号档。超过 30 天未用的版本，下次接上该版本设备时会重新下载。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連接實機除錯時下載的符號檔。超過 30 天未用的版本，下次接上該版本裝置時會重新下載。"
           }
         }
       }
@@ -1614,16 +3606,40 @@
     "rule.xcode.device-support.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "裝置支援檔（iOS / watchOS / tvOS DeviceSupport）"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Device support files (iOS / watchOS / tvOS DeviceSupport)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos de soporte de dispositivos (iOS / watchOS / tvOS DeviceSupport)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デバイスサポートファイル（iOS / watchOS / tvOS DeviceSupport）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기기 지원 파일(iOS / watchOS / tvOS DeviceSupport)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设备支持文件（iOS / watchOS / tvOS DeviceSupport）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "裝置支援檔（iOS / watchOS / tvOS DeviceSupport）"
           }
         }
       }
@@ -1631,16 +3647,40 @@
     "rule.xcode.previews.description": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Xcode Previews 的模擬環境，需要時會重建。"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Simulated environments for Xcode Previews, rebuilt when needed."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entornos simulados para las previsualizaciones de Xcode; se rehacen cuando hace falta."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode プレビュー用のシミュレーション環境で、必要なときに作り直されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 미리 보기용 시뮬레이션 환경으로, 필요할 때 다시 만들어집니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode Previews 的模拟环境，需要时会重建。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode Previews 的模擬環境，需要時會重建。"
           }
         }
       }
@@ -1648,16 +3688,40 @@
     "rule.xcode.previews.title": {
       "extractionState": "manual",
       "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SwiftUI 預覽快取"
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "SwiftUI previews cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché de previsualizaciones de SwiftUI"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SwiftUI プレビューのキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SwiftUI 미리 보기 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SwiftUI 预览缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SwiftUI 預覽快取"
           }
         }
       }
@@ -1669,6 +3733,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Simulator clones Xcode creates for parallel testing, created again on the next parallel test run."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clones de simuladores que crea Xcode para pruebas en paralelo; se vuelven a crear en la siguiente ejecución en paralelo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "並列テスト用に Xcode が作るシミュレータのクローンで、次の並列テストで再び作られます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode가 병렬 테스트용으로 만드는 시뮬레이터 복제본으로, 다음 병렬 테스트 때 다시 만들어집니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 平行测试时创建的模拟器复本，下次平行测试会重新创建。"
           }
         },
         "zh-Hant": {
@@ -1686,6 +3774,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "XCTest devices"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dispositivos de XCTest"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "XCTest デバイス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "XCTest 기기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "XCTest 测试设备"
           }
         },
         "zh-Hant": {

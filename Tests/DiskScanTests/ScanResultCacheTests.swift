@@ -44,7 +44,7 @@ private final class Scratch {
     }
 
     func resolved(_ url: URL) -> String {
-        url.resolvingSymlinksInPath().path
+        DiskScanner.canonicalPath(url)
     }
 }
 

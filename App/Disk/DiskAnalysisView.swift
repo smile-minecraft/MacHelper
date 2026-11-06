@@ -8,6 +8,7 @@ struct DiskAnalysisView: View {
     @State private var sideTab: SideTab = .contents
     @State private var confirmTrash = false
     @State private var dropTargeted = false
+    @State private var showProtected = false
 
     enum SideTab: String, CaseIterable, Identifiable {
         case contents, largest, duplicates, changes, insights
@@ -210,11 +211,22 @@ struct DiskAnalysisView: View {
             }
             .font(.mhCaption)
         }
-        if model.progress.unreadableDirectories > model.progress.cloudOnlyDirectories {
+        if model.progress.inaccessibleDirectories > 0 {
             HStack {
                 Image(systemName: "lock.fill").foregroundStyle(Theme.orange)
-                Text("\(model.progress.unreadableDirectories - model.progress.cloudOnlyDirectories) folders couldn’t be read; the results are incomplete.")
+                Text("\(model.progress.inaccessibleDirectories) folders couldn’t be read; the results are incomplete.")
                 Button("Open Full Disk Access Settings") { model.openFullDiskAccessSettings() }.buttonStyle(.link)
+            }
+            .font(.mhCaption)
+        }
+        // Expected on a whole-disk scan: no app may read these, so it's a quiet note, not a warning.
+        if model.progress.protectedDirectories > 0 {
+            HStack {
+                Image(systemName: "lock.shield").foregroundStyle(Palette.textMuted)
+                Text("\(model.progress.protectedDirectories) system folders are protected by macOS and weren’t measured. This is normal.")
+                    .foregroundStyle(Palette.textMuted)
+                Button("Show") { showProtected = true }.buttonStyle(.link)
+                    .popover(isPresented: $showProtected, arrowEdge: .bottom) { ProtectedFoldersList(paths: model.unreadableFolders(.protectedBySystem)) }
             }
             .font(.mhCaption)
         }
@@ -487,5 +499,26 @@ private struct InsightsList: View {
             if node.isDirectory { model.zoom(to: node) } else { model.quickLook(node) }
         }
         .contextMenu { if let node { NodeMenu(model: model, node: node) } }
+    }
+}
+
+/// The folders macOS keeps from every app, listed so the note above can be checked.
+private struct ProtectedFoldersList: View {
+    let paths: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Protected by macOS").font(.mhHeadline)
+            Text("System Integrity Protection, data vaults, and folders that belong to the system or another user account. Full Disk Access doesn’t open them to any app.")
+                .font(.mhCaption).foregroundStyle(Palette.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            List(paths, id: \.self) { path in
+                Text(path).font(.mhCaption).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+            }
+            .listStyle(.plain)
+            .frame(minHeight: 160)
+        }
+        .padding(14)
+        .frame(width: 460, height: 340)
     }
 }

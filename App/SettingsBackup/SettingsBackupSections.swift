@@ -46,9 +46,7 @@ struct GeneralSettingsSection: SettingsSection {
                                 domainName: String? = Bundle.main.bundleIdentifier) -> String? {
         let domain = domainName.flatMap { defaults.persistentDomain(forName: $0) }
         guard let first = (domain?["AppleLanguages"] as? [String])?.first else { return nil }
-        if first.hasPrefix("zh") { return "zh-Hant" }
-        if first.hasPrefix("en") { return "en" }
-        return nil
+        return AppLanguage.match(first)
     }
 
     private var payload: GeneralSettingsPayload {
@@ -65,8 +63,8 @@ struct GeneralSettingsSection: SettingsSection {
         do { incoming = try SettingsBackupJSON.decode(GeneralSettingsPayload.self, from: data) }
         catch { return .invalid(String(describing: error)) }
 
-        if let language = incoming.language, language != "en", language != "zh-Hant" {
-            return .invalid(String(localized: "The language must be en, zh-Hant, or null."))
+        if let language = incoming.language, !AppLanguage.codes.contains(language) {
+            return .invalid(String(localized: "The language must be one of \(AppLanguage.codes.joined(separator: ", ")), or null."))
         }
         do {
             return .valid(SettingsPayload(data: try SettingsBackupJSON.encode(incoming),

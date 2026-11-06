@@ -22,14 +22,67 @@ public struct ScanProgress: Sendable, Codable {
     /// Directories that were skipped because they are cloud-only (dataless) or failed with EDEADLK.
     /// They are also counted in `unreadableDirectories`, so partial results are never reported as complete.
     public var cloudOnlyDirectories: Int
+    /// Directories macOS keeps from every app, whatever its permissions: System Integrity Protection,
+    /// data vaults, and folders owned by root or another account. Full Disk Access doesn't change
+    /// them, so they don't make a scan incomplete. Also counted in `unreadableDirectories`.
+    public var protectedDirectories: Int
+
+    /// Unreadable directories that are neither cloud-only nor protected by macOS: usually missing
+    /// Full Disk Access. Only these make a result incomplete.
+    public var inaccessibleDirectories: Int { max(0, unreadableDirectories - cloudOnlyDirectories - protectedDirectories) }
 
     public init(files: Int, directories: Int, bytes: UInt64, unreadableDirectories: Int,
-                cloudOnlyDirectories: Int = 0) {
+                cloudOnlyDirectories: Int = 0, protectedDirectories: Int = 0) {
         self.files = files
         self.directories = directories
         self.bytes = bytes
         self.unreadableDirectories = unreadableDirectories
         self.cloudOnlyDirectories = cloudOnlyDirectories
+        self.protectedDirectories = protectedDirectories
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case files, directories, bytes, unreadableDirectories, cloudOnlyDirectories, protectedDirectories
+    }
+
+    // Saved scans from before protectedDirectories existed decode with 0.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(files: try c.decode(Int.self, forKey: .files), directories: try c.decode(Int.self, forKey: .directories),
+                  bytes: try c.decode(UInt64.self, forKey: .bytes),
+                  unreadableDirectories: try c.decode(Int.self, forKey: .unreadableDirectories),
+                  cloudOnlyDirectories: try c.decodeIfPresent(Int.self, forKey: .cloudOnlyDirectories) ?? 0,
+                  protectedDirectories: try c.decodeIfPresent(Int.self, forKey: .protectedDirectories) ?? 0)
+    }
+}
+
+/// Why a directory couldn't be read, as far as the person scanning can do anything about it.
+public enum ReadFailure: Sendable, Equatable {
+    /// Protected by macOS whatever the app's permissions (see `ScanProgress.protectedDirectories`).
+    case protectedBySystem
+    /// Probably needs Full Disk Access, or the folder's own permissions shut the user out.
+    case inaccessible
+
+    /// EPERM outside the home folder and external drives is System Integrity Protection or a data
+    /// vault; inside them it is privacy protection (TCC), which Full Disk Access lifts. EACCES on a
+    /// folder owned by another account is plain Unix permissions, which no app permission changes.
+    public static func classify(path: String, code: Int32, home: String = NSHomeDirectory(),
+                                ownerUID: (String) -> uid_t? = ReadFailure.owner) -> ReadFailure {
+        // A whole-disk scan sees the home folder through the Data volume's path.
+        let p = path.hasPrefix("/System/Volumes/Data/") ? String(path.dropFirst("/System/Volumes/Data".count)) : path
+        let userSpace = p == home || p.hasPrefix(home + "/") || p.hasPrefix("/Volumes/")
+        switch code {
+        case EPERM: return userSpace ? .inaccessible : .protectedBySystem
+        case EACCES:
+            if let uid = ownerUID(path), uid != getuid() { return .protectedBySystem }
+            return .inaccessible
+        default: return .inaccessible
+        }
+    }
+
+    public static func owner(_ path: String) -> uid_t? {
+        var st = stat()
+        return lstat(path, &st) == 0 ? st.st_uid : nil
     }
 }
 
@@ -65,6 +118,14 @@ public final class DiskScanner: @unchecked Sendable {
 
     private var isCancelled: Bool { lock.withLock { cancelled } }
 
+    /// The path a scan of `url` reports as its root (and caches under).
+    /// realpath, not resolvingSymlinksInPath: Foundation strips "/private" ("/private/var" → "/var"),
+    /// which is a symlink and can't be opened with O_NOFOLLOW.
+    public static func canonicalPath(_ url: URL) -> String {
+        realpath(url.path, nil).map { p in defer { free(p) }; return String(cString: p) }
+            ?? url.standardizedFileURL.resolvingSymlinksInPath().path
+    }
+
     /// Blocking. Call from a background task.
     public func scan(_ url: URL) throws -> ScanResult {
         try ThreadMaterializePolicy.withBan { try scanProtected(url) }
@@ -72,7 +133,7 @@ public final class DiskScanner: @unchecked Sendable {
 
     private func scanProtected(_ url: URL) throws -> ScanResult {
         let start = Date()
-        let rootPath = url.standardizedFileURL.resolvingSymlinksInPath().path
+        let rootPath = Self.canonicalPath(url)
         var st = stat()
         guard lstat(rootPath, &st) == 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .ENOENT) }
         let rootDevice = Int32(st.st_dev)
@@ -128,15 +189,25 @@ public final class DiskScanner: @unchecked Sendable {
                                buffer: UnsafeMutablePointer<MHDirEntry>, capacity: Int) -> [(DiskNode, String)] {
         /// Records a directory read failure once, including the cloud-only distinction.
         func recordReadFailure(_ code: Int32) {
+            // ERANGE: a nullfs mirror such as an App Translocation mount, whose contents are counted
+            // where they really are. Not a folder the user owns, so not a failure either.
+            if code == ERANGE { return }
             node.readError = code
             if code == EDEADLK { node.skippedCloudOnly = true }
+            let protected = code != EDEADLK && ReadFailure.classify(path: path, code: code) == .protectedBySystem
             lock.withLock {
                 counters.unreadableDirectories += 1
                 if code == EDEADLK { counters.cloudOnlyDirectories += 1 }
+                if protected { counters.protectedDirectories += 1 }
             }
         }
 
-        let fd = open(path, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        // A signal can interrupt the open or the read (EINTR); that is worth another try.
+        var fd: Int32 = -1
+        for _ in 0..<5 {
+            fd = open(path, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+            if fd >= 0 || errno != EINTR { break }
+        }
         guard fd >= 0 else {
             recordReadFailure(errno)
             return []
@@ -150,10 +221,16 @@ public final class DiskScanner: @unchecked Sendable {
         var shared: [SharedFile] = []
         let enumerate = directoryEnumeration ?? mh_read_dir_entries
 
+        var interruptions = 0
         while true {
             let n = enumerate(fd, buffer, Int32(capacity))
             if n < 0 {
-                recordReadFailure(errno)
+                let code = errno
+                if code == EINTR, interruptions < 5 {
+                    interruptions += 1
+                    continue
+                }
+                recordReadFailure(code)
                 break
             }
             if n == 0 { break }

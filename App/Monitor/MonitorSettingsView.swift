@@ -98,21 +98,20 @@ private struct ModuleRow: View {
 /// Overrides the app's language (the AppleLanguages default in MacHelper's own domain); takes effect
 /// after a relaunch. "System" removes the override.
 struct LanguagePicker: View {
-    private static let options: [(code: String?, name: String?)] = [(nil, nil), ("en", "English"), ("zh-Hant", "繁體中文")]
     @State private var selection: String = Self.current ?? "system"
     @State private var changed = false
 
     private static var current: String? {
         UserDefaults.standard.persistentDomain(forName: Bundle.main.bundleIdentifier ?? "")?["AppleLanguages"]
             .flatMap { ($0 as? [String])?.first }
-            .map { $0.hasPrefix("zh") ? "zh-Hant" : "en" }
+            .map { AppLanguage.match($0) ?? "en" }
     }
 
     var body: some View {
         HStack {
             Picker("Language", selection: $selection) {
                 Text("System Default").tag("system")
-                ForEach(Self.options.compactMap { o in o.code.map { ($0, o.name!) } }, id: \.0) { code, name in
+                ForEach(AppLanguage.all, id: \.code) { code, name in
                     Text(verbatim: name).tag(code)
                 }
             }

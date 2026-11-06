@@ -6,7 +6,7 @@ import Foundation
 public enum AgentSkill {
     public static let name = "machelper"
     /// Bump when the text changes: installed copies are refreshed when the app starts.
-    public static let version = 1
+    public static let version = 2
     static let marker = "<!-- managed by MacHelper: skill version"
 
     public struct Target: Sendable, Identifiable, Hashable {
@@ -85,6 +85,8 @@ public enum AgentSkill {
            With `--json`, errors come back as `{"schemaVersion":1,"error":{"message":…}}`.
         6. A scan that reports `"status": "partial"` couldn't read some folders. Tell the user to give their
            terminal app Full Disk Access (System Settings → Privacy & Security) for a complete result.
+           `protectedDirectories` are folders macOS keeps from every app (SIP, data vaults, other accounts):
+           expected on a whole-disk scan, nothing to fix.
         7. If `analyze` or `insights` prints that it is waiting, macOS is showing a permission dialog: ask the
            user to answer it. Scanning a specific folder (`~/Downloads`, a project folder) is faster than `~`.
 

@@ -3,6 +3,30 @@
   "strings": {
     "%@ is running": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ está abierto"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ が実行中です"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 실행 중"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 正在运行"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13,6 +37,30 @@
     },
     "%lld items not processed: %@": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld elementos sin procesar: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 項目は未処理: %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld개 항목 처리되지 않음: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 项未处理：%@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23,6 +71,30 @@
     },
     "App Group declared by the app": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Group declarado por la app"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App が宣言している App Group"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱이 선언한 App Group"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 声明的 App Group"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -33,6 +105,30 @@
     },
     "App bundle": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paquete de la app"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App バンドル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 번들"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 本体"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -43,6 +139,30 @@
     },
     "App data (Application Support)": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos de la app (Application Support)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App のデータ（Application Support）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 데이터(Application Support)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 数据（Application Support）"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -53,6 +173,30 @@
     },
     "App is running": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La app está abierta"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App が実行中"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 실행 중"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 正在运行"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -63,6 +207,30 @@
     },
     "Background items": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ítems en segundo plano"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バックグラウンド項目"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "백그라운드 항목"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后台启动项"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -73,6 +241,30 @@
     },
     "Background items for all users": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ítems en segundo plano de todos los usuarios"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてのユーザのバックグラウンド項目"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 사용자의 백그라운드 항목"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有用户的后台项目"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -83,6 +275,30 @@
     },
     "Built-in Apple app, managed by macOS": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App integrada de Apple gestionada por macOS"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS が管理する Apple 内蔵の App"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS가 관리하는 내장 Apple 앱"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 内置 App，由 macOS 管理"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -93,6 +309,30 @@
     },
     "Bundle ID matches": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coincide el ID de paquete"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バンドル ID が一致"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "번들 ID 일치"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bundle ID 相符"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -103,6 +343,30 @@
     },
     "Caches": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -113,6 +377,30 @@
     },
     "Clears the preview thumbnail cache and reloads QuickLook plug-ins, fixing wrong or stale thumbnails.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borra la caché de miniaturas y vuelve a cargar los plug-ins de Vista rápida, para corregir miniaturas erróneas o desactualizadas."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プレビューのサムネールキャッシュを消去し、クイックルックのプラグインを読み込み直して、間違ったサムネールや古いサムネールを直します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "미리 보기 썸네일 캐시를 지우고 훑어보기 플러그인을 다시 불러와 잘못되거나 오래된 썸네일을 고칩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除预览缩略图缓存并重新加载 QuickLook 插件，修正缩略图错误或过时。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -123,6 +411,30 @@
     },
     "Commands (~/.local/bin)": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comandos (~/.local/bin)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コマンド（~/.local/bin）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "명령(~/.local/bin)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指令（~/.local/bin）"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -133,6 +445,30 @@
     },
     "Container metadata names the app": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los metadatos del contenedor nombran la app"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コンテナのメタデータに App 名がある"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "컨테이너 메타데이터에 앱 이름이 있음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器信息指向这个 App"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -143,6 +479,30 @@
     },
     "Crash reports": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informes de fallos"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クラッシュレポート"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "충돌 보고서"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当机报告"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -153,6 +513,30 @@
     },
     "Data in your home folder (~/.name)": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos en tu carpeta de inicio (~/.nombre)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ホームフォルダ内のデータ（~/.name）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "홈 폴더의 데이터(~/.name)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "家目录里的数据（~/.名称）"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -163,6 +547,30 @@
     },
     "Delete unavailable simulators": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar simuladores no disponibles"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用できないシミュレータを削除"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용할 수 없는 시뮬레이터 삭제"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除无法使用的模拟器"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -173,6 +581,30 @@
     },
     "Docker cleanup": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpieza de Docker"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker のクリーンアップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker 정리"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker 清理"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -183,6 +615,30 @@
     },
     "Fixes duplicate or wrong entries in the Open With menu. Resets default apps for file types and takes a few minutes.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corrige entradas duplicadas o erróneas en el menú Abrir con. Restablece las apps predeterminadas por tipo de archivo y tarda unos minutos."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「このアプリケーションで開く」メニューの重複や間違った項目を直します。ファイルの種類ごとのデフォルト App がリセットされ、数分かかります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‘다음으로 열기’ 메뉴의 중복되거나 잘못된 항목을 고칩니다. 파일 유형별 기본 앱이 재설정되며 몇 분 걸립니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修正「打开方式」菜单重复或错误。会重置文件类型的默认 App，需要几分钟。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -193,6 +649,30 @@
     },
     "Flush the DNS cache": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vaciar la caché DNS"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS キャッシュを消去"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DNS 캐시 비우기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除 DNS 缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -203,6 +683,30 @@
     },
     "Free inactive memory": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liberar memoria inactiva"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "非アクティブなメモリを解放"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "비활성 메모리 확보"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "释放闲置内存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -213,6 +717,30 @@
     },
     "Helper or extension inside the app": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asistente o extensión dentro de la app"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 内のヘルパーまたは拡張機能"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 안의 도우미 또는 확장 프로그램"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 内的辅助程序或延伸功能"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -223,6 +751,30 @@
     },
     "Homebrew: remove old versions": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew: eliminar versiones antiguas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew: 古いバージョンを削除"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew: 이전 버전 제거"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 清理旧版本"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -233,6 +785,30 @@
     },
     "Its app no longer exists": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Su app ya no existe"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App がもう存在しません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "해당 앱이 더 이상 없음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对应的 App 已不存在"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -243,6 +819,30 @@
     },
     "It’s a git repository, possibly your own settings or project": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es un repositorio git; puede que sean tus ajustes o un proyecto tuyo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "git リポジトリです。自分の設定やプロジェクトかもしれません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "git 저장소이며 내 설정이나 프로젝트일 수 있음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "是 git 保存库，可能是你自己的设置或项目"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -253,6 +853,30 @@
     },
     "Listed by Homebrew": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indicado por Homebrew"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew の一覧に記載"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 목록에 있음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 清单列出"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -263,6 +887,30 @@
     },
     "Logs": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로그"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日志"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -273,6 +921,30 @@
     },
     "MacHelper itself": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El propio MacHelper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 自身"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 자체"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 自己"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -283,6 +955,30 @@
     },
     "MacHelper rule": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regla de MacHelper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper のルール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 규칙"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 规则"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -293,6 +989,30 @@
     },
     "MacHelper rule: doesn’t belong to this app": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regla de MacHelper: no pertenece a esta app"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper のルール: この App のものではありません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 규칙: 이 앱의 것이 아님"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 规则：不属于这个 App"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -303,6 +1023,30 @@
     },
     "Matched by app name, please check": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coincide por nombre de app; compruébalo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 名で一致。確認してください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 이름으로 일치, 확인하십시오"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依 App 名称比对，请确认"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -313,6 +1057,30 @@
     },
     "Matched by developer name, please check": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coincide por nombre del desarrollador; compruébalo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開発元名で一致。確認してください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "개발자 이름으로 일치, 확인하십시오"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依开发者名称比对，请确认"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -323,6 +1091,30 @@
     },
     "Plug-ins and extensions": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plug-ins y extensiones"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プラグインと拡張機能"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "플러그인 및 확장 프로그램"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插件与延伸功能"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -333,6 +1125,30 @@
     },
     "Preferences": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferencias"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "環境設定"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "환경설정"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "偏好设置"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -343,6 +1159,30 @@
     },
     "Purges the disk cache (purge). macOS manages this itself, so it’s rarely needed; file reads are slower for a while afterwards.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vacía la caché de disco (purge). macOS la gestiona solo, así que rara vez hace falta; después la lectura de archivos va más lenta durante un rato."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ディスクキャッシュを消去します（purge）。macOS が自分で管理しているため必要になることはまれで、実行後しばらくはファイルの読み込みが遅くなります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "디스크 캐시를 비웁니다(purge). macOS가 스스로 관리하므로 필요한 경우는 드물며, 실행 후 한동안 파일 읽기가 느려집니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空磁盘缓存（purge）。macOS 本来就会自动管理，通常不需要；之后一段时间文件读取会变慢。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -353,6 +1193,30 @@
     },
     "Rebuild the LaunchServices database": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reconstruir la base de datos de LaunchServices"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LaunchServices データベースを再構築"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LaunchServices 데이터베이스 재구성"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重建 LaunchServices 数据库"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -363,6 +1227,30 @@
     },
     "Related bundle ID": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ID de paquete relacionado"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "関連するバンドル ID"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "관련 번들 ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "相关的 bundle ID"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -373,6 +1261,30 @@
     },
     "Removes iOS simulators whose runtime no longer exists (xcrun simctl delete unavailable).": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina los simuladores de iOS cuyo runtime ya no existe (xcrun simctl delete unavailable)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ランタイムがなくなった iOS シミュレータを削除します（xcrun simctl delete unavailable）。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "런타임이 더 이상 없는 iOS 시뮬레이터를 제거합니다(xcrun simctl delete unavailable)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除对应 runtime 已不存在的 iOS 模拟器（xcrun simctl delete unavailable）。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -383,6 +1295,30 @@
     },
     "Removes old versions of installed packages and stale downloads (brew cleanup).": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina versiones antiguas de los paquetes instalados y descargas obsoletas (brew cleanup)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "インストール済みパッケージの古いバージョンと古いダウンロードを削除します（brew cleanup）。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설치된 패키지의 이전 버전과 오래된 다운로드를 제거합니다(brew cleanup)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除已安装套件的旧版本与过期下载（brew cleanup）。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -393,6 +1329,30 @@
     },
     "Removes stopped containers, unused networks, dangling images and build cache (docker system prune -f). Docker must be running.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina contenedores detenidos, redes sin usar, imágenes huérfanas y la caché de compilación (docker system prune -f). Docker debe estar en marcha."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止したコンテナ、未使用のネットワーク、宙に浮いたイメージ、ビルドキャッシュを削除します（docker system prune -f）。Docker が動いている必要があります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "중지된 컨테이너, 사용하지 않는 네트워크, 댕글링 이미지, 빌드 캐시를 제거합니다(docker system prune -f). Docker가 실행 중이어야 합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除停止的容器、未使用的网络、悬空映像与建置缓存（docker system prune -f）。需要 Docker 正在运行。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -403,6 +1363,30 @@
     },
     "Reset QuickLook thumbnail cache": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restablecer la caché de miniaturas de Vista rápida"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クイックルックのサムネールキャッシュをリセット"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "훑어보기 썸네일 캐시 재설정"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置 QuickLook 缩略图缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -413,6 +1397,30 @@
     },
     "Restart Finder": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reiniciar el Finder"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder を再起動"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder 재시작"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新启动 Finder"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -423,6 +1431,30 @@
     },
     "Restart the Dock": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reiniciar el Dock"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock を再起動"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock 재시작"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新启动 Dock"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -433,6 +1465,30 @@
     },
     "Run periodic maintenance scripts": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejecutar los scripts de mantenimiento periódico"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "定期メンテナンススクリプトを実行"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "정기 유지 관리 스크립트 실행"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行系统例行维护脚本"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -443,6 +1499,30 @@
     },
     "Runs a program inside the app": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejecuta un programa dentro de la app"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 内のプログラムを実行"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱 안의 프로그램 실행"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行的程序在 App 里"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -453,6 +1533,30 @@
     },
     "Runs the daily / weekly / monthly scripts (rotates and compresses system logs, cleans temporary files).": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejecuta los scripts diarios, semanales y mensuales (rota y comprime los registros del sistema y limpia archivos temporales)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日次・週次・月次のスクリプトを実行します（システムログのローテーションと圧縮、一時ファイルの削除）。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일간·주간·월간 스크립트를 실행합니다(시스템 로그 순환 및 압축, 임시 파일 정리)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 daily / weekly / monthly 例行脚本（轮替与压缩系统日志、清理暂存）。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -463,6 +1567,30 @@
     },
     "Same developer team": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mismo equipo de desarrollo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同じ開発チーム"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "같은 개발자 팀"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同一个开发团队"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -473,6 +1601,30 @@
     },
     "Sandbox containers (Containers)": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contenedores aislados (Containers)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サンドボックスのコンテナ（Containers）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "샌드박스 컨테이너(Containers)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沙盒容器（Containers）"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -483,6 +1635,30 @@
     },
     "Saved window state": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estado guardado de las ventanas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存されたウインドウの状態"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "저장된 윈도우 상태"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "窗口状态"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -493,6 +1669,30 @@
     },
     "Shared containers (Group Containers)": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contenedores compartidos (Group Containers)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共有コンテナ（Group Containers）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "공유 컨테이너(Group Containers)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共用容器（Group Containers）"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -503,6 +1703,30 @@
     },
     "System daemons": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daemons del sistema"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システムデーモン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 데몬"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统守护进程"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -513,6 +1737,30 @@
     },
     "The command %@ also uses it; it may be a separately installed command-line tool": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El comando %@ también lo usa; puede ser una herramienta de línea de comandos instalada aparte"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コマンド %@ もこれを使っています。別途インストールしたコマンドラインツールかもしれません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 명령도 이것을 사용하며, 별도로 설치한 명령줄 도구일 수 있음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指令 %@ 也在使用它，可能是另外安装的指令列工具"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -523,6 +1771,30 @@
     },
     "Useful when Dock or Launchpad icons misbehave. The Dock flickers briefly, then comes back.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Útil cuando los iconos del Dock o del Launchpad se comportan mal. El Dock parpadea un momento y vuelve."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock や Launchpad のアイコンがおかしいときに役立ちます。Dock が一瞬ちらついてから元に戻ります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock이나 Launchpad 아이콘이 이상할 때 유용합니다. Dock이 잠시 깜박인 후 돌아옵니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock 或 Launchpad 图标异常时有用。Dock 会闪一下后恢复。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -533,6 +1805,30 @@
     },
     "Useful when Finder hangs or shows wrong icons. Copies in progress are interrupted.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Útil cuando el Finder se bloquea o muestra iconos erróneos. Se interrumpen las copias en curso."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder が固まったりアイコンがおかしかったりするときに役立ちます。進行中のコピーは中断されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder가 멈추거나 아이콘이 잘못 표시될 때 유용합니다. 진행 중인 복사는 중단됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finder 卡住或图标异常时有用。进行中的拷贝会被中断。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -543,6 +1839,30 @@
     },
     "Useful when name resolution goes wrong or right after changing DNS settings.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Útil cuando falla la resolución de nombres o justo después de cambiar los ajustes de DNS."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名前解決がおかしいときや、DNS 設定を変えた直後に役立ちます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이름 확인이 잘못되거나 DNS 설정을 바꾼 직후에 유용합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网域解析错误或刚改过 DNS 设置时有用。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -553,6 +1873,30 @@
     },
     "Uses the app’s data": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa los datos de la app"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App のデータを使います"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱의 데이터를 사용함"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "会用到 App 的数据"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -563,6 +1907,30 @@
     },
     "Web data": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos web"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web データ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "웹 데이터"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网页数据"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -573,6 +1941,30 @@
     },
     "Your background items": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tus ítems en segundo plano"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自分のバックグラウンド項目"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "내 백그라운드 항목"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的后台项目"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -583,6 +1975,30 @@
     },
     "~/%@ belongs to the separately installed command-line tool %@ and isn’t removed with the app": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/%@ pertenece a la herramienta de línea de comandos %@, instalada aparte, y no se elimina con la app"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/%@ は別途インストールしたコマンドラインツール %@ のもので、App と一緒には削除されません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/%@은(는) 별도로 설치한 명령줄 도구 %@의 것이라 앱과 함께 제거되지 않음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/%@ 属于独立安装的指令列工具 %@，不会跟着 App 删除"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -593,6 +2009,30 @@
     },
     "Docker: clear all build cache": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker: borrar toda la caché de compilación"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker: ビルドキャッシュをすべて消去"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker: 빌드 캐시 모두 지우기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker：清除全部建置缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -603,6 +2043,30 @@
     },
     "Removes all unused build cache, not only dangling layers (docker builder prune -a -f). The next image builds are slower. Docker must be running.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina toda la caché de compilación sin usar, no solo las capas huérfanas (docker builder prune -a -f). Las siguientes compilaciones de imágenes serán más lentas. Docker debe estar en marcha."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "宙に浮いたレイヤーだけでなく、未使用のビルドキャッシュをすべて削除します（docker builder prune -a -f）。次回のイメージのビルドは遅くなります。Docker が動いている必要があります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "댕글링 레이어뿐 아니라 사용하지 않는 빌드 캐시를 모두 제거합니다(docker builder prune -a -f). 다음 이미지 빌드는 느려집니다. Docker가 실행 중이어야 합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除所有未使用的建置缓存，不只是悬置的层（docker builder prune -a -f）。之后几次建置映像会比较慢。Docker 必须正在运行。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -613,6 +2077,30 @@
     },
     "Docker: remove unused images": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker: eliminar imágenes sin usar"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker: 未使用のイメージを削除"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker: 사용하지 않는 이미지 제거"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker：移除未使用的映像"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -623,6 +2111,30 @@
     },
     "Removes every image no container uses, including tagged images you pulled or built (docker image prune -a -f). They have to be downloaded or rebuilt the next time you need them. Docker must be running.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina todas las imágenes que no usa ningún contenedor, incluidas las etiquetadas que descargaste o compilaste (docker image prune -a -f). Habrá que descargarlas o compilarlas de nuevo la próxima vez. Docker debe estar en marcha."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "どのコンテナも使っていないイメージを、取得またはビルドしたタグ付きのものも含めてすべて削除します（docker image prune -a -f）。次に必要になったときに再ダウンロードか再ビルドが必要です。Docker が動いている必要があります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어떤 컨테이너도 쓰지 않는 이미지를 받거나 빌드한 태그 이미지까지 모두 제거합니다(docker image prune -a -f). 다음에 필요할 때 다시 받거나 빌드해야 합니다. Docker가 실행 중이어야 합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除所有没有容器使用的映像，包括你下载或建置、带有标签的映像（docker image prune -a -f）。下次需要时得重新下载或建置。Docker 必须正在运行。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -633,6 +2145,30 @@
     },
     "Clear the Clang module cache": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar la caché de módulos de Clang"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clang モジュールキャッシュを消去"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clang 모듈 캐시 지우기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除 Clang 模块缓存"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -643,6 +2179,30 @@
     },
     "Deletes precompiled modules shared by Xcode and Swift builds; the next build rebuilds them and is slower. Deleted permanently (it’s a cache). Don’t run it while a build is in progress.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina los módulos precompilados que comparten las compilaciones de Xcode y Swift; la siguiente compilación los rehace y es más lenta. Se eliminan de forma permanente (es una caché). No lo ejecutes durante una compilación."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode と Swift のビルドで共有するプリコンパイル済みモジュールを削除します。次のビルドで作り直されるため遅くなります。キャッシュなので完全に削除されます。ビルド中は実行しないでください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode와 Swift 빌드가 공유하는 미리 컴파일된 모듈을 삭제합니다. 다음 빌드에서 다시 만들어지므로 느려집니다. 캐시이므로 영구 삭제됩니다. 빌드 중에는 실행하지 마십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 Xcode 与 Swift 建置共用的预先编译模块；下次建置会重新产生，速度较慢。这是缓存，会直接永久删除。建置进行中请不要运行。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -653,6 +2213,30 @@
     },
     "Crash, hang and resource reports for all users in /Library/Logs/DiagnosticReports older than 30 days. Deleted directly as administrator.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informes de fallos, bloqueos y recursos de todos los usuarios en /Library/Logs/DiagnosticReports con más de 30 días. Se eliminan directamente como administrador."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs/DiagnosticReports にある、すべてのユーザの 30 日より古いクラッシュ、ハング、リソースのレポート。管理者として直接削除します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs/DiagnosticReports에 있는 모든 사용자의 30일이 지난 충돌, 멈춤, 리소스 보고서. 관리자로 바로 삭제합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs/DiagnosticReports 里所有用户超过 30 天的当机、停止回应与资源报告。以管理员权限直接删除。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -663,6 +2247,30 @@
     },
     "Log files directly in /Library/Logs older than 30 days; app subfolders are left alone. Deleted directly as administrator.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos de registro directamente en /Library/Logs con más de 30 días; las subcarpetas de apps no se tocan. Se eliminan directamente como administrador."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs の直下にある 30 日より古いログファイル。App のサブフォルダはそのままです。管理者として直接削除します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs 바로 안에 있는 30일이 지난 로그 파일. 앱 하위 폴더는 그대로 둡니다. 관리자로 바로 삭제합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs 第一层超过 30 天的日志档；各 App 的子文件夹不动。以管理员权限直接删除。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -673,6 +2281,30 @@
     },
     "Maintenance failed: %@": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error en el mantenimiento: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メンテナンスに失敗しました: %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "유지 관리 실패: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "维护任务失败：%@"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -683,6 +2315,30 @@
     },
     "Old system diagnostic reports": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informes de diagnóstico del sistema antiguos"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "古いシステム診断レポート"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오래된 시스템 진단 보고서"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旧的系统诊断报告"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -693,6 +2349,30 @@
     },
     "Old system log files": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos de registro del sistema antiguos"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "古いシステムログファイル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오래된 시스템 로그 파일"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旧的系统日志档"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -703,6 +2383,30 @@
     },
     "Trash on other drives": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Papelera en otras unidades"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ほかのドライブのゴミ箱"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다른 드라이브의 휴지통"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他磁盘的废纸篓"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -713,6 +2417,30 @@
     },
     "Permanently deletes the items in the Trash of connected drives. This can’t be undone.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina de forma permanente los elementos de la Papelera de las unidades conectadas. No se puede deshacer."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接続しているドライブのゴミ箱の中身を完全に削除します。元に戻せません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결된 드라이브의 휴지통에 있는 항목을 영구적으로 삭제합니다. 되돌릴 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永久删除已连接磁盘废纸篓里的项目，无法撤销。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",

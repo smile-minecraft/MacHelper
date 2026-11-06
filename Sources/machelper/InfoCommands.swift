@@ -47,16 +47,20 @@ struct Analyze: ParsableCommand {
             struct File: Encodable { let path: String; let size: UInt64; let modified: Date }
             struct Out: Encodable {
                 let schemaVersion = 1; let root: Node; let largestFiles: [File]
-                let files: Int; let directories: Int; let unreadableDirectories: Int; let seconds: Double
-                /// "complete", or "partial" when some folders could not be read (grant Full Disk Access).
+                let files: Int; let directories: Int; let unreadableDirectories: Int
+                /// Of those, folders macOS keeps from every app (SIP, data vaults, other accounts); expected.
+                let protectedDirectories: Int; let seconds: Double
+                /// "complete", or "partial" when folders other than protected ones could not be read
+                /// (usually: grant Full Disk Access).
                 let status: String
             }
             try Output.json(Out(root: node(root, 0),
                                 largestFiles: root.largestFiles(limit: largest).map { File(path: $0.path, size: $0.size, modified: $0.modified) },
                                 files: result.progress.files, directories: result.progress.directories,
                                 unreadableDirectories: result.progress.unreadableDirectories,
+                                protectedDirectories: result.progress.protectedDirectories,
                                 seconds: (result.elapsed * 100).rounded() / 100,
-                                status: result.progress.unreadableDirectories == 0 ? "complete" : "partial"))
+                                status: result.progress.inaccessibleDirectories == 0 ? "complete" : "partial"))
             return
         }
 
@@ -74,9 +78,7 @@ struct Analyze: ParsableCommand {
         for f in root.largestFiles(limit: largest) {
             Output.line("  \(Output.lpad(Output.bytes(f.size), 10))  \(Output.shortPath(f.path))")
         }
-        if result.progress.unreadableDirectories > 0 {
-            Output.line("\n\(result.progress.unreadableDirectories) folders could not be read. Grant Full Disk Access to your terminal for a complete scan.")
-        }
+        ScanNotes.print(result.progress)
     }
 }
 
@@ -362,17 +364,19 @@ struct Insights: ParsableCommand {
         options.limit = limit
         let insights = SpaceInsights.find(in: result.root, previous: previous, options: options)
         if !noSave { try? ScanSnapshot(root: result.root).save() }
-        let partial = result.progress.unreadableDirectories > 0
+        let partial = result.progress.inaccessibleDirectories > 0
 
         if output.json {
             struct Out: Encodable {
                 let schemaVersion = 1
                 let status: String
                 let unreadableDirectories: Int
+                let protectedDirectories: Int
                 let previousScan: Date?
                 let insights: SpaceInsights
             }
             try Output.json(Out(status: partial ? "partial" : "complete", unreadableDirectories: result.progress.unreadableDirectories,
+                                protectedDirectories: result.progress.protectedDirectories,
                                 previousScan: previous?.date, insights: insights))
             return
         }
@@ -399,7 +403,19 @@ struct Insights: ParsableCommand {
         }
         if insights.bloatedFolders.isEmpty { Output.line("  none") }
         if previous == nil { Output.line("\nNo earlier scan of this path: run again later to see which folders grew.") }
-        if partial { Output.line("\n\(result.progress.unreadableDirectories) folders could not be read. Grant Full Disk Access to your terminal for a complete scan.") }
+        ScanNotes.print(result.progress)
+    }
+}
+
+/// What a scan couldn't read, in the text output.
+enum ScanNotes {
+    static func print(_ p: ScanProgress) {
+        if p.inaccessibleDirectories > 0 {
+            Output.line("\n\(p.inaccessibleDirectories) folders could not be read. Grant Full Disk Access to your terminal for a complete scan.")
+        }
+        if p.protectedDirectories > 0 {
+            Output.line("\(p.inaccessibleDirectories > 0 ? "" : "\n")\(p.protectedDirectories) system folders are protected by macOS (SIP, data vaults, other accounts) and were not measured; this is normal.")
+        }
     }
 }
 
