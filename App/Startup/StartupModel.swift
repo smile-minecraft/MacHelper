@@ -11,6 +11,8 @@ final class StartupModel {
     var search = ""
     var onlyBroken = false
     private(set) var message: String?
+    /// System daemons are switched through the root Helper.
+    private(set) var helperEnabled = false
 
     enum Tab: String, CaseIterable, Identifiable { case launchd, background; var id: String { rawValue } }
     var tab: Tab = .launchd
@@ -53,14 +55,25 @@ final class StartupModel {
     func load() async {
         guard !loading else { return }
         loading = true
+        helperEnabled = HelperClient.shared.status == .enabled
         items = await Task.detached(priority: .userInitiated) { StartupItems.list() }.value
         loading = false
+    }
+
+    func canToggle(_ item: StartupItem) -> Bool {
+        !item.isProtected && (!item.scope.needsHelper || helperEnabled)
     }
 
     func setEnabled(_ item: StartupItem, _ enabled: Bool) async {
         message = nil
         do {
-            try await Task.detached { try StartupItems.setEnabled(item, enabled) }.value
+            if item.scope.needsHelper {
+                // The Helper re-validates the path and reads the label from the plist itself.
+                try await HelperClient.shared.setSystemDaemonEnabled(plistPath: item.plistPath, enabled: enabled)
+                StartupItems.recordToggle(item, enabled)
+            } else {
+                try await Task.detached { try StartupItems.setEnabled(item, enabled) }.value
+            }
         } catch {
             message = "\(error)"
         }

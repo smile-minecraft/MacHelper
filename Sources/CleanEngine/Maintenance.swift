@@ -63,7 +63,10 @@ public enum MaintenanceCatalog {
                             description: String(localized: "Removes iOS simulators whose runtime no longer exists (xcrun simctl delete unavailable).", bundle: .module),
                             risk: .low, selectedByDefault: true,
                             runner: .user([["/usr/bin/xcrun", "simctl", "delete", "unavailable"]]),
-                            requires: ["/usr/bin/xcrun"], probe: ["/usr/bin/xcrun", "--find", "simctl"]),
+                            requires: ["/usr/bin/xcrun", "/usr/bin/xcode-select"],
+                            // xcode-select -p first: without developer tools, xcrun pops up an install dialog,
+                            // which must never happen from the scheduled background run.
+                            probe: ["/bin/sh", "-c", "/usr/bin/xcode-select -p >/dev/null 2>&1 && /usr/bin/xcrun --find simctl >/dev/null 2>&1"]),
             MaintenanceTask(id: "dock.refresh", title: String(localized: "Restart the Dock", bundle: .module),
                             description: String(localized: "Useful when Dock or Launchpad icons misbehave. The Dock flickers briefly, then comes back.", bundle: .module),
                             risk: .low, selectedByDefault: false,
@@ -119,11 +122,18 @@ public enum MaintenanceCatalog {
     }()
 }
 
-public struct TaskOutcome: Codable, Sendable {
+public struct TaskOutcome: Codable, Sendable, Equatable {
     public let id: String
     public let ok: Bool
     public let dryRun: Bool
     public let output: String
+
+    public init(id: String, ok: Bool, dryRun: Bool, output: String) {
+        self.id = id
+        self.ok = ok
+        self.dryRun = dryRun
+        self.output = output
+    }
 }
 
 public struct MaintenanceRunner: Sendable {
@@ -131,7 +141,8 @@ public struct MaintenanceRunner: Sendable {
     public init(log: OperationLog = .shared) { self.log = log }
 
     /// Runs user-level tasks. Helper tasks return an outcome explaining they need the app.
-    public func run(_ task: MaintenanceTask, dryRun: Bool, timeout: TimeInterval = 300) -> TaskOutcome {
+    /// `command` is the operations-log command: "optimize" from the Optimize page, "autoclean" when scheduled.
+    public func run(_ task: MaintenanceTask, dryRun: Bool, timeout: TimeInterval = 300, command: String = "optimize") -> TaskOutcome {
         guard task.isAvailable else { return TaskOutcome(id: task.id, ok: false, dryRun: dryRun, output: "not available on this Mac") }
         guard case .user(let commands) = task.runner else {
             return TaskOutcome(id: task.id, ok: false, dryRun: dryRun, output: "requires root: run it from the MacHelper app (Helper)")
@@ -146,7 +157,7 @@ public struct MaintenanceRunner: Sendable {
             output += text
             if status != 0 { ok = false; output += "\n(exit \(status))"; break }
         }
-        log.append([OperationLog.Entry(time: Date(), command: "optimize", path: "", source: task.id, bytes: 0,
+        log.append([OperationLog.Entry(time: Date(), command: command, path: "", source: task.id, bytes: 0,
                                        result: ok ? "ok" : "failed", message: ok ? nil : String(output.suffix(300)))])
         return TaskOutcome(id: task.id, ok: ok, dryRun: false, output: output.trimmingCharacters(in: .whitespacesAndNewlines))
     }

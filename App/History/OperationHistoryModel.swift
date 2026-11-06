@@ -57,6 +57,7 @@ final class OperationHistoryModel {
             var titles: [String: String] = [:]
             for r in (try? RuleSet.load()) ?? [] { titles[r.id] = r.title }
             for t in MaintenanceCatalog.all { titles[t.id] = t.title }
+            for t in SystemCleanupCatalog.all { titles[t.id] = t.title }
             for d in (try? ArtifactDetector.loadBuiltIn()) ?? [] { titles[d.id] = d.title }
             sourceTitles = titles
         }

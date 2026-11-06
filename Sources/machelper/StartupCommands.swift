@@ -5,12 +5,13 @@ import Foundation
 struct Startup: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "startup",
-        abstract: "List launch agents and daemons that start on their own; disable, enable or remove your own.",
+        abstract: "List launch agents and daemons that start on their own; disable or enable them, remove your own.",
         discussion: """
         Lists ~/Library/LaunchAgents, /Library/LaunchAgents and /Library/LaunchDaemons (Apple's jobs are hidden).
         --disable / --enable work like the switch in System Settings → Login Items and survive restarts.
-        --remove stops the job and moves its plist to the Trash (needs --yes). Items for all users and system
-        daemons need an administrator and are listed only.
+        Agents for all users (/Library/LaunchAgents) are switched for your account only.
+        --remove stops the job and moves its plist to the Trash (needs --yes); only your own items can be removed.
+        System daemons (/Library/LaunchDaemons) need root: switch them in the MacHelper app (through its Helper).
         """
     )
 
@@ -57,7 +58,12 @@ struct Startup: ParsableCommand {
         for scope in StartupItem.Scope.allCases {
             let group = shown.filter { $0.scope == scope }
             guard !group.isEmpty else { continue }
-            Output.line("\(scope.rawValue) (\(group.count))\(scope.needsAdmin ? "  [needs admin to change]" : "")")
+            let note = switch scope {
+            case .userAgent: ""
+            case .systemAgent: "  [switch affects your account only]"
+            case .systemDaemon: "  [switch from the app (Helper)]"
+            }
+            Output.line("\(scope.rawValue) (\(group.count))\(note)")
             for i in group {
                 let state = i.isDisabled ? "disabled" : (i.pid != nil ? "running" : (i.isLoaded ? "loaded" : "off"))
                 let flags = [i.programMissing ? "PROGRAM MISSING" : nil, i.ownerName].compactMap { $0 }.joined(separator: ", ")

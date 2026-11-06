@@ -59,6 +59,7 @@ struct OptimizeView: View {
                     }
                 }
                 if let a = model.artifacts { artifactSection(a) } else { rootsOnlySection }
+                systemSection
                 Section("Maintenance") {
                     if let docker = model.dockerUsage { DockerUsageRow(result: docker) }
                     ForEach($model.tasks) { $row in
@@ -113,9 +114,12 @@ struct OptimizeView: View {
         if model.selectedTrashBytes > 0 {
             lines.append(String(localized: "Move to the Trash: \(Fmt.bytes(Int64(clamping: model.selectedTrashBytes))). Anything removed by mistake can be restored from the Trash."))
         }
-        let directBytes = model.selectedPermanentBytes - model.selectedEmptyTrashBytes
+        let directBytes = model.selectedPermanentBytes - model.selectedEmptyTrashBytes - model.selectedSystemBytes
         if directBytes > 0 {
             lines.append(String(localized: "Delete directly: \(Fmt.bytes(Int64(clamping: directBytes))) of low-risk caches and logs that apps rebuild themselves. They don’t go to the Trash."))
+        }
+        if model.selectedSystemBytes > 0 {
+            lines.append(String(localized: "Delete old system logs and diagnostic reports as administrator: \(Fmt.bytes(Int64(clamping: model.selectedSystemBytes))). Only files older than 30 days in the fixed system log folders."))
         }
         if model.selectedEmptyTrashBytes > 0 {
             lines.append(String(localized: "Empty the Trash: \(Fmt.bytes(Int64(clamping: model.selectedEmptyTrashBytes))). This can’t be undone."))
@@ -125,6 +129,45 @@ struct OptimizeView: View {
         }
         lines.append(String(localized: "Every item is recorded in the operation log so you can review it later."))
         return lines.joined(separator: "\n")
+    }
+
+    private var systemSection: some View {
+        Section {
+            ForEach($model.systemRows) { $row in
+                HStack(alignment: .top) {
+                    Toggle(isOn: $row.selected) { EmptyView() }.labelsHidden().disabled(row.count == 0)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(row.info.title).foregroundStyle(Palette.text)
+                            RiskBadge(risk: row.info.risk)
+                            Text("Deleted directly").font(.caption2).foregroundStyle(Palette.textMuted)
+                            Text("Needs Helper").font(.caption2).foregroundStyle(Palette.textMuted)
+                        }
+                        Text(row.info.description).font(.caption).foregroundStyle(Palette.textMuted)
+                        if let p = row.preview {
+                            if let why = p.unavailable {
+                                Text("Can’t read \(row.info.folder): \(why)").font(.caption2).foregroundStyle(Theme.amber)
+                            } else {
+                                Text(p.count == 0 ? String(localized: "Nothing older than 30 days") : String(localized: "\(p.count) files"))
+                                    .font(.caption2).foregroundStyle(Palette.textFaint)
+                            }
+                        }
+                    }
+                    Spacer()
+                    if row.preview != nil {
+                        Text(Fmt.bytes(Int64(clamping: row.bytes))).monospacedDigit().foregroundStyle(Palette.text)
+                    }
+                }
+                .opacity(row.preview == nil ? 0.5 : 1)
+            }
+        } header: {
+            HStack(spacing: 8) {
+                Text("System Logs")
+                if let e = model.systemError {
+                    Text(e).font(.caption).foregroundStyle(Theme.amber).lineLimit(1).truncationMode(.tail).help(e).textCase(nil)
+                }
+            }
+        }
     }
 
     private func artifactSection(_ a: ArtifactScanResult) -> some View {

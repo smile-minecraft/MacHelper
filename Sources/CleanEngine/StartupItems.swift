@@ -1,6 +1,7 @@
 import AppKit
 import Darwin
 import Foundation
+import PrivilegedOps
 
 /// A launchd job that starts on its own: a per-user launch agent, an all-users agent or a system
 /// daemon. Apple's own jobs are not listed.
@@ -16,8 +17,20 @@ public struct StartupItem: Codable, Sendable, Identifiable, Hashable {
             }
         }
 
-        /// Changing these needs an administrator.
-        public var needsAdmin: Bool { self != .userAgent }
+        /// Only your own items can be removed; system items can only be switched on or off.
+        public var canRemove: Bool { self == .userAgent }
+
+        /// System daemons are switched by the root Helper (app only). Agents for all users are
+        /// switched for the current user in their own launchd domain, which needs no administrator.
+        public var needsHelper: Bool { self == .systemDaemon }
+
+        var jobKind: SystemJobControl.Kind? {
+            switch self {
+            case .userAgent: nil
+            case .systemAgent: .agent
+            case .systemDaemon: .daemon
+            }
+        }
     }
 
     public var id: String { plistPath }
@@ -33,6 +46,9 @@ public struct StartupItem: Codable, Sendable, Identifiable, Hashable {
     public let isLoaded: Bool
     public let pid: Int?
     public let isDisabled: Bool
+    /// Apple's and MacHelper's own jobs are never switched.
+    public var isProtected: Bool { SystemJobControl.isProtected(label) }
+
     /// The program it starts is missing: a leftover of an app that is gone.
     public let programMissing: Bool
     public let ownerName: String?
@@ -46,13 +62,17 @@ public struct StartupItem: Codable, Sendable, Identifiable, Hashable {
 
 public enum StartupItemError: Error, CustomStringConvertible {
     case notFound(String)
-    case needsAdmin(String)
+    case cannotRemove(String)
+    case needsHelper(String)
+    case protected(String)
     case launchctl(String)
 
     public var description: String {
         switch self {
         case .notFound(let l): "No startup item with label \(l)"
-        case .needsAdmin(let l): "\(l) is a system item; changing it needs an administrator"
+        case .cannotRemove(let l): "\(l) is a system item; it can be disabled but not removed"
+        case .needsHelper(let l): "\(l) is a system daemon; switch it from the MacHelper app (needs the Helper)"
+        case .protected(let l): "\(l) is an Apple or MacHelper job and can't be changed"
         case .launchctl(let m): "launchctl: \(m)"
         }
     }
@@ -99,29 +119,44 @@ public enum StartupItems {
         return items.sorted { ($0.scope.rawValue, $0.label.lowercased()) < ($1.scope.rawValue, $1.label.lowercased()) }
     }
 
-    // MARK: Changes (your own background items; system items need an administrator)
+    // MARK: Changes (enable/disable for every scope; remove only your own items)
 
     /// Stops the job and keeps it from starting again (survives restarts), like the switch in
     /// System Settings → Login Items. The plist stays where it is.
+    ///
+    /// Your own agents and agents for all users are switched in your gui domain (for agents in
+    /// /Library/LaunchAgents that affects only you). System daemons throw `needsHelper`: the app
+    /// sends them to the root Helper and then calls `recordToggle`.
     public static func setEnabled(_ item: StartupItem, _ enabled: Bool) throws {
-        guard !item.scope.needsAdmin else { throw StartupItemError.needsAdmin(item.label) }
-        let target = "gui/\(uid)/\(item.label)"
-        if enabled {
-            try launchctl(["enable", target])
-            // Already loaded is fine.
-            _ = try? launchctl(["bootstrap", "gui/\(uid)", item.plistPath])
-        } else {
-            try launchctl(["disable", target])
-            _ = try? launchctl(["bootout", target])
+        try checkToggle(item)
+        let domain = "gui/\(uid)"
+        let (required, bestEffort) = SystemJobControl.commands(label: item.label, plistPath: item.plistPath, domain: domain, enabled: enabled)
+        try launchctl(required)
+        // Already stopped / already loaded is fine.
+        _ = try? launchctl(bestEffort)
+        recordToggle(item, enabled)
+    }
+
+    /// Throws unless `setEnabled` may switch this item in-process.
+    public static func checkToggle(_ item: StartupItem) throws {
+        guard !item.isProtected else { throw StartupItemError.protected(item.label) }
+        guard !item.scope.needsHelper else { throw StartupItemError.needsHelper(item.label) }
+        if let kind = item.scope.jobKind {
+            // Same rules as the Helper: directly in the folder, a real root-owned plist, label from the file.
+            let label = try SystemJobControl.validate(plistPath: item.plistPath, kind: kind)
+            guard label == item.label else { throw StartupItemError.notFound(item.label) }
         }
-        OperationLog.shared.append([OperationLog.Entry(time: Date(), command: "startup", path: item.plistPath,
-                                                       source: "startup", bytes: 0, result: enabled ? "enabled" : "disabled",
-                                                       message: item.label)])
+    }
+
+    public static func recordToggle(_ item: StartupItem, _ enabled: Bool, log: OperationLog = .shared) {
+        log.append([OperationLog.Entry(time: Date(), command: "startup", path: item.plistPath,
+                                       source: "startup", bytes: 0, result: enabled ? "enabled" : "disabled",
+                                       message: item.label)])
     }
 
     /// Stops the job and moves its plist to the Trash.
     public static func remove(_ item: StartupItem) throws -> CleanReport {
-        guard !item.scope.needsAdmin else { throw StartupItemError.needsAdmin(item.label) }
+        guard item.scope.canRemove else { throw StartupItemError.cannotRemove(item.label) }
         _ = try? launchctl(["bootout", "gui/\(uid)/\(item.label)"])
         let removal = RemovalItem(path: item.plistPath, source: "startup.remove", bytes: 0, action: .trash)
         return CleanExecutor(safety: AppUninstaller.leftoverSafety).execute([removal], dryRun: false, command: "startup")

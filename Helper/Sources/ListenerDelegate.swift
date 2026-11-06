@@ -2,6 +2,7 @@ import Foundation
 import FanControl
 import HelperProtocol
 import os
+import PrivilegedOps
 import SMCKit
 
 private let xpcLog = Logger(subsystem: HelperConstants.helperBundleIdentifier, category: "xpc")
@@ -122,6 +123,55 @@ final class HelperService: NSObject, HelperXPC, @unchecked Sendable {
         "memory.purge": [["/usr/sbin/purge"]],
         "periodic.run": [["/usr/sbin/periodic", "daily", "weekly", "monthly"]],
     ]
+
+    func systemCleanup(_ request: Data, reply: @escaping @Sendable (Data?, String?) -> Void) {
+        let decoded: SystemCleanupRequest
+        do { decoded = try JSONDecoder().decode(SystemCleanupRequest.self, from: request) } catch {
+            reply(nil, "bad request: \(error)")
+            return
+        }
+        DispatchQueue.global(qos: .utility).async {
+            do {
+                let result = try SystemCleanup.run(decoded)
+                if !decoded.dryRun {
+                    xpcLog.notice("System cleanup \(decoded.targetIDs.joined(separator: ","), privacy: .public): \(result.count) files, \(result.bytes) bytes")
+                }
+                reply(try JSONEncoder().encode(result), nil)
+            } catch {
+                reply(nil, String(describing: error))
+            }
+        }
+    }
+
+    func setSystemDaemonEnabled(_ plistPath: String, enabled: Bool, reply: @escaping @Sendable (String?) -> Void) {
+        let label: String
+        do { label = try SystemJobControl.validate(plistPath: plistPath, kind: .daemon) } catch {
+            reply(String(describing: error))
+            return
+        }
+        DispatchQueue.global(qos: .utility).async {
+            let (required, bestEffort) = SystemJobControl.commands(label: label, plistPath: plistPath, domain: "system", enabled: enabled)
+            let (status, output) = Self.exec(["/bin/launchctl"] + required)
+            guard status == 0 else { reply("launchctl \(required.joined(separator: " ")): \(output) (exit \(status))"); return }
+            // Already stopped / already loaded is fine.
+            _ = Self.exec(["/bin/launchctl"] + bestEffort)
+            xpcLog.notice("\(enabled ? "Enabled" : "Disabled", privacy: .public) system daemon \(label, privacy: .public)")
+            reply(nil)
+        }
+    }
+
+    private static func exec(_ argv: [String]) -> (Int32, String) {
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: argv[0])
+        p.arguments = Array(argv.dropFirst())
+        let pipe = Pipe()
+        p.standardOutput = pipe
+        p.standardError = pipe
+        do { try p.run() } catch { return (-1, "\(error)") }
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        p.waitUntilExit()
+        return (p.terminationStatus, String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines))
+    }
 
     func runMaintenance(_ taskID: String, reply: @escaping @Sendable (Bool, String) -> Void) {
         guard let commands = Self.maintenance[taskID] else {

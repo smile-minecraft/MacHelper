@@ -56,7 +56,7 @@ targets:
             subpath: Contents/Library/LaunchAgents
     dependencies:
       - package: MacHelperKit
-        products: [HelperProtocol, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, SettingsPortability, Diagnostics]
+        products: [HelperProtocol, PrivilegedOps, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, SettingsPortability, Diagnostics]
       - target: MacHelperHelper
         embed: true
         codeSign: false
@@ -87,7 +87,7 @@ targets:
       - path: Helper/Sources
     dependencies:
       - package: MacHelperKit
-        products: [HelperProtocol, SMCKit, FanControl, Metrics]
+        products: [HelperProtocol, PrivilegedOps, SMCKit, FanControl, Metrics]
     info:
       path: Helper/Info.plist
       properties:

@@ -2,6 +2,7 @@ import AppKit
 import CleanEngine
 import Foundation
 import Observation
+import PrivilegedOps
 
 /// Scan → preview → choose → run → report. Nothing is removed before `run()`.
 @MainActor
@@ -14,6 +15,16 @@ final class OptimizeModel {
         var selected: Bool
         let available: Bool
         var id: String { task.id }
+    }
+
+    /// One root-only cleanup target, previewed by the Helper during the scan.
+    struct SystemRow: Identifiable {
+        let info: SystemCleanupInfo
+        var preview: SystemCleanupResult.Target?
+        var selected: Bool
+        var id: String { info.id }
+        var bytes: UInt64 { preview?.bytes ?? 0 }
+        var count: Int { preview?.count ?? 0 }
     }
 
     struct TaskResult: Identifiable {
@@ -34,6 +45,10 @@ final class OptimizeModel {
     private(set) var loadError: String?
     /// `docker system df`, read during the scan when a Docker CLI exists; nil otherwise.
     private(set) var dockerUsage: Result<DockerUsage, DockerUsage.Failure>?
+    var systemRows: [SystemRow] = []
+    /// Why system cleanup can't be previewed (Helper off, older Helper, XPC error); nil when it worked.
+    private(set) var systemError: String?
+    private(set) var systemReport: SystemCleanupResult?
 
     @ObservationIgnored nonisolated static let rootsKey = "optimize.artifactRoots"
 
@@ -53,6 +68,7 @@ final class OptimizeModel {
         loadError = nil
         report = nil
         artifactReport = nil
+        systemReport = nil
         taskResults = []
         let roots = artifactRoots
         let helperEnabled = HelperClient.shared.status == .enabled
@@ -74,12 +90,35 @@ final class OptimizeModel {
             self.artifacts = artifacts
             self.tasks = tasks
             self.dockerUsage = await docker
+            await previewSystemCleanup(helperEnabled: helperEnabled)
             phase = .ready
         } catch {
             loadError = "\(error)"
             phase = .idle
         }
     }
+
+    private func previewSystemCleanup(helperEnabled: Bool) async {
+        let infos = SystemCleanupCatalog.all
+        guard helperEnabled else {
+            systemRows = infos.map { SystemRow(info: $0, preview: nil, selected: false) }
+            systemError = String(localized: "Helper not enabled")
+            return
+        }
+        do {
+            let result = try await HelperClient.shared.systemCleanup(SystemCleanupRequest(targetIDs: infos.map(\.id), dryRun: true))
+            systemRows = infos.map { info in
+                let preview = result.targets.first { $0.id == info.id }
+                return SystemRow(info: info, preview: preview, selected: info.selectedByDefault && (preview?.count ?? 0) > 0)
+            }
+            systemError = nil
+        } catch {
+            systemRows = infos.map { SystemRow(info: $0, preview: nil, selected: false) }
+            systemError = "\(error)"
+        }
+    }
+
+    var selectedSystemBytes: UInt64 { systemRows.filter(\.selected).reduce(0) { $0 + $1.bytes } }
 
     // MARK: Selection
 
@@ -122,14 +161,14 @@ final class OptimizeModel {
     }
 
     var selectedBytes: UInt64 {
-        (plan?.selectedSize ?? 0) + (artifacts?.selectedSize ?? 0)
+        (plan?.selectedSize ?? 0) + (artifacts?.selectedSize ?? 0) + selectedSystemBytes
     }
 
     var selectedTaskCount: Int { tasks.filter(\.selected).count }
 
-    /// Selected bytes that will be permanently deleted: low-risk rules plus emptying the Trash.
+    /// Selected bytes that will be permanently deleted: low-risk rules, emptying the Trash and old system logs.
     var selectedPermanentBytes: UInt64 {
-        plan?.results.filter { $0.rule.action == .delete }.reduce(0) { $0 + $1.selectedSize } ?? 0
+        (plan?.results.filter { $0.rule.action == .delete }.reduce(0) { $0 + $1.selectedSize } ?? 0) + selectedSystemBytes
     }
 
     /// The part of `selectedPermanentBytes` that empties the Trash.
@@ -169,6 +208,7 @@ final class OptimizeModel {
         let artifactRoots = artifacts?.roots ?? []
         let userTasks = tasks.filter { $0.selected && !$0.task.requiresRoot }.map(\.task)
         let rootTasks = tasks.filter { $0.selected && $0.task.requiresRoot }.map(\.task)
+        let systemIDs = systemRows.filter { $0.selected && $0.count > 0 }.map(\.id)
 
         let (report, artifactReport, userResults) = await Task.detached(priority: .userInitiated) {
             let report = CleanExecutor(safety: .forCleaning()).execute(items, dryRun: false, command: "clean")
@@ -192,14 +232,29 @@ final class OptimizeModel {
                 results.append(TaskResult(id: t.id, title: t.title, ok: false, output: "\(error)"))
             }
         }
+        var systemReport: SystemCleanupResult?
+        if !systemIDs.isEmpty {
+            do {
+                // The Helper scans again with the same fixed rules; only what is still old enough goes.
+                let r = try await HelperClient.shared.systemCleanup(SystemCleanupRequest(targetIDs: systemIDs, dryRun: false))
+                SystemCleanupCatalog.record(r)
+                systemReport = r
+                if let f = r.targets.flatMap(\.failures).first {
+                    results.append(TaskResult(id: "system", title: String(localized: "System logs"), ok: false, output: "\(f.path): \(f.message)"))
+                }
+            } catch {
+                results.append(TaskResult(id: "system", title: String(localized: "System logs"), ok: false, output: "\(error)"))
+            }
+        }
         self.report = report
         self.artifactReport = artifactReport
+        self.systemReport = systemReport
         self.taskResults = results
         phase = .finished
     }
 
     var trashedBytes: UInt64 { (report?.trashedBytes ?? 0) + (artifactReport?.trashedBytes ?? 0) }
-    var freedBytes: UInt64 { (report?.freedBytes ?? 0) + (artifactReport?.freedBytes ?? 0) }
+    var freedBytes: UInt64 { (report?.freedBytes ?? 0) + (artifactReport?.freedBytes ?? 0) + (systemReport?.bytes ?? 0) }
     var failures: [ItemOutcome] { (report?.failures ?? []) + (artifactReport?.failures ?? []) }
 
     /// Empties the Trash through the same rule (permanent; it is what the user asked for).

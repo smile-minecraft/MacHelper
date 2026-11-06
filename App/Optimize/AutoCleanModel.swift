@@ -22,6 +22,11 @@ final class AutoCleanModel {
     func refresh() {
         config = AutoClean.load()
         agentStatus = agent.status
+        let tasks = maintenanceRows.map(\.task)
+        Task {
+            let availability = await Task.detached(priority: .utility) { tasks.map(\.isAvailable) }.value
+            maintenanceRows = zip(tasks, availability).map { ($0, $1) }
+        }
     }
 
     var enabled: Bool {
@@ -38,6 +43,23 @@ final class AutoCleanModel {
         get { config.trashInstead == true }
         set { config.trashInstead = newValue; save() }
     }
+
+    /// Safe maintenance tasks Auto Clean may run, with whether each applies on this Mac
+    /// (checked off the main thread in `refresh()`; the probes start processes).
+    private(set) var maintenanceRows: [(task: MaintenanceTask, available: Bool)] = AutoClean.maintenanceTaskIDs.compactMap { id in
+        MaintenanceCatalog.all.first { $0.id == id }.map { ($0, true) }
+    }
+
+    func isMaintenanceEnabled(_ id: String) -> Bool { config.enabledMaintenanceTasks.contains(id) }
+
+    func setMaintenance(_ id: String, enabled: Bool) {
+        var set = Set(config.enabledMaintenanceTasks)
+        if enabled { set.insert(id) } else { set.remove(id) }
+        config.maintenanceTasks = AutoClean.maintenanceTaskIDs.filter(set.contains)
+        save()
+    }
+
+    func title(forTask id: String) -> String { MaintenanceCatalog.all.first { $0.id == id }?.title ?? id }
 
     private func setEnabled(_ on: Bool) async {
         config.enabled = on
@@ -67,17 +89,19 @@ final class AutoCleanModel {
         isRunning = true
         defer { isRunning = false }
         let current = config
-        let report = await Task.detached(priority: .userInitiated) { () -> CleanReport? in
+        let outcome = await Task.detached(priority: .userInitiated) { () -> (CleanReport, [TaskOutcome])? in
             guard let rules = try? RuleSet.load() else { return nil }
-            return AutoClean.run(config: current, rules: rules).1
+            let (_, report, tasks) = AutoClean.run(config: current, rules: rules)
+            return (report, tasks)
         }.value
-        guard let report else { message = String(localized: "Couldn’t load the cleaning rules"); return }
+        guard let (report, tasks) = outcome else { message = String(localized: "Couldn’t load the cleaning rules"); return }
         var updated = AutoClean.load()
-        AutoClean.record(report, into: &updated)
+        AutoClean.record(report, tasks: tasks, into: &updated)
         updated.enabled = config.enabled
         updated.frequency = config.frequency
         updated.permanent = config.permanent
         updated.trashInstead = config.trashInstead
+        updated.maintenanceTasks = config.maintenanceTasks
         config = updated
         save()
         message = String(localized: "Cleaned \(config.lastItemCount) items.")

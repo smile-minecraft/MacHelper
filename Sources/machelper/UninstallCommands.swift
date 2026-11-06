@@ -113,6 +113,8 @@ struct AutoCleanCommand: ParsableCommand {
         discussion: """
         Settings live in ~/Library/Application Support/MacHelper/autoclean.json and are edited in the app.
         Only low-risk rules selected by default run; caches of running apps are skipped; the Trash is never emptied.
+        Then the enabled safe maintenance tasks run (QuickLook cache reset, deleting unavailable simulators);
+        tasks that don't apply on this Mac are skipped.
           machelper autoclean --status          # show settings and last result
           machelper autoclean --run-if-due      # what the hourly agent calls
           machelper autoclean --now             # run immediately
@@ -144,19 +146,22 @@ struct AutoCleanCommand: ParsableCommand {
                 } else {
                     Output.line("Never run.")
                 }
+                Output.line("Maintenance: \(config.enabledMaintenanceTasks.isEmpty ? "none" : config.enabledMaintenanceTasks.joined(separator: ", "))")
+                for t in config.lastTasks ?? [] { Output.line("  last \(t.id): \(t.ok ? "ok" : "failed")") }
                 if let e = config.lastError { Output.line("Last error: \(e)") }
                 if let next = config.nextRun { Output.line("Next run: \(next.formatted())") }
             }
             return
         }
-        let (_, report) = AutoClean.run(config: config, rules: try RuleSet.load())
-        AutoClean.record(report, into: &config)
+        let (_, report, tasks) = AutoClean.run(config: config, rules: try RuleSet.load())
+        AutoClean.record(report, tasks: tasks, into: &config)
         try AutoClean.save(config)
         if output.json {
-            struct Out: Encodable { let schemaVersion = 1; let ran = true; let config: AutoCleanConfig; let report: CleanReport }
-            try Output.json(Out(config: config, report: report))
+            struct Out: Encodable { let schemaVersion = 1; let ran = true; let config: AutoCleanConfig; let report: CleanReport; let tasks: [TaskOutcome] }
+            try Output.json(Out(config: config, report: report, tasks: tasks))
         } else {
             Output.line("Auto clean: \(config.lastItemCount) items, trashed \(Output.bytes(report.trashedBytes)), deleted \(Output.bytes(report.freedBytes)).")
+            for t in tasks { Output.line("  \(t.id): \(t.ok ? "ok" : "failed — \(t.output.suffix(200))")") }
         }
         throw reportExit(report)
     }

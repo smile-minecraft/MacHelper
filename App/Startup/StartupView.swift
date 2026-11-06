@@ -4,6 +4,7 @@ import SwiftUI
 struct StartupView: View {
     @Bindable var model: StartupModel
     @State private var removing: StartupItem?
+    @State private var disablingDaemon: StartupItem?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -42,8 +43,8 @@ struct StartupView: View {
                                     Text(scope.title)
                                         .font(.system(size: 12, weight: .semibold))
                                         .foregroundStyle(Palette.textMuted)
-                                    if scope.needsAdmin {
-                                        Text("Needs an administrator to change").font(.caption).foregroundStyle(Palette.textFaint)
+                                    if let note = note(for: scope) {
+                                        Text(note).font(.caption).foregroundStyle(Palette.textFaint)
                                     }
                                 }
                             }
@@ -74,6 +75,24 @@ struct StartupView: View {
         } message: {
             Text("The job is stopped and its plist goes to the Trash. The app that installed it may add it again.")
         }
+        .confirmationDialog("Disable \(disablingDaemon?.label ?? "")?", isPresented: Binding(get: { disablingDaemon != nil }, set: { if !$0 { disablingDaemon = nil } }),
+                            titleVisibility: .visible) {
+            Button("Disable") {
+                if let item = disablingDaemon { Task { await model.setEnabled(item, false) } }
+            }
+        } message: {
+            Text("This system daemon is stopped for all users and won’t start again until you enable it here. The app that installed it may stop working properly (for example its updater, VPN or network helper). The plist isn’t changed or removed.")
+        }
+    }
+
+    private func note(for scope: StartupItem.Scope) -> String? {
+        switch scope {
+        case .userAgent: nil
+        case .systemAgent: String(localized: "Switching affects only your account; can’t be removed")
+        case .systemDaemon: model.helperEnabled
+            ? String(localized: "Switched by the Helper for all users; can’t be removed")
+            : String(localized: "Enable the Helper in Settings to switch these")
+        }
     }
 
     private func row(_ item: StartupItem) -> some View {
@@ -96,9 +115,12 @@ struct StartupView: View {
                 Text(schedule(item)).font(.caption2).foregroundStyle(Palette.textMuted)
             }
             Spacer()
-            if !item.scope.needsAdmin {
-                Toggle("Enabled", isOn: Binding(get: { !item.isDisabled }, set: { on in Task { await model.setEnabled(item, on) } }))
-                    .toggleStyle(.switch).labelsHidden()
+            if !item.isProtected {
+                Toggle("Enabled", isOn: Binding(get: { !item.isDisabled }, set: { on in
+                    if !on && item.scope == .systemDaemon { disablingDaemon = item } else { Task { await model.setEnabled(item, on) } }
+                }))
+                .toggleStyle(.switch).labelsHidden()
+                .disabled(!model.canToggle(item))
             }
         }
         .padding(.vertical, 2)
@@ -108,7 +130,7 @@ struct StartupView: View {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(item.label, forType: .string)
             }
-            if !item.scope.needsAdmin {
+            if item.scope.canRemove {
                 Divider()
                 Button("Remove…", role: .destructive) { removing = item }
             }

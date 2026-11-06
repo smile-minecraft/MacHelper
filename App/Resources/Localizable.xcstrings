@@ -2351,16 +2351,6 @@
         }
       }
     },
-    "Needs an administrator to change": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "需要管理員權限才能變更"
-          }
-        }
-      }
-    },
     "Network": {
       "localizations": {
         "zh-Hant": {
@@ -6211,6 +6201,146 @@
           "stringUnit": {
             "state": "translated",
             "value": "移到垃圾桶"
+          }
+        }
+      }
+    },
+    "%lld files": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 個檔案"
+          }
+        }
+      }
+    },
+    "Can’t read %@: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法讀取 %1$@：%2$@"
+          }
+        }
+      }
+    },
+    "Delete old system logs and diagnostic reports as administrator: %@. Only files older than 30 days in the fixed system log folders.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以管理員權限直接刪除舊的系統日誌與診斷報告：%@。只處理固定系統日誌資料夾裡超過 30 天的檔案。"
+          }
+        }
+      }
+    },
+    "Disable": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停用"
+          }
+        }
+      }
+    },
+    "Disable %@?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要停用 %@ 嗎？"
+          }
+        }
+      }
+    },
+    "Enable the Helper in Settings to switch these": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在設定中啟用 Helper 後才能切換"
+          }
+        }
+      }
+    },
+    "Not applicable on this Mac; skipped.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這台 Mac 不適用，會略過。"
+          }
+        }
+      }
+    },
+    "Nothing older than 30 days": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有超過 30 天的檔案"
+          }
+        }
+      }
+    },
+    "Only tasks that are safe to repeat and lose nothing the system doesn’t rebuild can run unattended.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只有可以安全重複執行、而且不會失去系統無法重建之資料的任務，才能在背景自動執行。"
+          }
+        }
+      }
+    },
+    "Switched by the Helper for all users; can’t be removed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由 Helper 為所有使用者切換；不能刪除"
+          }
+        }
+      }
+    },
+    "Switching affects only your account; can’t be removed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切換只影響你的帳號；不能刪除"
+          }
+        }
+      }
+    },
+    "System Logs": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統日誌"
+          }
+        }
+      }
+    },
+    "System logs": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統日誌"
+          }
+        }
+      }
+    },
+    "This system daemon is stopped for all users and won’t start again until you enable it here. The app that installed it may stop working properly (for example its updater, VPN or network helper). The plist isn’t changed or removed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個系統背景程式會對所有使用者停止，直到你在這裡重新啟用前都不會再啟動。安裝它的 App 可能無法正常運作（例如更新程式、VPN 或網路輔助程式）。plist 檔不會被修改或刪除。"
           }
         }
       }

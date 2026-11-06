@@ -1,5 +1,6 @@
 import FanControl
 import Foundation
+import PrivilegedOps
 import HelperProtocol
 
 /// `MacHelper.app/Contents/MacOS/MacHelper --selftest [--register | --refresh | --reinstall | --unregister]`
@@ -97,6 +98,11 @@ enum SelfTest {
                         out("  fan \(f.id):    actual \(Int(f.reading.actualRPM)) target \(Int(f.reading.targetRPM)) commanded \(f.commandedRPM.map { "\(Int($0))" } ?? "firmware") mode \(f.reading.mode)")
                     }
                     if let e = s.lastError { out("lastError:   \(e)") }
+                    // v4, read-only: what system cleanup would delete (dry run, nothing removed).
+                    let preview = try await client.systemCleanup(SystemCleanupRequest(targetIDs: SystemCleanup.targets.map(\.id), dryRun: true))
+                    for t in preview.targets {
+                        out("syscleanup:  \(t.id) dry-run \(t.count) files, \(t.bytes) bytes\(t.unavailable.map { " (unavailable: \($0))" } ?? "")")
+                    }
                 } catch {
                     out("error:       \(error)")
                 }

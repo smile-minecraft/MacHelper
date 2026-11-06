@@ -57,14 +57,31 @@
   - 捷徑的低風險清理改成依規則動作執行，也就是直接刪除。
   - 專案建置產物（purge）、解除安裝、重複檔案仍然丟垃圾桶。
 
+- [ ] **第三批**（2026-11-06，使用者確認範圍）：
+  - **Helper 協定升到 v4**，新增兩個 XPC 操作；白名單和驗證放在新模組 `PrivilegedOps`（沒有相依，Helper、App、CleanEngine 共用），測試在 `Tests/PrivilegedOpsTests`。
+  - **系統日誌清理**（`systemCleanup`）：App 只能傳目標 id，資料夾、檔名規則和 30 天門檻都寫死在 `SystemCleanup.targets`：
+    - `system.diagnostic-reports`：`/Library/Logs/DiagnosticReports` 和下一層子資料夾（`Retired/` 等），副檔名 ips、crash、diag、spin、hang、panic、shutdownStall。
+    - `system.logs`：只看 `/Library/Logs` 第一層的 `*.log`、`*.log.N`、`.gz`/`.bz2`，各 App 的子資料夾不進去。
+    - 用 `O_NOFOLLOW` 的目錄 fd 逐層走，`unlinkat` 刪除；符號連結、硬連結（nlink > 1）、資料夾一律不碰。以 root 直接刪除。
+    - `/Library/Caches` 沒有收：這台實際看過，裡面沒有診斷報告，只有 iconservices、ColorSync 等系統服務正在用的快取。
+    - 「一鍵優化」新增「系統日誌」區塊，掃描時由 Helper 做 dry run 列出檔案數和大小，預設勾選；清理時 Helper 依同樣規則重新掃一次再刪。每個檔案寫進操作紀錄（command `clean`，source 為目標 id）。CLI 不能用（Helper 只接受 App 連線）。
+  - **系統啟動項目開關**（只有停用／啟用，不刪除、不改 plist）：
+    - `/Library/LaunchDaemons`：經 Helper 的 `setSystemDaemonEnabled`。Helper 自己驗證路徑（必須直接在資料夾內、一般檔案、root 擁有、不是符號連結）、從 plist 讀 Label，拒絕 `com.apple.` 和 `com.machelper.`；執行 `launchctl disable/enable system/<label>`，再 best-effort `bootout`/`bootstrap`。停用前會跳確認。
+    - `/Library/LaunchAgents`：用同樣的驗證，在使用者自己的 `gui/<uid>` domain 切換，只影響目前帳號，不需要 Helper。
+    - 只有自己的 `~/Library/LaunchAgents` 項目能刪除。CLI `startup --disable/--enable` 可切換全使用者 agent；系統 daemon 會提示改用 App。
+  - **自動清理納入維護任務**：白名單 `AutoClean.maintenanceTaskIDs` = QuickLook 快取重設、刪除無法使用的模擬器；執行時再檢查一次低風險且不需 root。`AutoCleanConfig.maintenanceTasks`（optional，nil 表示全部）、`lastTasks` 記錄結果。自動清理視窗可分別開關，不適用的任務會略過。模擬器任務的探測改成先 `xcode-select -p` 成功才跑 `xcrun`，避免背景執行時跳出安裝開發者工具的對話框。
+  - `swift test` 212 項通過（新增 35 項）。Release 建置成功，**還沒安裝**：`scripts/install.sh` 因背景記錄的 `machelper-cli` 正在執行而停下，要先照第五節「換版前先停用背景記錄」。
+  - 待實機確認：
+    - 安裝後 `MacHelper --selftest` 應顯示 `protocol v4` 和兩行 `syscleanup: … dry-run`。
+    - 一鍵優化的「系統日誌」區塊數字、實際清理後操作紀錄。
+    - 啟動項目頁切換一個全使用者 agent 和一個系統 daemon，再切回來；`launchctl print-disabled system` 確認狀態。
+    - 自動清理「立即執行」後「上次執行」列出兩個維護任務的結果（這台沒有選定 Xcode，模擬器任務會略過）。
+
 ## 二、還沒做的功能
 
-- [ ] **系統層級的項目要管理員權限**：
-  - 系統啟動項目（`/Library/LaunchDaemons` 等）只能看，不能停用或刪除
+- [ ] **系統層級的項目要管理員權限**（剩下的部分；啟動項目開關與系統日誌清理已在第三批完成）：
   - 解除安裝時 `/Library` 底下的殘留只列出來
   - 287 個 root 程序看不到 CPU 和記憶體用量
-
-  做法：在 Helper 加 XPC 操作，協定升到 v4，並加嚴格的路徑和 label 白名單。
 - [ ] **睡眠／喚醒測試**：風扇策略在喚醒後的 reassert 邏輯沒有在實機上驗證過。
 
 電池充電上限與桌面小工具已由使用者決定取消，不再規劃。

@@ -26,6 +26,21 @@ struct AutoCleanView: View {
                          : "Auto Clean only touches low-risk caches and logs, which are deleted directly and free space immediately (apps rebuild this data themselves).")
                         .font(.caption).foregroundStyle(.secondary)
                 }
+                Section {
+                    ForEach(model.maintenanceRows, id: \.task.id) { row in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Toggle(row.task.title, isOn: Binding(get: { model.isMaintenanceEnabled(row.task.id) },
+                                                                 set: { model.setMaintenance(row.task.id, enabled: $0) }))
+                            Text(row.available ? row.task.description : String(localized: "Not applicable on this Mac; skipped."))
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                } header: {
+                    Text("Maintenance")
+                } footer: {
+                    Text("Only tasks that are safe to repeat and lose nothing the system doesn’t rebuild can run unattended.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
             }
             .formStyle(.grouped)
 
@@ -37,6 +52,10 @@ struct AutoCleanView: View {
                             .font(.caption).foregroundStyle(.secondary)
                     } else {
                         Text("Hasn’t run yet").foregroundStyle(.secondary)
+                    }
+                    ForEach(model.config.lastTasks ?? [], id: \.id) { t in
+                        Label(model.title(forTask: t.id), systemImage: t.ok ? "checkmark.circle" : "xmark.circle")
+                            .font(.caption).foregroundStyle(t.ok ? Color.secondary : Color.orange)
                     }
                     if let e = model.config.lastError { Text(e).font(.caption).foregroundStyle(.orange) }
                     if model.enabled, let next = model.config.nextRun {

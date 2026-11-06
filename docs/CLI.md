@@ -36,8 +36,8 @@ inside the app follows the app's language; a standalone build prints English.
 | `machelper purge --path DIR` | Project build artifacts: `node_modules`, `target`, `.build`, `.venv`, … |
 | `machelper optimize` | Maintenance: QuickLook reset, unavailable simulators, `brew cleanup`, … |
 | `machelper uninstall APP` | An app plus everything it left behind (see below); `--list`, `--orphans` |
-| `machelper autoclean` | The scheduled low-risk clean: `--status`, `--now`, `--run-if-due` |
-| `machelper startup` | Launch agents / daemons; `--disable`, `--enable`, `--remove LABEL --yes`, `--broken` |
+| `machelper autoclean` | The scheduled low-risk clean plus safe maintenance (QuickLook reset, unavailable simulators): `--status`, `--now`, `--run-if-due` |
+| `machelper startup` | Launch agents / daemons; `--disable`, `--enable` (agents for all users: your account only; system daemons: app only, via the Helper), `--remove LABEL --yes` (your own items only), `--broken` |
 | `machelper analyze [PATH]` | Where the space goes (allocated size, hard links and APFS clones counted once) |
 | `machelper duplicates [PATH]` | Files with identical content (size → 64 KB head/tail → SHA-256), clones marked |
 | `machelper stats --range 24h` | Recorded per-minute metric history (retention defaults to 7 days and is adjustable in Settings → General → Data management; background recording continues after the app quits when enabled) |

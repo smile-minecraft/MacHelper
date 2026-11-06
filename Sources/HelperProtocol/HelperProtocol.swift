@@ -9,7 +9,7 @@ public enum HelperConstants {
     /// Name of the helper executable inside `MacHelper.app/Contents/MacOS/`.
     public static let helperExecutableName = "MacHelperHelper"
     /// Bump when the XPC interface changes; the app refuses to talk to a mismatched helper.
-    public static let protocolVersion = 3
+    public static let protocolVersion = 4
 }
 
 /// XPC interface exported by the root Helper daemon.
@@ -29,6 +29,15 @@ public enum HelperConstants {
 
     /// Runs one root maintenance task by id. The Helper maps ids to fixed commands; unknown ids are refused.
     func runMaintenance(_ taskID: String, reply: @escaping @Sendable (_ ok: Bool, _ output: String) -> Void)
+
+    // v4
+
+    /// `request` is an encoded `SystemCleanupRequest` (target ids + dry run); the reply is an encoded
+    /// `SystemCleanupResult`. Folders, name patterns and the 30-day age limit are fixed in the Helper.
+    func systemCleanup(_ request: Data, reply: @escaping @Sendable (_ json: Data?, _ error: String?) -> Void)
+    /// Enables or disables a third-party job in /Library/LaunchDaemons. The Helper reads the label
+    /// from the plist itself and refuses Apple's and MacHelper's own jobs. Never edits or deletes files.
+    func setSystemDaemonEnabled(_ plistPath: String, enabled: Bool, reply: @escaping @Sendable (_ error: String?) -> Void)
 }
 
 public enum HelperTiming {

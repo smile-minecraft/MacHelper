@@ -1,6 +1,7 @@
 import FanControl
 import Foundation
 import HelperProtocol
+import PrivilegedOps
 import ServiceManagement
 import SMCKit
 
@@ -152,6 +153,25 @@ final class HelperClient: @unchecked Sendable {
         try await call(timeout: .seconds(120)) { proxy, done in
             proxy.runMaintenance(id) { ok, output in
                 done(ok ? .success(output) : .failure(HelperClientError.remote(output)))
+            }
+        }
+    }
+
+    /// Old system logs and diagnostic reports (fixed folders, older than 30 days). Deleting is permanent.
+    func systemCleanup(_ request: SystemCleanupRequest) async throws -> SystemCleanupResult {
+        let json = try JSONEncoder().encode(request)
+        let data: Data = try await call(timeout: .seconds(60)) { proxy, done in
+            proxy.systemCleanup(json) { data, error in
+                if let data { done(.success(data)) } else { done(.failure(HelperClientError.remote(error ?? "unknown"))) }
+            }
+        }
+        return try JSONDecoder().decode(SystemCleanupResult.self, from: data)
+    }
+
+    func setSystemDaemonEnabled(plistPath: String, enabled: Bool) async throws {
+        let _: Bool = try await call(timeout: .seconds(30)) { proxy, done in
+            proxy.setSystemDaemonEnabled(plistPath, enabled: enabled) { error in
+                if let error { done(.failure(HelperClientError.remote(error))) } else { done(.success(true)) }
             }
         }
     }

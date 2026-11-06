@@ -650,6 +650,56 @@
           }
         }
       }
+    },
+    "Crash, hang and resource reports for all users in /Library/Logs/DiagnosticReports older than 30 days. Deleted directly as administrator.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs/DiagnosticReports 裡所有使用者超過 30 天的當機、停止回應與資源報告。以管理員權限直接刪除。"
+          }
+        }
+      }
+    },
+    "Log files directly in /Library/Logs older than 30 days; app subfolders are left alone. Deleted directly as administrator.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs 第一層超過 30 天的日誌檔；各 App 的子資料夾不動。以管理員權限直接刪除。"
+          }
+        }
+      }
+    },
+    "Maintenance failed: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "維護任務失敗：%@"
+          }
+        }
+      }
+    },
+    "Old system diagnostic reports": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "舊的系統診斷報告"
+          }
+        }
+      }
+    },
+    "Old system log files": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "舊的系統日誌檔"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
