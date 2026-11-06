@@ -70,9 +70,8 @@
     - `/Library/LaunchAgents`：用同樣的驗證，在使用者自己的 `gui/<uid>` domain 切換，只影響目前帳號，不需要 Helper。
     - 只有自己的 `~/Library/LaunchAgents` 項目能刪除。CLI `startup --disable/--enable` 可切換全使用者 agent；系統 daemon 會提示改用 App。
   - **自動清理納入維護任務**：白名單 `AutoClean.maintenanceTaskIDs` = QuickLook 快取重設、刪除無法使用的模擬器；執行時再檢查一次低風險且不需 root。`AutoCleanConfig.maintenanceTasks`（optional，nil 表示全部）、`lastTasks` 記錄結果。自動清理視窗可分別開關，不適用的任務會略過。模擬器任務的探測改成先 `xcode-select -p` 成功才跑 `xcrun`，避免背景執行時跳出安裝開發者工具的對話框。
-  - `swift test` 212 項通過（新增 35 項）。Release 建置成功，**還沒安裝**：`scripts/install.sh` 因背景記錄的 `machelper-cli` 正在執行而停下，要先照第五節「換版前先停用背景記錄」。
+  - `swift test` 212 項通過（新增 35 項）。2026-11-06 照第五節停用背景記錄、備份到 `~/Desktop/MacHelper-backup-20261106163509/` 後安裝 build `202611061635`；`--selftest` 顯示 `protocol v4`，兩個系統清理目標 dry run 都是 0 個檔案（這台的診斷報告和日誌都不到 30 天，與 `find -mtime +30` 一致）。背景記錄目前是關閉的，要在 App 裡重新開啟。
   - 待實機確認：
-    - 安裝後 `MacHelper --selftest` 應顯示 `protocol v4` 和兩行 `syscleanup: … dry-run`。
     - 一鍵優化的「系統日誌」區塊數字、實際清理後操作紀錄。
     - 啟動項目頁切換一個全使用者 agent 和一個系統 daemon，再切回來；`launchctl print-disabled system` 確認狀態。
     - 自動清理「立即執行」後「上次執行」列出兩個維護任務的結果（這台沒有選定 Xcode，模擬器任務會略過）。
