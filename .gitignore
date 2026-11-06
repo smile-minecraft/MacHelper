@@ -8,3 +8,41 @@ xcuserdata/
 Config/Local.xcconfig
 Config/CLI-Info.plist
 .vscode/
+
+# Swift Package Manager / Xcode local state
+.swiftpm/
+*.xcworkspace/xcuserdata/
+
+# AI assistant files and local agent state
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+AGENTS.md
+.ultrawork/
+.omc/
+.codex/
+.cursor/
+.cursorrules
+.gemini/
+.windsurf/
+.aider*
+.taste-skill/
+design-system/
+
+# Local data, logs and scratch
+.env
+.env.*
+*.log
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+__pycache__/
+*.pyc
+scratch/
+tmp/
+.idea/
+
+# AI-written handoff notes and research reports (kept locally, not in the repo)
+docs/HANDOFF.md
+docs/*-feasibility.md
+docs/*-audit.md
