@@ -93,6 +93,9 @@ public struct SystemSnapshot: Codable, Sendable, Equatable {
 }
 
 public enum HealthCheck {
+    /// The app, the background recorder and the root Helper.
+    public static let ownProcessNames: Set<String> = ["MacHelper", "machelper-cli", "machelper", "MacHelperHelper"]
+
     /// Builds the report for the last `hours` of history.
     public static func run(history: MetricsHistory, hours: Double = 24, system: SystemSnapshot, now: Date = Date()) throws -> HealthReport {
         let since = now.addingTimeInterval(-hours * 3600)
@@ -140,7 +143,8 @@ public enum HealthCheck {
                     String(localized: "CPU use was 80% or higher in \(pct(busy)) of the recorded minutes.", bundle: .module))
             }
         }
-        if let top = byCPU.first, top.averageCPU >= 0.5, top.presence >= 0.5 {
+        // MacHelper's own processes are never reported as the problem (its own numbers stay in the lists).
+        if let top = byCPU.first(where: { !ownProcessNames.contains($0.name) }), top.averageCPU >= 0.5, top.presence >= 0.5 {
             add("cpu.process", .warning, String(localized: "\(top.name) keeps the CPU busy", bundle: .module),
                 String(localized: "It used \(pct(top.averageCPU)) of a core on average and was among the busiest processes in \(pct(top.presence)) of the minutes.", bundle: .module))
         }

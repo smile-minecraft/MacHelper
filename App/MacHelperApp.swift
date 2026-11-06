@@ -25,6 +25,18 @@ struct MacHelperApp: App {
                 }
                 Divider()
             }
+            // Interface size: ⌘+ / ⌘- / ⌘0 change the text size setting (80–150 %).
+            CommandGroup(after: .toolbar) {
+                Button("Make Interface Bigger") { ThemeStore.shared.zoom(by: 1) }
+                    .keyboardShortcut("+", modifiers: .command)
+                Button("Make Interface Bigger") { ThemeStore.shared.zoom(by: 1) }
+                    .keyboardShortcut("=", modifiers: .command)
+                Button("Make Interface Smaller") { ThemeStore.shared.zoom(by: -1) }
+                    .keyboardShortcut("-", modifiers: .command)
+                Button("Actual Size") { ThemeStore.shared.settings.textScale = 1 }
+                    .keyboardShortcut("0", modifiers: .command)
+                Divider()
+            }
         }
 
         Settings {

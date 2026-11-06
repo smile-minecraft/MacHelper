@@ -82,14 +82,14 @@ struct MonitorPanel: View {
         HStack(spacing: 8) {
             Button(action: actions.openMain) {
                 HStack(spacing: 7) {
-                    PixelIcon(name: "px.fans", size: 22)
-                    Text("MacHelper").font(.system(size: 16, weight: .bold, design: .rounded)).foregroundStyle(Palette.text)
+                    Image(nsImage: ThemeStore.shared.logoImage).interpolation(.none).resizable().frame(width: 22, height: 22)
+                    Text("MacHelper").font(.display(16.5, weight: .bold)).foregroundStyle(Palette.text)
                 }
             }
             .buttonStyle(.plain)
             .help("Open MacHelper")
             Spacer()
-            Text(Host.uptimeShort).font(.system(size: 10.5)).foregroundStyle(Palette.textFaint)
+            Text(Host.uptimeShort).font(.mh(size: 10.5)).foregroundStyle(Palette.textFaint)
             IconButton(symbol: "macwindow", help: "Open MacHelper", action: actions.openMain)
             IconButton(symbol: "gearshape", help: "Settings", action: actions.openSettings)
         }
@@ -112,11 +112,11 @@ struct MonitorPanel: View {
         HStack(spacing: 6) {
             let enabled = HelperClient.shared.status == .enabled
             Circle().fill(enabled ? Theme.accent : Theme.amber).frame(width: 6, height: 6)
-            Text(enabled ? "Helper running" : "Helper not enabled").font(.system(size: 11)).foregroundStyle(Palette.textMuted)
+            Text(enabled ? "Helper running" : "Helper not enabled").font(.mh(size: 11)).foregroundStyle(Palette.textMuted)
             Spacer()
             Button("Quit", action: actions.quit)
                 .buttonStyle(.plain)
-                .font(.system(size: 11.5, weight: .medium))
+                .font(.mh(size: 11.5, weight: .medium))
                 .foregroundStyle(Palette.textMuted)
         }
         .padding(.horizontal, 14)
@@ -132,10 +132,10 @@ private struct QuickBar: View {
     var body: some View {
         HStack(spacing: 0) {
             item(.optimize, actions.openOptimize)
-            item(.fans, actions.openFanControl)
+            if !ThemeStore.shared.isSimple { item(.fans, actions.openFanControl) }
             item(.disk, actions.openDiskAnalysis)
             item(.uninstall, actions.openUninstall)
-            item(.startup, actions.openStartup)
+            if !ThemeStore.shared.isSimple { item(.startup, actions.openStartup) }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
@@ -147,7 +147,7 @@ private struct QuickBar: View {
         Button(action: action) {
             VStack(spacing: 4) {
                 PixelIcon(name: s.icon, size: 30)
-                Text(s.title).font(.system(size: 11.5, weight: .medium)).foregroundStyle(Palette.textMuted).lineLimit(1)
+                Text(s.title).font(.mh(size: 11.5, weight: .medium)).foregroundStyle(Palette.textMuted).lineLimit(1)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
@@ -162,7 +162,7 @@ private struct QuickItemStyle: ButtonStyle {
     @State private var hover = false
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .background(hover ? Palette.inset : .clear, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .background(hover ? Palette.inset : .clear, in: SurfaceShape(cornerRadius: 8, style: .continuous))
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isPressed)
             .onHover { hover = $0 }
@@ -180,9 +180,9 @@ private enum Series {
         return (0..<points).map { pts[Int(Double($0) * step)] }
     }
 
+    /// Same rule as everywhere: neutral when normal, amber / red only when it needs attention.
     static func tempColor(_ t: Double?) -> Color {
-        guard let t else { return Theme.mint }
-        return t >= 95 ? Theme.rose : (t >= 80 ? Theme.orange : (t >= 60 ? Theme.amber : Theme.mint))
+        StatusRules.temperature(t)?.level.color ?? Palette.textMuted
     }
 }
 
@@ -223,17 +223,17 @@ private struct CPUTab: View {
             HairlineHeader(text: "Details")
             VStack(spacing: 0) {
                 if let c = store.cpu {
-                    KeyValueRow(label: String(localized: "System (kernel)"), value: Fmt.percent(c.system), dot: Theme.rose)
+                    KeyValueRow(label: String(localized: "System (kernel)"), value: Fmt.percent(c.system), dot: Theme.slate)
                     KeyValueRow(label: String(localized: "User"), value: Fmt.percent(c.user), dot: Theme.blue)
                     KeyValueRow(label: String(localized: "Idle"), value: Fmt.percent(max(1 - c.total, 0)), dot: Palette.textFaint)
                 }
                 let l = Host.loadAverages
-                KeyValueRow(label: String(localized: "Load average (1 · 5 · 15 min)"), value: String(format: "%.2f · %.2f · %.2f", l.0, l.1, l.2))
+                KeyValueRow(label: String(localized: "Load average (1 · 5 · 15 min)"), value: String(format: "%.2f / %.2f / %.2f", l.0, l.1, l.2))
                 if let f = store.fans.first {
                     KeyValueRow(label: String(localized: "Fans"), value: "\(Fmt.rpm(f.actualRPM)) rpm", dot: Theme.mint)
                 }
                 if let w = store.power?.systemWatts {
-                    KeyValueRow(label: String(localized: "Power"), value: Fmt.watts(w), dot: Theme.amber)
+                    KeyValueRow(label: String(localized: "Power"), value: Fmt.watts(w), dot: Theme.slate)
                 }
                 KeyValueRow(label: String(localized: "CPU power"), value: Fmt.watts(store.power?.cpuWatts), dot: Theme.blue)
             }
@@ -245,9 +245,9 @@ private struct CPUTab: View {
 
     private func legend(_ color: Color, _ title: String, _ value: Double?) -> some View {
         HStack(spacing: 5) {
-            RoundedRectangle(cornerRadius: 2.5).fill(color).frame(width: 10, height: 10)
-            Text(title).font(.system(size: 12)).foregroundStyle(Palette.textMuted)
-            Text(Fmt.percent(value)).font(.system(size: 12, weight: .semibold, design: .monospaced)).foregroundStyle(Palette.text)
+            SurfaceShape(cornerRadius: 2.5).fill(color).frame(width: 10, height: 10)
+            Text(title).font(.mh(size: 12)).foregroundStyle(Palette.textMuted)
+            Text(Fmt.percent(value)).font(.display(12, weight: .semibold).monospacedDigit()).foregroundStyle(Palette.text)
         }
     }
 }
@@ -296,17 +296,17 @@ private struct GPUProcessTable: View {
             if let items {
                 if items.isEmpty {
                     Text("No process used the GPU in the last few seconds")
-                        .font(.system(size: 12)).foregroundStyle(Palette.textMuted)
+                        .font(.mh(size: 12)).foregroundStyle(Palette.textMuted)
                         .frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 6)
                 }
                 ForEach(Array(items.enumerated()), id: \.element.id) { i, p in
                     HStack(spacing: 8) {
                         Image(nsImage: ProcessIcon.icon(for: p)).resizable().frame(width: 18, height: 18)
-                        Text(p.name).font(.system(size: 13)).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.middle)
+                        Text(p.name).font(.mh(size: 13)).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.middle)
                         Spacer(minLength: 4)
                         Text(Fmt.percent(p.gpu)).frame(width: 58, alignment: .trailing).foregroundStyle(Palette.text)
                     }
-                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                    .font(.display(13).monospacedDigit())
                     .frame(height: 28)
                     .overlay(alignment: .bottom) {
                         if i < items.count - 1 { Rectangle().fill(Palette.hairline).frame(height: 1) }
@@ -354,10 +354,10 @@ private struct MemoryTab: View {
 
                 HairlineHeader(text: "Details")
                 HStack {
-                    Text("Used").font(.system(size: 13)).foregroundStyle(Palette.textMuted)
+                    Text("Used").font(.mh(size: 13)).foregroundStyle(Palette.textMuted)
                     Spacer()
                     Text("\(Fmt.memory(m.usedBytes)) / \(Fmt.memory(m.totalBytes))")
-                        .font(.system(size: 13, weight: .semibold, design: .monospaced)).foregroundStyle(Palette.text)
+                        .font(.display(13).monospacedDigit()).foregroundStyle(Palette.text)
                 }
                 StackedBar(parts: [(app, Theme.blue), (wired, Theme.amber), (comp, Theme.rose)]).padding(.bottom, 2)
                 VStack(spacing: 0) {
@@ -406,7 +406,7 @@ private struct DiskTab: View {
                     RingGauge(fraction: used, value: Fmt.percent(used), caption: "Used", color: used > 0.9 ? Theme.rose : Theme.violet,
                               size: 112, lineWidth: 14)
                     VStack(alignment: .leading, spacing: 0) {
-                        Text(Host.volumeName).font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.text).padding(.bottom, 4)
+                        Text(Host.volumeName).font(.mh(size: 15, weight: .semibold)).foregroundStyle(Palette.text).padding(.bottom, 4)
                         KeyValueRow(label: String(localized: "Free"), value: Fmt.bytes(d.availableBytes), dot: Palette.inset)
                         KeyValueRow(label: String(localized: "Used"), value: Fmt.bytes(d.totalBytes - d.availableBytes), dot: Theme.violet)
                         KeyValueRow(label: String(localized: "Capacity"), value: Fmt.bytes(d.totalBytes))
@@ -460,10 +460,10 @@ private struct NetworkTab: View {
 
     private func big(_ value: String, _ label: String, _ color: Color) -> some View {
         VStack(spacing: 3) {
-            Text("\(value)/s").font(.system(size: 30, weight: .bold, design: .monospaced)).foregroundStyle(Palette.text)
+            Text("\(value)/s").font(.display(30, weight: .bold).monospacedDigit()).foregroundStyle(Palette.text)
             HStack(spacing: 5) {
-                RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 8, height: 8)
-                Text(label).font(.system(size: 11)).foregroundStyle(Palette.textMuted)
+                SurfaceShape(cornerRadius: 2).fill(color).frame(width: 8, height: 8)
+                Text(label).font(.mh(size: 11)).foregroundStyle(Palette.textMuted)
             }
         }
     }
@@ -490,7 +490,7 @@ struct ProcessTable: View {
                     header("CPU", .cpu).frame(width: 52, alignment: .trailing)
                     header("Memory", .memory).frame(width: 66, alignment: .trailing)
                 }
-                .font(.system(size: 11.5, weight: .medium))
+                .font(.mh(size: 11.5, weight: .medium))
                 .foregroundStyle(Palette.textFaint)
                 .padding(.bottom, 6)
                 Rectangle().fill(Palette.hairline).frame(height: 1)
@@ -501,7 +501,7 @@ struct ProcessTable: View {
             ForEach(Array(items.enumerated()), id: \.element.id) { i, p in
                 HStack(spacing: 8) {
                     Image(nsImage: ProcessIcon.icon(for: p)).resizable().frame(width: 18, height: 18)
-                    Text(p.name).font(.system(size: 13)).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.middle)
+                    Text(p.name).font(.mh(size: 13)).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.middle)
                     Spacer(minLength: 4)
                     if showHeader || !valueIsMemory {
                         Text(Fmt.percent(p.cpu)).frame(width: 58, alignment: .trailing)
@@ -515,7 +515,7 @@ struct ProcessTable: View {
                             .foregroundStyle(sort == .memory ? Palette.text : Palette.textMuted)
                     }
                 }
-                .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                .font(.display(13).monospacedDigit())
                 .frame(height: 28)
                 .overlay(alignment: .bottom) {
                     if i < items.count - 1 { Rectangle().fill(Palette.hairline).frame(height: 1) }
@@ -538,7 +538,7 @@ struct ProcessTable: View {
         Button { onSort?(s) } label: {
             HStack(spacing: 2) {
                 Text(title)
-                if sort == s { Image(systemName: "chevron.down").font(.system(size: 7, weight: .bold)) }
+                if sort == s { Image(systemName: "chevron.down").font(.mh(size: 7, weight: .bold)) }
             }
             .foregroundStyle(sort == s ? Palette.text : Palette.textFaint)
         }

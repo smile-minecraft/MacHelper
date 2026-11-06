@@ -1,127 +1,372 @@
+import AppKit
 import HelperProtocol
 import Metrics
+import Storage
 import SwiftUI
 
 struct OverviewView: View {
     let app: AppModel
     private var store: MonitorStore { app.store }
+    @State private var diskPoints: [DiskSpacePoint] = []
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
-                Hero(store: store)
-                HairlinePanel(columns: 4) {
-                    MetricTile(title: "CPU", icon: "px.cpu", color: Theme.blue,
-                               value: Fmt.percent(store.cpu?.total), detail: cpuDetail,
-                               series: store.history[.cpu], maxValue: 1)
-                    MetricTile(title: "GPU", icon: "px.gpu", color: Theme.violet,
-                               value: Fmt.percent(store.gpu?.utilization), detail: store.gpu?.name,
-                               series: store.history[.gpu], maxValue: 1)
-                    MetricTile(title: "Memory", icon: "px.memory", color: Theme.cyan,
-                               value: memoryValue, detail: memoryDetail, series: store.history[.memory], maxValue: 1)
-                    MetricTile(title: "Temperature", icon: "px.temperature", color: Theme.orange,
-                               value: Fmt.celsius(store.cpuCelsius), detail: String(localized: "Hottest CPU sensor"),
-                               series: store.history[.temperature], maxValue: nil)
-                    MetricTile(title: "Fans", icon: "px.fans", color: Theme.mint,
-                               value: store.fans.first.map { "\(Fmt.rpm($0.actualRPM)) rpm" } ?? "–",
-                               detail: fanDetail, series: store.history[.fan], maxValue: store.fans.first?.maxRPM)
-                    MetricTile(title: "Power", icon: "px.power", color: Theme.amber,
-                               value: Fmt.watts(store.power?.systemWatts ?? store.power?.gpuWatts),
-                               detail: store.power.map { String(localized: "CPU \(Fmt.watts($0.cpuWatts)) · GPU \(Fmt.watts($0.gpuWatts))") },
-                               series: store.history[.power], maxValue: nil)
-                    MetricTile(title: "Network", icon: "px.network", color: Theme.blue,
-                               value: store.network.map { "↓ \(Fmt.rate($0.inBytesPerSecond))/s" } ?? "–",
-                               detail: store.network.map { "↑ \(Fmt.rate($0.outBytesPerSecond))/s" },
-                               series: store.history[.netIn], maxValue: nil)
-                    MetricTile(title: "Disk", icon: "px.ssd", color: Theme.violet,
-                               value: store.disk.map { Fmt.bytes($0.availableBytes) } ?? "–",
-                               detail: store.disk.map { String(localized: "free of \(Fmt.bytes($0.totalBytes))") },
-                               series: store.history[.diskRead], maxValue: nil)
+            VStack(alignment: .leading, spacing: 32) {
+                Headline(store: store, app: app, diskPoints: diskPoints)
+                Readouts(store: store, advanced: !ThemeStore.shared.isSimple)
+                Rectangle().fill(Palette.hairline).frame(height: 1)
+                HStack(alignment: .top, spacing: 40) {
+                    if ThemeStore.shared.isSimple {
+                        CommonTools(app: app).frame(maxWidth: .infinity, alignment: .topLeading)
+                    } else {
+                        BusiestApps(store: store).frame(maxWidth: .infinity, alignment: .topLeading)
+                    }
+                    ToDoList(app: app).frame(maxWidth: .infinity, alignment: .topLeading)
                 }
-                QuickActions(app: app)
-                TopProcesses(store: store)
+                MachineLine()
             }
-            .padding(.horizontal, 28)
-            .padding(.vertical, 22)
-            .frame(maxWidth: 1200)
+            .padding(.horizontal, 40)
+            .padding(.vertical, 32)
+            .frame(maxWidth: 1100, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
         .onAppear { store.watchProcesses(true) }
         .onDisappear { store.watchProcesses(false) }
-    }
-
-    private var cpuDetail: String? {
-        guard let c = store.cpu, let p = c.performance, let e = c.efficiency else { return nil }
-        return String(localized: "P-cores \(Fmt.percent(p)) · E-cores \(Fmt.percent(e))")
-    }
-
-    private var memoryValue: String {
-        guard let m = store.memory, m.totalBytes > 0 else { return "–" }
-        return Fmt.percent(Double(m.usedBytes) / Double(m.totalBytes))
-    }
-
-    private var memoryDetail: String? {
-        store.memory.map { "\(Fmt.memory($0.usedBytes)) / \(Fmt.memory($0.totalBytes))" }
-    }
-
-    private var fanDetail: String? {
-        guard let f = store.fans.first else { return nil }
-        return f.mode == .automatic ? String(localized: "System control") : String(localized: "Manual")
+        .task {
+            let history = store.persistentHistory
+            diskPoints = await Task.detached(priority: .utility) {
+                (try? history?.diskSpace(since: Date().addingTimeInterval(-8 * 86_400))) ?? []
+            }.value
+            if !ThemeStore.shared.isSimple, app.startupModel.items.isEmpty { await app.startupModel.load() }
+        }
     }
 }
 
-// MARK: - Hero
+// MARK: - Headline
 
-private struct Hero: View {
+/// The one bold element: a sentence that answers "is my Mac OK?", with the number that matters in it.
+private struct Headline: View {
     let store: MonitorStore
+    let app: AppModel
+    let diskPoints: [DiskSpacePoint]
 
-    private struct Health {
-        let title: LocalizedStringKey
-        let detail: String
-        let color: Color
+    private struct Verdict {
+        let sentence: String
+        /// The part of the sentence drawn in the level color.
+        let value: String?
+        let level: StatusLevel
+        var action: (LocalizedStringKey, AppSection)?
     }
 
-    private var health: Health {
+    private var verdict: Verdict {
+        let free = store.disk.map { Fmt.bytes($0.availableBytes) }
         if let t = store.cpuCelsius, t >= 95 {
-            return Health(title: "Your Mac is running hot", detail: String(localized: "CPU at \(Fmt.celsius(t)). Check the top processes below."), color: Theme.rose)
+            let v = Fmt.celsius(t)
+            return Verdict(sentence: String(localized: "Your Mac is running hot at \(v)"), value: v, level: .critical,
+                           action: ThemeStore.shared.isSimple ? ("Check Health", .health) : ("Open Monitor", .monitor))
         }
         if store.memory?.pressure == .critical {
-            return Health(title: "Memory is under pressure", detail: String(localized: "Quit apps you don’t need to free memory."), color: Theme.rose)
+            return Verdict(sentence: String(localized: "Memory is running out"), value: nil, level: .critical, action: ("Check Health", .health))
         }
-        if let d = store.disk, d.totalBytes > 0, Double(d.availableBytes) / Double(d.totalBytes) < 0.08 {
-            return Health(title: "Startup disk is almost full", detail: String(localized: "Only \(Fmt.bytes(d.availableBytes)) free. Optimize can free up space."), color: Theme.amber)
+        if let f = store.diskFreeFraction, let free, f < 0.08 {
+            return Verdict(sentence: String(localized: "The disk is almost full, \(free) left"), value: free, level: .critical,
+                           action: ("Free Up Space", .optimize))
+        }
+        if let f = store.diskFreeFraction, let free, f < 0.2 {
+            return Verdict(sentence: String(localized: "Your Mac runs smoothly, \(free) of space left"), value: free, level: .attention,
+                           action: ("Free Up Space", .optimize))
         }
         if store.memory?.pressure == .warning {
-            return Health(title: "Memory is getting tight", detail: String(localized: "Things still run fine, but swapping may start soon."), color: Theme.amber)
+            return Verdict(sentence: String(localized: "Memory is getting tight"), value: nil, level: .attention, action: ("Check Health", .health))
         }
-        return Health(title: "Everything looks good", detail: String(localized: "Temperatures, memory and disk space are all in a healthy range."), color: Theme.mint)
+        return Verdict(sentence: String(localized: "Your Mac runs smoothly"), value: nil, level: .good)
+    }
+
+    /// The trend under the sentence: how fast free space shrinks, else how long the Mac has been up.
+    private var detail: String {
+        if let f = DiskSpaceForecast.compute(diskPoints) {
+            let perDay = Fmt.bytes(Int64(abs(f.bytesPerDay)))
+            if f.bytesPerDay < 0, let days = f.daysUntilFull, days < 365 {
+                return String(localized: "Free space shrinks by about \(perDay) a day; at this pace the disk is full in about \(Int(days.rounded())) days.")
+            }
+            if f.bytesPerDay < 0 { return String(localized: "Free space shrinks slowly, about \(perDay) a day.") }
+            return String(localized: "Free space hasn’t been shrinking lately.")
+        }
+        return String(localized: "Up for \(Host.uptime) without a restart.")
+    }
+
+    /// The mascot's color is the worst of temperature, memory and free space (CPU spikes are too
+    /// brief to recolor it); it holds up a sign toward the suggested action.
+    private var mood: SlimeMascot.Mood {
+        let levels = [StatusRules.temperature(store.cpuCelsius)?.level, StatusRules.memory(store.memory)?.level,
+                      StatusRules.disk(free: store.diskFreeFraction)?.level, verdict.level].compactMap { $0 }
+        var m = SlimeMascot.Mood(level: levels.max() ?? .good, holdsSign: verdict.action != nil)
+        m.sleepy = m.level == .good && !m.holdsSign && (store.cpu?.total ?? 1) < 0.05
+        return m
     }
 
     var body: some View {
-        let h = health
-        HStack(alignment: .center, spacing: 16) {
-            PixelIcon(name: "px.mascot", size: 64)
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
-                    Circle().fill(h.color).frame(width: 8, height: 8)
-                    Text(h.title).font(.system(size: 18, weight: .semibold))
-                }
-                Text(h.detail).font(.system(size: 12.5)).foregroundStyle(Palette.textMuted)
+        let v = verdict
+        HStack(alignment: .center, spacing: 24) {
+            SlimeMascot(mood: mood, cell: 4)
+            VStack(alignment: .leading, spacing: 10) {
+                Text(styled(v)).font(.display(34, weight: .semibold)).foregroundStyle(Palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(detail).font(.mh(size: 14)).foregroundStyle(Palette.textMuted)
             }
             Spacer(minLength: 16)
-            VStack(alignment: .trailing, spacing: 3) {
-                Text(Host.modelName).font(.system(size: 11.5, weight: .medium)).foregroundStyle(Palette.text)
-                Text("\(Host.osVersion) · \(String(localized: "Up \(Host.uptime)"))")
-                    .font(.system(size: 11)).foregroundStyle(Palette.textFaint)
+            if let (title, section) = v.action {
+                Button { app.show(section) } label: { Text(title) }
+                    .buttonStyle(PrimaryButtonStyle())
             }
         }
+    }
+
+    private func styled(_ v: Verdict) -> AttributedString {
+        var a = AttributedString(v.sentence)
+        if let value = v.value, let r = a.range(of: value) { a[r].foregroundColor = v.level.color }
+        return a
+    }
+}
+
+// MARK: - Readouts
+
+/// A row of instrument readouts: label, big number in the state color, and a quiet trend line.
+private struct Readouts: View {
+    let store: MonitorStore
+    let advanced: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 28) {
+            HStack(alignment: .top, spacing: 32) {
+                Readout(title: "CPU", value: Fmt.percent(store.cpu?.total), reading: StatusRules.cpu(store.cpu?.total),
+                        series: store.history[.cpu], maxValue: 1)
+                Readout(title: "Memory", value: Fmt.percent(store.memoryFraction), reading: StatusRules.memory(store.memory),
+                        series: store.history[.memory], maxValue: 1)
+                Readout(title: "Temperature", value: Fmt.celsius(store.cpuCelsius), reading: StatusRules.temperature(store.cpuCelsius),
+                        series: store.history[.temperature], maxValue: nil)
+                Readout(title: "Free space", value: store.disk.map { Fmt.bytes($0.availableBytes) } ?? "–",
+                        reading: StatusRules.disk(free: store.diskFreeFraction), series: nil, maxValue: nil,
+                        bar: store.diskFreeFraction.map { 1 - $0 })
+            }
+            if advanced {
+                HStack(alignment: .top, spacing: 32) {
+                    Readout(title: "GPU", value: Fmt.percent(store.gpu?.utilization),
+                            reading: StatusRules.fraction(store.gpu?.utilization).map { Reading(level: $0, word: "") },
+                            series: store.history[.gpu], maxValue: 1)
+                    Readout(title: "Network", value: store.network.map { "\(Fmt.rate($0.inBytesPerSecond))/s" } ?? "–",
+                            reading: nil, series: store.history[.netIn], maxValue: nil, note: store.network.map { String(localized: "Upload \(Fmt.rate($0.outBytesPerSecond))/s") })
+                    Readout(title: "Power", value: Fmt.watts(store.power?.systemWatts ?? store.power?.gpuWatts), reading: nil,
+                            series: store.history[.power], maxValue: nil)
+                    Readout(title: "Fans", value: store.fans.first.map { "\(Fmt.rpm($0.actualRPM)) rpm" } ?? "–", reading: nil,
+                            series: store.history[.fan], maxValue: store.fans.first?.maxRPM)
+                }
+            }
+        }
+    }
+}
+
+private struct Readout: View {
+    let title: LocalizedStringKey
+    let value: String
+    let reading: Reading?
+    let series: [ChartPoint]?
+    let maxValue: Double?
+    var bar: Double? = nil
+    var note: String? = nil
+
+    var body: some View {
+        let level = reading?.level ?? .good
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Text(title).font(.mh(size: 12.5, weight: .medium)).foregroundStyle(Palette.textMuted)
+                if let word = reading?.word, !word.isEmpty {
+                    Text(word).font(.mh(size: 12.5)).foregroundStyle(level == .good ? Palette.textFaint : level.color)
+                }
+            }
+            Text(value).font(.display(30, weight: .medium).monospacedDigit()).foregroundStyle(level.color)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Group {
+                if let bar {
+                    Meter(fraction: bar, color: level == .good ? Palette.textMuted : level.color)
+                } else {
+                    AreaSparkline(values: recent, maxValue: maxValue, color: level == .good ? Palette.textFaint : level.color, lineWidth: 1.2)
+                        .equatable()
+                }
+            }
+            .frame(height: bar == nil ? 24 : 8)
+            .padding(.top, bar == nil ? 0 : 8)
+            if let note { Text(note).font(.mh(size: 11.5)).foregroundStyle(Palette.textFaint) }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// The last five minutes, thinned to at most 60 points.
+    private var recent: [Double] {
+        guard let series else { return [] }
+        let cutoff = Date().addingTimeInterval(-300)
+        let points = series.filter { $0.date >= cutoff }.map(\.value)
+        guard points.count > 60 else { return points }
+        let stride = Double(points.count) / 60
+        return (0..<60).map { points[Int(Double($0) * stride)] }
+    }
+}
+
+// MARK: - Lower columns
+
+private struct BusiestApps: View {
+    let store: MonitorStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Busiest apps").font(Theme.heading).foregroundStyle(Palette.text)
+            ProcessTable(items: Array((store.processes?.byCPU ?? []).prefix(6)), sort: .cpu)
+        }
+    }
+}
+
+private struct CommonTools: View {
+    let app: AppModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Tools").font(Theme.heading).foregroundStyle(Palette.text).padding(.bottom, 8)
+            tool(.optimize, "Free up space safely. You see everything before it’s cleaned.")
+            tool(.health, "Find out what’s slowing your Mac down.")
+            tool(.disk, "See what takes up the most space.")
+            tool(.uninstall, "Remove apps completely, leftovers included.")
+        }
+    }
+
+    private func tool(_ s: AppSection, _ text: LocalizedStringKey) -> some View {
+        Button { app.show(s) } label: {
+            HStack(spacing: 12) {
+                PixelIcon(name: s.icon, size: 24)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(s.title).font(.mh(size: 13.5, weight: .semibold)).foregroundStyle(Palette.text)
+                    Text(text).font(.mh(size: 12)).foregroundStyle(Palette.textMuted)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.vertical, 8).padding(.horizontal, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(RowHoverStyle())
+    }
+}
+
+/// What needs the person's attention, each with the action that fixes it. Empty is good news.
+private struct ToDoList: View {
+    let app: AppModel
+    private var store: MonitorStore { app.store }
+
+    private struct Item: Identifiable {
+        let id: String
+        let text: String
+        let level: StatusLevel
+        let action: LocalizedStringKey
+        let section: AppSection
+    }
+
+    private var items: [Item] {
+        var out: [Item] = []
+        if let d = store.disk, let f = store.diskFreeFraction, f < 0.2 {
+            out.append(Item(id: "disk", text: String(localized: "Only \(Fmt.bytes(d.availableBytes)) of space is left."),
+                            level: f < 0.08 ? .critical : .attention, action: "Free Up Space", section: .optimize))
+        }
+        if let p = store.memory?.pressure, p != .normal {
+            out.append(Item(id: "memory", text: String(localized: "Memory is tight; quitting unused apps helps."),
+                            level: p == .critical ? .critical : .attention, action: "Check Health", section: .health))
+        }
+        if let t = store.cpuCelsius, t >= 85 {
+            out.append(Item(id: "temp", text: String(localized: "The CPU is at \(Fmt.celsius(t))."),
+                            level: t >= 95 ? .critical : .attention, action: "Check Health", section: .health))
+        }
+        let broken = app.startupModel.items.filter(\.programMissing).count
+        if broken > 0, !ThemeStore.shared.isSimple {
+            out.append(Item(id: "startup", text: String(localized: "\(broken) startup items point to programs that no longer exist."),
+                            level: .attention, action: "Review Startup Items", section: .startup))
+        }
+        return out
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Needs your attention").font(Theme.heading).foregroundStyle(Palette.text)
+            if items.isEmpty {
+                Text("Nothing right now.").font(.mh(size: 13)).foregroundStyle(Palette.textMuted)
+            }
+            ForEach(items) { item in
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Circle().fill(item.level.color).frame(width: 7, height: 7).alignmentGuide(.firstTextBaseline) { $0[.bottom] - 1 }
+                    Text(item.text).font(.mh(size: 13)).foregroundStyle(Palette.text).fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 8)
+                    Button { app.show(item.section) } label: {
+                        Text(item.action).font(.mh(size: 13, weight: .medium)).underline().foregroundStyle(Palette.text)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.vertical, 4)
+            }
+        }
+    }
+}
+
+/// The machine, quietly, at the bottom.
+private struct MachineLine: View {
+    var body: some View {
+        HStack(spacing: 18) {
+            Text(Host.modelName)
+            Text(Host.osVersion)
+            Text("Up \(Host.uptime)")
+        }
+        .font(.mh(size: 11.5)).foregroundStyle(Palette.textFaint)
+    }
+}
+
+/// The one filled button: ink on light, light on dark (the instrument's only "accent").
+struct PrimaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        let fill = Theme.accent
+        configuration.label
+            .font(.mh(size: 13, weight: .semibold))
+            .foregroundStyle(fill.isDarkForeground ? Color.white : Color.black)
+            .padding(.horizontal, 16).padding(.vertical, 8)
+            .background(fill.opacity(configuration.isPressed ? 0.8 : 1), in: SurfaceShape(cornerRadius: 8))
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+    }
+}
+
+struct PixelButtonStyle: ButtonStyle {
+    var color: Color = Theme.accent
+
+    func makeBody(configuration: Configuration) -> some View {
+        let shape = SurfaceShape(cornerRadius: 6)
+        configuration.label
+            .foregroundStyle(color.isDarkForeground ? Color.white : Color.black)
+            .padding(.horizontal, 14).padding(.vertical, 7)
+            .background(shape.fill(color))
+            .background(shape.fill(Color.black.opacity(0.35)).offset(y: configuration.isPressed ? 0 : 3))
+            .offset(y: configuration.isPressed ? 3 : 0)
+            .animation(.easeOut(duration: 0.06), value: configuration.isPressed)
+    }
+}
+
+extension Color {
+    /// Whether white text reads better than black on this color.
+    var isDarkForeground: Bool {
+        let c = NSColor(self).usingColorSpace(.sRGB) ?? .gray
+        let l = 0.2126 * c.redComponent + 0.7152 * c.greenComponent + 0.0722 * c.blueComponent
+        return l < 0.55
     }
 }
 
 enum Host {
     static let modelName: String = {
         let model = sysctl("hw.model"), chip = sysctl("machdep.cpu.brand_string")
-        return chip.isEmpty ? model : "\(chip) · \(model)"
+        return chip.isEmpty ? model : "\(chip) (\(model))"
     }()
 
     private static func sysctl(_ name: String) -> String {
@@ -144,77 +389,6 @@ enum Host {
     }
 }
 
-// MARK: - Tiles
-
-private struct MetricTile: View {
-    let title: LocalizedStringKey
-    let icon: String
-    let color: Color
-    let value: String
-    let detail: String?
-    let series: [ChartPoint]?
-    let maxValue: Double?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(spacing: 6) {
-                PixelIcon(name: icon, size: 16)
-                Text(title).font(Theme.label).foregroundStyle(Palette.textMuted)
-            }
-            Text(value).font(Theme.numeral).foregroundStyle(Palette.text).lineLimit(1).minimumScaleFactor(0.6)
-            Text(detail ?? " ").font(.system(size: 11)).foregroundStyle(Palette.textFaint).lineLimit(1)
-            AreaSparkline(values: recent, maxValue: maxValue, color: color).equatable().frame(height: 30).padding(.top, 4)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    /// The last five minutes, thinned to at most 90 points.
-    private var recent: [Double] {
-        guard let series else { return [] }
-        let cutoff = Date().addingTimeInterval(-300)
-        let points = series.filter { $0.date >= cutoff }.map(\.value)
-        guard points.count > 90 else { return points }
-        let stride = Double(points.count) / 90
-        return (0..<90).map { points[Int(Double($0) * stride)] }
-    }
-}
-
-// MARK: - Quick actions
-
-private struct QuickActions: View {
-    let app: AppModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Tools").font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.text)
-            HairlinePanel(columns: 2) {
-                action(.optimize, "Scan caches, logs and leftovers, then clean what you pick.")
-                action(.disk, "See where the space goes, find duplicates and what grew.")
-                action(.uninstall, "Remove apps together with everything they left behind.")
-                action(.startup, "Review what starts on its own at login.")
-            }
-        }
-    }
-
-    private func action(_ s: AppSection, _ text: LocalizedStringKey) -> some View {
-        Button { app.show(s) } label: {
-            HStack(spacing: 12) {
-                PixelIcon(name: s.icon, size: 28)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(s.title).font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.text)
-                    Text(text).font(.system(size: 11.5)).foregroundStyle(Palette.textMuted).lineLimit(1)
-                }
-                Spacer(minLength: 0)
-                Image(systemName: "arrow.right").font(.system(size: 11, weight: .medium)).foregroundStyle(Palette.textFaint)
-            }
-            .padding(.horizontal, 16).padding(.vertical, 14)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(RowHoverStyle())
-    }
-}
-
 /// Row highlight on hover, slight shrink on press.
 struct RowHoverStyle: ButtonStyle {
     @State private var hover = false
@@ -234,7 +408,7 @@ struct HoverCardButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous)
+            .overlay(SurfaceShape(cornerRadius: Theme.cardRadius, style: .continuous)
                 .strokeBorder(accent.opacity(hovering ? 0.55 : 0), lineWidth: 1.5))
             .scaleEffect(configuration.isPressed ? 0.985 : 1)
             .animation(.easeOut(duration: 0.12), value: hovering)
@@ -250,7 +424,7 @@ struct TopProcesses: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Processes").font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.text)
+            Text("Processes").font(Theme.heading).foregroundStyle(Palette.text)
             HairlinePanel(columns: 2) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Top processes by CPU").font(Theme.label).foregroundStyle(Palette.textMuted)

@@ -83,13 +83,13 @@ struct OperationHistoryView: View {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(entry.time.formatted(date: .abbreviated, time: .shortened))
-                        .font(.caption.monospacedDigit())
+                        .font(.mhCaption.monospacedDigit())
                         .foregroundStyle(Palette.textMuted)
                     Badge(text: entry.kind.title, color: entry.kind.color)
                     Badge(text: entry.status.title, color: entry.status.color)
                 }
                 Text(entry.path.isEmpty ? entry.source : entry.path)
-                    .font(.callout)
+                    .font(.mhCallout)
                     .foregroundStyle(Palette.text)
                     .lineLimit(1)
                     .truncationMode(.middle)
@@ -101,7 +101,7 @@ struct OperationHistoryView: View {
             Spacer(minLength: 8)
             if entry.bytes > 0 {
                 Text(bytes(entry.bytes))
-                    .font(.caption.monospacedDigit())
+                    .font(.mhCaption.monospacedDigit())
                     .foregroundStyle(Palette.textMuted)
                     .frame(minWidth: 64, alignment: .trailing)
             }
@@ -127,7 +127,7 @@ struct OperationHistoryView: View {
     private func message(_ text: LocalizedStringKey) -> some View {
         VStack(spacing: 8) {
             Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 30))
+                .font(.mh(size: 30))
                 .foregroundStyle(Palette.textFaint)
                 .accessibilityHidden(true)
             Text(text).foregroundStyle(Palette.textMuted)
@@ -142,20 +142,20 @@ struct OperationHistoryView: View {
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(model.title(for: s.source)).foregroundStyle(Palette.text)
-                            Text(s.source).font(.caption2.monospaced()).foregroundStyle(Palette.textFaint)
+                            Text(s.source).font(.mhCaption2.monospaced()).foregroundStyle(Palette.textFaint)
                         }
                         Spacer()
-                        Text(bytes(s.bytes)).font(.callout.monospacedDigit()).foregroundStyle(Palette.text)
-                        Text("\(s.items) items on \(s.days) days").font(.caption).foregroundStyle(Palette.textMuted)
+                        Text(bytes(s.bytes)).font(.mhCallout.monospacedDigit()).foregroundStyle(Palette.text)
+                        Text("\(s.items) items on \(s.days) days").font(.mhCaption).foregroundStyle(Palette.textMuted)
                             .frame(width: 140, alignment: .trailing)
-                        Text(s.last, format: .dateTime.year().month().day()).font(.caption).foregroundStyle(Palette.textMuted)
+                        Text(s.last, format: .dateTime.year().month().day()).font(.mhCaption).foregroundStyle(Palette.textMuted)
                             .frame(width: 90, alignment: .trailing)
                     }
                     .accessibilityElement(children: .combine)
                 }
             } header: {
                 Text("What each rule, detector or task removed in the records shown, largest first. Rules that never appear here may not be worth selecting.")
-                    .font(.caption).foregroundStyle(Palette.textMuted).textCase(nil)
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted).textCase(nil)
             }
         }
         .scrollContentBackground(.hidden)
@@ -168,13 +168,13 @@ struct OperationHistoryView: View {
             HStack(spacing: 12) {
                 Text(m.month, format: .dateTime.year().month(.wide)).frame(width: 130, alignment: .leading).foregroundStyle(Palette.text)
                 GeometryReader { geo in
-                    RoundedRectangle(cornerRadius: 3).fill(Theme.amber.opacity(0.7))
+                    SurfaceShape(cornerRadius: 3).fill(Theme.amber.opacity(0.7))
                         .frame(width: max(2, geo.size.width * Double(m.trashedBytes + m.deletedBytes) / Double(peak)))
                 }
                 .frame(height: 10)
                 .accessibilityHidden(true)
                 Text("Trash \(bytes(m.trashedBytes)) · deleted \(bytes(m.deletedBytes))")
-                    .font(.caption.monospacedDigit()).foregroundStyle(Palette.textMuted).frame(width: 220, alignment: .trailing)
+                    .font(.mhCaption.monospacedDigit()).foregroundStyle(Palette.textMuted).frame(width: 220, alignment: .trailing)
             }
             .accessibilityElement(children: .combine)
         }
@@ -201,10 +201,10 @@ private struct Badge: View {
 
     var body: some View {
         Text(text)
-            .font(.caption2.bold())
+            .font(.mhCaption2.bold())
             .padding(.horizontal, 5)
             .padding(.vertical, 1)
-            .background(color.opacity(0.15), in: Capsule())
+            .background(color.opacity(0.15), in: SurfaceShape.capsule)
             .foregroundStyle(color)
     }
 }

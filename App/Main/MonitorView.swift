@@ -52,7 +52,7 @@ struct MonitorView: View {
                     Spacer()
                     Text(range == .live ? String(localized: "Last 5 minutes, updated live")
                          : String(localized: "Averages per \(Duration.seconds(range.bucket).formatted(.units(allowed: [.minutes, .hours], width: .wide)))"))
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
                 let shown = metrics.compactMap { m -> (Metric, [(String, [ChartPoint])])? in
                     let data = m.series.map { ($0.name, points($0.live, $0.stored)) }.filter { !$0.1.isEmpty }
@@ -102,7 +102,7 @@ struct MonitorView: View {
         VStack(alignment: .leading, spacing: 14) {
             // The current value sits next to the title, away from the trailing y-axis labels.
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(m.title).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(Palette.text)
+                Text(m.title).font(.mh(size: 12.5, weight: .semibold)).foregroundStyle(Palette.text)
                 if let last = data.first?.1.last { Text(label(last.value, m.format)).font(Theme.smallNumeral).foregroundStyle(m.color) }
                 Spacer()
             }

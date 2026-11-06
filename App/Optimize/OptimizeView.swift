@@ -6,6 +6,7 @@ struct OptimizeView: View {
     let autoClean: AutoCleanModel
     @State private var confirm = false
     @State private var showAutoClean = false
+    @State private var category: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,7 +35,7 @@ struct OptimizeView: View {
                         message: "Scan first to list what can be cleaned. Nothing is cleaned until you’ve reviewed and checked it; by default items go to the Trash and can be restored.") {
             VStack(spacing: 8) {
                 Button("Start Scan") { Task { await model.scan() } }.buttonStyle(.borderedProminent).controlSize(.large)
-                if let e = model.loadError { Text(e).font(.caption).foregroundStyle(Theme.rose) }
+                if let e = model.loadError { Text(e).font(.mhCaption).foregroundStyle(Theme.rose) }
             }
         }
     }
@@ -42,7 +43,7 @@ struct OptimizeView: View {
     private func progress(_ text: String) -> some View {
         VStack(spacing: 14) {
             ScanningArt(art: "px.empty.clean")
-            Text(text).font(.callout).foregroundStyle(Palette.textMuted)
+            Text(text).font(.mhCallout).foregroundStyle(Palette.textMuted)
             ProgressView().controlSize(.small)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -52,43 +53,20 @@ struct OptimizeView: View {
 
     private var preview: some View {
         VStack(spacing: 0) {
-            List {
-                ForEach(model.groups, id: \.category) { group in
-                    Section(group.title) {
-                        ForEach(group.results) { r in RuleRow(model: model, result: r) }
-                    }
-                }
-                if let a = model.artifacts { artifactSection(a) } else { rootsOnlySection }
-                systemSection
-                Section("Maintenance") {
-                    if let docker = model.dockerUsage { DockerUsageRow(result: docker) }
-                    ForEach($model.tasks) { $row in
-                        HStack(alignment: .top) {
-                            Toggle(isOn: $row.selected) { EmptyView() }.labelsHidden().disabled(!row.available)
-                            VStack(alignment: .leading, spacing: 2) {
-                                HStack {
-                                    Text(row.task.title).foregroundStyle(Palette.text)
-                                    RiskBadge(risk: row.task.risk)
-                                    if row.task.requiresRoot { Text("Needs Helper").font(.caption2).foregroundStyle(Palette.textMuted) }
-                                }
-                                Text(row.task.description).font(.caption).foregroundStyle(Palette.textMuted)
-                                if !row.available {
-                                    Text(row.task.requiresRoot && row.task.isAvailable ? "Helper not enabled" : "Not applicable on this Mac")
-                                        .font(.caption2).foregroundStyle(Theme.amber)
-                                }
-                            }
-                        }
-                        .opacity(row.available ? 1 : 0.5)
-                    }
-                }
+            // Two panes: categories with their selected size on the left, the chosen category's items on the right.
+            HStack(spacing: 0) {
+                categoryList
+                    .frame(width: 250)
+                Rectangle().fill(Palette.hairline).frame(width: 1)
+                categoryDetail
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .scrollContentBackground(.hidden)
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(Fmt.bytes(Int64(clamping: model.selectedBytes))) selected, \(model.selectedTaskCount) maintenance tasks")
                         .font(Theme.smallNumeral)
                         .foregroundStyle(Palette.text)
-                    Text("This is only a preview; nothing is deleted until you click Clean. Low-risk items are deleted directly, medium and high risk go to the Trash.").font(.caption).foregroundStyle(Palette.textMuted)
+                    Text("This is only a preview; nothing is deleted until you click Clean. Low-risk items are deleted directly, medium and high risk go to the Trash.").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
                 Spacer(minLength: 12)
                 Button("Rescan") { Task { await model.scan() } }
@@ -105,6 +83,115 @@ struct OptimizeView: View {
             Button("Clean", role: .destructive) { Task { await model.run() } }
         } message: {
             Text(confirmMessage)
+        }
+    }
+
+    // MARK: Categories
+
+    private struct Category: Identifiable {
+        let id: String
+        let title: String
+        let icon: String
+        let detail: String
+    }
+
+    private var categories: [Category] {
+        var out = model.groups.map { g in
+            Category(id: g.category, title: g.title, icon: Self.icon(g.category),
+                     detail: selectedText(g.results.reduce(0) { $0 + $1.selectedSize }, of: g.results.reduce(0) { $0 + $1.totalSize }))
+        }
+        out.append(Category(id: "artifacts", title: String(localized: "Project Build Artifacts"), icon: "hammer",
+                            detail: model.artifacts.map { selectedText($0.selectedSize, of: $0.totalSize) } ?? String(localized: "Add project folders")))
+        out.append(Category(id: "system", title: String(localized: "System Logs"), icon: "lock.doc",
+                            detail: model.systemError == nil
+                                ? selectedText(model.selectedSystemBytes, of: model.systemRows.reduce(0) { $0 + $1.bytes })
+                                : String(localized: "Needs Helper")))
+        out.append(Category(id: "maintenance", title: String(localized: "Maintenance"), icon: "wrench.and.screwdriver",
+                            detail: String(localized: "\(model.selectedTaskCount) of \(model.tasks.filter(\.available).count) tasks")))
+        return out
+    }
+
+    private func selectedText(_ selected: UInt64, of total: UInt64) -> String {
+        total == 0 ? String(localized: "Nothing to clean")
+            : String(localized: "\(Fmt.bytes(Int64(clamping: selected))) of \(Fmt.bytes(Int64(clamping: total)))")
+    }
+
+    private static func icon(_ category: String) -> String {
+        switch category {
+        case "caches": "archivebox"
+        case "logs": "doc.text"
+        case "browsers": "globe"
+        case "developer": "chevron.left.forwardslash.chevron.right"
+        case "trash": "trash"
+        case "downloads": "arrow.down.circle"
+        case "mail": "envelope"
+        case "backups": "iphone"
+        default: "folder"
+        }
+    }
+
+    private var selectedCategory: String { category ?? categories.first?.id ?? "maintenance" }
+
+    private var categoryList: some View {
+        List(selection: Binding(get: { selectedCategory }, set: { category = $0 })) {
+            ForEach(categories) { c in
+                HStack(spacing: 10) {
+                    Image(systemName: c.icon).frame(width: 18).foregroundStyle(Palette.textMuted)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(c.title).font(.mhBody.weight(.medium)).foregroundStyle(Palette.text).lineLimit(1)
+                        Text(c.detail).font(.mhCaption).foregroundStyle(Palette.textMuted).lineLimit(1)
+                    }
+                }
+                .padding(.vertical, 3)
+                .tag(c.id)
+            }
+        }
+        .listStyle(.sidebar)
+        .scrollContentBackground(.hidden)
+        .background(Palette.card)
+    }
+
+    @ViewBuilder private var categoryDetail: some View {
+        List {
+            switch selectedCategory {
+            case "artifacts":
+                if let a = model.artifacts { artifactSection(a) } else { rootsOnlySection }
+            case "system":
+                systemSection
+            case "maintenance":
+                maintenanceSection
+            default:
+                if let group = model.groups.first(where: { $0.category == selectedCategory }) {
+                    Section(group.title) {
+                        ForEach(group.results) { r in RuleRow(model: model, result: r) }
+                    }
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+    }
+
+    private var maintenanceSection: some View {
+        Section("Maintenance") {
+            if let docker = model.dockerUsage { DockerUsageRow(result: docker) }
+            ForEach($model.tasks) { $row in
+                HStack(alignment: .top) {
+                    Toggle(isOn: $row.selected) { EmptyView() }.labelsHidden().disabled(!row.available)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(row.task.title).foregroundStyle(Palette.text)
+                            RiskBadge(risk: row.task.risk)
+                            if row.task.requiresRoot { Text("Needs Helper").font(.mhCaption2).foregroundStyle(Palette.textMuted) }
+                        }
+                        Text(row.task.description).font(.mhCaption).foregroundStyle(Palette.textMuted)
+                        if !row.available {
+                            Text(row.task.requiresRoot && row.task.isAvailable ? "Helper not enabled" : "Not applicable on this Mac")
+                                .font(.mhCaption2).foregroundStyle(Theme.amber)
+                        }
+                    }
+                }
+                .opacity(row.available ? 1 : 0.5)
+            }
         }
     }
 
@@ -140,16 +227,16 @@ struct OptimizeView: View {
                         HStack {
                             Text(row.info.title).foregroundStyle(Palette.text)
                             RiskBadge(risk: row.info.risk)
-                            Text("Deleted directly").font(.caption2).foregroundStyle(Palette.textMuted)
-                            Text("Needs Helper").font(.caption2).foregroundStyle(Palette.textMuted)
+                            Text("Deleted directly").font(.mhCaption2).foregroundStyle(Palette.textMuted)
+                            Text("Needs Helper").font(.mhCaption2).foregroundStyle(Palette.textMuted)
                         }
-                        Text(row.info.description).font(.caption).foregroundStyle(Palette.textMuted)
+                        Text(row.info.description).font(.mhCaption).foregroundStyle(Palette.textMuted)
                         if let p = row.preview {
                             if let why = p.unavailable {
-                                Text("Can’t read \(row.info.folder): \(why)").font(.caption2).foregroundStyle(Theme.amber)
+                                Text("Can’t read \(row.info.folder): \(why)").font(.mhCaption2).foregroundStyle(Theme.amber)
                             } else {
                                 Text(p.count == 0 ? String(localized: "Nothing older than 30 days") : String(localized: "\(p.count) files"))
-                                    .font(.caption2).foregroundStyle(Palette.textFaint)
+                                    .font(.mhCaption2).foregroundStyle(Palette.textFaint)
                             }
                         }
                     }
@@ -164,7 +251,7 @@ struct OptimizeView: View {
             HStack(spacing: 8) {
                 Text("System Logs")
                 if let e = model.systemError {
-                    Text(e).font(.caption).foregroundStyle(Theme.amber).lineLimit(1).truncationMode(.tail).help(e).textCase(nil)
+                    Text(e).font(.mhCaption).foregroundStyle(Theme.amber).lineLimit(1).truncationMode(.tail).help(e).textCase(nil)
                 }
             }
         }
@@ -179,9 +266,9 @@ struct OptimizeView: View {
                     VStack(alignment: .leading, spacing: 1) {
                         Text((art.path as NSString).lastPathComponent + "  ·  " + (art.projectPath as NSString).lastPathComponent)
                             .foregroundStyle(Palette.text)
-                        Text(art.path).font(.caption2).foregroundStyle(Palette.textMuted).lineLimit(1).truncationMode(.head)
+                        Text(art.path).font(.mhCaption2).foregroundStyle(Palette.textMuted).lineLimit(1).truncationMode(.head)
                     }
-                    if art.recentlyUsed { Text("Recently used").font(.caption2).foregroundStyle(Theme.amber) }
+                    if art.recentlyUsed { Text("Recently used").font(.mhCaption2).foregroundStyle(Theme.amber) }
                     Spacer()
                     Text(Fmt.bytes(Int64(clamping: art.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
                 }
@@ -197,7 +284,7 @@ struct OptimizeView: View {
     private var rootsOnlySection: some View {
         Section("Project Build Artifacts") {
             Text("Add the folders where you keep projects to find rebuildable artifacts such as node_modules, target and .build.")
-                .font(.caption).foregroundStyle(Palette.textMuted)
+                .font(.mhCaption).foregroundStyle(Palette.textMuted)
             rootsEditor
         }
     }
@@ -207,7 +294,7 @@ struct OptimizeView: View {
             ForEach(model.artifactRoots, id: \.self) { root in
                 HStack {
                     Image(systemName: "folder").foregroundStyle(Palette.textMuted)
-                    Text(root).font(.caption).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.head)
+                    Text(root).font(.mhCaption).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.head)
                     Spacer()
                     Button { model.removeArtifactRoot(root) } label: { Image(systemName: "minus.circle") }.buttonStyle(.plain)
                 }
@@ -221,7 +308,7 @@ struct OptimizeView: View {
     private var results: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 14) {
-                Label("Cleaning Complete", systemImage: "checkmark.seal.fill").font(.title2).foregroundStyle(Theme.mint)
+                Label("Cleaning Complete", systemImage: "checkmark.seal.fill").font(.mhTitle2).foregroundStyle(Theme.mint)
                 Grid(alignment: .leading, verticalSpacing: 6) {
                     GridRow { Text("Moved to Trash").foregroundStyle(Palette.textMuted); Text(Fmt.bytes(Int64(clamping: model.trashedBytes))).monospacedDigit().bold().foregroundStyle(Palette.text) }
                     GridRow { Text("Freed permanently").foregroundStyle(Palette.textMuted); Text(Fmt.bytes(Int64(clamping: model.freedBytes))).monospacedDigit().bold().foregroundStyle(Palette.text) }
@@ -230,7 +317,7 @@ struct OptimizeView: View {
                 .card(padding: 16)
                 if model.trashedBytes > 0 {
                     HStack {
-                        Text("Space used by items in the Trash is freed when you empty the Trash.").font(.callout).foregroundStyle(Palette.textMuted)
+                        Text("Space used by items in the Trash is freed when you empty the Trash.").font(.mhCallout).foregroundStyle(Palette.textMuted)
                         Button("Empty Trash") { Task { await model.emptyTrash() } }
                     }
                 }
@@ -244,7 +331,7 @@ struct OptimizeView: View {
                 if !model.failures.isEmpty {
                     DisclosureGroup("Items not processed") {
                         ForEach(model.failures, id: \.path) { f in
-                            Text(verbatim: "\(f.path): \(f.message ?? "")").font(.caption).foregroundStyle(Palette.textMuted)
+                            Text(verbatim: "\(f.path): \(f.message ?? "")").font(.mhCaption).foregroundStyle(Palette.textMuted)
                         }
                     }
                 }
@@ -253,7 +340,7 @@ struct OptimizeView: View {
             .padding(.horizontal, 20).padding(.vertical, 18)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             HStack(spacing: 12) {
-                Text("All operations are logged in ~/Library/Logs/MacHelper/operations.jsonl").font(.caption).foregroundStyle(Palette.textMuted)
+                Text("All operations are logged in ~/Library/Logs/MacHelper/operations.jsonl").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 Spacer(minLength: 12)
                 Button("Scan Again") { Task { await model.scan() } }
             }
@@ -275,11 +362,11 @@ private struct RuleRow: View {
                 Text(result.rule.title).foregroundStyle(Palette.textMuted)
                 Spacer()
                 if let reason = result.skippedReason {
-                    Text("Skipped: \(reason)").font(.caption).foregroundStyle(Palette.textMuted)
+                    Text("Skipped: \(reason)").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 } else if result.rule.needsFullDiskAccess {
-                    Button("Needs Full Disk Access") { model.openFullDiskAccessSettings() }.buttonStyle(.link).font(.caption)
+                    Button("Needs Full Disk Access") { model.openFullDiskAccessSettings() }.buttonStyle(.link).font(.mhCaption)
                 } else {
-                    Text("Nothing to clean").font(.caption).foregroundStyle(Palette.textFaint)
+                    Text("Nothing to clean").font(.mhCaption).foregroundStyle(Palette.textFaint)
                 }
             }
         } else {
@@ -291,11 +378,11 @@ private struct RuleRow: View {
                         }
                         .labelsHidden()
                         Text((c.path as NSString).lastPathComponent).lineLimit(1).truncationMode(.middle).foregroundStyle(Palette.text)
-                        if let note = c.note { Text(note).font(.caption2).foregroundStyle(Theme.amber) }
+                        if let note = c.note { Text(note).font(.mhCaption2).foregroundStyle(Theme.amber) }
                         Spacer()
                         Text(Fmt.bytes(Int64(clamping: c.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
                     }
-                    .font(.callout)
+                    .font(.mhCallout)
                     .help(c.path)
                 }
             } label: {
@@ -308,10 +395,10 @@ private struct RuleRow: View {
                             Text(result.rule.title).foregroundStyle(Palette.text)
                             RiskBadge(risk: result.rule.risk)
                             Text(result.rule.action == .delete ? "Deleted directly" : "To Trash")
-                                .font(.caption2).foregroundStyle(Palette.textMuted)
-                            if model.isRuleSelected(result.rule.id) == nil { Text("Partial").font(.caption2).foregroundStyle(Palette.textMuted) }
+                                .font(.mhCaption2).foregroundStyle(Palette.textMuted)
+                            if model.isRuleSelected(result.rule.id) == nil { Text("Partial").font(.mhCaption2).foregroundStyle(Palette.textMuted) }
                         }
-                        Text(result.rule.description).font(.caption).foregroundStyle(Palette.textMuted)
+                        Text(result.rule.description).font(.mhCaption).foregroundStyle(Palette.textMuted)
                     }
                     Spacer()
                     Text(Fmt.bytes(Int64(clamping: result.totalSize))).monospacedDigit().foregroundStyle(Palette.text)
@@ -330,9 +417,9 @@ private struct RiskBadge: View {
         case .high: (String(localized: "High risk"), Theme.rose)
         }
         Text(text)
-            .font(.caption2.bold())
+            .font(.mhCaption2.bold())
             .padding(.horizontal, 5).padding(.vertical, 1)
-            .background(color.opacity(0.15), in: Capsule())
+            .background(color.opacity(0.15), in: SurfaceShape.capsule)
             .foregroundStyle(color)
     }
 }
@@ -347,7 +434,7 @@ private struct DockerUsageRow: View {
             switch result {
             case .success(let usage):
                 Text("\(Fmt.bytes(Int64(clamping: usage.totalSize))) used, \(Fmt.bytes(Int64(clamping: usage.totalReclaimable))) reclaimable according to Docker")
-                    .font(.caption).foregroundStyle(Palette.textMuted)
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 2) {
                     ForEach(usage.rows) { r in
                         GridRow {
@@ -358,16 +445,16 @@ private struct DockerUsageRow: View {
                         }
                     }
                 }
-                .font(.caption.monospacedDigit()).foregroundStyle(Palette.textMuted)
+                .font(.mhCaption.monospacedDigit()).foregroundStyle(Palette.textMuted)
                 Text("Clearing all build cache or unused images can reclaim more than Docker’s estimate; volumes are never removed here.")
-                    .font(.caption2).foregroundStyle(Palette.textMuted)
+                    .font(.mhCaption2).foregroundStyle(Palette.textMuted)
             case .failure(.engineNotRunning):
                 Text("Docker is installed but its engine isn’t running. Start Docker Desktop or OrbStack, then rescan.")
-                    .font(.caption).foregroundStyle(Theme.amber)
+                    .font(.mhCaption).foregroundStyle(Theme.amber)
             case .failure(.notInstalled):
                 EmptyView()
             case .failure(.unreadable(let message)):
-                Text("Couldn’t read Docker disk usage: \(message)").font(.caption).foregroundStyle(Theme.amber).textSelection(.enabled)
+                Text("Couldn’t read Docker disk usage: \(message)").font(.mhCaption).foregroundStyle(Theme.amber).textSelection(.enabled)
             }
         }
         .padding(.vertical, 2)

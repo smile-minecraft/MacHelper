@@ -1,53 +1,46 @@
 import AppKit
 import SwiftUI
+import Theming
 
-/// Shared look: section accents (matching the pixel palette), cards, pixel icons, numerals.
+/// Shared look: data colors, numerals and card geometry, all read from `ThemeStore` so the whole
+/// interface follows the chosen theme, style, fonts and text size.
 enum Theme {
-    // Chart colors: desaturated (< 80 %) so they sit on neutral zinc instead of shouting.
-    static let blue = Color(red: 0.36, green: 0.55, blue: 0.86)
-    static let cyan = Color(red: 0.25, green: 0.66, blue: 0.74)
-    static let mint = Color(red: 0.24, green: 0.66, blue: 0.48)
-    static let amber = Color(red: 0.84, green: 0.62, blue: 0.25)
-    static let rose = Color(red: 0.86, green: 0.39, blue: 0.43)
-    static let violet = Color(red: 0.49, green: 0.55, blue: 0.70)   // slate-blue, not purple
-    static let orange = Color(red: 0.86, green: 0.48, blue: 0.25)
-    static let slate = Color(red: 0.58, green: 0.60, blue: 0.64)
+    static var blue: Color { ThemeStore.shared.color(.blue) }
+    static var cyan: Color { ThemeStore.shared.color(.cyan) }
+    static var mint: Color { ThemeStore.shared.color(.mint) }
+    static var amber: Color { ThemeStore.shared.color(.amber) }
+    static var rose: Color { ThemeStore.shared.color(.rose) }
+    static var violet: Color { ThemeStore.shared.color(.violet) }
+    static var orange: Color { ThemeStore.shared.color(.orange) }
+    static var slate: Color { ThemeStore.shared.color(.slate) }
+    static var accent: Color { ThemeStore.shared.color(.accent) }
 
-    static let accent = Color(red: 0.24, green: 0.66, blue: 0.48)   // the one accent: emerald
-
-    static let cardRadius: CGFloat = 12
-    /// Numbers use a monospaced face: values don't jitter as they change, and it reads like a console.
-    static let numeral = Font.system(size: 24, weight: .semibold, design: .monospaced)
-    static let mediumNumeral = Font.system(size: 19, weight: .semibold, design: .monospaced)
-    static let smallNumeral = Font.system(size: 13, weight: .semibold, design: .monospaced)
-    static let label = Font.system(size: 11, weight: .medium)
+    static var cardRadius: CGFloat { ThemeStore.shared.isPixel ? 6 : 12 }
+    /// Big numbers use the display face (pixel font by default) with fixed-width digits, so values
+    /// don't jitter as they change.
+    static var numeral: Font { .display(24).monospacedDigit() }
+    static var mediumNumeral: Font { .display(19).monospacedDigit() }
+    static var smallNumeral: Font { ThemeStore.shared.isPixel ? .display(13).monospacedDigit() : .display(13).monospacedDigit() }
+    static var label: Font { .mh(size: 11, weight: .medium) }
+    /// Card and section headings.
+    static var heading: Font { .display(15) }
 }
 
-/// Surface colors with their own light/dark values (a blue-tinted dark, like a console), so the app
-/// doesn't read as stock gray.
+/// Surface and text colors of the current theme.
 enum Palette {
-    // One neutral family (zinc) in both appearances.
-    static let base = dynamic(light: 0xFAFAFA, dark: 0x111113)
-    static let card = dynamic(light: 0xFFFFFF, dark: 0x18181B)
-    static let inset = dynamic(light: 0xF0F0F2, dark: 0x232327)
-    static let raised = dynamic(light: 0xFFFFFF, dark: 0x2C2C31)
-    static let stroke = dynamic(light: 0x18181B, dark: 0xFFFFFF, lightAlpha: 0.08, darkAlpha: 0.075)
-    static let hairline = dynamic(light: 0x18181B, dark: 0xFFFFFF, lightAlpha: 0.06, darkAlpha: 0.06)
-    static let text = dynamic(light: 0x18181B, dark: 0xF4F4F5)
-    static let textMuted = dynamic(light: 0x52525B, dark: 0xA1A1AA)
-    static let textFaint = dynamic(light: 0x71717A, dark: 0x8B8B94)
-
-    static func dynamic(light: UInt32, dark: UInt32, lightAlpha: CGFloat = 1, darkAlpha: CGFloat = 1) -> Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-            let v = isDark ? dark : light
-            return NSColor(srgbRed: CGFloat((v >> 16) & 0xFF) / 255, green: CGFloat((v >> 8) & 0xFF) / 255,
-                           blue: CGFloat(v & 0xFF) / 255, alpha: isDark ? darkAlpha : lightAlpha)
-        })
-    }
+    static var base: Color { ThemeStore.shared.color(.base) }
+    static var card: Color { ThemeStore.shared.color(.card) }
+    static var inset: Color { ThemeStore.shared.color(.inset) }
+    static var raised: Color { ThemeStore.shared.color(.raised) }
+    static var stroke: Color { ThemeStore.shared.color(.stroke) }
+    static var hairline: Color { ThemeStore.shared.color(.hairline) }
+    static var text: Color { ThemeStore.shared.color(.text) }
+    static var textMuted: Color { ThemeStore.shared.color(.textMuted) }
+    static var textFaint: Color { ThemeStore.shared.color(.textFaint) }
 }
 
-/// Pixel art from the asset catalog, scaled without smoothing.
+/// An interface icon by asset name (`px.<id>`). What it draws follows Settings → Appearance →
+/// Icons: a hand-replaced image, an icon pack, system symbols or the built-in pixel art.
 struct PixelIcon: View {
     let name: String
     var size: CGFloat = 16
@@ -55,11 +48,23 @@ struct PixelIcon: View {
     var label: LocalizedStringKey? = nil
 
     @ViewBuilder var body: some View {
-        let image = Image(name).interpolation(.none).resizable().frame(width: size, height: size)
+        let image = picture.frame(width: size, height: size)
         if let label {
             image.accessibilityLabel(label)
         } else {
             image.accessibilityHidden(true)
+        }
+    }
+
+    @ViewBuilder private var picture: some View {
+        switch ThemeStore.shared.icon(IconCatalog.id(forAssetName: name)) {
+        case .asset(let asset):
+            Image(asset).interpolation(.none).resizable()
+        case .image(let img, let pixelated):
+            Image(nsImage: img).interpolation(pixelated ? .none : .high).resizable().aspectRatio(contentMode: .fit)
+        case .symbol(let symbol, let color):
+            Image(systemName: symbol).resizable().scaledToFit().fontWeight(.semibold).foregroundStyle(color)
+                .padding(size * 0.08)
         }
     }
 }
@@ -70,13 +75,32 @@ struct CardStyle: ViewModifier {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Palette.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous).strokeBorder(Palette.stroke, lineWidth: 1))
+            .surface()
+    }
+}
+
+/// Card background: in the pixel style a notched block with a 2 pt border and a hard drop shadow
+/// (like a game UI window); otherwise a rounded card with a hairline border.
+struct SurfaceBackground: ViewModifier {
+    var fill: Color = Palette.card
+    func body(content: Content) -> some View {
+        let shape = SurfaceShape(cornerRadius: Theme.cardRadius)
+        if ThemeStore.shared.isPixel {
+            content
+                .background(shape.fill(fill))
+                .overlay(shape.strokeBorder(Palette.stroke, lineWidth: 2))
+                .background(shape.fill(Color.black.opacity(0.28)).offset(x: 0, y: 3))
+        } else {
+            content
+                .background(fill, in: shape)
+                .overlay(shape.strokeBorder(Palette.stroke, lineWidth: 1))
+        }
     }
 }
 
 extension View {
     func card(padding: CGFloat = 14) -> some View { modifier(CardStyle(padding: padding)) }
+    func surface(_ fill: Color = Palette.card) -> some View { modifier(SurfaceBackground(fill: fill)) }
 }
 
 /// Title row shown at the top of every page.
@@ -89,8 +113,8 @@ struct PageHeader<Trailing: View>: View {
         HStack(spacing: 12) {
             PixelIcon(name: section.icon, size: 32)
             VStack(alignment: .leading, spacing: 2) {
-                Text(section.title).font(.title2.weight(.semibold))
-                if let subtitle { Text(subtitle).font(.callout).foregroundStyle(.secondary) }
+                Text(section.title).font(.display(22)).foregroundStyle(Palette.text)
+                if let subtitle { Text(subtitle).font(.mhCallout).foregroundStyle(Palette.textMuted) }
             }
             Spacer()
             trailing
@@ -143,8 +167,8 @@ struct PixelEmptyState<Actions: View>: View {
     var body: some View {
         VStack(spacing: 14) {
             PixelIcon(name: art, size: 128)
-            Text(title).font(.system(size: 22, weight: .bold, design: .rounded))
-            Text(message).font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.center).frame(maxWidth: 440)
+            Text(title).font(.display(22, weight: .bold)).foregroundStyle(Palette.text)
+            Text(message).font(.mhCallout).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center).frame(maxWidth: 440)
             actions.padding(.top, 4)
         }
         .padding(32)
@@ -170,9 +194,9 @@ struct Pill: View {
     var color: Color = .secondary
     var body: some View {
         Text(text)
-            .font(.caption.weight(.semibold))
+            .font(.mhCaption.weight(.semibold))
             .padding(.horizontal, 8).padding(.vertical, 3)
-            .background(color.opacity(0.15), in: Capsule())
+            .background(color.opacity(0.15), in: SurfaceShape.capsule)
             .foregroundStyle(color)
     }
 }

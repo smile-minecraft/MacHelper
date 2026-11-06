@@ -5,6 +5,7 @@ struct StartupView: View {
     @Bindable var model: StartupModel
     @State private var removing: StartupItem?
     @State private var disablingDaemon: StartupItem?
+    @State private var selectedID: StartupItem.ID?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -32,32 +33,40 @@ struct StartupView: View {
             } else if model.loading && model.items.isEmpty {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List {
-                    ForEach(StartupItem.Scope.allCases, id: \.self) { scope in
-                        let group = model.visible.filter { $0.scope == scope }
-                        if !group.isEmpty {
-                            Section {
-                                ForEach(group) { item in row(item) }
-                            } header: {
-                                HStack(spacing: 8) {
-                                    Text(scope.title)
-                                        .font(.system(size: 12, weight: .semibold))
-                                        .foregroundStyle(Palette.textMuted)
-                                    if let note = note(for: scope) {
-                                        Text(note).font(.caption).foregroundStyle(Palette.textFaint)
-                                    }
+                // Two panes: a compact list on the left, everything about the selected item on the right.
+                HStack(spacing: 0) {
+                    List(selection: $selectedID) {
+                        ForEach(StartupItem.Scope.allCases, id: \.self) { scope in
+                            let group = model.visible.filter { $0.scope == scope }
+                            if !group.isEmpty {
+                                Section {
+                                    ForEach(group) { item in compactRow(item).tag(item.id) }
+                                } header: {
+                                    Text(scope.title).font(.mh(size: 12, weight: .semibold)).foregroundStyle(Palette.textMuted)
                                 }
                             }
                         }
                     }
+                    .scrollContentBackground(.hidden)
+                    .frame(minWidth: 320, idealWidth: 380, maxWidth: 440)
+                    Rectangle().fill(Palette.hairline).frame(width: 1)
+                    Group {
+                        if let item = model.items.first(where: { $0.id == selectedID }) {
+                            detail(item)
+                        } else {
+                            Text("Select an item to see what it runs and when.")
+                                .font(.mhCallout).foregroundStyle(Palette.textMuted)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .scrollContentBackground(.hidden)
             }
             HStack(spacing: 12) {
-                if let m = model.message { Text(m).font(.caption).foregroundStyle(Theme.orange).lineLimit(2) }
+                if let m = model.message { Text(m).font(.mhCaption).foregroundStyle(Theme.orange).lineLimit(2) }
                 Spacer(minLength: 8)
                 Text("Background items that apps register themselves are managed in Login Items.")
-                    .font(.caption).foregroundStyle(Palette.textMuted)
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 Button("Open Login Items") { model.openLoginItems() }
             }
             .padding(.horizontal, 14).padding(.vertical, 10)
@@ -95,45 +104,96 @@ struct StartupView: View {
         }
     }
 
-    private func row(_ item: StartupItem) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(nsImage: model.icon(for: item)).resizable().frame(width: 28, height: 28)
+    private func toggle(_ item: StartupItem) -> some View {
+        Toggle("Enabled", isOn: Binding(get: { !item.isDisabled }, set: { on in
+            if !on && item.scope == .systemDaemon { disablingDaemon = item } else { Task { await model.setEnabled(item, on) } }
+        }))
+        .toggleStyle(.switch).labelsHidden().controlSize(.small)
+        .disabled(!model.canToggle(item))
+    }
+
+    private func compactRow(_ item: StartupItem) -> some View {
+        HStack(spacing: 10) {
+            Image(nsImage: model.icon(for: item)).resizable().frame(width: 22, height: 22)
             VStack(alignment: .leading, spacing: 2) {
+                Text(item.ownerName ?? item.label).font(.mhBody.weight(.medium)).lineLimit(1).foregroundStyle(Palette.text)
                 HStack(spacing: 6) {
-                    Text(item.ownerName ?? item.label).bold().lineLimit(1).foregroundStyle(Palette.text)
                     StateBadge(item: item)
                     if item.programMissing {
                         Label("Program missing", systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption2).foregroundStyle(Theme.orange)
+                            .font(.mhCaption2).foregroundStyle(Theme.orange).labelStyle(.titleAndIcon)
                     }
                 }
-                if item.ownerName != nil {
-                    Text(item.label).font(.caption).foregroundStyle(Palette.textMuted).textSelection(.enabled)
-                }
-                Text(item.commandLine).font(.caption2.monospaced()).foregroundStyle(Palette.textFaint).lineLimit(1).truncationMode(.middle)
-                    .help(item.commandLine)
-                Text(schedule(item)).font(.caption2).foregroundStyle(Palette.textMuted)
             }
-            Spacer()
-            if !item.isProtected {
-                Toggle("Enabled", isOn: Binding(get: { !item.isDisabled }, set: { on in
-                    if !on && item.scope == .systemDaemon { disablingDaemon = item } else { Task { await model.setEnabled(item, on) } }
-                }))
-                .toggleStyle(.switch).labelsHidden()
-                .disabled(!model.canToggle(item))
-            }
+            Spacer(minLength: 4)
+            if !item.isProtected { toggle(item) }
         }
         .padding(.vertical, 2)
-        .contextMenu {
-            Button("Show in Finder") { model.reveal(item.plistPath) }
-            Button("Copy Label") {
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(item.label, forType: .string)
+        .contextMenu { menu(item) }
+    }
+
+    @ViewBuilder private func menu(_ item: StartupItem) -> some View {
+        Button("Show in Finder") { model.reveal(item.plistPath) }
+        Button("Copy Label") {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(item.label, forType: .string)
+        }
+        if item.scope.canRemove {
+            Divider()
+            Button("Remove…", role: .destructive) { removing = item }
+        }
+    }
+
+    private func detail(_ item: StartupItem) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(spacing: 14) {
+                    Image(nsImage: model.icon(for: item)).resizable().frame(width: 48, height: 48)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item.ownerName ?? item.label).font(Theme.heading).foregroundStyle(Palette.text)
+                        HStack(spacing: 6) {
+                            StateBadge(item: item)
+                            Text(item.scope.title).font(.mhCaption).foregroundStyle(Palette.textMuted)
+                        }
+                    }
+                    Spacer()
+                    if !item.isProtected { toggle(item).controlSize(.regular) }
+                }
+                if item.programMissing {
+                    Label("The program this item starts no longer exists, so it does nothing. It is usually left over from an app you removed.",
+                          systemImage: "exclamationmark.triangle.fill")
+                        .font(.mhCallout).foregroundStyle(Theme.orange)
+                }
+                if let note = note(for: item.scope) {
+                    Text(note).font(.mhCaption).foregroundStyle(Palette.textMuted)
+                }
+                Grid(alignment: .topLeading, horizontalSpacing: 14, verticalSpacing: 10) {
+                    field("When it runs", schedule(item))
+                    field("Label", item.label, mono: true)
+                    field("Runs", item.commandLine, mono: true)
+                    field("Settings file", item.plistPath, mono: true)
+                    if let owner = item.ownerPath { field("Belongs to", owner, mono: true) }
+                }
+                .card(padding: 14)
+                HStack {
+                    Button("Show in Finder") { model.reveal(item.plistPath) }
+                    Button("Copy Label") {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(item.label, forType: .string)
+                    }
+                    Spacer()
+                    if item.scope.canRemove { Button("Remove…", role: .destructive) { removing = item } }
+                }
             }
-            if item.scope.canRemove {
-                Divider()
-                Button("Remove…", role: .destructive) { removing = item }
-            }
+            .padding(20)
+        }
+    }
+
+    private func field(_ title: LocalizedStringKey, _ value: String, mono: Bool = false) -> some View {
+        GridRow {
+            Text(title).font(.mhCaption.weight(.semibold)).foregroundStyle(Palette.textMuted).gridColumnAlignment(.trailing)
+            Text(value).font(mono ? .mh(size: 11.5, design: .monospaced) : .mhCallout).foregroundStyle(Palette.text)
+                .textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -155,9 +215,9 @@ private struct StateBadge: View {
             else if item.isLoaded { (String(localized: "Loaded"), Theme.blue) }
             else { (String(localized: "Not loaded"), Palette.textMuted) }
         Text(text)
-            .font(.caption2.bold())
+            .font(.mhCaption2.bold())
             .padding(.horizontal, 5).padding(.vertical, 1)
-            .background(color.opacity(0.15), in: Capsule())
+            .background(color.opacity(0.15), in: SurfaceShape.capsule)
             .foregroundStyle(color)
     }
 }
@@ -171,7 +231,7 @@ private struct BackgroundItemsList: View {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let error = model.backgroundError, model.backgroundGroups.isEmpty {
             Text("Couldn’t read the login items list: \(error)")
-                .font(.callout).foregroundStyle(Theme.amber).textSelection(.enabled)
+                .font(.mhCallout).foregroundStyle(Theme.amber).textSelection(.enabled)
                 .frame(maxWidth: .infinity, maxHeight: .infinity).padding()
         } else {
             List {
@@ -179,7 +239,7 @@ private struct BackgroundItemsList: View {
                     ForEach(model.visibleBackgroundGroups) { group in GroupRow(group: group) }
                 } header: {
                     Text("What macOS has registered to run at login or in the background, including items apps add themselves. This list is read-only; change it in Login Items.")
-                        .font(.caption).foregroundStyle(Palette.textMuted).textCase(nil)
+                        .font(.mhCaption).foregroundStyle(Palette.textMuted).textCase(nil)
                 }
             }
             .scrollContentBackground(.hidden)
@@ -195,23 +255,23 @@ private struct GroupRow: View {
             HStack(spacing: 6) {
                 Text(group.title).bold().foregroundStyle(Palette.text).lineLimit(1)
                 if let developer = group.parent?.developerName, developer != group.title {
-                    Text(developer).font(.caption).foregroundStyle(Palette.textMuted).lineLimit(1)
+                    Text(developer).font(.mhCaption).foregroundStyle(Palette.textMuted).lineLimit(1)
                 }
                 if !group.enabled {
-                    Text("Off").font(.caption2.bold()).padding(.horizontal, 5).padding(.vertical, 1)
-                        .background(Palette.textMuted.opacity(0.15), in: Capsule()).foregroundStyle(Palette.textMuted)
+                    Text("Off").font(.mhCaption2.bold()).padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(Palette.textMuted.opacity(0.15), in: SurfaceShape.capsule).foregroundStyle(Palette.textMuted)
                 }
             }
             ForEach(group.items) { item in
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(kindLabel(item.kind)).font(.caption2.bold()).foregroundStyle(Palette.textMuted).frame(width: 96, alignment: .leading)
-                    Text(item.displayName).font(.caption).foregroundStyle(item.isActive ? Palette.text : Palette.textMuted)
-                    if item.uid != Int(getuid()) { Text("All users").font(.caption2).foregroundStyle(Palette.textFaint) }
-                    if item.enabled && !item.allowed { Text("Not allowed").font(.caption2).foregroundStyle(Theme.amber) }
-                    else if !item.enabled { Text("Disabled").font(.caption2).foregroundStyle(Palette.textMuted) }
+                    Text(kindLabel(item.kind)).font(.mhCaption2.bold()).foregroundStyle(Palette.textMuted).frame(width: 96, alignment: .leading)
+                    Text(item.displayName).font(.mhCaption).foregroundStyle(item.isActive ? Palette.text : Palette.textMuted)
+                    if item.uid != Int(getuid()) { Text("All users").font(.mhCaption2).foregroundStyle(Palette.textFaint) }
+                    if item.enabled && !item.allowed { Text("Not allowed").font(.mhCaption2).foregroundStyle(Theme.amber) }
+                    else if !item.enabled { Text("Disabled").font(.mhCaption2).foregroundStyle(Palette.textMuted) }
                     Spacer(minLength: 4)
                     if let path = item.executablePath ?? item.url {
-                        Text(path).font(.caption2.monospaced()).foregroundStyle(Palette.textFaint)
+                        Text(path).font(.mhCaption2.monospaced()).foregroundStyle(Palette.textFaint)
                             .lineLimit(1).truncationMode(.middle).help(path).textSelection(.enabled)
                     }
                 }

@@ -30,6 +30,7 @@ for g in Design/Pixel/*.grid; do
   case $name in
     AppIcon) ;;
     px.mascot|px.empty.*) imageset "$name" "$TMP/$name.png" 2 ;;
+    logo.*) imageset "$name" "$TMP/$name.png" 8 ;;   # 256 pt: Dock icon and settings previews
     *) imageset "$name" "$TMP/$name.png" 1 ;;
   esac
 done

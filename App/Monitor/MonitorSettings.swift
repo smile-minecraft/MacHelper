@@ -37,8 +37,8 @@ enum MonitorModule: String, Codable, CaseIterable, Identifiable, Sendable {
     /// Styles that make sense for this metric (rates and RPM have no natural 0–100 % scale).
     var supportedStyles: [MenuBarStyle] {
         switch self {
-        case .network, .fan, .power, .temperature: [.text, .sparkline]
-        case .disk: [.text, .bar, .ring]
+        case .network, .fan, .power, .temperature: [.text, .sparkline, .columns]
+        case .disk: [.text, .bar, .ring, .blocks]
         default: MenuBarStyle.allCases
         }
     }
@@ -54,6 +54,8 @@ enum MonitorModule: String, Codable, CaseIterable, Identifiable, Sendable {
 
 enum MenuBarStyle: String, Codable, CaseIterable, Identifiable, Sendable {
     case text, sparkline, bar, ring
+    /// Pixel styles: a vertical meter of blocks, and a histogram of block columns.
+    case blocks, columns
     var id: String { rawValue }
     var title: String {
         switch self {
@@ -61,6 +63,8 @@ enum MenuBarStyle: String, Codable, CaseIterable, Identifiable, Sendable {
         case .sparkline: String(localized: "Line")
         case .bar: String(localized: "Bar")
         case .ring: String(localized: "Ring")
+        case .blocks: String(localized: "Blocks")
+        case .columns: String(localized: "Columns")
         }
     }
 }

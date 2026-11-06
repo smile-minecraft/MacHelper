@@ -8,6 +8,8 @@ struct SettingsView: View {
         TabView {
             GeneralSettings(app: app)
                 .tabItem { Label("General", systemImage: "gearshape") }
+            AppearanceSettingsView()
+                .tabItem { Label("Appearance", systemImage: "paintpalette") }
             MonitorSettingsView(settings: app.settings, available: app.store.availableModules)
                 .tabItem { Label("Menu Bar", systemImage: "menubar.rectangle") }
             Form { AlertSettingsSection(alerts: app.store.alerts) }
@@ -39,7 +41,7 @@ private struct GeneralSettings: View {
                         .frame(width: 56, height: 56)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("MacHelper").font(.title3.weight(.semibold)).foregroundStyle(Palette.text)
+                        Text("MacHelper").font(.mhTitle3.weight(.semibold)).foregroundStyle(Palette.text)
                         Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""))")
                             .settingsCaption()
                     }

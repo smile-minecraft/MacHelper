@@ -15,14 +15,14 @@ struct TabStrip<Value: Hashable>: View {
                     HStack(spacing: 5) {
                         if let icon = icons[item.0] { PixelIcon(name: icon, size: 14) }
                         Text(item.1)
-                            .font(.system(size: 13, weight: selected ? .semibold : .medium))
+                            .font(.mh(size: 13, weight: selected ? .semibold : .medium))
                             .foregroundStyle(selected ? Palette.text : Palette.textMuted)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                     .background {
                         if selected {
-                            RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Palette.raised)
+                            SurfaceShape(cornerRadius: 7, style: .continuous).fill(Palette.raised)
                                 .shadow(color: .black.opacity(0.12), radius: 1, y: 0.5)
                                 .matchedGeometryEffect(id: "tab", in: ns)
                         }
@@ -33,7 +33,7 @@ struct TabStrip<Value: Hashable>: View {
             }
         }
         .padding(3)
-        .background(Palette.inset, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+        .background(Palette.inset, in: SurfaceShape(cornerRadius: 9, style: .continuous))
         .animation(.snappy(duration: 0.2), value: selection)
     }
 }
@@ -49,11 +49,11 @@ struct ChipBar<Value: Hashable>: View {
                 let selected = item.0 == selection
                 Button { selection = item.0 } label: {
                     Text(item.1)
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.mh(size: 11, weight: .medium))
                         .foregroundStyle(selected ? Palette.text : Palette.textMuted)
                         .padding(.horizontal, 9).padding(.vertical, 4)
-                        .background(selected ? Palette.raised : .clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(selected ? Palette.stroke : .clear))
+                        .background(selected ? Palette.raised : .clear, in: SurfaceShape(cornerRadius: 6, style: .continuous))
+                        .overlay(SurfaceShape(cornerRadius: 6, style: .continuous).strokeBorder(selected ? Palette.stroke : .clear))
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -78,7 +78,7 @@ struct StatCard: View {
         VStack(alignment: .leading, spacing: compact ? 3 : 6) {
             HStack(spacing: 5) {
                 if let symbol {
-                    Image(systemName: symbol).font(.system(size: 10, weight: .semibold)).foregroundStyle(accent)
+                    Image(systemName: symbol).font(.mh(size: 10, weight: .semibold)).foregroundStyle(accent)
                 }
                 Text(title).font(Theme.label).foregroundStyle(Palette.textMuted).lineLimit(1)
                 Spacer(minLength: 0)
@@ -87,7 +87,7 @@ struct StatCard: View {
                 .font(compact ? Theme.mediumNumeral : Theme.numeral)
                 .foregroundStyle(Palette.text)
                 .lineLimit(1).minimumScaleFactor(0.55)
-            Text(detail ?? " ").font(.system(size: 10.5)).foregroundStyle(detailColor).lineLimit(1)
+            Text(detail ?? " ").font(.mh(size: 10.5)).foregroundStyle(detailColor).lineLimit(1)
             if !spark.isEmpty {
                 AreaSparkline(values: spark, maxValue: sparkMax, color: accent)
                     .equatable()
@@ -97,8 +97,7 @@ struct StatCard: View {
         }
         .padding(compact ? 10 : 14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Palette.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous).strokeBorder(Palette.stroke, lineWidth: 1))
+        .surface()
     }
 }
 
@@ -116,12 +115,12 @@ struct MeterRow<Leading: View>: View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 8) {
                 leading
-                Text(title).font(.system(size: 12.5, weight: .medium)).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.middle)
+                Text(title).font(.mh(size: 12.5, weight: .medium)).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.middle)
                 Spacer(minLength: 8)
                 Text(value).font(Theme.smallNumeral).foregroundStyle(Palette.text)
             }
             Meter(fraction: fraction, color: color)
-            if let caption { Text(caption).font(.system(size: 10.5)).foregroundStyle(captionColor).lineLimit(1) }
+            if let caption { Text(caption).font(.mh(size: 10.5)).foregroundStyle(captionColor).lineLimit(1) }
         }
         .padding(.vertical, 4)
     }
@@ -132,19 +131,44 @@ struct Meter: View {
     var color: Color = Theme.accent
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Capsule().fill(Palette.inset)
-                Capsule().fill(color.gradient)
-                    .frame(width: max(geo.size.width * min(max(fraction, 0), 1), fraction > 0 ? 3 : 0))
+        if ThemeStore.shared.isPixel {
+            PixelBlocks(fraction: fraction, color: color, track: Palette.inset).frame(height: 8)
+        } else {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    SurfaceShape.capsule.fill(Palette.inset)
+                    SurfaceShape.capsule.fill(color.gradient)
+                        .frame(width: max(geo.size.width * min(max(fraction, 0), 1), fraction > 0 ? 3 : 0))
+                }
             }
+            .frame(height: 8)
+            .animation(.easeOut(duration: 0.35), value: fraction)
         }
-        .frame(height: 8)
-        .animation(.easeOut(duration: 0.35), value: fraction)
     }
 }
 
-/// Square, quiet icon button for headers.
+/// A row of square blocks lit up to `fraction`, like a game health bar.
+struct PixelBlocks: View, Equatable {
+    let fraction: Double
+    let color: Color
+    let track: Color
+    var block: CGFloat = 6
+    var gap: CGFloat = 2
+
+    var body: some View {
+        Canvas { ctx, size in
+            let count = max(Int((size.width + gap) / (block + gap)), 1)
+            let w = (size.width - gap * CGFloat(count - 1)) / CGFloat(count)
+            let lit = Int((min(max(fraction, 0), 1) * Double(count)).rounded(.up))
+            for i in 0..<count {
+                let r = CGRect(x: CGFloat(i) * (w + gap), y: 0, width: w, height: size.height)
+                ctx.fill(Path(r), with: .color(i < lit && fraction > 0 ? color : track))
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 struct IconButton: View {
     let symbol: String
     let help: LocalizedStringKey
@@ -154,10 +178,10 @@ struct IconButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 12, weight: .medium))
+                .font(.mh(size: 12, weight: .medium))
                 .foregroundStyle(hover ? Palette.text : Palette.textMuted)
                 .frame(width: 26, height: 26)
-                .background(hover ? Palette.inset : .clear, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .background(hover ? Palette.inset : .clear, in: SurfaceShape(cornerRadius: 7, style: .continuous))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -174,7 +198,7 @@ struct SettingsCaption: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .font(.caption)
+            .font(.mhCaption)
             .foregroundStyle(color)
             .fixedSize(horizontal: false, vertical: true)
     }
@@ -197,9 +221,9 @@ struct SectionLabel: View {
     var trailing: String?
     var body: some View {
         HStack {
-            Text(text).font(.system(size: 11, weight: .semibold)).foregroundStyle(Palette.textMuted)
+            Text(text).font(.mh(size: 11, weight: .semibold)).foregroundStyle(Palette.textMuted)
             Spacer()
-            if let trailing { Text(trailing).font(.system(size: 10.5)).foregroundStyle(Palette.textFaint) }
+            if let trailing { Text(trailing).font(.mh(size: 10.5)).foregroundStyle(Palette.textFaint) }
         }
     }
 }
@@ -212,7 +236,7 @@ struct HairlineHeader: View {
     var body: some View {
         HStack(spacing: 8) {
             Rectangle().fill(Palette.hairline).frame(height: 1)
-            Text(text).font(.system(size: 11, weight: .semibold)).foregroundStyle(Palette.textFaint).fixedSize()
+            Text(text).font(ThemeStore.shared.isPixel ? .display(11) : .mh(size: 11, weight: .semibold)).foregroundStyle(Palette.textMuted).fixedSize()
             Rectangle().fill(Palette.hairline).frame(height: 1)
         }
         .padding(.top, 12)
@@ -234,33 +258,56 @@ struct RingGauge: View {
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
-                // Recessed track.
-                Circle().stroke(Palette.inset, lineWidth: lineWidth)
-                Circle().stroke(Color.black.opacity(0.10), lineWidth: 1)
-                    .padding(lineWidth / 2).blendMode(.multiply)
-                // Lit progress stroke.
-                Circle()
-                    .trim(from: 0, to: min(max(fraction, 0.001), 1))
-                    .stroke(AngularGradient(colors: [color.opacity(0.78), color], center: .center,
-                                            startAngle: .degrees(0), endAngle: .degrees(360 * max(fraction, 0.01))),
-                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                    .shadow(color: color.opacity(0.35), radius: 3, y: 1.5)
-                    .animation(.easeOut(duration: 0.5), value: fraction)
+                if ThemeStore.shared.isPixel {
+                    PixelRing(fraction: fraction, color: color, track: Palette.inset, lineWidth: lineWidth)
+                } else {
+                    // Recessed track.
+                    Circle().stroke(Palette.inset, lineWidth: lineWidth)
+                    Circle().stroke(Color.black.opacity(0.10), lineWidth: 1)
+                        .padding(lineWidth / 2).blendMode(.multiply)
+                    // Lit progress stroke.
+                    Circle()
+                        .trim(from: 0, to: min(max(fraction, 0.001), 1))
+                        .stroke(AngularGradient(colors: [color.opacity(0.78), color], center: .center,
+                                                startAngle: .degrees(0), endAngle: .degrees(360 * max(fraction, 0.01))),
+                                style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .shadow(color: color.opacity(0.35), radius: 3, y: 1.5)
+                        .animation(.easeOut(duration: 0.5), value: fraction)
+                }
                 Text(value)
-                    .font(.system(size: size * 0.22, weight: .bold, design: .monospaced))
+                    .font(.display(size * 0.22, weight: .bold).monospacedDigit())
                     .foregroundStyle(Palette.text)
                     .minimumScaleFactor(0.55).lineLimit(1)
                     .padding(.horizontal, lineWidth + 4)
             }
             .frame(width: size, height: size)
-            Text(caption).font(.system(size: 12, weight: .medium)).foregroundStyle(Palette.textMuted)
+            Text(caption).font(.mh(size: 12, weight: .medium)).foregroundStyle(Palette.textMuted)
         }
         .accessibilityElement(children: .combine)
     }
 }
 
-/// "● Label ............ value" row.
+/// Pixel-style ring: one continuous band with square ends and a flat track (no gaps, no glow).
+struct PixelRing: View {
+    let fraction: Double
+    let color: Color
+    let track: Color
+    var lineWidth: CGFloat = 10
+
+    var body: some View {
+        ZStack {
+            Circle().stroke(track, lineWidth: lineWidth)
+            Circle()
+                .trim(from: 0, to: min(max(fraction, 0), 1))
+                .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt))
+                .rotationEffect(.degrees(-90))
+                .animation(.easeOut(duration: 0.4), value: fraction)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 struct KeyValueRow: View {
     let label: String
     let value: String
@@ -269,10 +316,10 @@ struct KeyValueRow: View {
 
     var body: some View {
         HStack(spacing: 9) {
-            if let dot { RoundedRectangle(cornerRadius: 2.5).fill(dot).frame(width: 9, height: 9) }
-            Text(label).font(.system(size: 13)).foregroundStyle(Palette.textMuted).lineLimit(1)
+            if let dot { SurfaceShape(cornerRadius: 2.5).fill(dot).frame(width: 9, height: 9) }
+            Text(label).font(.mh(size: 13)).foregroundStyle(Palette.textMuted).lineLimit(1)
             Spacer(minLength: 10)
-            Text(value).font(.system(size: 13, weight: .semibold, design: .monospaced)).foregroundStyle(valueColor).lineLimit(1)
+            Text(value).font(.display(13).monospacedDigit()).foregroundStyle(valueColor).lineLimit(1)
         }
         .frame(height: 25)
     }
@@ -293,12 +340,12 @@ struct CoreBars: View, Equatable {
             for (i, v) in values.enumerated() {
                 let color = (i < kinds.count && kinds[i]) ? performance : efficiency
                 let x = CGFloat(i) * (w + gap)
-                ctx.fill(Path(roundedRect: CGRect(x: x, y: 0, width: w, height: size.height), cornerRadius: 5),
+                ctx.fill(Path(roundedRect: CGRect(x: x, y: 0, width: w, height: size.height), cornerRadius: ThemeStore.shared.isPixel ? 0 : 5),
                          with: .color(color.opacity(0.13)))
                 let h = max(size.height * CGFloat(min(max(v, 0), 1)), 4)
                 let bar = CGRect(x: x, y: size.height - h, width: w, height: h)
                 // Lit top, deeper base: reads as a solid column.
-                ctx.fill(Path(roundedRect: bar, cornerRadius: 5),
+                ctx.fill(Path(roundedRect: bar, cornerRadius: ThemeStore.shared.isPixel ? 0 : 5),
                          with: .linearGradient(Gradient(colors: [color, color.opacity(0.72)]),
                                                startPoint: CGPoint(x: 0, y: bar.minY), endPoint: CGPoint(x: 0, y: bar.maxY)))
                 ctx.fill(Path(roundedRect: CGRect(x: bar.minX + 2, y: bar.minY + 1.5, width: bar.width - 4, height: 2), cornerRadius: 1),
@@ -335,7 +382,7 @@ struct PressureGauge: View {
                 ctx.fill(Path(ellipseIn: CGRect(x: c.x - 6, y: c.y - 6, width: 12, height: 12)), with: .color(Palette.text))
             }
             .frame(width: size, height: size * 0.6)
-            Text(label).font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.text)
+            Text(label).font(.mh(size: 13, weight: .semibold)).foregroundStyle(Palette.text)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(label))
@@ -351,19 +398,21 @@ struct SegmentedRing: View {
 
     var body: some View {
         ZStack {
-            Circle().stroke(Palette.inset, lineWidth: lineWidth)
+            Circle().stroke(Palette.inset, style: ringStyle)
             ForEach(Array(starts.enumerated()), id: \.offset) { i, start in
                 Circle()
                     .trim(from: start, to: min(start + segments[i].0, 1))
-                    .stroke(segments[i].1, style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt))
+                    .stroke(segments[i].1, style: ringStyle)
                     .rotationEffect(.degrees(-90))
-                    .shadow(color: segments[i].1.opacity(0.3), radius: 2, y: 1)
+                    .shadow(color: segments[i].1.opacity(ThemeStore.shared.isPixel ? 0 : 0.3), radius: 2, y: 1)
             }
-            Text(value).font(.system(size: size * 0.22, weight: .bold, design: .monospaced)).foregroundStyle(Palette.text)
+            Text(value).font(.display(size * 0.22, weight: .bold).monospacedDigit()).foregroundStyle(Palette.text)
         }
         .frame(width: size, height: size)
         .animation(.easeOut(duration: 0.4), value: segments.map(\.0))
     }
+
+    private var ringStyle: StrokeStyle { StrokeStyle(lineWidth: lineWidth, lineCap: .butt) }
 
     private var starts: [Double] {
         var acc = 0.0
@@ -385,7 +434,7 @@ struct StackedBar: View {
                 Spacer(minLength: 0)
             }
             .background(Palette.inset)
-            .clipShape(RoundedRectangle(cornerRadius: height / 2, style: .continuous))
+            .clipShape(SurfaceShape(cornerRadius: height / 2, style: .continuous))
         }
         .frame(height: height)
     }
@@ -420,7 +469,7 @@ struct MirroredHistory: View, Equatable {
             ctx.fill(Path(CGRect(x: 0, y: mid - 0.5, width: size.width, height: 1)), with: .color(Palette.textFaint.opacity(0.4)))
         }
         .background(Palette.inset.opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+        .clipShape(SurfaceShape(cornerRadius: 6, style: .continuous))
     }
 }
 
@@ -443,7 +492,7 @@ struct HistoryArea: View, Equatable {
         }
         .padding(.top, 1)
         .background(Palette.inset.opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+        .clipShape(SurfaceShape(cornerRadius: 6, style: .continuous))
     }
 }
 
@@ -457,10 +506,10 @@ struct SkeletonRows: View {
         VStack(spacing: 9) {
             ForEach(0..<count, id: \.self) { i in
                 HStack {
-                    RoundedRectangle(cornerRadius: 3).frame(width: 14, height: 14)
-                    RoundedRectangle(cornerRadius: 3).frame(width: CGFloat(90 + (i * 37) % 70), height: 9)
+                    SurfaceShape(cornerRadius: 3).frame(width: 14, height: 14)
+                    SurfaceShape(cornerRadius: 3).frame(width: CGFloat(90 + (i * 37) % 70), height: 9)
                     Spacer()
-                    RoundedRectangle(cornerRadius: 3).frame(width: 38, height: 9)
+                    SurfaceShape(cornerRadius: 3).frame(width: 38, height: 9)
                 }
             }
         }
@@ -491,9 +540,8 @@ struct HairlinePanel<Content: View>: View {
 
     var body: some View {
         _VariadicView.Tree(HairlineGridLayout(columns: columns)) { content }
-            .background(Palette.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous).strokeBorder(Palette.stroke, lineWidth: 1))
-            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
+            .clipShape(SurfaceShape(cornerRadius: Theme.cardRadius))
+            .surface()
     }
 }
 

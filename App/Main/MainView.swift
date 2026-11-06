@@ -18,6 +18,8 @@ struct MainView: View {
         }
         .frame(minWidth: 980, minHeight: 640)
         .onAppear { app.openMainWindow = { openWindow(id: "main") } }
+        // Switching to simple mode while on an advanced page goes back to the overview.
+        .onChange(of: ThemeStore.shared.settings.mode) { if !app.section.isVisible { app.section = .overview } }
     }
 
     @ViewBuilder private var detail: some View {
@@ -69,7 +71,7 @@ private struct SidebarFooter: View {
             HStack(spacing: 8) {
                 Circle().fill(status == .enabled ? Theme.mint : Theme.amber).frame(width: 8, height: 8)
                 Text(status == .enabled ? "Helper running" : "Helper not enabled")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 Spacer()
                 SettingsLink { Image(systemName: "gearshape") }
                     .buttonStyle(.borderless)

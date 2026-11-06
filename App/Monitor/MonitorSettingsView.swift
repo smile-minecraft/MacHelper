@@ -1,18 +1,50 @@
 import AppKit
 import SwiftUI
+import Theming
 
 struct MonitorSettingsView: View {
     @Bindable var settings: MonitorSettingsStore
     let available: Set<MonitorModule>
     var alerts: AlertCenter?
 
+    @Bindable private var look = ThemeStore.shared
+
     var body: some View {
         Form {
-            Section("Menu Bar") {
-                Toggle("Compact (name above value)", isOn: $settings.configuration.compact)
-            }
+            Section {
+                Picker("Font", selection: $look.settings.menuBarFont) {
+                    Text("System Rounded").tag(AppearanceSettings.MenuBarFont.rounded)
+                    Text("System").tag(AppearanceSettings.MenuBarFont.system)
+                    Text("Pixel").tag(AppearanceSettings.MenuBarFont.pixel)
+                }
+                .pickerStyle(.segmented)
+                Picker("Label each value with", selection: $look.settings.menuBarLabel) {
+                    Text("Short name (CPU, MEM)").tag(AppearanceSettings.MenuBarLabel.text)
+                    Text("Icon").tag(AppearanceSettings.MenuBarLabel.icon)
+                    Text("Nothing").tag(AppearanceSettings.MenuBarLabel.none)
+                }
+                Picker("Value color", selection: $look.settings.menuBarColored) {
+                    Text("White (menu bar text color)").tag(false)
+                    Text("Soft hint when high").tag(true)
+                }
+                Text(look.settings.menuBarColored
+                     ? "Values that need attention get a pale yellow or red, close to white, so they stay easy to read."
+                     : "Every value uses the menu bar’s own text color.")
+                    .settingsCaption()
+                Toggle("Two lines (name above value, saves width)", isOn: $settings.configuration.compact)
+                    .disabled(look.settings.menuBarLabel != .text)
+            } header: { Text("How Values Look") }
+
             if let alerts { AlertSettingsSection(alerts: alerts) }
-            Section("Items") {
+            Section {
+                HStack(spacing: 12) {
+                    Text("Item").frame(minWidth: 90, alignment: .leading)
+                    Text("In menu bar")
+                    Spacer()
+                    Text("Graph").frame(minWidth: 80, alignment: .leading)
+                    Text("Updates every").frame(minWidth: 80, alignment: .leading)
+                }
+                .font(.mhCaption.weight(.semibold)).foregroundStyle(Palette.textMuted)
                 ForEach(MonitorModule.allCases) { m in
                     if available.contains(m) {
                         ModuleRow(module: m, config: binding(m))
@@ -21,6 +53,9 @@ struct MonitorSettingsView: View {
                             .foregroundStyle(Palette.textMuted)
                     }
                 }
+            } header: { Text("Items") } footer: {
+                Text("Turning an item off stops measuring it everywhere. “In menu bar” only decides whether it shows up there; it stays in the panel and the main window.")
+                    .settingsCaption()
             }
         }
         .formStyle(.grouped)
@@ -40,8 +75,10 @@ private struct ModuleRow: View {
         HStack(spacing: 12) {
             Toggle(module.title, isOn: $config.enabled)
                 .frame(minWidth: 90, alignment: .leading)
-            Toggle("Menu bar", isOn: $config.inMenuBar)
+            Toggle("Show", isOn: $config.inMenuBar)
+                .toggleStyle(.checkbox)
                 .disabled(!config.enabled)
+            Spacer()
             Picker("Style", selection: $config.style) {
                 ForEach(module.supportedStyles) { Text($0.title).tag($0) }
             }
@@ -122,7 +159,7 @@ struct CommandLineToolRow: View {
         LabeledContent("Command-line tool") {
             HStack {
                 Text(installed ? "~/.local/bin/machelper" : String(localized: "Not installed"))
-                    .font(.caption.monospaced()).foregroundStyle(Palette.textMuted)
+                    .font(.mhCaption.monospaced()).foregroundStyle(Palette.textMuted)
                 Button(installed ? "Remove" : "Install") { toggle() }
             }
         }

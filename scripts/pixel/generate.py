@@ -31,11 +31,17 @@ PALETTE = {
     'O': '#FED7AA', 'n': '#F97316', 'z': '#C2410C',
     # slate
     'S': '#E2E8F0', 's': '#94A3B8', 't': '#475569',
+    # slime blue (the mascot: lighter than the icon blue)
+    'I': '#B8D9FF', 'i': '#6BA8FF', 'j': '#4585E8',
+    # apple flesh (the bite)
+    'F': '#FFF7DC', 'G': '#F4DC8C',
+    # brown (stems)
+    'P': '#C9905A', 'w': '#8A5A2E', 'h': '#5A3818',
     # navy (icon background)
     'N': '#2B3A67', 'd': '#1E2A4F', 'D': '#141C36',
 }
 RAMPS = {'b': ('B', 'q'), 'c': ('C', 'u'), 'm': ('M', 'e'), 'a': ('A', 'o'), 'r': ('R', 'x'),
-         'v': ('V', 'y'), 'n': ('O', 'z'), 's': ('S', 't')}
+         'v': ('V', 'y'), 'n': ('O', 'z'), 's': ('S', 't'), 'w': ('P', 'h'), 'i': ('I', 'j')}
 
 
 class Canvas:
@@ -398,34 +404,124 @@ def icon_power():
 
 # ---------------------------------------------------------------- 32×32 art
 
-def app_icon():
-    """macOS icon grid: 26×26 rounded body (3 px margin ≈ Apple's 824/1024 safe area)."""
+def logo_body():
+    """Full-bleed 32×32 square with a dithered navy gradient. No corners or margin of its own:
+    macOS (26 and later) masks app icons into its rounded shape, and art that doesn't fill the
+    square gets shrunk onto a grey plate."""
     cv = Canvas(32)
-    cv.round_rect(3, 3, 28, 28, 6, 'N')
-    # Vertical gradient with a pixel dither band.
+    cv.rect(0, 0, 31, 31, 'N')
     for y in range(32):
         for x in range(32):
-            if cv.get(x, y) != 'N':
-                continue
-            if y > 19 or (y == 19 and x % 2 == 0) or (y == 18 and x % 4 == 1):
+            if y > 18 or (y == 18 and x % 2 == 0) or (y == 17 and x % 4 == 1):
                 cv.set(x, y, 'd')
-            if y > 25 or (y == 25 and x % 2 == 1):
+            if y > 26 or (y == 26 and x % 2 == 1):
                 cv.set(x, y, 'D')
-    cv.flat |= {(x, y) for y in range(32) for x in range(32) if cv.get(x, y) in 'NdD'}
-    pinwheel(cv, 15.5, 16.5, 11.2, 0, 'm', 3.0, angle0=25)
-    cv.bevel()
-    cv.disc(15.5, 16.5, 1.2, 'W', flat=True)
-    star(cv, 24, 8, 4.2, 'A', flat=True)
-    cv.set(24, 8, 'W', flat=True)
-    # Ink outline only around the fan and sparkle, not the body.
+    cv.flat |= {(x, y) for y in range(32) for x in range(32)}
+    return cv
+
+
+def logo_finish(cv):
+    """Ink outline around everything drawn on the background."""
     src = [row[:] for row in cv.px]
     for y in range(32):
         for x in range(32):
-            if src[y][x] in 'NdD':
-                if any(cv.inside(x + dx, y + dy) and src[y + dy][x + dx] in 'MmeSstWA' for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
-                    cv.px[y][x] = 'K'
-    cv.outline('D')   # dark rim around the body
+            if src[y][x] in 'NdD' and any(cv.inside(x + dx, y + dy) and src[y + dy][x + dx] not in '.NdDK'
+                                          for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                cv.px[y][x] = 'K'
     return cv
+
+
+def slime_body(cv, cx=16, base=25.5, half=10.5, height=12.5):
+    """A blue slime: a dome with a flat, slightly rounded bottom."""
+    def t(x, y):
+        if y > base:
+            return False
+        u = abs(x - cx) / half
+        v = (base - y) / height
+        return u ** 2.4 + v ** 2 <= 1 and u <= 1 - max(0, 0.35 - (base - y)) * 0.5
+    cv.fill(t, 'i')
+
+
+def slime_face(cv, cy=18, gap=3):
+    """Eyes only, no nose or mouth: two dark capsules with a highlight."""
+    for ex in (16 - gap - 1, 16 + gap - 1):
+        cv.rect(ex, cy, ex + 1, cy + 2, 'K', flat=True)
+        cv.set(ex, cy, 'W', flat=True)
+    cv.set(9, cy - 3, 'W', flat=True)   # shine on the dome
+    cv.set(10, cy - 4, 'W', flat=True)
+
+
+def logo_apple():
+    """A pixel apple with a bite out of its right side showing pale yellow flesh, a stem and an
+    attached leaf: a coloured fruit drawing, not a silhouette."""
+    cv = logo_body()
+    cv.disc(15.5, 18.5, 8.6, 'r')
+    cv.disc(11.9, 14.6, 5.4, 'r')
+    cv.disc(19.1, 14.6, 5.4, 'r')
+    cv.fill(lambda x, y: abs(x - 15.5) < 1.2 and 9.5 < y < 11.5, 'N', flat=True)   # the dip between the shoulders
+    cv.bevel()
+    # The bite: a round piece missing on the right; the exposed flesh is a two-pixel band inside it.
+    bx, by, br = 25.6, 17.2, 4.9
+    for y in range(32):
+        for x in range(32):
+            d = math.hypot(x + 0.5 - bx, y + 0.5 - by)
+            if cv.get(x, y) in 'rRx':
+                if d <= br:
+                    cv.set(x, y, 'N', flat=True)
+                elif d <= br + 1.6:
+                    cv.set(x, y, 'F', flat=True)
+                elif d <= br + 2.6:
+                    cv.set(x, y, 'G', flat=True)
+    cv.set(19, 17, 'h', flat=True)   # a seed showing in the flesh
+    cv.rect(14, 6, 15, 10, 'w')                                       # stem
+    cv.bevel()
+    def leaf(x, y):
+        dx, dy = x - 19.5, y - 7.5
+        a = math.radians(-28)
+        rx, ry = dx * math.cos(a) - dy * math.sin(a), dx * math.sin(a) + dy * math.cos(a)
+        return (rx / 3.6) ** 2 + (ry / 1.7) ** 2 <= 1
+    cv.fill(leaf, 'm')
+    cv.bevel()
+    cv.set(10, 14, 'W', flat=True); cv.set(10, 15, 'W', flat=True); cv.set(11, 13, 'R', flat=True)
+    return logo_finish(cv)
+
+
+def logo_slime():
+    """The mascot: a blue slime with eyes only."""
+    cv = logo_body()
+    slime_body(cv)
+    cv.bevel()
+    slime_face(cv)
+    return logo_finish(cv)
+
+
+def logo_sprout():
+    """The slime with a small apple leaf sprouting from its head."""
+    cv = logo_body()
+    slime_body(cv, base=26.5, height=12)
+    cv.bevel()
+    cv.rect(16, 11, 16, 14, 'e', flat=True)                            # sprout stem
+    cv.fill(lambda x, y: ((x - 19.2) / 3.0) ** 2 + ((y - 9.6) / 1.6) ** 2 <= 1, 'm')
+    cv.fill(lambda x, y: ((x - 13.4) / 2.2) ** 2 + ((y - 10.8) / 1.2) ** 2 <= 1, 'm')
+    cv.bevel()
+    slime_face(cv, cy=19)
+    return logo_finish(cv)
+
+
+def app_icon():
+    """The bundle icon (what Finder shows) is the default logo."""
+    return logo_apple()
+
+
+def logo_fan():
+    """The original logo: a fan with a sparkle."""
+    cv = logo_body()
+    pinwheel(cv, 15.5, 16.5, 11.2, 0, 'm', 3.0, angle0=25)
+    cv.bevel()
+    cv.disc(15.5, 16.5, 1.2, 'W', flat=True)
+    star(cv, 24.5, 7.5, 4.2, 'A', flat=True)
+    cv.set(24, 7, 'W', flat=True)
+    return logo_finish(cv)
 
 
 def mascot():
@@ -502,7 +598,8 @@ ICONS = {
     'px.cpu': icon_cpu, 'px.gpu': icon_gpu, 'px.memory': icon_memory, 'px.ssd': icon_ssd, 'px.network': icon_network,
     'px.temperature': icon_temperature, 'px.battery': icon_battery, 'px.power': icon_power,
 }
-ART = {'px.mascot': mascot, 'px.empty.clean': empty_clean, 'px.empty.scan': empty_scan, 'px.empty.box': empty_box, 'AppIcon': app_icon}
+ART = {'px.mascot': mascot, 'px.empty.clean': empty_clean, 'px.empty.scan': empty_scan, 'px.empty.box': empty_box, 'AppIcon': app_icon,
+       'logo.apple': logo_apple, 'logo.slime': logo_slime, 'logo.sprout': logo_sprout, 'logo.fan': logo_fan}
 
 if __name__ == '__main__':
     for name, f in {**ICONS, **ART}.items():

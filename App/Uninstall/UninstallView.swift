@@ -47,10 +47,10 @@ struct UninstallView: View {
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(app.name).lineLimit(1).foregroundStyle(Palette.text)
                                 Text(app.lastUsed.map { String(localized: "Last used \($0.formatted(date: .abbreviated, time: .omitted))") } ?? app.bundleID)
-                                    .font(.caption2).foregroundStyle(Palette.textMuted).lineLimit(1)
+                                    .font(.mhCaption2).foregroundStyle(Palette.textMuted).lineLimit(1)
                             }
                             Spacer()
-                            Text(Fmt.bytes(Int64(clamping: app.size))).font(.caption).monospacedDigit().foregroundStyle(Palette.textMuted)
+                            Text(Fmt.bytes(Int64(clamping: app.size))).font(.mhCaption).monospacedDigit().foregroundStyle(Palette.textMuted)
                         }
                         .opacity(app.canUninstall ? 1 : 0.5)
                         .tag(app.id)
@@ -84,9 +84,9 @@ private struct AppDetail: View {
                 HStack(spacing: 12) {
                     Image(nsImage: model.icon(for: app)).resizable().frame(width: 56, height: 56)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(app.name).font(.title2.bold()).foregroundStyle(Palette.text)
-                        Text("\(app.version ?? "") · \(app.bundleID)").font(.caption).foregroundStyle(Palette.textMuted).textSelection(.enabled)
-                        Text(app.path).font(.caption2).foregroundStyle(Palette.textFaint).lineLimit(1).truncationMode(.middle)
+                        Text(app.name).font(.mhTitle2.bold()).foregroundStyle(Palette.text)
+                        Text("\(app.version ?? "") · \(app.bundleID)").font(.mhCaption).foregroundStyle(Palette.textMuted).textSelection(.enabled)
+                        Text(app.path).font(.mhCaption2).foregroundStyle(Palette.textFaint).lineLimit(1).truncationMode(.middle)
                             .help(app.path)
                     }
                 }
@@ -107,7 +107,7 @@ private struct AppDetail: View {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let plan = model.plan {
                 Toggle("Also remove app data (Application Support, Containers, ~/.name: may contain your documents, settings or sign-in data)", isOn: $model.includeUserData)
-                    .font(.callout)
+                    .font(.mhCallout)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 8)
                 List {
@@ -123,7 +123,7 @@ private struct AppDetail: View {
                                             Text(Fmt.shortPath(item.path)).lineLimit(1).truncationMode(.middle).foregroundStyle(Palette.text)
                                             Text(item.followsUserData && !item.kind.mayContainUserData
                                                  ? String(localized: "\(item.evidence.title); selected together with “Also remove app data”") : item.evidence.title)
-                                                .font(.caption2)
+                                                .font(.mhCaption2)
                                                 .foregroundStyle(item.needsConfirmation ? AnyShapeStyle(Theme.orange) : AnyShapeStyle(Palette.textMuted))
                                         }
                                         Spacer()
@@ -138,8 +138,8 @@ private struct AppDetail: View {
                         Section("Found but Kept") {
                             ForEach(plan.kept, id: \.self) { k in
                                 VStack(alignment: .leading, spacing: 1) {
-                                    Text(Fmt.shortPath(k.path)).font(.caption).foregroundStyle(Palette.text)
-                                    Text(k.reason).font(.caption2).foregroundStyle(Palette.textMuted)
+                                    Text(Fmt.shortPath(k.path)).font(.mhCaption).foregroundStyle(Palette.text)
+                                    Text(k.reason).font(.mhCaption2).foregroundStyle(Palette.textMuted)
                                 }
                             }
                         }
@@ -150,11 +150,11 @@ private struct AppDetail: View {
                                 HStack(spacing: 8) {
                                     Toggle(isOn: Binding(get: { model.systemSelection.contains(p) }, set: { _ in model.toggleSystem(p) })) { EmptyView() }
                                         .labelsHidden().disabled(!model.helperEnabled)
-                                    Text(p).font(.caption).foregroundStyle(model.helperEnabled ? Palette.text : Palette.textMuted)
+                                    Text(p).font(.mhCaption).foregroundStyle(model.helperEnabled ? Palette.text : Palette.textMuted)
                                         .lineLimit(1).truncationMode(.middle).help(p)
                                     Spacer(minLength: 4)
                                     if !UninstallModel.isStrongSystemMatch(p, bundleID: app.bundleID) {
-                                        Text("Matched by name").font(.caption2).foregroundStyle(Theme.amber)
+                                        Text("Matched by name").font(.mhCaption2).foregroundStyle(Theme.amber)
                                     }
                                 }
                                 .contextMenu { Button("Show in Finder") { model.reveal(p) } }
@@ -165,7 +165,7 @@ private struct AppDetail: View {
                                 Text(model.helperEnabled
                                      ? "Checked items are moved to your Trash by the Helper, so you can put them back. Items matched only by name are left unchecked; check them only if they clearly belong to this app."
                                      : "Enable the Helper in Settings to move these to the Trash; until then remove them manually.")
-                                    .font(.caption).foregroundStyle(Palette.textMuted).textCase(nil)
+                                    .font(.mhCaption).foregroundStyle(Palette.textMuted).textCase(nil)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }
@@ -173,7 +173,7 @@ private struct AppDetail: View {
                 }
                 .scrollContentBackground(.hidden)
                 HStack(spacing: 12) {
-                    if let m = model.message { Text(m).font(.caption).foregroundStyle(Palette.textMuted).lineLimit(2) }
+                    if let m = model.message { Text(m).font(.mhCaption).foregroundStyle(Palette.textMuted).lineLimit(2) }
                     Spacer(minLength: 8)
                     Text("\(Fmt.bytes(Int64(clamping: plan.selectedSize))) selected").monospacedDigit().foregroundStyle(Palette.text)
                     Button("Uninstall…") { confirm = true }
@@ -204,9 +204,9 @@ private struct OrphansTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("These items are named after a bundle ID whose app can no longer be found; for background items, the program they start no longer exists. This is a guess: review each item before checking it. Nothing is checked by default.")
-                .font(.callout).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
+                .font(.mhCallout).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
                 .padding(12)
-                .background(Palette.inset, in: RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
+                .background(Palette.inset, in: SurfaceShape(cornerRadius: Theme.cardRadius, style: .continuous))
                 .padding(16)
             if let orphans = model.orphans {
                 List {
@@ -214,7 +214,7 @@ private struct OrphansTab: View {
                         HStack {
                             Toggle(isOn: Binding(get: { item.selected }, set: { _ in model.toggleOrphan(item) })) { EmptyView() }
                                 .labelsHidden()
-                            Text(item.kind.title).font(.caption).foregroundStyle(Palette.textMuted).frame(width: 90, alignment: .leading)
+                            Text(item.kind.title).font(.mhCaption).foregroundStyle(Palette.textMuted).frame(width: 90, alignment: .leading)
                             Text(Fmt.shortPath(item.path)).lineLimit(1).truncationMode(.middle).foregroundStyle(Palette.text)
                             Spacer()
                             Text(Fmt.bytes(Int64(clamping: item.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
@@ -224,7 +224,7 @@ private struct OrphansTab: View {
                 }
                 .scrollContentBackground(.hidden)
                 HStack(spacing: 12) {
-                    if let m = model.message { Text(m).font(.caption).foregroundStyle(Palette.textMuted) }
+                    if let m = model.message { Text(m).font(.mhCaption).foregroundStyle(Palette.textMuted) }
                     Spacer(minLength: 8)
                     Button("Search Again") { Task { await model.loadOrphans() } }
                     Button("Move to Trash…") { confirm = true }

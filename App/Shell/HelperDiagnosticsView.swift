@@ -56,7 +56,7 @@ struct HelperDiagnosticsView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             ForEach(Array(log.enumerated()), id: \.offset) {
                                 Text($0.element)
-                                    .font(.caption.monospaced())
+                                    .font(.mhCaption.monospaced())
                                     .foregroundStyle(Palette.text)
                                     .textSelection(.enabled)
                                     .fixedSize(horizontal: false, vertical: true)

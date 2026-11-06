@@ -12,17 +12,17 @@ struct ProcessHistoryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Process history").font(.system(size: 13, weight: .semibold)).foregroundStyle(Palette.text)
+            Text("Process history").font(.mh(size: 13, weight: .semibold)).foregroundStyle(Palette.text)
             if let errorMessage {
                 Text(errorMessage)
-                    .font(.caption)
+                    .font(.mhCaption)
                     .foregroundStyle(Theme.rose)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if let usage, !usage.byCPU.isEmpty || !usage.byMemory.isEmpty {
                 Text("Only each minute’s top 10 processes by CPU and by memory are kept, so a process missing from a minute may still have been running. Averages cover only the minutes a process appears in.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.mhCaption)
+                    .foregroundStyle(Palette.textMuted)
                 HairlinePanel(columns: 2) {
                     column("Top processes by CPU", ranks: usage.byCPU,
                            totalMinutes: usage.totalMinuteCount, showsMemory: false)
@@ -37,8 +37,8 @@ struct ProcessHistoryView: View {
             }
             if let usage, usage.hiddenCount > 0 {
                 Text("Up to \(usage.hiddenCount) processes per minute couldn’t be read and are not included.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.mhCaption)
+                    .foregroundStyle(Palette.textMuted)
             }
         }
         .task(id: range) {
@@ -65,18 +65,18 @@ struct ProcessHistoryView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title).font(Theme.label).foregroundStyle(Palette.textMuted)
             if ranks.isEmpty {
-                Text("No data in this range").font(.system(size: 12)).foregroundStyle(Palette.textMuted)
+                Text("No data in this range").font(.mh(size: 12)).foregroundStyle(Palette.textMuted)
             }
             ForEach(ranks, id: \.name) { rank in
                 HStack(spacing: 8) {
                     Text(rank.name)
-                        .font(.system(size: 13))
+                        .font(.mh(size: 13))
                         .foregroundStyle(Palette.text)
                         .lineLimit(1)
                         .truncationMode(.middle)
                     Spacer(minLength: 4)
                     Text("\(rank.minuteCount) of \(totalMinutes) min")
-                        .font(.system(size: 10.5))
+                        .font(.mh(size: 10.5))
                         .foregroundStyle(Palette.textFaint)
                     Text(showsMemory ? Fmt.memory(UInt64(max(rank.averageMemoryBytes, 0))) : Fmt.percent(rank.averageCPU))
                         .font(Theme.smallNumeral)

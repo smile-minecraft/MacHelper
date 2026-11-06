@@ -285,13 +285,13 @@ private struct ImportPlanView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Import Settings").font(.headline)
+                Text("Import Settings").font(.mhHeadline)
                 Text("Review what each category will do. Nothing changes until you choose Apply Import.")
                     .settingsCaption()
             }
 
             Text(String(format: String(localized: "File: %@"), fileName))
-                .font(.callout)
+                .font(.mhCallout)
             Text(String(format: String(localized: "Exported by MacHelper %@ on %@."),
                         plan.appVersion,
                         plan.exportedAt.formatted(date: .abbreviated, time: .shortened)))
@@ -336,10 +336,10 @@ private struct ImportPlanView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline) {
                 Text(title)
-                    .font(.callout.weight(.medium))
+                    .font(.mhCallout.weight(.medium))
                 Spacer()
                 Text(statusLabel(entry.status))
-                    .font(.caption.weight(.semibold))
+                    .font(.mhCaption.weight(.semibold))
                     .foregroundStyle(statusColor(entry.status))
             }
             if let detail = statusDetail(entry.status), detail != title {
@@ -353,7 +353,7 @@ private struct ImportPlanView: View {
                     }
                 } else {
                     ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
-                        Text(line).font(.caption2).foregroundStyle(Palette.textMuted)
+                        Text(line).font(.mhCaption2).foregroundStyle(Palette.textMuted)
                     }
                     if entry.section == SettingsCategory.cleanRules.rawValue, case .overwrite = entry.status {
                         Text("Imported rules are not selected by default.")

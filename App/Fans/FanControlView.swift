@@ -52,9 +52,9 @@ struct FanControlView: View {
                         Text("\(Int(f.reading.actualRPM)) rpm").monospacedDigit()
                         Spacer()
                         if let c = f.commandedRPM {
-                            Text("Helper target \(Int(c)) rpm").foregroundStyle(.orange).monospacedDigit()
+                            Text("Helper target \(Int(c)) rpm").foregroundStyle(Theme.orange).monospacedDigit()
                         } else {
-                            Text("System control (target \(Int(f.reading.targetRPM)))").foregroundStyle(.secondary).monospacedDigit()
+                            Text("System control (target \(Int(f.reading.targetRPM)))").foregroundStyle(Palette.textMuted).monospacedDigit()
                         }
                     }
                 }
@@ -62,18 +62,18 @@ struct FanControlView: View {
                     if let t = s.controlCelsius { Text("Curve temperature \(Fmt.celsius(t))") }
                     if let h = s.hottestCelsius { Text("Hottest \(Fmt.celsius(h))") }
                 }
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 if s.safetyTripped {
                     Label("Temperature exceeded the safety limit; control was handed back to the system", systemImage: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.red).font(.caption)
+                        .foregroundStyle(Theme.rose).font(.mhCaption)
                 }
                 if let e = s.lastError {
-                    Label(e, systemImage: "exclamationmark.circle").foregroundStyle(.orange).font(.caption)
+                    Label(e, systemImage: "exclamationmark.circle").foregroundStyle(Theme.orange).font(.mhCaption)
                 }
                 if commandIgnored(s) {
                     Label("The firmware doesn’t seem to apply the Helper’s speed. On some models manual control only takes effect after the system has started the fans.",
                           systemImage: "info.circle")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
             }
         } else {
@@ -91,7 +91,7 @@ struct FanControlView: View {
             switch model.mode {
             case .automatic:
                 Text("The macOS firmware controls the fans based on temperature. This is the safest setting.")
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.mhCallout).foregroundStyle(Palette.textMuted)
             case .fixed:
                 VStack(alignment: .leading) {
                     HStack {
@@ -101,7 +101,7 @@ struct FanControlView: View {
                             .monospacedDigit().frame(width: 80, alignment: .trailing)
                     }
                     Text("A fixed speed needs the app to keep running; \(Int(HelperTiming.heartbeatTimeout)) seconds after the app quits, control returns to the system.")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
             case .curve:
                 curveEditor
@@ -158,13 +158,13 @@ struct FanControlView: View {
                     Toggle("Never go below the speed the system asks for (recommended)", isOn: $model.onlyIncrease)
                 }
             }
-            .font(.callout)
+            .font(.mhCallout)
         }
     }
 
     private var footer: some View {
         HStack {
-            if let m = model.message { Text(m).font(.caption).foregroundStyle(.secondary).lineLimit(2) }
+            if let m = model.message { Text(m).font(.mhCaption).foregroundStyle(Palette.textMuted).lineLimit(2) }
             Spacer()
             Button("Return to System Control") { Task { await model.restoreAutomatic() } }
             Button("Apply") { Task { await model.apply() } }
@@ -203,9 +203,9 @@ private struct CurveEditor: View {
             }
             if let t = currentCelsius {
                 RuleMark(x: .value("Current", min(max(t, 20), 110)))
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Theme.orange)
                     .annotation(position: .top, alignment: .leading) {
-                        Text(Fmt.celsius(t)).font(.caption2).foregroundStyle(.orange)
+                        Text(Fmt.celsius(t)).font(.mhCaption2).foregroundStyle(Theme.orange)
                     }
             }
         }

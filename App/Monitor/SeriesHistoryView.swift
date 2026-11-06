@@ -39,7 +39,7 @@ struct SeriesHistoryView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text("Sensor and core history")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.mh(size: 13, weight: .semibold))
                     .foregroundStyle(Palette.text)
                 Spacer()
                 if !available.isEmpty { sensorMenu }
@@ -53,10 +53,10 @@ struct SeriesHistoryView: View {
                         .frame(minHeight: 260)
                 } else if selected.isEmpty {
                     Text("Choose at least one sensor to show history.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.mhCaption)
+                        .foregroundStyle(Palette.textMuted)
                 } else if temperaturePlots.isEmpty, corePlots.isEmpty {
-                    Text("No data in this range").font(.caption).foregroundStyle(.secondary)
+                    Text("No data in this range").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 } else {
                     HairlinePanel(columns: temperaturePlots.isEmpty || corePlots.isEmpty ? 1 : 2) {
                         if !temperaturePlots.isEmpty {
@@ -216,7 +216,7 @@ struct SeriesHistoryView: View {
         VStack(alignment: .leading, spacing: 14) {
             // Same header as the monitor charts: value beside the title, clear of the y-axis labels.
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(title).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(Palette.text)
+                Text(title).font(.mh(size: 12.5, weight: .semibold)).foregroundStyle(Palette.text)
                 if let first = plots.first, let last = first.points.last {
                     Text(label(last.value, format)).font(Theme.smallNumeral).foregroundStyle(first.color)
                 }

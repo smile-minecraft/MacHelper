@@ -34,10 +34,20 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
-    static var groups: [(LocalizedStringKey, [AppSection])] { [
-        ("This Mac", [.overview, .monitor, .health, .fans]),
-        ("Clean Up", [.optimize, .disk, .uninstall, .startup]),
-    ] }
+    static var groups: [(LocalizedStringKey, [AppSection])] {
+        ThemeStore.shared.isSimple
+            ? [(LocalizedStringKey("This Mac"), simpleSections.filter { $0.isThisMac }),
+               (LocalizedStringKey("Clean Up"), simpleSections.filter { !$0.isThisMac })]
+            : [("This Mac", [.overview, .monitor, .health, .fans]), ("Clean Up", [.optimize, .disk, .uninstall, .startup])]
+    }
+
+    /// Simple mode keeps the everyday tools; monitoring charts, fan curves and launch agents are advanced.
+    static let simpleSections: [AppSection] = [.overview, .health, .optimize, .disk, .uninstall]
+
+    var isThisMac: Bool { [.overview, .monitor, .health, .fans].contains(self) }
+
+    /// Whether the page is shown in the current mode.
+    var isVisible: Bool { !ThemeStore.shared.isSimple || Self.simpleSections.contains(self) }
 }
 
 /// Owns every feature model; shared by the main window, the menu bar panel and Settings.

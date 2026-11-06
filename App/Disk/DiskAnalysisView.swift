@@ -30,17 +30,17 @@ struct DiskAnalysisView: View {
     private func savedScanBanner(_ scannedAt: Date) -> some View {
         HStack(spacing: 10) {
             Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 14, weight: .semibold))
+                .font(.mh(size: 14, weight: .semibold))
                 .foregroundStyle(Theme.amber)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Saved scan from \(scannedAt.formatted(date: .abbreviated, time: .shortened))")
-                    .font(.system(size: 12.5, weight: .semibold))
+                    .font(.mh(size: 12.5, weight: .semibold))
                     .foregroundStyle(Palette.text)
                 Text("This result may be out of date. Scan again to update it.")
-                    .font(.caption)
+                    .font(.mhCaption)
                     .foregroundStyle(Palette.textMuted)
                 Text("Collecting, removing, and duplicate search are disabled for a saved scan.")
-                    .font(.caption2)
+                    .font(.mhCaption2)
                     .foregroundStyle(Palette.textFaint)
             }
             Spacer()
@@ -96,7 +96,7 @@ struct DiskAnalysisView: View {
             VStack(spacing: 14) {
                 ScanningArt(art: "px.empty.scan")
                 Text("Scanned \(model.progress.files.formatted()) files · \(Fmt.bytes(Int64(clamping: model.progress.bytes)))")
-                    .font(.callout).monospacedDigit().foregroundStyle(.secondary)
+                    .font(.mhCallout).monospacedDigit().foregroundStyle(Palette.textMuted)
                 ProgressView().controlSize(.small)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -123,7 +123,7 @@ struct DiskAnalysisView: View {
                 // collector hint would contradict the disabled actions.
                 if !model.isShowingSavedScan {
                     Text(model.mode == .sunburst ? "Click a ring to open a folder, click the center to go up; right-click or drag items to the collector." : "Click a block to open its folder; right-click or drag items to the collector.")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
             }
             .padding(12)
@@ -178,13 +178,13 @@ struct DiskAnalysisView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 2) {
                 ForEach(Array(model.breadcrumbs.enumerated()), id: \.element.id) { i, node in
-                    if i > 0 { Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary) }
+                    if i > 0 { Image(systemName: "chevron.right").font(.mhCaption2).foregroundStyle(Palette.textFaint) }
                     Button(i == 0 ? node.path : node.name) { model.zoom(to: node) }
                         .buttonStyle(.plain)
                         .foregroundStyle(i == model.breadcrumbs.count - 1 ? .primary : .secondary)
                 }
             }
-            .font(.callout)
+            .font(.mhCallout)
         }
     }
 
@@ -199,37 +199,37 @@ struct DiskAnalysisView: View {
                 if v.localSnapshots > 0 { Text("\(v.localSnapshots) local snapshots") }
             }
         }
-        .font(.caption).foregroundStyle(.secondary)
+        .font(.mhCaption).foregroundStyle(Palette.textMuted)
         if model.progress.cloudOnlyDirectories > 0 {
             HStack {
-                Image(systemName: "icloud.slash").foregroundStyle(.orange)
+                Image(systemName: "icloud.slash").foregroundStyle(Theme.orange)
                 Text("\(model.progress.cloudOnlyDirectories) cloud-only folders were skipped; their contents were not downloaded.")
             }
-            .font(.caption)
+            .font(.mhCaption)
         }
         if model.progress.unreadableDirectories > model.progress.cloudOnlyDirectories {
             HStack {
-                Image(systemName: "lock.fill").foregroundStyle(.orange)
+                Image(systemName: "lock.fill").foregroundStyle(Theme.orange)
                 Text("\(model.progress.unreadableDirectories - model.progress.cloudOnlyDirectories) folders couldn’t be read; the results are incomplete.")
                 Button("Open Full Disk Access Settings") { model.openFullDiskAccessSettings() }.buttonStyle(.link)
             }
-            .font(.caption)
+            .font(.mhCaption)
         }
     }
 
     private func row(_ node: DiskNode, total: UInt64) -> some View {
         HStack {
             Image(systemName: node.isDirectory ? (node.skippedCloudOnly ? "icloud.slash" : "folder.fill") : "doc")
-                .foregroundStyle(node.skippedCloudOnly ? Color.orange : node.isDirectory ? Color.accentColor : .secondary)
+                .foregroundStyle(node.skippedCloudOnly ? Theme.orange : node.isDirectory ? Theme.accent : .secondary)
                 .help(node.skippedCloudOnly ? String(localized: "Only in the cloud; contents were not downloaded") : "")
             VStack(alignment: .leading, spacing: 1) {
                 Text(node.name).lineLimit(1).truncationMode(.middle)
                 if sideTab == .largest {
-                    Text(node.parent?.path ?? "").font(.caption2).foregroundStyle(.secondary).lineLimit(1).truncationMode(.head)
+                    Text(node.parent?.path ?? "").font(.mhCaption2).foregroundStyle(Palette.textMuted).lineLimit(1).truncationMode(.head)
                 }
             }
             Spacer()
-            Text(Fmt.bytes(Int64(clamping: node.size))).monospacedDigit().foregroundStyle(.secondary)
+            Text(Fmt.bytes(Int64(clamping: node.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
         }
         .contentShape(Rectangle())
         .onTapGesture(count: 2) { if node.isDirectory { model.zoom(to: node) } else { model.quickLook(node) } }
@@ -243,7 +243,7 @@ struct DiskAnalysisView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Label("Collector", systemImage: "tray.full")
-                    .font(.headline)
+                    .font(.mhHeadline)
                 Spacer()
                 Text(Fmt.bytes(Int64(clamping: model.collectorSize))).monospacedDigit()
             }
@@ -251,7 +251,7 @@ struct DiskAnalysisView: View {
                 Text(model.isShowingSavedScan
                      ? LocalizedStringKey("Collecting is disabled for a saved scan. Scan again to update it.")
                      : LocalizedStringKey("Drag items you want to delete here, then move them to the Trash in one go."))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted)
                     .frame(maxWidth: .infinity, minHeight: 50)
             } else {
                 ScrollView {
@@ -260,11 +260,11 @@ struct DiskAnalysisView: View {
                             HStack {
                                 Text(node.name).lineLimit(1).truncationMode(.middle)
                                 Spacer()
-                                Text(Fmt.bytes(Int64(clamping: node.size))).monospacedDigit().foregroundStyle(.secondary)
+                                Text(Fmt.bytes(Int64(clamping: node.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
                                 Button { model.removeFromCollector(node) } label: { Image(systemName: "xmark.circle.fill") }
-                                    .buttonStyle(.plain).foregroundStyle(.tertiary)
+                                    .buttonStyle(.plain).foregroundStyle(Palette.textFaint)
                             }
-                            .font(.caption)
+                            .font(.mhCaption)
                         }
                     }
                 }
@@ -274,10 +274,10 @@ struct DiskAnalysisView: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(model.isShowingSavedScan)
             }
-            if let m = model.lastMessage { Text(m).font(.caption2).foregroundStyle(.secondary) }
+            if let m = model.lastMessage { Text(m).font(.mhCaption2).foregroundStyle(Palette.textMuted) }
         }
         .padding(10)
-        .background(dropTargeted && !model.isShowingSavedScan ? Color.accentColor.opacity(0.15) : Color.clear)
+        .background(dropTargeted && !model.isShowingSavedScan ? Theme.accent.opacity(0.15) : Color.clear)
         .dropDestination(for: URL.self) { urls, _ in
             guard !model.isShowingSavedScan else { return false }
             for u in urls { model.addToCollector(path: u.standardizedFileURL.path) }
@@ -315,10 +315,10 @@ private struct DuplicatesList: View {
         if let groups = model.duplicates {
             let total = groups.reduce(0) { $0 + $1.reclaimable }
             if let note = model.duplicatesMessage {
-                Text(note).font(.caption).foregroundStyle(.orange)
+                Text(note).font(.mhCaption).foregroundStyle(Theme.orange)
             }
             Text("\(groups.count) groups · \(Fmt.bytes(Int64(clamping: total))) reclaimable")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.mhCaption).foregroundStyle(Palette.textMuted)
             List {
                 ForEach(groups.prefix(200)) { g in
                     Section {
@@ -328,11 +328,11 @@ private struct DuplicatesList: View {
                                     .help(i == 0 ? String(localized: "Oldest copy (suggested to keep)") : "")
                                 VStack(alignment: .leading, spacing: 1) {
                                     Text((f.path as NSString).lastPathComponent).lineLimit(1).truncationMode(.middle)
-                                    Text(Fmt.shortPath((f.path as NSString).deletingLastPathComponent)).font(.caption2)
-                                        .foregroundStyle(.secondary).lineLimit(1).truncationMode(.head)
+                                    Text(Fmt.shortPath((f.path as NSString).deletingLastPathComponent)).font(.mhCaption2)
+                                        .foregroundStyle(Palette.textMuted).lineLimit(1).truncationMode(.head)
                                 }
                                 if f.sharesStorage {
-                                    Text("Clone").font(.caption2).foregroundStyle(.orange)
+                                    Text("Clone").font(.mhCaption2).foregroundStyle(Theme.orange)
                                         .help(String(localized: "Shares storage with another copy; deleting it alone frees almost nothing."))
                                 }
                             }
@@ -350,7 +350,7 @@ private struct DuplicatesList: View {
                             Text("\(Fmt.bytes(Int64(clamping: g.size))) × \(g.files.count)")
                             Spacer()
                             Button("Collect All but the Oldest") { model.collectDuplicates(g) }
-                                .buttonStyle(.link).font(.caption)
+                                .buttonStyle(.link).font(.mhCaption)
                                 .disabled(g.reclaimable == 0)
                         }
                     }
@@ -361,7 +361,7 @@ private struct DuplicatesList: View {
             VStack(spacing: 8) {
                 Spacer()
                 Text("Duplicate search is disabled for a saved scan. Scan again to update it.")
-                    .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center)
                 Spacer()
             }
             .frame(maxWidth: .infinity).padding()
@@ -369,14 +369,14 @@ private struct DuplicatesList: View {
             VStack(spacing: 8) {
                 Spacer()
                 if let note = model.duplicatesMessage {
-                    Text(note).font(.caption).foregroundStyle(.orange).multilineTextAlignment(.center)
+                    Text(note).font(.mhCaption).foregroundStyle(Theme.orange).multilineTextAlignment(.center)
                 }
                 if model.findingDuplicates {
                     ProgressView()
-                    Text("Comparing file contents…").font(.caption).foregroundStyle(.secondary)
+                    Text("Comparing file contents…").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 } else {
                     Text("Finds files of 1 MB or more with identical content in this scan.")
-                        .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                        .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center)
                     Button("Find Duplicates") { Task { await model.findDuplicates() } }.buttonStyle(.borderedProminent)
                 }
                 Spacer()
@@ -392,23 +392,23 @@ private struct ChangesList: View {
     var body: some View {
         if let since = model.changesSince {
             Text("Compared with the scan of \(since.formatted(date: .abbreviated, time: .shortened))")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.mhCaption).foregroundStyle(Palette.textMuted)
             if model.changes.isEmpty {
-                Text("No folder changed by more than 50 MB.").font(.callout).foregroundStyle(.secondary)
+                Text("No folder changed by more than 50 MB.").font(.mhCallout).foregroundStyle(Palette.textMuted)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List(model.changes) { c in
                     HStack {
                         Image(systemName: c.delta > 0 ? "arrow.up.right" : "arrow.down.right")
-                            .foregroundStyle(c.delta > 0 ? Color.orange : .green)
+                            .foregroundStyle(c.delta > 0 ? Theme.orange : .green)
                         VStack(alignment: .leading, spacing: 1) {
                             Text((c.path as NSString).lastPathComponent).lineLimit(1)
                             Text(c.before == nil ? String(localized: "New") : (c.after == nil ? String(localized: "Gone or now small") : Fmt.shortPath(c.path)))
-                                .font(.caption2).foregroundStyle(.secondary).lineLimit(1).truncationMode(.head)
+                                .font(.mhCaption2).foregroundStyle(Palette.textMuted).lineLimit(1).truncationMode(.head)
                         }
                         Spacer()
                         Text((c.delta > 0 ? "+" : "−") + Fmt.bytes(Int64(clamping: c.delta.magnitude))).monospacedDigit()
-                            .foregroundStyle(c.delta > 0 ? Color.orange : .green)
+                            .foregroundStyle(c.delta > 0 ? Theme.orange : .green)
                     }
                     .contextMenu {
                         if let node = model.node(atPath: c.path) {
@@ -421,7 +421,7 @@ private struct ChangesList: View {
             }
         } else {
             Text("Scan the same location again later to see which folders grew or shrank.")
-                .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center)
                 .padding().frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }

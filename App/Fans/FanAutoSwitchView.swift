@@ -7,7 +7,7 @@ struct FanAutoSwitchSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Toggle("Switch profiles automatically", isOn: $switcher.enabled).font(.headline)
+                Toggle("Switch profiles automatically", isOn: $switcher.enabled).font(.mhHeadline)
                 Spacer()
                 Menu("Add Rule") {
                     Button("When an App Is Running…") { switcher.addAppRule() }
@@ -17,11 +17,11 @@ struct FanAutoSwitchSection: View {
                 .fixedSize()
             }
             Text("The first matching rule wins. When none matches, the setting you applied above is used.")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.mhCaption).foregroundStyle(Palette.textMuted)
             ForEach($switcher.rules) { $rule in
                 HStack {
                     Image(systemName: switcher.activeRule?.id == rule.id ? "checkmark.circle.fill" : "circle")
-                        .foregroundStyle(switcher.activeRule?.id == rule.id ? Color.green : Color.secondary)
+                        .foregroundStyle(switcher.activeRule?.id == rule.id ? Theme.mint : Palette.textMuted)
                     Text(rule.trigger.title)
                     Spacer()
                     Picker("Profile", selection: $rule.target) {
@@ -31,13 +31,13 @@ struct FanAutoSwitchSection: View {
                     Button { switcher.rules.removeAll { $0.id == rule.id } } label: { Image(systemName: "minus.circle") }
                         .buttonStyle(.plain)
                 }
-                .font(.callout)
+                .font(.mhCallout)
                 .opacity(switcher.enabled ? 1 : 0.5)
             }
             if let active = switcher.activeRule {
-                Text("Now: \(active.target.title) (\(active.trigger.title))").font(.caption).foregroundStyle(.green)
+                Text("Now: \(active.target.title) (\(active.trigger.title))").font(.mhCaption).foregroundStyle(Theme.mint)
             }
-            if let e = switcher.lastError { Text(e).font(.caption).foregroundStyle(.orange) }
+            if let e = switcher.lastError { Text(e).font(.mhCaption).foregroundStyle(Theme.orange) }
         }
     }
 }

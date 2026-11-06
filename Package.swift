@@ -11,6 +11,7 @@ let package = Package(
         .library(name: "FanControl", targets: ["FanControl"]),
         .library(name: "HelperProtocol", targets: ["HelperProtocol"]),
         .library(name: "PrivilegedOps", targets: ["PrivilegedOps"]),
+        .library(name: "Theming", targets: ["Theming"]),
         .library(name: "DiskScan", targets: ["DiskScan"]),
         .library(name: "CleanEngine", targets: ["CleanEngine"]),
         .library(name: "Storage", targets: ["Storage"]),
@@ -49,6 +50,8 @@ let package = Package(
         ),
         // Fixed allowlists for what the root Helper may delete or switch; no dependencies.
         .target(name: "PrivilegedOps"),
+        // Color themes, VS Code theme import and appearance settings; no UI framework.
+        .target(name: "Theming"),
         .target(name: "HelperProtocol", dependencies: ["SMCKit", "FanControl"], linkerSettings: [.linkedFramework("Security")]),
         .executableTarget(name: "mhprobe", dependencies: ["SMCKit", "Metrics"]),
         .testTarget(name: "SMCKitTests", dependencies: ["SMCKit"]),
@@ -57,6 +60,7 @@ let package = Package(
         .testTarget(name: "CleanEngineTests", dependencies: ["CleanEngine"]),
         .testTarget(name: "PrivilegedOpsTests", dependencies: ["PrivilegedOps"]),
         .testTarget(name: "MetricsTests", dependencies: ["Metrics"]),
+        .testTarget(name: "ThemingTests", dependencies: ["Theming"]),
         .testTarget(name: "StorageTests", dependencies: ["Storage"]),
         .testTarget(name: "DiagnosticsTests", dependencies: ["Diagnostics", "Storage"]),
         .testTarget(name: "SettingsPortabilityTests", dependencies: ["SettingsPortability", "CleanEngine", "FanControl"]),

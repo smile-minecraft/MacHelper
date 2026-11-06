@@ -2486,7 +2486,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "沒有可清理的項目"
+            "value": "沒有可清理項目"
           }
         }
       }
@@ -6411,6 +6411,2096 @@
           "stringUnit": {
             "state": "translated",
             "value": "系統層級"
+          }
+        }
+      }
+    },
+    "%@ Copy": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 副本"
+          }
+        }
+      }
+    },
+    "%@ left. A cleanup now keeps things smooth.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩下 %@。現在清理一下，電腦會更順暢。"
+          }
+        }
+      }
+    },
+    "Accent": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "強調色"
+          }
+        }
+      }
+    },
+    "Advanced": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "進階"
+          }
+        }
+      }
+    },
+    "Almost full": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快滿了"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外觀"
+          }
+        }
+      }
+    },
+    "Blocks": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "方塊"
+          }
+        }
+      }
+    },
+    "Blue (CPU, links)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "藍（CPU、連結）"
+          }
+        }
+      }
+    },
+    "Borders": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "邊框"
+          }
+        }
+      }
+    },
+    "Built-in": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "內建"
+          }
+        }
+      }
+    },
+    "Busy": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忙碌"
+          }
+        }
+      }
+    },
+    "Cards": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卡片"
+          }
+        }
+      }
+    },
+    "Choose a VS Code color theme (.json)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇 VS Code 色彩主題（.json）"
+          }
+        }
+      }
+    },
+    "Choose which values appear and their graph style in the Menu Bar tab.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要顯示哪些數值與圖表樣式，請到「選單列」分頁設定。"
+          }
+        }
+      }
+    },
+    "Color values by level (warning, critical)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依狀態替數值上色（注意、警告）"
+          }
+        }
+      }
+    },
+    "Columns": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "柱狀"
+          }
+        }
+      }
+    },
+    "Cool": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "涼爽"
+          }
+        }
+      }
+    },
+    "Cubic 11 (pixel)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "俐方體11號（像素）"
+          }
+        }
+      }
+    },
+    "Cyan (network)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "青（網路）"
+          }
+        }
+      }
+    },
+    "Delete Theme": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除主題"
+          }
+        }
+      }
+    },
+    "Dividers": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分隔線"
+          }
+        }
+      }
+    },
+    "Duplicate": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "複製"
+          }
+        }
+      }
+    },
+    "Edit Colors": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編輯顏色"
+          }
+        }
+      }
+    },
+    "Edit Colors…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編輯顏色…"
+          }
+        }
+      }
+    },
+    "Editing the dark variant (switch the system appearance to edit the light one).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在編輯深色版本（把系統外觀切成淺色才能編輯淺色版本）。"
+          }
+        }
+      }
+    },
+    "Editing the light variant (switch the system appearance to edit the dark one).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在編輯淺色版本（把系統外觀切成深色才能編輯深色版本）。"
+          }
+        }
+      }
+    },
+    "Export…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯出…"
+          }
+        }
+      }
+    },
+    "Faint text": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "淡色文字"
+          }
+        }
+      }
+    },
+    "Fields and tracks": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輸入框與軌道"
+          }
+        }
+      }
+    },
+    "Find out what’s slowing your Mac down.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找出讓 Mac 變慢的原因。"
+          }
+        }
+      }
+    },
+    "Font": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字體"
+          }
+        }
+      }
+    },
+    "Fonts": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字體"
+          }
+        }
+      }
+    },
+    "Free of %@ on your startup disk.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟動磁碟共 %@ 的可用空間。"
+          }
+        }
+      }
+    },
+    "Free space is getting low": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用空間偏少"
+          }
+        }
+      }
+    },
+    "Free up space safely. You see everything before it’s cleaned.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安全地釋放空間，清理前每一項都會先讓你看過。"
+          }
+        }
+      }
+    },
+    "Getting low": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "偏少"
+          }
+        }
+      }
+    },
+    "Gray": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "灰"
+          }
+        }
+      }
+    },
+    "Green (good)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "綠（正常）"
+          }
+        }
+      }
+    },
+    "Hot": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "很熱"
+          }
+        }
+      }
+    },
+    "How hard the processor is working right now.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "處理器現在有多忙。"
+          }
+        }
+      }
+    },
+    "Import": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯入"
+          }
+        }
+      }
+    },
+    "Import File…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從檔案匯入…"
+          }
+        }
+      }
+    },
+    "Import from VS Code": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從 VS Code 匯入"
+          }
+        }
+      }
+    },
+    "Import from VS Code…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從 VS Code 匯入…"
+          }
+        }
+      }
+    },
+    "Imported “%@”.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已匯入「%@」。"
+          }
+        }
+      }
+    },
+    "Imports color themes from VS Code, Cursor, VSCodium and Windsurf (installed themes or a .json theme file). Only colors are read.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可以匯入 VS Code、Cursor、VSCodium 與 Windsurf 的色彩主題（已安裝的主題或 .json 主題檔）。只會讀取顏色。"
+          }
+        }
+      }
+    },
+    "Item label": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "項目標示"
+          }
+        }
+      }
+    },
+    "Light": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輕鬆"
+          }
+        }
+      }
+    },
+    "Light & Dark": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "淺色與深色"
+          }
+        }
+      }
+    },
+    "More": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多"
+          }
+        }
+      }
+    },
+    "No VS Code-family editor was found. Use “Import File…” with a theme .json instead.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 VS Code 系列的編輯器。可以改用「從檔案匯入…」選擇主題 .json。"
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不顯示"
+          }
+        }
+      }
+    },
+    "Notched corners, block borders and segmented gauges, like a game screen.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "階梯狀邊角、方塊邊框和分格儀表，像遊戲畫面一樣。"
+          }
+        }
+      }
+    },
+    "Orange (temperature)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "橘（溫度）"
+          }
+        }
+      }
+    },
+    "Pixel": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素"
+          }
+        }
+      }
+    },
+    "Pixel icon": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素圖示"
+          }
+        }
+      }
+    },
+    "Plenty": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "充足"
+          }
+        }
+      }
+    },
+    "Plenty of space": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空間充足"
+          }
+        }
+      }
+    },
+    "Processor": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "處理器"
+          }
+        }
+      }
+    },
+    "Red (warning)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "紅（警告）"
+          }
+        }
+      }
+    },
+    "Remove apps completely, leftovers included.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把 App 和它留下的檔案一起移除。"
+          }
+        }
+      }
+    },
+    "Reset": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重設"
+          }
+        }
+      }
+    },
+    "Room for open apps. When it runs out, everything slows down.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "給開著的 App 使用的空間，不夠時一切都會變慢。"
+          }
+        }
+      }
+    },
+    "Rounded cards and continuous rings.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圓角卡片和連續的圓環。"
+          }
+        }
+      }
+    },
+    "Running out": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不足"
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儲存"
+          }
+        }
+      }
+    },
+    "Secondary text": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "次要文字"
+          }
+        }
+      }
+    },
+    "See what takes up the most space.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "看看什麼最占空間。"
+          }
+        }
+      }
+    },
+    "Selected and raised": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選取與浮起"
+          }
+        }
+      }
+    },
+    "Short name": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "簡稱"
+          }
+        }
+      }
+    },
+    "Shows every page, chart and technical detail: monitoring history, fan curves, launch agents and per-process numbers.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示所有頁面、圖表與技術細節：監控歷史、風扇曲線、啟動代理程式和各程序的數字。"
+          }
+        }
+      }
+    },
+    "Shows the essentials in plain language: how your Mac is doing, free space, and one-click cleanup. Monitoring charts, fan curves and startup items are hidden.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用白話顯示最重要的資訊：Mac 狀況好不好、還有多少空間，以及一鍵清理。監控圖表、風扇曲線和啟動項目會隱藏。"
+          }
+        }
+      }
+    },
+    "Simple": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "簡單"
+          }
+        }
+      }
+    },
+    "Smooth": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平滑"
+          }
+        }
+      }
+    },
+    "Storage": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儲存空間"
+          }
+        }
+      }
+    },
+    "System Monospaced": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統等寬"
+          }
+        }
+      }
+    },
+    "System Rounded": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統圓體"
+          }
+        }
+      }
+    },
+    "Text": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "內文"
+          }
+        }
+      }
+    },
+    "Text size": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文字大小"
+          }
+        }
+      }
+    },
+    "Theme": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主題"
+          }
+        }
+      }
+    },
+    "Themes installed in VS Code, Cursor, VSCodium and Windsurf, including the built-in ones.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VS Code、Cursor、VSCodium 與 Windsurf 中已安裝的主題，包含內建主題。"
+          }
+        }
+      }
+    },
+    "Tight": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有點緊"
+          }
+        }
+      }
+    },
+    "Titles and big numbers use the display font; descriptions and lists use the text font so they stay easy to read. The pixel font is 俐方體11號 (Cubic 11), free to use and bundled with MacHelper.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標題和大數字使用標題字體；說明與清單使用內文字體，保持好讀。像素字體是 MacHelper 內附的免費字體「俐方體11號」。"
+          }
+        }
+      }
+    },
+    "Titles and numbers": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標題與數字"
+          }
+        }
+      }
+    },
+    "Too hot": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "過熱"
+          }
+        }
+      }
+    },
+    "Very busy": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "很忙"
+          }
+        }
+      }
+    },
+    "Violet (GPU)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "紫（GPU）"
+          }
+        }
+      }
+    },
+    "Want charts, fan control and startup items? Switch to Advanced in Settings → Appearance.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要圖表、風扇控制和啟動項目嗎？到「設定 → 外觀」切換成進階模式。"
+          }
+        }
+      }
+    },
+    "Warm": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溫熱"
+          }
+        }
+      }
+    },
+    "Warm is normal under load; the fans step in when needed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忙的時候變熱是正常的，需要時風扇會自動加速。"
+          }
+        }
+      }
+    },
+    "What would you like to do?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "想做什麼？"
+          }
+        }
+      }
+    },
+    "Window background": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "視窗背景"
+          }
+        }
+      }
+    },
+    "Yellow (attention)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黃（注意）"
+          }
+        }
+      }
+    },
+    "Pixel Night": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素夜"
+          }
+        }
+      }
+    },
+    "Pixel Day": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素晝"
+          }
+        }
+      }
+    },
+    "Classic": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "經典"
+          }
+        }
+      }
+    },
+    "Choose a folder of icon images": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇放有圖示圖片的資料夾"
+          }
+        }
+      }
+    },
+    "Choose an image (a square one works best)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇一張圖片（正方形效果最好）"
+          }
+        }
+      }
+    },
+    "Choose where to create the “MacHelper Icons” folder": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇要在哪裡建立「MacHelper Icons」資料夾"
+          }
+        }
+      }
+    },
+    "Click an icon to replace it with your own image; replaced icons are used with every set. An icon pack is a folder of images named after the icons (cpu.png, fans.svg …); export the template to see every name. Images in a pack that MacHelper doesn’t use are ignored.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點一下圖示就能換成你自己的圖片，換過的圖示在任何圖示組都會使用。圖示包是一個資料夾，裡面的圖片以圖示代號命名（cpu.png、fans.svg…）；匯出範本可以看到所有代號。資料夾裡 MacHelper 用不到的檔案會被略過。"
+          }
+        }
+      }
+    },
+    "Delete This Icon Pack": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除這個圖示包"
+          }
+        }
+      }
+    },
+    "Export Here": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯出到這裡"
+          }
+        }
+      }
+    },
+    "Export as Template…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯出成範本…"
+          }
+        }
+      }
+    },
+    "Exported the icon template.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已匯出圖示範本。"
+          }
+        }
+      }
+    },
+    "Icon set": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圖示組"
+          }
+        }
+      }
+    },
+    "Icons": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圖示"
+          }
+        }
+      }
+    },
+    "Import Icon Pack…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯入圖示包…"
+          }
+        }
+      }
+    },
+    "Imported %lld icons from “%@”.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已從「%2$@」匯入 %1$lld 個圖示。"
+          }
+        }
+      }
+    },
+    "My Icons": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我的圖示"
+          }
+        }
+      }
+    },
+    "Pixel (built-in)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素（內建）"
+          }
+        }
+      }
+    },
+    "Replace with Image…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "換成圖片…"
+          }
+        }
+      }
+    },
+    "Replaced": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已替換"
+          }
+        }
+      }
+    },
+    "Restore Default": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復預設"
+          }
+        }
+      }
+    },
+    "Show Icons Folder": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Finder 中顯示圖示資料夾"
+          }
+        }
+      }
+    },
+    "System symbols": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統符號"
+          }
+        }
+      }
+    },
+    "App icon (Dock)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 圖示（Dock）"
+          }
+        }
+      }
+    },
+    "Mascot": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "吉祥物"
+          }
+        }
+      }
+    },
+    "Empty list": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空白清單"
+          }
+        }
+      }
+    },
+    "Scan prompt": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描提示"
+          }
+        }
+      }
+    },
+    "%@ of %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已選 %1$@／共 %2$@"
+          }
+        }
+      }
+    },
+    "%lld of %lld tasks": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已選 %1$lld／共 %2$lld 項"
+          }
+        }
+      }
+    },
+    "A ready-made look sets the colors, shapes, title font and icons together. Change any detail below to make it your own.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選一個現成的外觀，會一次設定好顏色、形狀、標題字體和圖示。之後在下面調整任何細節，就會變成你自己的版本。"
+          }
+        }
+      }
+    },
+    "Add project folders": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入專案資料夾"
+          }
+        }
+      }
+    },
+    "Belongs to": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所屬 App"
+          }
+        }
+      }
+    },
+    "Body text": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "內文"
+          }
+        }
+      }
+    },
+    "Choose a .json File…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇 .json 檔案…"
+          }
+        }
+      }
+    },
+    "Clean system look that follows light and dark mode.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "簡潔的系統風格，跟著淺色／深色模式切換。"
+          }
+        }
+      }
+    },
+    "Colors": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顏色"
+          }
+        }
+      }
+    },
+    "Custom: you changed details below. Pick a look to start over from it.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自訂：你已調整過下面的細節。選一個外觀可以從它重新開始。"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除"
+          }
+        }
+      }
+    },
+    "Delete Pack": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除圖示包"
+          }
+        }
+      }
+    },
+    "Editing a built-in theme saves your changes as a new copy, so the original stays. Imported VS Code themes keep their colors; only colors are read from the file.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編輯內建主題時，修改會另存成一份副本，原本的主題不會變。匯入的 VS Code 主題保留原本的顏色；只會讀取檔案裡的顏色。"
+          }
+        }
+      }
+    },
+    "Every value uses the menu bar’s own text color.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有數值都使用選單列原本的文字顏色。"
+          }
+        }
+      }
+    },
+    "Fonts, text size and shapes": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字體、文字大小與形狀"
+          }
+        }
+      }
+    },
+    "Graph": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圖形"
+          }
+        }
+      }
+    },
+    "How Values Look": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "數值顯示方式"
+          }
+        }
+      }
+    },
+    "Icon": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圖示"
+          }
+        }
+      }
+    },
+    "Import VS Code Theme…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯入 VS Code 主題…"
+          }
+        }
+      }
+    },
+    "In menu bar": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示在選單列"
+          }
+        }
+      }
+    },
+    "Interface Mode": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "介面模式"
+          }
+        }
+      }
+    },
+    "Item": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "項目"
+          }
+        }
+      }
+    },
+    "Label": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "識別名稱"
+          }
+        }
+      }
+    },
+    "Label each value with": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每個數值旁標示"
+          }
+        }
+      }
+    },
+    "Look": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外觀方案"
+          }
+        }
+      }
+    },
+    "Menu bar font, labels and value colors are in the Menu Bar tab.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選單列的字體、標示與數值顏色請到「選單列」分頁設定。"
+          }
+        }
+      }
+    },
+    "No VS Code-family editor was found. Use “Choose a .json File…” to import a theme file instead.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 VS Code 系列的編輯器。可以改用「選擇 .json 檔案…」匯入主題檔。"
+          }
+        }
+      }
+    },
+    "Nothing": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不標示"
+          }
+        }
+      }
+    },
+    "Open Icons Folder": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打開圖示資料夾"
+          }
+        }
+      }
+    },
+    "Pixel Retro": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素復古"
+          }
+        }
+      }
+    },
+    "Pixel art (built-in)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素圖（內建）"
+          }
+        }
+      }
+    },
+    "Pixel: stepped corners and block borders, like a retro game.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素：階梯狀邊角和方塊邊框，像復古遊戲。"
+          }
+        }
+      }
+    },
+    "Retro game look with a pixel font and stepped corners.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素字體加上階梯狀邊角的復古遊戲風格。"
+          }
+        }
+      }
+    },
+    "Rounded": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圓角"
+          }
+        }
+      }
+    },
+    "Rounded: soft corners and smooth rings.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "圓角：柔和的邊角和平滑的圓環。"
+          }
+        }
+      }
+    },
+    "Runs": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "執行內容"
+          }
+        }
+      }
+    },
+    "Select an item to see what it runs and when.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選一個項目，查看它執行什麼、什麼時候執行。"
+          }
+        }
+      }
+    },
+    "Settings file": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定檔"
+          }
+        }
+      }
+    },
+    "Shapes": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "形狀"
+          }
+        }
+      }
+    },
+    "Short name (CPU, MEM)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "簡稱（CPU、MEM）"
+          }
+        }
+      }
+    },
+    "Soft hint when high": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "偏高時淡色提示"
+          }
+        }
+      }
+    },
+    "Standard": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標準"
+          }
+        }
+      }
+    },
+    "The program this item starts no longer exists, so it does nothing. It is usually left over from an app you removed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個項目要啟動的程式已經不存在，所以它不會做任何事。通常是已移除 App 留下的。"
+          }
+        }
+      }
+    },
+    "Titles and big numbers use the title font; descriptions and lists use the body font so they stay easy to read.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標題和大數字使用標題字體；說明與清單使用內文字體，保持好讀。"
+          }
+        }
+      }
+    },
+    "Turning an item off stops measuring it everywhere. “In menu bar” only decides whether it shows up there; it stays in the panel and the main window.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉項目會完全停止量測。「顯示在選單列」只決定它是否出現在選單列，面板和主視窗仍會顯示。"
+          }
+        }
+      }
+    },
+    "Two lines (name above value, saves width)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雙行顯示（名稱在上、數值在下，比較省空間）"
+          }
+        }
+      }
+    },
+    "Updates every": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新頻率"
+          }
+        }
+      }
+    },
+    "Value color": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "數值顏色"
+          }
+        }
+      }
+    },
+    "Values that need attention get a pale yellow or red, close to white, so they stay easy to read.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要注意的數值會變成接近白色的淡黃或淡紅，仍然清楚好讀。"
+          }
+        }
+      }
+    },
+    "When it runs": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "執行時機"
+          }
+        }
+      }
+    },
+    "White (menu bar text color)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白色（選單列文字顏色）"
+          }
+        }
+      }
+    },
+    "%lld startup items point to programs that no longer exist.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 個啟動項目指向已不存在的程式。"
+          }
+        }
+      }
+    },
+    "A calm instrument panel: neutral grays, and color only when something needs attention.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像一台安靜的儀表：平常是中性灰，只有需要注意時才出現顏色。"
+          }
+        }
+      }
+    },
+    "Busiest apps": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最耗資源的 App"
+          }
+        }
+      }
+    },
+    "Check Health": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康檢查"
+          }
+        }
+      }
+    },
+    "Free Up Space": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "釋放空間"
+          }
+        }
+      }
+    },
+    "Free space": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用空間"
+          }
+        }
+      }
+    },
+    "Free space hasn’t been shrinking lately.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用空間最近沒有減少。"
+          }
+        }
+      }
+    },
+    "Free space shrinks by about %@ a day; at this pace the disk is full in about %lld days.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用空間每天約少 %1$@，照這速度大約 %2$lld 天後會用完。"
+          }
+        }
+      }
+    },
+    "Free space shrinks slowly, about %@ a day.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用空間緩慢減少，每天約 %@。"
+          }
+        }
+      }
+    },
+    "Instrument": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儀表"
+          }
+        }
+      }
+    },
+    "Memory is running out": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體不足"
+          }
+        }
+      }
+    },
+    "Memory is tight; quitting unused apps helps.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體有點緊，關掉用不到的 App 會有幫助。"
+          }
+        }
+      }
+    },
+    "Needs your attention": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要你處理的事"
+          }
+        }
+      }
+    },
+    "Nothing right now.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前沒有。"
+          }
+        }
+      }
+    },
+    "Only %@ of space is left.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只剩 %@ 的空間。"
+          }
+        }
+      }
+    },
+    "Open Monitor": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打開監控"
+          }
+        }
+      }
+    },
+    "Review Startup Items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢查啟動項目"
+          }
+        }
+      }
+    },
+    "The CPU is at %@.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 溫度 %@。"
+          }
+        }
+      }
+    },
+    "The disk is almost full, %@ left": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁碟快滿了，只剩 %@"
+          }
+        }
+      }
+    },
+    "Up for %@ without a restart.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已連續開機 %@。"
+          }
+        }
+      }
+    },
+    "Upload %@/s": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上傳 %@/s"
+          }
+        }
+      }
+    },
+    "Your Mac is running hot at %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 過熱了，目前 %@"
+          }
+        }
+      }
+    },
+    "Your Mac runs smoothly": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 運作順暢"
+          }
+        }
+      }
+    },
+    "Your Mac runs smoothly, %@ of space left": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 運作順暢，空間剩 %@"
+          }
+        }
+      }
+    },
+    "Actual Size": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "實際大小"
+          }
+        }
+      }
+    },
+    "App icon": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 圖示"
+          }
+        }
+      }
+    },
+    "Dozing": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打瞌睡"
+          }
+        }
+      }
+    },
+    "MacHelper mascot": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 吉祥物"
+          }
+        }
+      }
+    },
+    "Make Interface Bigger": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放大介面"
+          }
+        }
+      }
+    },
+    "Make Interface Smaller": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "縮小介面"
+          }
+        }
+      }
+    },
+    "Relaxed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放鬆"
+          }
+        }
+      }
+    },
+    "Sweating": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "流汗"
+          }
+        }
+      }
+    },
+    "Pixel apple": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素蘋果"
+          }
+        }
+      }
+    },
+    "Blue slime": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "藍色史萊姆"
+          }
+        }
+      }
+    },
+    "Slime with a leaf": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "長葉子的史萊姆"
+          }
+        }
+      }
+    },
+    "Fan": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "風扇"
+          }
+        }
+      }
+    },
+    "The Dock and the menu bar panel use the icon you pick (or your own image for “App icon (Dock)” below) while MacHelper runs. Finder shows the pixel apple, the icon inside the app.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 執行時，Dock 和選單列面板會使用你選的圖示（或下方「App 圖示（Dock）」換上的你自己的圖片）。Finder 顯示的是 App 內建的像素蘋果。"
+          }
+        }
+      }
+    },
+    "Pointing at the suggested action": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "舉牌指向建議的動作"
+          }
+        }
+      }
+    },
+    "Alert": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "留意中"
           }
         }
       }

@@ -39,9 +39,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         startHeartbeat()
         let args = CommandLine.arguments
         // Snapshot instances run next to the real app: never let them drive the fans.
-        if !args.contains(where: { $0.hasPrefix("--snapshot") }) {
+        if !args.contains(where: { $0.hasPrefix("--snapshot") || $0 == "--export-icon-template" }) {
             fanModel.onUserApplied = { [weak self] policy in self?.fanSwitcher.userApplied(policy) }
             fanSwitcher.start()
+        }
+        if let dir = ThemeStore.shared.exportTemplateOnLaunch {
+            do { try ThemeStore.shared.exportIconTemplate(to: dir) } catch { print("export failed: \(error)") }
+            NSApp.terminate(nil)
+            return
+        }
+        if let i = args.firstIndex(of: "--snapshot-mascot"), i + 1 < args.count {
+            renderMascotSheet(to: URL(fileURLWithPath: args[i + 1]))
+            return
         }
         if let i = args.firstIndex(of: "--snapshot-disk"), i + 2 < args.count {
             renderDiskSnapshots(scan: args[i + 1], to: URL(fileURLWithPath: args[i + 2]))
@@ -95,6 +104,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             }
             NSApp.terminate(nil)
         }
+    }
+
+    /// Debug aid: `MacHelper --snapshot-mascot DIR` renders every mood at several frames (rows: moods,
+    /// columns: frames), plus a tap reaction row, into mascot.png.
+    private func renderMascotSheet(to dir: URL) {
+        let moods: [SlimeMascot.Mood] = [.init(), .init(level: .attention, holdsSign: true), .init(level: .critical, holdsSign: true),
+                                         .init(level: .critical), .init(level: .good, holdsSign: false, sleepy: true)]
+        let frames = [0, 5, 12, 30, 35, 58, 62, 66, 70]
+        let sheet = VStack(alignment: .leading, spacing: 6) {
+            ForEach(Array(moods.enumerated()), id: \.offset) { _, mood in
+                HStack(spacing: 6) {
+                    ForEach(frames, id: \.self) { f in
+                        Canvas { ctx, _ in SlimeRenderer.draw(SlimePose.make(mood: mood, frame: f, tappedAt: nil), in: ctx, cell: 4) }
+                            .frame(width: 160, height: 96)
+                    }
+                }
+            }
+            HStack(spacing: 6) {
+                ForEach(0..<9, id: \.self) { f in
+                    Canvas { ctx, _ in SlimeRenderer.draw(SlimePose.make(mood: .init(), frame: f, tappedAt: 0), in: ctx, cell: 4) }
+                        .frame(width: 160, height: 96)
+                }
+            }
+        }
+        .padding(10)
+        .background(Color(white: 0.16))
+        render(sheet, "mascot", dir)
+        NSApp.terminate(nil)
     }
 
     /// Debug aid: `MacHelper --snapshot-disk PATH DIR` scans PATH and renders both charts.

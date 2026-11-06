@@ -21,7 +21,7 @@ struct HealthView: View {
                         .disabled(model.loading)
                 }
                 if let error = model.error {
-                    Text(error).font(.callout).foregroundStyle(Theme.amber).textSelection(.enabled)
+                    Text(error).font(.mhCallout).foregroundStyle(Theme.amber).textSelection(.enabled)
                 }
                 if let report = model.report {
                     findings(report)
@@ -31,7 +31,7 @@ struct HealthView: View {
                 } else if model.loading {
                     VStack(spacing: 12) {
                         ScanningArt(art: "px.empty.scan")
-                        Text("Checking…").font(.callout).foregroundStyle(Palette.textMuted)
+                        Text("Checking…").font(.mhCallout).foregroundStyle(Palette.textMuted)
                         ProgressView().controlSize(.small)
                     }
                     .frame(maxWidth: .infinity).padding(.top, 60)
@@ -51,16 +51,16 @@ struct HealthView: View {
         VStack(alignment: .leading, spacing: 8) {
             if report.findings.isEmpty {
                 Label("No problems found in this period.", systemImage: "checkmark.seal.fill")
-                    .foregroundStyle(Theme.mint).font(.headline)
+                    .foregroundStyle(Theme.mint).font(.mhHeadline)
                     .card()
             }
             ForEach(report.findings) { f in
                 HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: symbol(f.severity)).foregroundStyle(color(f.severity)).font(.title3)
+                    Image(systemName: symbol(f.severity)).foregroundStyle(color(f.severity)).font(.mhTitle3)
                         .accessibilityLabel(severityLabel(f.severity))
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(f.title).font(.headline).foregroundStyle(Palette.text)
-                        Text(f.detail).font(.callout).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
+                        Text(f.title).font(.mhHeadline).foregroundStyle(Palette.text)
+                        Text(f.detail).font(.mhCallout).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer(minLength: 0)
                     if let section = action(f.id) {
@@ -130,16 +130,16 @@ struct HealthView: View {
                 }
             }
             Text("CPU and memory: average · highest. Temperature: highest. Power: average.")
-                .font(.caption2).foregroundStyle(Palette.textFaint)
+                .font(.mhCaption2).foregroundStyle(Palette.textFaint)
         }
         .card()
     }
 
     private func stat(_ title: LocalizedStringKey, _ value: String, note: String? = nil) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title).font(.caption).foregroundStyle(Palette.textMuted)
+            Text(title).font(.mhCaption).foregroundStyle(Palette.textMuted)
             Text(value).font(Theme.smallNumeral).foregroundStyle(Palette.text)
-            if let note { Text(note).font(.caption2).foregroundStyle(Theme.amber) }
+            if let note { Text(note).font(.mhCaption2).foregroundStyle(Theme.amber) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
@@ -151,7 +151,7 @@ struct HealthView: View {
     private func processes(_ report: HealthReport) -> some View {
         if report.topByCPU.isEmpty && report.topByMemory.isEmpty {
             Text("Turn on “Record process usage” in Settings → General → Data to see which processes were busiest.")
-                .font(.callout).foregroundStyle(Palette.textMuted).card()
+                .font(.mhCallout).foregroundStyle(Palette.textMuted).card()
         } else {
             HStack(alignment: .top, spacing: 16) {
                 processList("Busiest by CPU", report.topByCPU) { Fmt.percent($0.averageCPU) }
@@ -163,18 +163,18 @@ struct HealthView: View {
     private func processList(_ title: LocalizedStringKey, _ lines: [HealthReport.ProcessLine],
                              value: @escaping (HealthReport.ProcessLine) -> String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title).font(.headline)
+            Text(title).font(.mhHeadline)
             ForEach(lines, id: \.name) { line in
                 HStack {
                     Text(line.name).lineLimit(1).foregroundStyle(Palette.text)
                     Spacer()
-                    Text(value(line)).font(.callout.monospacedDigit()).foregroundStyle(Palette.text)
-                    Text("\(Fmt.percent(line.presence)) of the time").font(.caption).foregroundStyle(Palette.textMuted)
+                    Text(value(line)).font(.mhCallout.monospacedDigit()).foregroundStyle(Palette.text)
+                    Text("\(Fmt.percent(line.presence)) of the time").font(.mhCaption).foregroundStyle(Palette.textMuted)
                         .frame(width: 110, alignment: .trailing)
                 }
             }
             Text("CPU is the share of one core while the process was among the busiest.")
-                .font(.caption2).foregroundStyle(Palette.textFaint)
+                .font(.mhCaption2).foregroundStyle(Palette.textFaint)
         }
         .card()
     }
@@ -189,11 +189,11 @@ private struct DiskTrendCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Free space on the startup disk").font(.headline)
+                Text("Free space on the startup disk").font(.mhHeadline)
                 Spacer()
                 if let free { Text(Fmt.bytes(Int64(free))).font(Theme.smallNumeral) }
             }
-            Text(caption).font(.callout).foregroundStyle(Palette.textMuted)
+            Text(caption).font(.mhCallout).foregroundStyle(Palette.textMuted)
             if points.count >= 2 {
                 Chart {
                     ForEach(points, id: \.time) { p in

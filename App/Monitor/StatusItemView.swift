@@ -1,4 +1,5 @@
 import SwiftUI
+import Theming
 
 /// What the menu bar shows for one module: display text, an optional 0...1 fraction
 /// for bar/ring styles, and the series used by the sparkline.
@@ -9,6 +10,8 @@ struct MenuBarItemModel: Identifiable {
     let secondary: String?
     let fraction: Double?
     let series: [ChartPoint]
+    /// Warning / critical level for coloring; nil = no level for this metric.
+    var level: StatusLevel? = nil
     var id: MonitorModule { module }
 }
 
@@ -19,23 +22,27 @@ extension MonitorStore {
             guard isActive(m), settings[m].inMenuBar else { return nil }
             switch m {
             case .cpu:
-                return .init(module: m, text: Fmt.percent(cpu?.total), secondary: nil, fraction: cpu?.total, series: history[.cpu] ?? [])
+                return .init(module: m, text: Fmt.percent(cpu?.total), secondary: nil, fraction: cpu?.total, series: history[.cpu] ?? [],
+                             level: StatusRules.fraction(cpu?.total))
             case .gpu:
-                return .init(module: m, text: Fmt.percent(gpu?.utilization), secondary: nil, fraction: gpu?.utilization, series: history[.gpu] ?? [])
+                return .init(module: m, text: Fmt.percent(gpu?.utilization), secondary: nil, fraction: gpu?.utilization, series: history[.gpu] ?? [],
+                             level: StatusRules.fraction(gpu?.utilization))
             case .memory:
                 let f = memory.map { Double($0.usedBytes) / Double(max($0.totalBytes, 1)) }
-                return .init(module: m, text: Fmt.percent(f), secondary: nil, fraction: f, series: history[.memory] ?? [])
+                return .init(module: m, text: Fmt.percent(f), secondary: nil, fraction: f, series: history[.memory] ?? [],
+                             level: StatusRules.memory(memory)?.level)
             case .disk:
                 let used = disk.map { 1 - Double($0.availableBytes) / Double(max($0.totalBytes, 1)) }
                 return .init(module: m, text: disk.map { Fmt.compactBytes(Double($0.availableBytes)) } ?? "–",
-                             secondary: nil, fraction: used, series: [])
+                             secondary: nil, fraction: used, series: [], level: StatusRules.disk(free: diskFreeFraction)?.level)
             case .network:
                 return .init(module: m, text: "↑" + Fmt.rate(network?.outBytesPerSecond),
                              secondary: "↓" + Fmt.rate(network?.inBytesPerSecond), fraction: nil, series: history[.netIn] ?? [])
             case .battery:
                 return .init(module: m, text: Fmt.percent(battery?.charge), secondary: nil, fraction: battery?.charge, series: history[.battery] ?? [])
             case .temperature:
-                return .init(module: m, text: Fmt.celsius(cpuCelsius), secondary: nil, fraction: nil, series: history[.temperature] ?? [])
+                return .init(module: m, text: Fmt.celsius(cpuCelsius), secondary: nil, fraction: nil, series: history[.temperature] ?? [],
+                             level: StatusRules.temperature(cpuCelsius)?.level)
             case .fan:
                 return .init(module: m, text: Fmt.rpm(fans.first?.actualRPM), secondary: nil, fraction: nil, series: history[.fan] ?? [])
             case .power:
@@ -81,22 +88,51 @@ private struct MenuBarItemView: View {
     let item: MenuBarItemModel
     let style: MenuBarStyle
     let compact: Bool
+    private var look: AppearanceSettings { ThemeStore.shared.settings }
 
     var body: some View {
         HStack(spacing: 3) {
-            if compact {
+            if compact && look.menuBarLabel == .text {
                 VStack(alignment: .leading, spacing: -1) {
                     Text(item.module.shortLabel).font(.system(size: 7, weight: .semibold))
                         .foregroundStyle(.secondary)
                     valueText
                 }
             } else {
-                Text(item.module.shortLabel).font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
+                label
                 valueText
             }
             graphic
         }
         .fixedSize()
+    }
+
+    @ViewBuilder private var label: some View {
+        switch look.menuBarLabel {
+        case .icon: PixelIcon(name: Self.icon(item.module), size: 14, label: LocalizedStringKey(item.module.title))
+        case .text: Text(item.module.shortLabel).font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
+        case .none: EmptyView()
+        }
+    }
+
+    static func icon(_ m: MonitorModule) -> String {
+        switch m {
+        case .cpu: "px.cpu"
+        case .gpu: "px.gpu"
+        case .memory: "px.memory"
+        case .disk: "px.ssd"
+        case .network: "px.network"
+        case .battery: "px.battery"
+        case .temperature: "px.temperature"
+        case .fan: "px.fans"
+        case .power: "px.power"
+        }
+    }
+
+    /// Only values past a threshold are colored; normal ones keep the menu bar's own text color.
+    private var valueStyle: AnyShapeStyle {
+        if look.menuBarColored, let level = item.level, level != .good { return AnyShapeStyle(ThemeStore.menuBarTint(level)) }
+        return AnyShapeStyle(.primary)
     }
 
     /// The widest text this module can show: values are laid out in this fixed width, so the item never
@@ -121,13 +157,17 @@ private struct MenuBarItemView: View {
 
     @ViewBuilder private var valueText: some View {
         if let secondary = item.secondary {
+            // Two lines need the small system face; the pixel font has no size that fits twice in 22 pt.
             VStack(alignment: .trailing, spacing: -2) {
                 fixed(item.text)
                 fixed(secondary)
             }
             .font(.system(size: 8, weight: .medium).monospacedDigit())
+            .foregroundStyle(valueStyle)
         } else {
-            fixed(item.text).font(.system(size: compact ? 10 : 11, weight: .medium).monospacedDigit())
+            fixed(item.text)
+                .font(ThemeStore.shared.menuBarFont(size: compact && look.menuBarLabel == .text ? 10.5 : 12))
+                .foregroundStyle(valueStyle)
         }
     }
 
@@ -141,8 +181,8 @@ private struct MenuBarItemView: View {
         case .bar:
             if let f = item.fraction {
                 ZStack(alignment: .bottom) {
-                    RoundedRectangle(cornerRadius: 1).fill(.secondary.opacity(0.3))
-                    RoundedRectangle(cornerRadius: 1).fill(.primary).frame(height: 14 * min(max(f, 0), 1))
+                    SurfaceShape(cornerRadius: 1).fill(.secondary.opacity(0.3))
+                    SurfaceShape(cornerRadius: 1).fill(.primary).frame(height: 14 * min(max(f, 0), 1))
                 }
                 .frame(width: 4, height: 14)
             }
@@ -154,6 +194,52 @@ private struct MenuBarItemView: View {
                         .rotationEffect(.degrees(-90))
                 }
                 .frame(width: 12, height: 12)
+            }
+        case .blocks:
+            if let f = item.fraction {
+                MenuBarBlocks(fraction: f, tint: item.level.flatMap { look.menuBarColored && $0 != .good ? ThemeStore.menuBarTint($0) : nil })
+                    .frame(width: 5, height: 15)
+            }
+        case .columns:
+            MenuBarColumns(values: item.series.suffix(12).map(\.value), fixedMax: item.fraction != nil ? 1 : nil)
+                .frame(width: 26, height: 14)
+        }
+    }
+}
+
+/// A vertical meter of five blocks (pixel style).
+private struct MenuBarBlocks: View {
+    let fraction: Double
+    var tint: Color?
+
+    var body: some View {
+        Canvas { ctx, size in
+            let n = 5, gap: CGFloat = 1
+            let h = (size.height - gap * CGFloat(n - 1)) / CGFloat(n)
+            let lit = Int((min(max(fraction, 0), 1) * Double(n)).rounded(.up))
+            for i in 0..<n {
+                let r = CGRect(x: 0, y: size.height - CGFloat(i + 1) * h - CGFloat(i) * gap, width: size.width, height: h)
+                let on = i < lit && fraction > 0
+                ctx.fill(Path(r), with: on ? (tint.map { .color($0) } ?? .foreground) : .color(.secondary.opacity(0.3)))
+            }
+        }
+    }
+}
+
+/// Recent values as block columns, snapped to a 2 pt grid so they stay crisp.
+private struct MenuBarColumns: View {
+    let values: [Double]
+    var fixedMax: Double?
+
+    var body: some View {
+        Canvas { ctx, size in
+            guard !values.isEmpty else { return }
+            let top = fixedMax ?? max(values.max() ?? 1, .ulpOfOne)
+            let w: CGFloat = 2
+            let step = size.width / CGFloat(max(values.count, 1))
+            for (i, v) in values.enumerated() {
+                let h = max(2, (size.height * CGFloat(min(v / top, 1)) / 2).rounded() * 2)
+                ctx.fill(Path(CGRect(x: CGFloat(i) * step, y: size.height - h, width: w, height: h)), with: .foreground)
             }
         }
     }

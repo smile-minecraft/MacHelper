@@ -61,20 +61,20 @@ struct ChartTooltip: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text(info.title).font(.system(size: 13, weight: .semibold)).lineLimit(1)
+            Text(info.title).font(.mh(size: 13, weight: .semibold)).lineLimit(1)
             HStack(spacing: 6) {
-                Text(Fmt.bytes(Int64(clamping: info.size))).font(.system(size: 12, weight: .semibold, design: .monospaced))
-                if let share { Text(Fmt.percent(share)).font(.system(size: 12, design: .monospaced)).foregroundStyle(.secondary) }
-                Text("· \(info.detail)").font(.system(size: 11.5)).foregroundStyle(.secondary)
+                Text(Fmt.bytes(Int64(clamping: info.size))).font(.display(12, weight: .semibold).monospacedDigit())
+                if let share { Text(Fmt.percent(share)).font(.mh(size: 12).monospacedDigit()).foregroundStyle(Palette.textMuted) }
+                Text("· \(info.detail)").font(.mh(size: 11.5)).foregroundStyle(Palette.textMuted)
             }
             if let path = info.path {
-                Text(Fmt.shortPath(path)).font(.system(size: 10.5)).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
+                Text(Fmt.shortPath(path)).font(.mh(size: 10.5)).foregroundStyle(Palette.textFaint).lineLimit(1).truncationMode(.middle)
             }
         }
         .padding(.horizontal, 10).padding(.vertical, 8)
         .frame(maxWidth: 320, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous).strokeBorder(Palette.stroke))
+        .background(.regularMaterial, in: SurfaceShape(cornerRadius: 9, style: .continuous))
+        .overlay(SurfaceShape(cornerRadius: 9, style: .continuous).strokeBorder(Palette.stroke))
         .shadow(color: .black.opacity(0.18), radius: 8, y: 3)
         .allowsHitTesting(false)
     }
@@ -198,7 +198,7 @@ struct SunburstChart: View {
             let arcLength = CGFloat(arc.end - arc.start) * 2 * .pi * radius
             guard arcLength > 40, ring > 20 else { continue }
             let name = arc.node?.name ?? String(localized: "Other")
-            let font = Font.system(size: arc.depth == 1 ? 12.5 : 11, weight: .semibold)
+            let font = Font.mh(size: arc.depth == 1 ? 12.5 : 11, weight: .semibold)
             guard let label = fittedLabel(lctx, name, font: font, width: arcLength - 14) else { continue }
             let theta = Angle.degrees(-90 + mid * 360).radians
             let pos = CGPoint(x: center.x + cos(theta) * radius, y: center.y + sin(theta) * radius)
@@ -218,11 +218,11 @@ struct SunburstChart: View {
         if let title = fittedLabel(ctx, focus.name, font: .system(size: 13, weight: .bold), width: 2 * r - 14, color: Palette.text) {
             ctx.draw(title, at: CGPoint(x: center.x, y: center.y - 10), anchor: .center)
         }
-        ctx.draw(Text(Fmt.bytes(Int64(clamping: focus.size))).font(.system(size: 12, weight: .semibold, design: .monospaced))
+        ctx.draw(Text(Fmt.bytes(Int64(clamping: focus.size))).font(.display(12, weight: .semibold).monospacedDigit())
                     .foregroundStyle(Palette.textMuted),
                  at: CGPoint(x: center.x, y: center.y + 8), anchor: .center)
         if focus.parent != nil {
-            ctx.draw(Text(verbatim: "↑").font(.system(size: 11, weight: .bold)).foregroundStyle(Palette.textFaint),
+            ctx.draw(Text(verbatim: "↑").font(.mh(size: 11, weight: .bold)).foregroundStyle(Palette.textFaint),
                      at: CGPoint(x: center.x, y: center.y + 26), anchor: .center)
         }
     }
@@ -364,7 +364,7 @@ struct TreemapChart: View {
         let size = Fmt.bytes(Int64(clamping: c.size))
         if c.hasHeader {
             guard r.width > 60 else { return }
-            let sizeText = ctx.resolve(Text(size).font(.system(size: 11.5, weight: .semibold, design: .monospaced)).foregroundStyle(.white.opacity(0.85)))
+            let sizeText = ctx.resolve(Text(size).font(.display(11.5, weight: .semibold).monospacedDigit()).foregroundStyle(.white.opacity(0.85)))
             let sw = sizeText.measure(in: CGSize(width: 400, height: 30)).width
             if let title = fittedLabel(ctx, name, font: .system(size: 12.5, weight: .bold), width: r.width - sw - 24) {
                 ctx.draw(title, at: CGPoint(x: r.minX + 8, y: r.minY + 10.5), anchor: .leading)
@@ -375,11 +375,11 @@ struct TreemapChart: View {
         // Leaf blocks: name and size, stacked, only when there is room.
         let big = c.depth == 1
         guard r.width > 54, r.height > (big ? 36 : 30) else { return }
-        let nameFont = Font.system(size: big ? 13.5 : 12, weight: .semibold)
+        let nameFont = Font.mh(size: big ? 13.5 : 12, weight: .semibold)
         guard let title = fittedLabel(ctx, name, font: nameFont, width: r.width - 14) else { return }
         ctx.draw(title, at: CGPoint(x: r.minX + 7, y: r.minY + 6), anchor: .topLeading)
         if r.height > (big ? 52 : 44) {
-            ctx.draw(Text(size).font(.system(size: big ? 12 : 11, design: .monospaced)).foregroundStyle(.white.opacity(0.82)),
+            ctx.draw(Text(size).font(.mh(size: big ? 12 : 11).monospacedDigit()).foregroundStyle(.white.opacity(0.82)),
                      at: CGPoint(x: r.minX + 7, y: r.minY + (big ? 25 : 22)), anchor: .topLeading)
         }
     }
