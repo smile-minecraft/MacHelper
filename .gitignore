@@ -42,7 +42,5 @@ scratch/
 tmp/
 .idea/
 
-# AI-written handoff notes and research reports (kept locally, not in the repo)
-docs/HANDOFF.md
-docs/*-feasibility.md
-docs/*-audit.md
+# Local docs: handoff notes, research reports, CLI notes (kept locally, not in the repo)
+docs/

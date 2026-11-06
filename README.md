@@ -29,7 +29,7 @@ one-click cleanup, disk analysis, an app uninstaller and startup-item management
 - **Startup items** — your launch agents (disable / enable / remove), all-users agents and system daemons,
   with the owning app and broken items flagged.
 - **CLI** — everything scriptable for automation and AI agents: previews by default, `--json` everywhere.
-  See [docs/CLI.md](docs/CLI.md).
+  Run `machelper guide` for an overview and `machelper <command> --help` for each command.
 - **Languages** — English and Traditional Chinese (String Catalogs; see below to add one).
 
 ## Building
