@@ -3,8 +3,8 @@
 # A clean replace matters: ditto over an old bundle merges stale files and breaks the seal.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-: "${DEVELOPER_DIR:=/Volumes/Smile-Data/Applications/Xcode-27.2.0.app/Contents/Developer}"
-export DEVELOPER_DIR
+XCODE_DEFAULT=/Volumes/Smile-Data/Applications/Xcode-27.2.0.app/Contents/Developer
+if [[ -z "${DEVELOPER_DIR:-}" && -d "$XCODE_DEFAULT" ]]; then export DEVELOPER_DIR="$XCODE_DEFAULT"; fi
 BUILD_NUMBER="${BUILD_NUMBER:-$(date +%Y%m%d%H%M)}"
 
 xcodegen generate --quiet

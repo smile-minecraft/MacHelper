@@ -28,9 +28,29 @@ one-click cleanup, disk analysis, an app uninstaller and startup-item management
   for review. Also finds leftovers of apps that are already gone.
 - **Startup items** — your launch agents (disable / enable / remove), all-users agents and system daemons,
   with the owning app and broken items flagged.
+- **App updates** — updates apps installed with Homebrew.
+- **Security check** — reads Gatekeeper, FileVault, firewall, SIP, automatic security updates and XProtect
+  (read-only).
+- **Space suggestions** — big files not used for six months and folders that look bloated, marked in the
+  disk charts.
 - **CLI** — everything scriptable for automation and AI agents: previews by default, `--json` everywhere.
   Run `machelper guide` for an overview and `machelper <command> --help` for each command.
 - **Languages** — English and Traditional Chinese (String Catalogs; see below to add one).
+
+## Install
+
+Download `MacHelper-<version>.dmg` from [Releases](https://github.com/smile-minecraft/MacHelper/releases)
+and drag MacHelper to Applications. Or with Homebrew:
+
+```sh
+brew install --cask smile-minecraft/tap/machelper
+```
+
+MacHelper isn't notarized by Apple yet, so macOS blocks the first launch. Open it once, then go to
+**System Settings → Privacy & Security** and click **Open Anyway**. Fan control and system cleanup need
+the helper: allow it in **System Settings → General → Login Items** when MacHelper asks.
+
+Checksums for each download are in `SHA256SUMS.txt` on the release page.
 
 ## Building
 
@@ -64,6 +84,18 @@ The first launch asks you to allow the helper in **System Settings → General �
 | `Sources/CleanEngine` | Cleaning rules, safety checks, uninstaller, startup items, auto-clean |
 | `Sources/Storage` | Metric history (GRDB) |
 | `Sources/machelper` | The CLI |
+
+## Releasing
+
+1. Move the changes under **Unreleased** in [CHANGELOG.md](CHANGELOG.md) to a new `## [x.y.z]` section.
+2. `scripts/release.sh build x.y.z` — a trial run: tests, a clean Release build, the DMG and zip.
+3. `scripts/release.sh prepare x.y.z` — the same, then commits the version and tags `vx.y.z` locally.
+4. `scripts/release.sh publish x.y.z` — pushes `main` and the tag and creates the GitHub release with the
+   DMG, zip, checksums and the changelog section as notes. 0.x versions are marked as pre-releases.
+5. Copy the generated `build/release/vx.y.z/machelper.rb` to `Casks/machelper.rb` in the
+   [tap](https://github.com/smile-minecraft/homebrew-tap) and push it.
+
+CI (`.github/workflows/ci.yml`) runs the tests and an ad-hoc signed build on every push and pull request.
 
 ## Translating
 

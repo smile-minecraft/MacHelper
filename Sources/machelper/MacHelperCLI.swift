@@ -15,7 +15,10 @@ struct MacHelperCLI: ParsableCommand {
         (`clean --trash` sends everything to the Trash). Other removals go to the Trash unless --permanent.
         All real operations are logged to ~/Library/Logs/MacHelper/operations.jsonl (see `machelper history`).
         """,
-        version: "0.1.0",
+        // From the Info.plist section the app build embeds in the binary; a plain `swift build` has none.
+        version: (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String).map {
+            "\($0) (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"))"
+        } ?? "dev",
         subcommands: [Clean.self, Purge.self, Optimize.self, Uninstall.self, AutoCleanCommand.self, Startup.self, Analyze.self, Insights.self, Duplicates.self, Guide.self, SkillCommand.self, Status.self, DockerCommand.self, LoginItemsCommand.self, DoctorCommand.self, Stats.self, Rules.self, Ignore.self, Updates.self, Security.self, History.self, MonitorCommand.self]
     )
 
