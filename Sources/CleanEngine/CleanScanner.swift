@@ -1,4 +1,5 @@
 import AppKit
+import Darwin
 import DiskScan
 import Foundation
 
@@ -55,8 +56,11 @@ public struct CleanScanner: Sendable {
         var results: [RuleResult] = []
 
         let running = Self.runningBundleIDs()
+        let processes = rules.contains { !$0.skipIfProcessRunning.isEmpty } ? Self.runningProcessNames() : []
         for rule in rules {
-            if let app = rule.skipIfRunning.first(where: running.contains) {
+            let busy = rule.skipIfRunning.first(where: running.contains)
+                ?? rule.skipIfProcessRunning.first { processes.contains(String($0.prefix(Self.processNameLength))) }
+            if let app = busy {
                 // Reserve the rule's paths so a broader rule (e.g. all of ~/Library/Caches) cannot take them.
                 claimed += rule.paths.flatMap(expandGlob).map(PathSafety.normalize)
                 results.append(RuleResult(rule: rule, candidates: [], skippedReason: String(localized: "\(app) is running", bundle: .module), refused: []))
@@ -128,6 +132,26 @@ public struct CleanScanner: Sendable {
 
     static func runningBundleIDs() -> Set<String> {
         Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
+    }
+
+    /// proc_name returns at most 2 × MAXCOMLEN characters.
+    static let processNameLength = 32
+
+    /// Executable names of this user's processes (others are not visible without root anyway).
+    static func runningProcessNames() -> Set<String> {
+        let capacity = proc_listallpids(nil, 0) + 64
+        guard capacity > 64 else { return [] }
+        var pids = [pid_t](repeating: 0, count: Int(capacity))
+        let count = proc_listallpids(&pids, capacity * Int32(MemoryLayout<pid_t>.size))
+        guard count > 0 else { return [] }
+        var names = Set<String>()
+        var buffer = [CChar](repeating: 0, count: processNameLength + 1)
+        for pid in pids.prefix(Int(count)) where pid > 0 {
+            if proc_name(pid, &buffer, UInt32(buffer.count)) > 0 {
+                names.insert(String(decoding: buffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self))
+            }
+        }
+        return names
     }
 }
 

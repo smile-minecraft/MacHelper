@@ -34,13 +34,16 @@ public struct CleanRule: Codable, Sendable, Identifiable, Hashable {
     public var minAgeDays: Int
     /// Skip the whole rule while any of these apps (bundle identifiers) is running.
     public var skipIfRunning: [String]
+    /// Skip the whole rule while a process with one of these executable names runs (command-line tools
+    /// without a bundle identifier, e.g. "opencode"). Matched against the first 32 characters of the name.
+    public var skipIfProcessRunning: [String]
     public var selectedByDefault: Bool
     public var action: CleanAction
     /// Rule needs Full Disk Access to see its paths (shown as a hint in the UI).
     public var needsFullDiskAccess: Bool
 
     enum CodingKeys: String, CodingKey {
-        case id, title, description, category, risk, paths, exclude, minAgeDays, skipIfRunning,
+        case id, title, description, category, risk, paths, exclude, minAgeDays, skipIfRunning, skipIfProcessRunning,
              selectedByDefault, action, needsFullDiskAccess
     }
 
@@ -55,6 +58,7 @@ public struct CleanRule: Codable, Sendable, Identifiable, Hashable {
         exclude = try c.decodeIfPresent([String].self, forKey: .exclude) ?? []
         minAgeDays = try c.decodeIfPresent(Int.self, forKey: .minAgeDays) ?? 0
         skipIfRunning = try c.decodeIfPresent([String].self, forKey: .skipIfRunning) ?? []
+        skipIfProcessRunning = try c.decodeIfPresent([String].self, forKey: .skipIfProcessRunning) ?? []
         selectedByDefault = try c.decodeIfPresent(Bool.self, forKey: .selectedByDefault) ?? (risk == .low)
         action = try c.decodeIfPresent(CleanAction.self, forKey: .action) ?? .trash
         needsFullDiskAccess = try c.decodeIfPresent(Bool.self, forKey: .needsFullDiskAccess) ?? false

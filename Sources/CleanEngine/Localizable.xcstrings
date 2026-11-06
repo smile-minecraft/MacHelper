@@ -630,6 +630,26 @@
           }
         }
       }
+    },
+    "Clear the Clang module cache": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除 Clang 模組快取"
+          }
+        }
+      }
+    },
+    "Deletes precompiled modules shared by Xcode and Swift builds; the next build rebuilds them and is slower. Deleted permanently (it’s a cache). Don’t run it while a build is in progress.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除 Xcode 與 Swift 建置共用的預先編譯模組；下次建置會重新產生，速度較慢。這是快取，會直接永久刪除。建置進行中請不要執行。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

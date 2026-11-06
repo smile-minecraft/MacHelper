@@ -88,6 +88,21 @@
       "skipIfRunning": [
         "org.mozilla.firefox"
       ]
+    },
+    {
+      "id": "browser.arc-service-worker",
+      "title": "Arc service worker caches",
+      "description": "Offline caches that websites store through service workers. Sites download them again; pages that work offline need a connection the first time.",
+      "category": "browsers",
+      "risk": "low",
+      "paths": [
+        "~/Library/Application Support/Arc/User Data/*/Service Worker/CacheStorage/*",
+        "~/Library/Application Support/Arc/User Data/*/Service Worker/ScriptCache/*"
+      ],
+      "skipIfRunning": [
+        "company.thebrowser.Browser"
+      ],
+      "selectedByDefault": false
     }
   ]
 }

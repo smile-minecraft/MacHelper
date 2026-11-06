@@ -43,6 +43,15 @@ public enum MaintenanceCatalog {
             .first { FileManager.default.isExecutableFile(atPath: $0) }
     }()
 
+    /// `$(getconf DARWIN_USER_CACHE_DIR)/clang/ModuleCache`: precompiled module cache shared by Xcode and swift builds.
+    public static let clangModuleCache: String? = {
+        var buffer = [CChar](repeating: 0, count: Int(PATH_MAX))
+        guard confstr(_CS_DARWIN_USER_CACHE_DIR, &buffer, buffer.count) > 0 else { return nil }
+        let dir = URL(fileURLWithPath: String(decoding: buffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self)).appending(path: "clang/ModuleCache").path
+        // Must stay inside this user's private /var/folders area.
+        return dir.hasPrefix("/var/folders/") || dir.hasPrefix("/private/var/folders/") ? dir : nil
+    }()
+
     public static let all: [MaintenanceTask] = {
         var tasks: [MaintenanceTask] = [
             MaintenanceTask(id: "quicklook.reset", title: String(localized: "Reset QuickLook thumbnail cache", bundle: .module),
@@ -79,6 +88,13 @@ public enum MaintenanceCatalog {
                             // Removed from macOS 27; kept so older systems still get it.
                             risk: .low, selectedByDefault: false, runner: .helper, requires: ["/usr/sbin/periodic"]),
         ]
+        if let clang = clangModuleCache {
+            tasks.append(MaintenanceTask(id: "clang.module-cache", title: String(localized: "Clear the Clang module cache", bundle: .module),
+                                         description: String(localized: "Deletes precompiled modules shared by Xcode and Swift builds; the next build rebuilds them and is slower. Deleted permanently (it’s a cache). Don’t run it while a build is in progress.", bundle: .module),
+                                         risk: .low, selectedByDefault: false,
+                                         runner: .user([["/bin/rm", "-rf", clang]]), requires: ["/bin/rm"],
+                                         probe: ["/bin/test", "-d", clang]))
+        }
         if let brew {
             tasks.append(MaintenanceTask(id: "brew.cleanup", title: String(localized: "Homebrew: remove old versions", bundle: .module),
                                          description: String(localized: "Removes old versions of installed packages and stale downloads (brew cleanup).", bundle: .module),

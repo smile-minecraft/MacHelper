@@ -206,6 +206,40 @@
         }
       }
     },
+    "rule.browser.arc-service-worker.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline caches that websites store through service workers. Sites download them again; pages that work offline need a connection the first time."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網站透過 Service Worker 存的離線快取，網站會重新下載；可離線使用的網頁第一次需要連線。"
+          }
+        }
+      }
+    },
+    "rule.browser.arc-service-worker.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc service worker caches"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arc Service Worker 快取"
+          }
+        }
+      }
+    },
     "rule.browser.arc.description": {
       "extractionState": "manual",
       "localizations": {
@@ -410,6 +444,40 @@
         }
       }
     },
+    "rule.dev.bun.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun’s package download cache, downloaded again when needed."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun 的套件下載快取，需要時會重新下載。"
+          }
+        }
+      }
+    },
+    "rule.dev.bun.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun install cache"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bun 安裝快取"
+          }
+        }
+      }
+    },
     "rule.dev.cargo.description": {
       "extractionState": "manual",
       "localizations": {
@@ -474,6 +542,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "CocoaPods cache"
+          }
+        }
+      }
+    },
+    "rule.dev.corepack.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Package manager versions (pnpm, Yarn) Corepack downloaded, downloaded again when a project needs them."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corepack 下載的套件管理工具版本（pnpm、Yarn），專案需要時會重新下載。"
+          }
+        }
+      }
+    },
+    "rule.dev.corepack.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corepack cache"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corepack 快取"
+          }
+        }
+      }
+    },
+    "rule.dev.gh.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cached API responses of the gh command."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gh 指令快取的 API 回應。"
+          }
+        }
+      }
+    },
+    "rule.dev.gh.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub CLI cache"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub CLI 快取"
           }
         }
       }
@@ -614,6 +750,40 @@
         }
       }
     },
+    "rule.dev.npm-logs.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Debug logs npm writes on every run."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 每次執行時寫入的除錯日誌。"
+          }
+        }
+      }
+    },
+    "rule.dev.npm-logs.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm logs"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm 日誌"
+          }
+        }
+      }
+    },
     "rule.dev.npm.description": {
       "extractionState": "manual",
       "localizations": {
@@ -644,6 +814,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "npm cache"
+          }
+        }
+      }
+    },
+    "rule.dev.opencode.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "npm packages OpenCode downloads for its plug-ins and providers, downloaded again when needed. The OpenCode program itself is not affected."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 為外掛與模型供應商下載的 npm 套件，需要時會重新下載。OpenCode 程式本身不受影響。"
+          }
+        }
+      }
+    },
+    "rule.dev.opencode.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode package cache"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 套件快取"
           }
         }
       }
@@ -784,6 +988,40 @@
         }
       }
     },
+    "rule.dev.vscode.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visual Studio Code’s web, code and GPU caches, downloaded extension packages and old logs. Settings, extensions and workspaces are not affected."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visual Studio Code 的網頁、程式碼與 GPU 快取、下載過的擴充套件安裝檔和舊日誌。設定、擴充套件與工作區不受影響。"
+          }
+        }
+      }
+    },
+    "rule.dev.vscode.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VS Code caches and logs"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VS Code 快取與日誌"
+          }
+        }
+      }
+    },
     "rule.dev.yarn.description": {
       "extractionState": "manual",
       "localizations": {
@@ -814,6 +1052,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yarn cache"
+          }
+        }
+      }
+    },
+    "rule.shell.zsh-cache.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh My Zsh’s completion and plug-in cache, regenerated the next time a shell starts (that start is a little slower)."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh My Zsh 的補全與外掛快取，下次開啟 shell 時重新產生（那次啟動會稍慢）。"
+          }
+        }
+      }
+    },
+    "rule.shell.zsh-cache.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh My Zsh cache"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh My Zsh 快取"
           }
         }
       }
@@ -1216,6 +1488,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "SwiftUI previews cache"
+          }
+        }
+      }
+    },
+    "rule.xcode.xctestdevices.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulator clones Xcode creates for parallel testing, created again on the next parallel test run."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 平行測試時建立的模擬器複本，下次平行測試會重新建立。"
+          }
+        }
+      }
+    },
+    "rule.xcode.xctestdevices.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "XCTest devices"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "XCTest 測試裝置"
           }
         }
       }

@@ -192,6 +192,103 @@
         "~/Library/Caches/ms-playwright/*"
       ],
       "selectedByDefault": false
+    },
+    {
+      "id": "dev.vscode",
+      "title": "VS Code caches and logs",
+      "description": "Visual Studio Code’s web, code and GPU caches, downloaded extension packages and old logs. Settings, extensions and workspaces are not affected.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/Library/Application Support/Code/Cache/*",
+        "~/Library/Application Support/Code/CachedData/*",
+        "~/Library/Application Support/Code/Code Cache/*",
+        "~/Library/Application Support/Code/GPUCache/*",
+        "~/Library/Application Support/Code/CachedExtensionVSIXs/*",
+        "~/Library/Application Support/Code/logs/*"
+      ],
+      "skipIfRunning": [
+        "com.microsoft.VSCode"
+      ]
+    },
+    {
+      "id": "dev.opencode",
+      "title": "OpenCode package cache",
+      "description": "npm packages OpenCode downloads for its plug-ins and providers, downloaded again when needed. The OpenCode program itself is not affected.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/.cache/opencode/npm/*"
+      ],
+      "skipIfProcessRunning": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "dev.npm-logs",
+      "title": "npm logs",
+      "description": "Debug logs npm writes on every run.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/.npm/_logs/*"
+      ]
+    },
+    {
+      "id": "dev.corepack",
+      "title": "Corepack cache",
+      "description": "Package manager versions (pnpm, Yarn) Corepack downloaded, downloaded again when a project needs them.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/.cache/node/corepack/*"
+      ]
+    },
+    {
+      "id": "dev.bun",
+      "title": "Bun install cache",
+      "description": "Bun’s package download cache, downloaded again when needed.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/.bun/install/cache/*"
+      ],
+      "skipIfProcessRunning": [
+        "bun"
+      ]
+    },
+    {
+      "id": "dev.gh",
+      "title": "GitHub CLI cache",
+      "description": "Cached API responses of the gh command.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/.cache/gh/*"
+      ]
+    },
+    {
+      "id": "shell.zsh-cache",
+      "title": "Oh My Zsh cache",
+      "description": "Oh My Zsh’s completion and plug-in cache, regenerated the next time a shell starts (that start is a little slower).",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/.oh-my-zsh/cache/*"
+      ]
+    },
+    {
+      "id": "xcode.xctestdevices",
+      "title": "XCTest devices",
+      "description": "Simulator clones Xcode creates for parallel testing, created again on the next parallel test run.",
+      "category": "developer",
+      "risk": "low",
+      "paths": [
+        "~/Library/Developer/XCTestDevices/*"
+      ],
+      "skipIfRunning": [
+        "com.apple.dt.Xcode"
+      ]
     }
   ]
 }
