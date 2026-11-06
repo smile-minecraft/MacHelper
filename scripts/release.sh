@@ -47,16 +47,16 @@ cask "machelper" do
   desc "Menu bar system monitor, fan control and cleanup utility"
   homepage "$REPO_URL"
 
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   app "MacHelper.app"
   binary "#{appdir}/MacHelper.app/Contents/MacOS/machelper-cli", target: "machelper"
 
-  uninstall quit:      "com.machelper.MacHelper",
-            launchctl: [
+  uninstall launchctl: [
               "com.machelper.MacHelper.AutoClean",
               "com.machelper.MacHelper.MonitorAgent",
-            ]
+            ],
+            quit:      "com.machelper.MacHelper"
 
   zap trash: [
     "~/Library/Application Support/MacHelper",
@@ -77,6 +77,40 @@ release_notes() {
     on && (/^## \[/ || /^\[[^]]+\]: /) { exit }
     on { print }
   ' CHANGELOG.md | sed -e '/./,$!d'
+}
+
+# Puts this release's cask into the Homebrew tap (smile-minecraft/homebrew-tap) and pushes it.
+# Uses the tapped checkout, or TAP_DIR for another clone.
+update_tap() {
+  local tap="${TAP_DIR:-$(brew --repository smile-minecraft/tap 2>/dev/null || true)}"
+  if [[ -z "$tap" || ! -d "$tap/.git" ]]; then
+    echo "Homebrew tap not found; run \`brew tap smile-minecraft/tap\` and then copy $CASK to Casks/machelper.rb there."
+    return
+  fi
+  echo "→ Updating the Homebrew tap"
+  [[ -z "$(git -C "$tap" status --porcelain)" ]] || { echo "  $tap has uncommitted changes; copy $CASK by hand."; return; }
+  git -C "$tap" pull -q --ff-only
+  mkdir -p "$tap/Casks"
+  cp "$CASK" "$tap/Casks/machelper.rb"
+  if ! grep -q "machelper" "$tap/README.md" 2>/dev/null; then
+    cat >> "$tap/README.md" <<'TAPREADME'
+
+## MacHelper
+
+A menu bar system monitor, fan control and cleanup utility for macOS 14 and later.
+
+```sh
+brew install --cask smile-minecraft/tap/machelper
+```
+
+MacHelper isn't notarized yet: open it once, then click **Open Anyway** in System Settings → Privacy & Security.
+TAPREADME
+  fi
+  HOMEBREW_NO_AUTO_UPDATE=1 brew style --cask smile-minecraft/tap/machelper >/dev/null 2>&1 || echo "  brew style reported problems: brew style --cask smile-minecraft/tap/machelper"
+  git -C "$tap" add Casks/machelper.rb README.md
+  git -C "$tap" commit -q -m "chore: pin machelper to the $TAG release asset"
+  git -C "$tap" push -q origin HEAD
+  echo "  brew install --cask smile-minecraft/tap/machelper now installs $VERSION"
 }
 
 prepare() {
@@ -175,8 +209,7 @@ publish() {
   git push origin main "$TAG"
   echo "→ Creating the GitHub release"
   gh release create "$TAG" "$DMG" "$ZIP" "$SUMS" --title "MacHelper $VERSION" --notes-file "$NOTES" --verify-tag "${pre[@]}"
-  echo
-  echo "Homebrew: copy $CASK to Casks/machelper.rb in your tap repository and push it."
+  update_tap
 }
 
 case "$ACTION" in

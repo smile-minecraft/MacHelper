@@ -90,10 +90,9 @@ The first launch asks you to allow the helper in **System Settings → General �
 1. Move the changes under **Unreleased** in [CHANGELOG.md](CHANGELOG.md) to a new `## [x.y.z]` section.
 2. `scripts/release.sh build x.y.z` — a trial run: tests, a clean Release build, the DMG and zip.
 3. `scripts/release.sh prepare x.y.z` — the same, then commits the version and tags `vx.y.z` locally.
-4. `scripts/release.sh publish x.y.z` — pushes `main` and the tag and creates the GitHub release with the
-   DMG, zip, checksums and the changelog section as notes. 0.x versions are marked as pre-releases.
-5. Copy the generated `build/release/vx.y.z/machelper.rb` to `Casks/machelper.rb` in the
-   [tap](https://github.com/smile-minecraft/homebrew-tap) and push it.
+4. `scripts/release.sh publish x.y.z` — pushes `main` and the tag, creates the GitHub release with the
+   DMG, zip, checksums and the changelog section as notes (0.x versions are pre-releases), then updates
+   `Casks/machelper.rb` in the [Homebrew tap](https://github.com/smile-minecraft/homebrew-tap) and pushes it.
 
 CI (`.github/workflows/ci.yml`) runs the tests and an ad-hoc signed build on every push and pull request.
 
