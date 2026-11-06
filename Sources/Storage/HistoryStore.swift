@@ -174,6 +174,7 @@ public struct HistoryStore: Sendable {
             case .minuteSamples:
                 try db.execute(sql: "DELETE FROM sample")
                 try db.execute(sql: "DELETE FROM sample_accumulator")
+                try db.execute(sql: "DELETE FROM disk_space")
             case .processSamples:
                 try db.execute(sql: "DELETE FROM process_sample")
                 try db.execute(sql: "DELETE FROM process_sample_minute")

@@ -24,6 +24,7 @@ struct MainView: View {
         switch app.section {
         case .overview: OverviewView(app: app)
         case .monitor: MonitorView(store: app.store)
+        case .health: HealthView(app: app, model: app.healthModel)
         case .fans:
             ScrollView {
                 FanControlView(model: app.fanModel, switcher: app.fanSwitcher, openHelperDiagnostics: { app.showSettings() })

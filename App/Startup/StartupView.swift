@@ -8,14 +8,27 @@ struct StartupView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
-                TextField("Search", text: $model.search).textFieldStyle(.roundedBorder).frame(maxWidth: 260)
-                Toggle("Only items whose program is missing", isOn: $model.onlyBroken).toggleStyle(.checkbox)
+                Picker("View", selection: $model.tab) {
+                    Text("Launch Agents").tag(StartupModel.Tab.launchd)
+                    Text("Login & Background Items").tag(StartupModel.Tab.background)
+                }
+                .pickerStyle(.segmented).labelsHidden().fixedSize()
+                TextField("Search", text: $model.search).textFieldStyle(.roundedBorder).frame(maxWidth: 220)
+                if model.tab == .launchd {
+                    Toggle("Only items whose program is missing", isOn: $model.onlyBroken).toggleStyle(.checkbox)
+                } else {
+                    Toggle("Show disabled", isOn: $model.showDisabledBackground).toggleStyle(.checkbox)
+                }
                 Spacer()
-                IconButton(symbol: "arrow.clockwise", help: "Refresh") { Task { await model.load() } }
+                IconButton(symbol: "arrow.clockwise", help: "Refresh") {
+                    Task { if model.tab == .launchd { await model.load() } else { await model.loadBackground() } }
+                }
             }
             .padding(.horizontal, 12).padding(.vertical, 10)
             .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
-            if model.loading && model.items.isEmpty {
+            if model.tab == .background {
+                BackgroundItemsList(model: model)
+            } else if model.loading && model.items.isEmpty {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List {
@@ -52,6 +65,7 @@ struct StartupView: View {
         }
         .frame(minWidth: 680, minHeight: 480)
         .task { await model.load() }
+        .task(id: model.tab) { if model.tab == .background && model.backgroundGroups.isEmpty { await model.loadBackground() } }
         .confirmationDialog("Remove \(removing?.label ?? "")?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }),
                             titleVisibility: .visible) {
             Button("Stop and Move to Trash", role: .destructive) {
@@ -123,5 +137,75 @@ private struct StateBadge: View {
             .padding(.horizontal, 5).padding(.vertical, 1)
             .background(color.opacity(0.15), in: Capsule())
             .foregroundStyle(color)
+    }
+}
+
+/// Read-only view of the Background Task Management list (System Settings → Login Items).
+private struct BackgroundItemsList: View {
+    let model: StartupModel
+
+    var body: some View {
+        if model.loadingBackground && model.backgroundGroups.isEmpty {
+            ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if let error = model.backgroundError, model.backgroundGroups.isEmpty {
+            Text("Couldn’t read the login items list: \(error)")
+                .font(.callout).foregroundStyle(Theme.amber).textSelection(.enabled)
+                .frame(maxWidth: .infinity, maxHeight: .infinity).padding()
+        } else {
+            List {
+                Section {
+                    ForEach(model.visibleBackgroundGroups) { group in GroupRow(group: group) }
+                } header: {
+                    Text("What macOS has registered to run at login or in the background, including items apps add themselves. This list is read-only; change it in Login Items.")
+                        .font(.caption).foregroundStyle(Palette.textMuted).textCase(nil)
+                }
+            }
+            .scrollContentBackground(.hidden)
+        }
+    }
+}
+
+private struct GroupRow: View {
+    let group: BackgroundItemGroup
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Text(group.title).bold().foregroundStyle(Palette.text).lineLimit(1)
+                if let developer = group.parent?.developerName, developer != group.title {
+                    Text(developer).font(.caption).foregroundStyle(Palette.textMuted).lineLimit(1)
+                }
+                if !group.enabled {
+                    Text("Off").font(.caption2.bold()).padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(Palette.textMuted.opacity(0.15), in: Capsule()).foregroundStyle(Palette.textMuted)
+                }
+            }
+            ForEach(group.items) { item in
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(kindLabel(item.kind)).font(.caption2.bold()).foregroundStyle(Palette.textMuted).frame(width: 96, alignment: .leading)
+                    Text(item.displayName).font(.caption).foregroundStyle(item.isActive ? Palette.text : Palette.textMuted)
+                    if item.uid != Int(getuid()) { Text("All users").font(.caption2).foregroundStyle(Palette.textFaint) }
+                    if item.enabled && !item.allowed { Text("Not allowed").font(.caption2).foregroundStyle(Theme.amber) }
+                    else if !item.enabled { Text("Disabled").font(.caption2).foregroundStyle(Palette.textMuted) }
+                    Spacer(minLength: 4)
+                    if let path = item.executablePath ?? item.url {
+                        Text(path).font(.caption2.monospaced()).foregroundStyle(Palette.textFaint)
+                            .lineLimit(1).truncationMode(.middle).help(path).textSelection(.enabled)
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 2)
+        .opacity(group.enabled ? 1 : 0.6)
+    }
+
+    private func kindLabel(_ kind: BackgroundItem.Kind) -> String {
+        switch kind {
+        case .loginItem: String(localized: "Login item")
+        case .agent, .legacyAgent: String(localized: "Agent")
+        case .daemon, .legacyDaemon: String(localized: "Daemon")
+        case .backgroundTask: String(localized: "Background task")
+        case .app, .developer, .other: String(localized: "Other")
+        }
     }
 }

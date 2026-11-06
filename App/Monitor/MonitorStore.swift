@@ -384,6 +384,7 @@ final class MonitorStore {
             Task.detached(priority: .background) {
                 do {
                     try db.recordMinute(finished)
+                    try? db.recordDiskSpaceIfNeeded()
                 } catch {
                     NSLog("MacHelper history write failed: %@", error.localizedDescription)
                 }

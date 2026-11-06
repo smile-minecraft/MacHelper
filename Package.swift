@@ -14,6 +14,7 @@ let package = Package(
         .library(name: "CleanEngine", targets: ["CleanEngine"]),
         .library(name: "Storage", targets: ["Storage"]),
         .library(name: "SettingsPortability", targets: ["SettingsPortability"]),
+        .library(name: "Diagnostics", targets: ["Diagnostics"]),
         .executable(name: "machelper", targets: ["machelper"]),
         .executable(name: "mhprobe", targets: ["mhprobe"]),
     ],
@@ -39,9 +40,10 @@ let package = Package(
                                                                   .process("Localizable.xcstrings"), .process("Rules.xcstrings")]),
         .target(name: "Storage", dependencies: [.product(name: "GRDB", package: "GRDB.swift")]),
         .target(name: "SettingsPortability", dependencies: ["CleanEngine", "FanControl"]),
+        .target(name: "Diagnostics", dependencies: ["CleanEngine", "Storage"], resources: [.process("Localizable.xcstrings")]),
         .executableTarget(
             name: "machelper",
-            dependencies: ["CleanEngine", "DiskScan", "Metrics", "SMCKit", "Storage",
+            dependencies: ["CleanEngine", "Diagnostics", "DiskScan", "Metrics", "SMCKit", "Storage",
                            .product(name: "ArgumentParser", package: "swift-argument-parser")]
         ),
         .target(name: "HelperProtocol", dependencies: ["SMCKit", "FanControl"], linkerSettings: [.linkedFramework("Security")]),
@@ -51,6 +53,7 @@ let package = Package(
         .testTarget(name: "DiskScanTests", dependencies: ["DiskScan"]),
         .testTarget(name: "CleanEngineTests", dependencies: ["CleanEngine"]),
         .testTarget(name: "StorageTests", dependencies: ["Storage"]),
+        .testTarget(name: "DiagnosticsTests", dependencies: ["Diagnostics", "Storage"]),
         .testTarget(name: "SettingsPortabilityTests", dependencies: ["SettingsPortability", "CleanEngine", "FanControl"]),
     ]
 )

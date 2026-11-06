@@ -21,6 +21,24 @@
 - [x] **GPU 溫度與 CPU 功耗**：2026-11-05 使用者目視確認沒有問題。
 - [x] **本輪新增功能的實機驗收**：2026-11-06 使用者確認磁碟分析儲存掃描、資料管理、程序用量歷史、感測器與核心歷史、設定備份與還原沒有問題；第六節只勾選這輪實際走過的項目，其餘細項（唯讀快取、外接磁碟、VoiceOver 等）列為已知未測。
 - [ ] **Docker 用量報告與進階清理**（2026-11-06 新增，尚未安裝到 `/Applications`）：`DockerUsage` 讀 `docker system df`（唯讀）；`machelper docker [--json]` 在這台 OrbStack 上顯示 16.15 GB、可回收 8.25 GB。「一鍵優化 → 維護」在 Docker 任務上方顯示各類用量；引擎沒開時顯示琥珀色提示。新增兩個預設不勾選的任務：`docker.builder.all`（`docker builder prune -a -f`，中風險）和 `docker.images.unused`（`docker image prune -a -f`，高風險）；資料卷一律不動。Docker CLI 搜尋路徑加上 `~/.orbstack/bin` 與 `~/.docker/bin`。`swift test` 45 項通過，Release 建置成功，字串鍵已和字串目錄核對。待實機確認：安裝後打開「一鍵優化」掃描，看 Docker 用量列和中文；關掉 OrbStack 再掃描看提示；兩個新任務沒有實際執行過。
+- [ ] **第一批：補齊低風險清理規則**（2026-11-06）：新增 9 條規則：
+  - `browser.arc-service-worker`（預設不勾）
+  - `dev.vscode`、`dev.opencode`、`dev.npm-logs`、`dev.corepack`、`dev.bun`、`dev.gh`
+  - `shell.zsh-cache`（只清 `~/.oh-my-zsh/cache`；`~/.zcompdump*` 在家目錄第一層，會被最小深度擋下，所以不收）
+  - `xcode.xctestdevices`
+  - 規則新增 `skipIfProcessRunning`（依程序名稱跳過，給 opencode、bun 這類沒有 bundle ID 的命令列工具）。這台實測 Arc、VS Code、OpenCode 執行中都正確跳過。
+  - 新維護任務 `clang.module-cache`：`rm -rf $(getconf DARWIN_USER_CACHE_DIR)/clang/ModuleCache`，永久刪除，預設不勾，只做過預覽。
+  - 待實機確認：「一鍵優化」裡看到新規則與中文名稱。
+- [ ] **第二批**（2026-11-06）：
+  - **健康檢查**：新的側欄頁「健康檢查」，對應 `machelper doctor [--hours N] [--json]`，邏輯在新模組 `Diagnostics`，像素圖示 `px.health`。根據歷史資料判斷 CPU 滿載、單一程序持續占用（以單核心計）、記憶體、置換空間、高溫、磁碟空間、空間趨勢、開機天數、背景項目數量。這台跑出三項：MacHelper 自己 24 小時平均占用單核心約 72%；可用空間 13%；有 44 個背景項目。
+  - **可用空間趨勢**：資料庫 migration `v6` 新增 `disk_space` 表，App 和背景記錄每小時寫一筆，保留 400 天，「清除監控歷史」會一併清掉。趨勢以最近一次大幅回升之後的資料做線性回歸，至少需要 12 小時。正式資料庫要等新版 App 或背景記錄啟動才會建表；唯讀讀取在建表前回傳空陣列。
+  - **登入與背景項目**：「啟動項目」頁新增分頁，讀取 `sfltool dumpbtm`（不需管理員權限），對應 `machelper login-items [--all] [--json]`。只能檢視；依父 App 或有名稱的開發者分組；同一項目出現在多個 UID 時只列一次；啟用但未允許的項目算停用。Helper v4 不需要為此開頭。
+  - **清理成效統計**：「設定 → 歷史紀錄」新增「依規則」與「依月份」，對應 `machelper history --by-rule`。
+  - **捷徑**：四個 App Intents：檢查 Mac 健康狀態、取得可用空間趨勢、預覽低風險清理、執行低風險清理（會先確認；範圍和排程清理相同，只丟垃圾桶）。捷徑片語只有英文。
+  - 待實機確認：
+    - 安裝後看健康檢查頁（三個期間、跳轉按鈕）、登入與背景項目分頁、歷史紀錄的兩種統計。
+    - 等 12 小時以上再看空間趨勢圖。
+    - 在「捷徑」App 找到四個動作；執行清理時會先跳確認。
 
 ## 二、還沒做的功能
 

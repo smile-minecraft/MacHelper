@@ -239,6 +239,8 @@ public struct MonitorAgentRecorder {
                     do {
                         try history.recordMinute(finished, now: now)
                         writeErrors[.metrics] = nil
+                        // Hourly free-space point; a failure here must not mark metrics as failing.
+                        try? history.recordDiskSpaceIfNeeded(now: now)
                     } catch let writeError {
                         writeErrors[.metrics] = "history write failed: \(writeError.localizedDescription)"
                         // Surface the failure now: the next timed heartbeat is up to 10 s

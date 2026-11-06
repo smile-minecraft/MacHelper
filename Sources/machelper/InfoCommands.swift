@@ -3,6 +3,8 @@ import CleanEngine
 import DiskScan
 import Foundation
 import Metrics
+import Diagnostics
+import Storage
 import SMCKit
 
 struct Analyze: ParsableCommand {
@@ -199,6 +201,105 @@ struct DockerCommand: ParsableCommand {
                 Output.err(message)
             }
             throw ExitCode(1)
+        }
+    }
+}
+
+struct LoginItemsCommand: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "login-items",
+        abstract: "List login items and background items macOS has registered (read-only).",
+        discussion: """
+        Reads the Background Task Management database (sfltool dumpbtm): the list behind
+        System Settings → General → Login Items, including items apps register themselves.
+        Change them in System Settings; `machelper startup` manages LaunchAgent plists.
+        """
+    )
+
+    @OptionGroup var output: OutputOptions
+
+    @Flag(name: .long, help: "Include disabled items.")
+    var all = false
+
+    func run() throws {
+        switch BackgroundItems.read() {
+        case .failure(.unavailable(let message)):
+            Output.err("Could not read background items: \(message)")
+            throw ExitCode(1)
+        case .success(let items):
+            let groups = BackgroundItems.groups(items).filter { all || $0.enabled }
+            if output.json {
+                struct Group: Encodable { let title: String; let enabled: Bool; let parent: BackgroundItem?; let items: [BackgroundItem] }
+                struct Out: Encodable { let schemaVersion = 1; let groups: [Group] }
+                try Output.json(Out(groups: groups.map { Group(title: $0.title, enabled: $0.enabled, parent: $0.parent, items: $0.items) }))
+                return
+            }
+            for g in groups {
+                let developer = g.parent?.developerName.flatMap { $0 == g.title ? nil : " — \($0)" } ?? ""
+                Output.line("\(g.enabled ? "[on] " : "[off]") \(g.title)\(developer)")
+                for i in g.items where all || i.isActive {
+                    let state = i.enabled ? (i.allowed ? "" : " (not allowed)") : " (disabled)"
+                    let scope = i.uid == Int(getuid()) ? "" : " [all users]"
+                    let path = i.executablePath ?? i.url ?? i.bundleIdentifier ?? ""
+                    Output.line("      \(Output.pad(i.kind.rawValue, 13)) \(i.displayName)\(state)\(scope)  \(Output.shortPath(path))")
+                }
+            }
+            let shown = groups.count
+            Output.line("\n\(shown) groups\(all ? "" : " with enabled items; add --all to include disabled ones").")
+        }
+    }
+}
+
+struct DoctorCommand: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "doctor",
+        abstract: "One-off health report from the monitoring history (read-only).",
+        discussion: """
+        Looks at the stored history (CPU, memory, temperature, busiest processes, free-space trend)
+        plus swap, uptime and login items. Works best with background recording turned on.
+        Exit code 0 also when problems are found; check "overall" in --json output.
+        """
+    )
+
+    @OptionGroup var output: OutputOptions
+
+    @Option(name: .long, help: "Hours of history to look at (1–720).")
+    var hours: Double = 24
+
+    func validate() throws {
+        guard (1...720).contains(hours) else { throw ValidationError("--hours must be between 1 and 720") }
+    }
+
+    func run() throws {
+        let history = try MetricsHistory(readOnly: true)
+        let report = try HealthCheck.run(history: history, hours: hours, system: .current())
+        if output.json {
+            struct Out: Encodable { let schemaVersion = 1; let overall: HealthReport.Severity; let report: HealthReport }
+            try Output.json(Out(overall: report.overall, report: report))
+            return
+        }
+        let pct = { (v: Double?) in v.map { $0.formatted(.percent.precision(.fractionLength(0))) } ?? "-" }
+        Output.line("Last \(Int(hours)) h, \(pct(report.coverage)) of the time recorded")
+        Output.line("CPU avg \(pct(report.cpu.average)) max \(pct(report.cpu.maximum))   Memory avg \(pct(report.memory.average)) max \(pct(report.memory.maximum))")
+        if let t = report.temperature.maximum { Output.line("Temperature max \(Int(t)) °C" + (report.power.average.map { String(format: "   Power avg %.1f W", $0) } ?? "")) }
+        if let free = report.system.diskFreeBytes {
+            var line = "Free space \(Output.bytes(UInt64(free)))"
+            if let f = report.diskForecast {
+                line += String(format: "   trend %@%@/day", f.bytesPerDay < 0 ? "-" : "+", Output.bytes(UInt64(abs(f.bytesPerDay))))
+                if let d = f.daysUntilFull { line += String(format: ", full in ~%.0f days", d) }
+            } else {
+                line += "   (trend needs 12 h of hourly data)"
+            }
+            Output.line(line)
+        }
+        if !report.topByCPU.isEmpty {
+            Output.line("Busiest (share of one core × time present): " + report.topByCPU.prefix(3).map { "\($0.name) \(pct($0.averageCPU * $0.presence))" }.joined(separator: ", "))
+        }
+        Output.line()
+        if report.findings.isEmpty { Output.line("No problems found.") }
+        for f in report.findings {
+            Output.line("[\(f.severity.rawValue.uppercased())] \(f.title)")
+            Output.line("    \(f.detail)")
         }
     }
 }

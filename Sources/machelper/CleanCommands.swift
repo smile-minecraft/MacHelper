@@ -216,7 +216,24 @@ struct History: ParsableCommand {
     @Option(name: .long, help: "Number of entries.")
     var limit = 50
 
+    @Flag(name: .long, help: "Totals per rule, detector or task over the whole log, instead of entries.")
+    var byRule = false
+
     func run() throws {
+        if byRule {
+            let stats = OperationSourceStats.compute(OperationLog.shared.readAll().entries)
+            if output.json {
+                struct Row: Encodable { let source: String; let bytes: UInt64; let items, days: Int; let last: Date }
+                struct Out: Encodable { let schemaVersion = 1; let sources: [Row] }
+                try Output.json(Out(sources: stats.map { Row(source: $0.source, bytes: $0.bytes, items: $0.items, days: $0.days, last: $0.last) }))
+                return
+            }
+            for s in stats {
+                Output.line("\(Output.pad(s.source, 28)) \(Output.lpad(Output.bytes(s.bytes), 10))  \(s.items) items on \(s.days) days")
+            }
+            if stats.isEmpty { Output.line("Nothing removed yet.") }
+            return
+        }
         let entries = OperationLog.shared.read(limit: limit)
         if output.json {
             struct Out: Encodable { let schemaVersion = 1; let entries: [OperationLog.Entry] }

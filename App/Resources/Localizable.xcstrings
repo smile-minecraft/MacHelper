@@ -4591,16 +4591,6 @@
         }
       }
     },
-    "This permanently deletes all per-minute monitoring history and every metric it contains. It can’t be undone. Process usage history, sensor and core history, other settings, and the operation history are not affected.": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "這會永久刪除每分鐘的監控歷史，包含其中所有指標。此操作無法復原。程序用量歷史、感測器與核心歷史、其他設定與操作紀錄都不受影響。"
-          }
-        }
-      }
-    },
     "Cancel": {
       "localizations": {
         "zh-Hant": {
@@ -5541,6 +5531,656 @@
           "stringUnit": {
             "state": "translated",
             "value": "Build cache"
+          }
+        }
+      }
+    },
+    "%@ free.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用 %@。"
+          }
+        }
+      }
+    },
+    "%@ of the time": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的時間"
+          }
+        }
+      }
+    },
+    "%lld items could not be moved.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 個項目無法移動。"
+          }
+        }
+      }
+    },
+    "%lld items on %lld days": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld 個項目，%2$lld 天"
+          }
+        }
+      }
+    },
+    "A low-risk cleanup would move %@ to the Trash.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "低風險清理會把 %@ 移到垃圾桶。"
+          }
+        }
+      }
+    },
+    "A one-off check of the last hours of history, free space and background items.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "根據最近的監控歷史、可用空間與背景項目做一次性檢查。"
+          }
+        }
+      }
+    },
+    "Agent": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "代理程式"
+          }
+        }
+      }
+    },
+    "All users": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有使用者"
+          }
+        }
+      }
+    },
+    "Background items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景項目"
+          }
+        }
+      }
+    },
+    "Background task": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景工作"
+          }
+        }
+      }
+    },
+    "Busiest by CPU": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 最忙"
+          }
+        }
+      }
+    },
+    "By month": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依月份"
+          }
+        }
+      }
+    },
+    "By rule": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依規則"
+          }
+        }
+      }
+    },
+    "CPU and memory: average · highest. Temperature: highest. Power: average.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 與記憶體：平均 · 最高。溫度：最高。功耗：平均。"
+          }
+        }
+      }
+    },
+    "CPU is the share of one core while the process was among the busiest.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 是該程序列入最忙排行期間占用單一核心的比例。"
+          }
+        }
+      }
+    },
+    "Check Mac Health": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢查 Mac 健康狀態"
+          }
+        }
+      }
+    },
+    "Checking…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢查中…"
+          }
+        }
+      }
+    },
+    "Couldn’t read the login items list: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法讀取登入項目清單：%@"
+          }
+        }
+      }
+    },
+    "Daemon": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "常駐程式"
+          }
+        }
+      }
+    },
+    "Free Space Trend": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用空間趨勢"
+          }
+        }
+      }
+    },
+    "Free space chart": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用空間圖表"
+          }
+        }
+      }
+    },
+    "Free space on the startup disk": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟動磁碟的可用空間"
+          }
+        }
+      }
+    },
+    "Get Free Space Trend": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取得可用空間趨勢"
+          }
+        }
+      }
+    },
+    "Growing by about %@ a day.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天約增加 %@。"
+          }
+        }
+      }
+    },
+    "Health Check": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康檢查"
+          }
+        }
+      }
+    },
+    "Hours of history": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "歷史時數"
+          }
+        }
+      }
+    },
+    "Largest by memory": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體最大"
+          }
+        }
+      }
+    },
+    "Launch Agents": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launch Agents"
+          }
+        }
+      }
+    },
+    "Login & Background Items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入與背景項目"
+          }
+        }
+      }
+    },
+    "Login item": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入項目"
+          }
+        }
+      }
+    },
+    "MacHelper records free space once an hour while it or background recording runs. The trend appears after about 12 hours.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 或背景記錄執行時，每小時記錄一次可用空間；大約 12 小時後會出現趨勢。"
+          }
+        }
+      }
+    },
+    "Measures what a low-risk cleanup would move to the Trash, without removing anything.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "計算低風險清理會移到垃圾桶的大小，不會移除任何項目。"
+          }
+        }
+      }
+    },
+    "Move %@ of low-risk items to the Trash?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要把 %@ 的低風險項目移到垃圾桶嗎？"
+          }
+        }
+      }
+    },
+    "Moved %@ to the Trash.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已將 %@ 移到垃圾桶。"
+          }
+        }
+      }
+    },
+    "Moves low-risk, selected-by-default items to the Trash (the same selection as scheduled cleaning). Apps that are running are skipped. Asks before it starts.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把預設勾選的低風險項目移到垃圾桶（與排程清理相同的範圍），正在執行的 App 會跳過。開始前會先詢問。"
+          }
+        }
+      }
+    },
+    "No problems found in the last %lld hours.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近 %lld 小時沒有發現問題。"
+          }
+        }
+      }
+    },
+    "No problems found in this period.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這段期間沒有發現問題。"
+          }
+        }
+      }
+    },
+    "Not allowed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未允許"
+          }
+        }
+      }
+    },
+    "Not enough data since the last big change for a trend yet (needs about 12 hours).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次大幅變動後的資料還不夠算出趨勢（約需 12 小時）。"
+          }
+        }
+      }
+    },
+    "Note": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提示"
+          }
+        }
+      }
+    },
+    "Nothing to clean right now.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前沒有可清理的項目。"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正常"
+          }
+        }
+      }
+    },
+    "Period": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "期間"
+          }
+        }
+      }
+    },
+    "Preview Cleanup": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預覽清理"
+          }
+        }
+      }
+    },
+    "Preview Low-Risk Cleanup": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預覽低風險清理"
+          }
+        }
+      }
+    },
+    "Recorded": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已記錄"
+          }
+        }
+      }
+    },
+    "Records": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "紀錄"
+          }
+        }
+      }
+    },
+    "Returns free space on the startup disk and, when there’s enough hourly history, how fast it’s shrinking.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回傳啟動磁碟的可用空間；每小時紀錄足夠時，也會回傳減少的速度。"
+          }
+        }
+      }
+    },
+    "Run Cleanup": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "執行清理"
+          }
+        }
+      }
+    },
+    "Run Low-Risk Cleanup": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "執行低風險清理"
+          }
+        }
+      }
+    },
+    "Run again": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新檢查"
+          }
+        }
+      }
+    },
+    "Runs MacHelper’s health check on the recorded history and returns the findings as text.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "根據已記錄的歷史執行 MacHelper 健康檢查，並以文字回傳結果。"
+          }
+        }
+      }
+    },
+    "Show": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示"
+          }
+        }
+      }
+    },
+    "Show disabled": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示已停用"
+          }
+        }
+      }
+    },
+    "Shrinking by about %@ a day; full in about %lld days at this rate.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天約減少 %1$@；照這個速度，約 %2$lld 天後會滿。"
+          }
+        }
+      }
+    },
+    "Stable: changing by less than 50 MB a day.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "穩定：每天變化不到 50 MB。"
+          }
+        }
+      }
+    },
+    "The history database couldn’t be opened.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法開啟歷史資料庫。"
+          }
+        }
+      }
+    },
+    "The startup disk’s free space couldn’t be read.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法讀取啟動磁碟的可用空間。"
+          }
+        }
+      }
+    },
+    "Trash %@ · deleted %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "垃圾桶 %1$@ · 永久刪除 %2$@"
+          }
+        }
+      }
+    },
+    "Turn on “Record process usage” in Settings → General → Data to see which processes were busiest.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "到「設定 → 一般 → 資料管理」開啟「記錄程序用量」，就能看到哪些程序最忙。"
+          }
+        }
+      }
+    },
+    "Uptime": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開機時間"
+          }
+        }
+      }
+    },
+    "View": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢視"
+          }
+        }
+      }
+    },
+    "What each rule, detector or task removed in the records shown, largest first. Rules that never appear here may not be worth selecting.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前顯示的紀錄中，每條規則、偵測器或工作移除了多少，由大到小排列。從沒出現在這裡的規則，可能不值得勾選。"
+          }
+        }
+      }
+    },
+    "What macOS has registered to run at login or in the background, including items apps add themselves. This list is read-only; change it in Login Items.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 登記在登入時或背景執行的項目，包括 App 自行加入的。這份清單只供檢視，要變更請到「登入項目」。"
+          }
+        }
+      }
+    },
+    "This permanently deletes all per-minute monitoring history, every metric it contains, and the hourly free-space history. It can’t be undone. Process usage history, sensor and core history, other settings, and the operation history are not affected.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這會永久刪除每分鐘的監控歷史（包含其中所有指標）與每小時的可用空間紀錄。此操作無法復原。程序用量歷史、感測器與核心歷史、其他設定與操作紀錄都不受影響。"
           }
         }
       }

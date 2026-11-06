@@ -158,7 +158,7 @@ struct HistoryManagementSection: View {
             Button("Cancel", role: .cancel) {}
                 .keyboardShortcut(.defaultAction)
         } message: {
-            Text("This permanently deletes all per-minute monitoring history and every metric it contains. It can’t be undone. Process usage history, sensor and core history, other settings, and the operation history are not affected.")
+            Text("This permanently deletes all per-minute monitoring history, every metric it contains, and the hourly free-space history. It can’t be undone. Process usage history, sensor and core history, other settings, and the operation history are not affected.")
         }
     }
 

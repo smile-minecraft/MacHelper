@@ -116,3 +116,25 @@ private func write(lines: [String], to url: URL) throws {
         #expect(summary.failedCount == 1)
     }
 }
+
+@Suite struct OperationStatsTests {
+    private func entry(_ day: Int, _ source: String, _ bytes: UInt64, _ result: String = "trashed") -> OperationLog.Entry {
+        var c = DateComponents(); c.year = 2026; c.month = day > 31 ? 11 : 10; c.day = day > 31 ? day - 31 : day; c.hour = 12
+        return OperationLog.Entry(time: Calendar(identifier: .gregorian).date(from: c)!, command: "clean", path: "/p/\(UUID())",
+                                  source: source, bytes: bytes, result: result, message: nil)
+    }
+
+    @Test func groupsBySourceAndMonth() {
+        let cal = Calendar(identifier: .gregorian)
+        let entries = [entry(1, "user.caches", 100), entry(1, "user.caches", 50), entry(3, "user.caches", 10),
+                       entry(33, "dev.npm", 500), entry(33, "user.trash", 7, "deleted"), entry(34, "dev.npm", 9, "failed")]
+        let stats = OperationSourceStats.compute(entries, calendar: cal)
+        #expect(stats.map(\.source) == ["dev.npm", "user.caches", "user.trash"])
+        #expect(stats[0].bytes == 500 && stats[0].items == 1, "failed removals don't count")
+        #expect(stats[1].bytes == 160 && stats[1].items == 3 && stats[1].days == 2)
+        let months = OperationMonthTotal.compute(entries, calendar: cal)
+        #expect(months.count == 2)
+        #expect(months[0].trashedBytes == 500 && months[0].deletedBytes == 7, "newest month first")
+        #expect(months[1].trashedBytes == 160)
+    }
+}

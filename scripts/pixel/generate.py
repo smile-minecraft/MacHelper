@@ -241,6 +241,30 @@ def icon_startup():
     return cv
 
 
+def icon_health():
+    """A heart with a pulse line across it (hand-authored: the curve loses its notch at 16 px)."""
+    cv = Canvas(16)
+    stamp(cv, [
+        '................',
+        '..KKKK....KKKK..',
+        '.KRRrrK..KRrrrK.',
+        'KRRrrrrKKRrrrrxK',
+        'KRrrrrrrrrrrrrxK',
+        'KrrrrrrWrrrrrrxK',
+        'KrrrrrWrWrrrrrxK',
+        'KWWWWWrrrWrWWWxK',
+        '.KxrrrrrrrWrrxK.',
+        '..KxrrrrrrrrxK..',
+        '...KxrrrrrrxK...',
+        '....KxrrrrxK....',
+        '.....KxrrxK.....',
+        '......KxxK......',
+        '.......KK.......',
+        '................',
+    ])
+    return cv
+
+
 def icon_settings():
     cv = Canvas(16)
     def gear(x, y):
@@ -474,7 +498,7 @@ def empty_box():
 
 ICONS = {
     'px.overview': icon_overview, 'px.monitor': icon_monitor, 'px.fans': icon_fans, 'px.optimize': icon_optimize,
-    'px.disk': icon_disk, 'px.uninstall': icon_uninstall, 'px.startup': icon_startup, 'px.settings': icon_settings,
+    'px.disk': icon_disk, 'px.uninstall': icon_uninstall, 'px.startup': icon_startup, 'px.health': icon_health, 'px.settings': icon_settings,
     'px.cpu': icon_cpu, 'px.gpu': icon_gpu, 'px.memory': icon_memory, 'px.ssd': icon_ssd, 'px.network': icon_network,
     'px.temperature': icon_temperature, 'px.battery': icon_battery, 'px.power': icon_power,
 }

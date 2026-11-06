@@ -3,13 +3,14 @@ import Observation
 import SwiftUI
 
 enum AppSection: String, CaseIterable, Identifiable, Hashable {
-    case overview, monitor, fans, optimize, disk, uninstall, startup
+    case overview, monitor, health, fans, optimize, disk, uninstall, startup
     var id: String { rawValue }
 
     var title: LocalizedStringKey {
         switch self {
         case .overview: "Overview"
         case .monitor: "Monitor"
+        case .health: "Health Check"
         case .fans: "Fans"
         case .optimize: "Optimize"
         case .disk: "Disk Analysis"
@@ -24,6 +25,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .overview: Theme.blue
         case .monitor: Theme.cyan
+        case .health: Theme.rose
         case .fans: Theme.mint
         case .optimize: Theme.amber
         case .disk: Theme.violet
@@ -33,7 +35,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
     }
 
     static var groups: [(LocalizedStringKey, [AppSection])] { [
-        ("This Mac", [.overview, .monitor, .fans]),
+        ("This Mac", [.overview, .monitor, .health, .fans]),
         ("Clean Up", [.optimize, .disk, .uninstall, .startup]),
     ] }
 }
@@ -54,6 +56,7 @@ final class AppModel {
     let autoCleanModel = AutoCleanModel()
     let uninstallModel = UninstallModel()
     let startupModel = StartupModel()
+    let healthModel = HealthModel()
 
     var section: AppSection = .overview
 

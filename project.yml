@@ -56,7 +56,7 @@ targets:
             subpath: Contents/Library/LaunchAgents
     dependencies:
       - package: MacHelperKit
-        products: [HelperProtocol, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, SettingsPortability]
+        products: [HelperProtocol, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, SettingsPortability, Diagnostics]
       - target: MacHelperHelper
         embed: true
         codeSign: false
@@ -119,7 +119,7 @@ targets:
       - path: Sources/machelper
     dependencies:
       - package: MacHelperKit
-        products: [CleanEngine, DiskScan, Metrics, SMCKit, Storage]
+        products: [CleanEngine, Diagnostics, DiskScan, Metrics, SMCKit, Storage]
       - package: ArgumentParser
         product: ArgumentParser
     info:

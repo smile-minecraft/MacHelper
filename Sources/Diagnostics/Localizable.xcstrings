@@ -1,0 +1,226 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ (%@) is free.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用 %1$@（%2$@）。"
+          }
+        }
+      }
+    },
+    "%@ keeps the CPU busy": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 持續占用 CPU"
+          }
+        }
+      }
+    },
+    "%@ of memory has been moved to disk. A restart clears it; if it keeps growing, the Mac needs more memory than it has for this workload.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已有 %@ 的記憶體被移到磁碟。重新開機會清掉；如果持續增加，代表這樣的工作量需要比這台 Mac 更多的記憶體。"
+          }
+        }
+      }
+    },
+    "%lld login and background items are active. Review them under Startup Items → Login & Background Items.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前有 %lld 個登入與背景項目在執行，可以到「啟動項目 → 登入與背景項目」檢查。"
+          }
+        }
+      }
+    },
+    "A restart clears swap and finishes pending updates.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新開機可以清掉置換空間，並完成待安裝的更新。"
+          }
+        }
+      }
+    },
+    "At the current rate of %@ a day, the startup disk is full in about %@ days.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "照目前每天 %1$@ 的速度，啟動磁碟大約 %2$@ 天後會滿。"
+          }
+        }
+      }
+    },
+    "CPU often fully loaded": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 經常滿載"
+          }
+        }
+      }
+    },
+    "CPU use was 80%% or higher in %@ of the recorded minutes.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在已記錄的時間中，有 %@ 的分鐘 CPU 用量達 80%% 以上。"
+          }
+        }
+      }
+    },
+    "Free space is shrinking": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用空間持續減少"
+          }
+        }
+      }
+    },
+    "It used %@ of a core on average and was among the busiest processes in %@ of the minutes.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均占用單一核心的 %1$@，並在 %2$@ 的分鐘裡名列最忙的程序。"
+          }
+        }
+      }
+    },
+    "Limited history": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "歷史資料不足"
+          }
+        }
+      }
+    },
+    "Many background items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景項目很多"
+          }
+        }
+      }
+    },
+    "Memory nearly full": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體快用完"
+          }
+        }
+      }
+    },
+    "Memory use averaged %@. Quitting apps you don’t need, or the ones at the top of the memory list, helps.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體平均用量 %@。結束用不到的 App，或記憶體排行最前面的程序，會有幫助。"
+          }
+        }
+      }
+    },
+    "Not restarted for %lld days": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已經 %lld 天沒有重新開機"
+          }
+        }
+      }
+    },
+    "Only %@ (%@) is free. macOS needs free space for updates, swap and caches; run Optimize or Disk Analysis.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只剩 %1$@（%2$@）可用。macOS 需要空間做更新、置換與快取；請執行「一鍵優化」或「磁碟分析」。"
+          }
+        }
+      }
+    },
+    "Only %@ of this period has data. Turn on background recording so the report also covers time when MacHelper isn’t open.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這段期間只有 %@ 有資料。開啟背景記錄後，報告也能涵蓋 MacHelper 沒開的時間。"
+          }
+        }
+      }
+    },
+    "Running hot": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "溫度偏高"
+          }
+        }
+      }
+    },
+    "Startup disk almost full": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟動磁碟快滿了"
+          }
+        }
+      }
+    },
+    "Startup disk getting full": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟動磁碟空間偏少"
+          }
+        }
+      }
+    },
+    "Swap in use": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在使用置換空間"
+          }
+        }
+      }
+    },
+    "The CPU was at 95 °C or more in %@ of the recorded minutes; the system may slow it down to cool off. Check airflow and the busiest processes.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在已記錄的時間中，有 %@ 的分鐘 CPU 達 95 °C 以上，系統可能降速散熱。請檢查通風和最忙的程序。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

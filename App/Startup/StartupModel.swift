@@ -12,6 +12,36 @@ final class StartupModel {
     var onlyBroken = false
     private(set) var message: String?
 
+    enum Tab: String, CaseIterable, Identifiable { case launchd, background; var id: String { rawValue } }
+    var tab: Tab = .launchd
+    private(set) var backgroundGroups: [BackgroundItemGroup] = []
+    private(set) var backgroundError: String?
+    private(set) var loadingBackground = false
+    var showDisabledBackground = false
+
+    var visibleBackgroundGroups: [BackgroundItemGroup] {
+        backgroundGroups.filter { g in
+            (showDisabledBackground || g.enabled)
+                && (search.isEmpty || g.title.localizedCaseInsensitiveContains(search)
+                    || g.items.contains { $0.displayName.localizedCaseInsensitiveContains(search) || $0.identifier.localizedCaseInsensitiveContains(search) })
+        }
+    }
+
+    /// Reads the Background Task Management list (sfltool, a few seconds).
+    func loadBackground() async {
+        guard !loadingBackground else { return }
+        loadingBackground = true
+        let result = await Task.detached(priority: .userInitiated) { BackgroundItems.read() }.value
+        switch result {
+        case .success(let items):
+            backgroundGroups = BackgroundItems.groups(items)
+            backgroundError = nil
+        case .failure(.unavailable(let message)):
+            backgroundError = message
+        }
+        loadingBackground = false
+    }
+
     var visible: [StartupItem] {
         items.filter { item in
             (!onlyBroken || item.programMissing)

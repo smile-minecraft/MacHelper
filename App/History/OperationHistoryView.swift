@@ -13,7 +13,11 @@ struct OperationHistoryView: View {
             } else if model.filtered.isEmpty {
                 message("No records match these filters.")
             } else {
-                list
+                switch model.display {
+                case .records: list
+                case .bySource: sourceList
+                case .byMonth: monthList
+                }
             }
             footer
         }
@@ -33,6 +37,12 @@ struct OperationHistoryView: View {
             }
             .labelsHidden()
             .frame(minWidth: 150)
+            Picker("Show", selection: $model.display) {
+                Text("Records").tag(OperationHistoryModel.Display.records)
+                Text("By rule").tag(OperationHistoryModel.Display.bySource)
+                Text("By month").tag(OperationHistoryModel.Display.byMonth)
+            }
+            .pickerStyle(.segmented).labelsHidden().fixedSize()
             Spacer()
             IconButton(symbol: "arrow.clockwise", help: "Refresh") { model.load() }
         }
@@ -123,6 +133,52 @@ struct OperationHistoryView: View {
             Text(text).foregroundStyle(Palette.textMuted)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var sourceList: some View {
+        List {
+            Section {
+                ForEach(model.sourceStats) { s in
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(model.title(for: s.source)).foregroundStyle(Palette.text)
+                            Text(s.source).font(.caption2.monospaced()).foregroundStyle(Palette.textFaint)
+                        }
+                        Spacer()
+                        Text(bytes(s.bytes)).font(.callout.monospacedDigit()).foregroundStyle(Palette.text)
+                        Text("\(s.items) items on \(s.days) days").font(.caption).foregroundStyle(Palette.textMuted)
+                            .frame(width: 140, alignment: .trailing)
+                        Text(s.last, format: .dateTime.year().month().day()).font(.caption).foregroundStyle(Palette.textMuted)
+                            .frame(width: 90, alignment: .trailing)
+                    }
+                    .accessibilityElement(children: .combine)
+                }
+            } header: {
+                Text("What each rule, detector or task removed in the records shown, largest first. Rules that never appear here may not be worth selecting.")
+                    .font(.caption).foregroundStyle(Palette.textMuted).textCase(nil)
+            }
+        }
+        .scrollContentBackground(.hidden)
+    }
+
+    private var monthList: some View {
+        let totals = model.monthTotals
+        let peak = max(totals.map { $0.trashedBytes + $0.deletedBytes }.max() ?? 1, 1)
+        return List(totals) { m in
+            HStack(spacing: 12) {
+                Text(m.month, format: .dateTime.year().month(.wide)).frame(width: 130, alignment: .leading).foregroundStyle(Palette.text)
+                GeometryReader { geo in
+                    RoundedRectangle(cornerRadius: 3).fill(Theme.amber.opacity(0.7))
+                        .frame(width: max(2, geo.size.width * Double(m.trashedBytes + m.deletedBytes) / Double(peak)))
+                }
+                .frame(height: 10)
+                .accessibilityHidden(true)
+                Text("Trash \(bytes(m.trashedBytes)) · deleted \(bytes(m.deletedBytes))")
+                    .font(.caption.monospacedDigit()).foregroundStyle(Palette.textMuted).frame(width: 220, alignment: .trailing)
+            }
+            .accessibilityElement(children: .combine)
+        }
+        .scrollContentBackground(.hidden)
     }
 
     private func summaryCell(_ title: LocalizedStringKey, value: String, color: Color? = nil) -> some View {

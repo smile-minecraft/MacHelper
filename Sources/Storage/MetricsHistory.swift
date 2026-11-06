@@ -47,7 +47,7 @@ public final class MetricsHistory: Sendable {
         FileManager.default.homeDirectoryForCurrentUser.appending(path: "Library/Application Support/MacHelper/history.sqlite")
     }
 
-    private let db: any DatabaseWriter
+    let db: any DatabaseWriter
     public let retention: TimeInterval
 
     /// Opens (creating if needed) the database. `readOnly` for tools that only query it.
@@ -138,6 +138,14 @@ public final class MetricsHistory: Sendable {
                 t.column("value_sum", .double).notNull()
                 t.column("value_count", .integer).notNull()
                 t.primaryKey(["time", "series"])
+            }
+        }
+        m.registerMigration("v6") { db in
+            // Free space on the startup volume, one row per hour, kept for 400 days.
+            try db.create(table: "disk_space") { t in
+                t.column("time", .datetime).primaryKey()
+                t.column("free", .double).notNull()
+                t.column("total", .double).notNull()
             }
         }
         return m
