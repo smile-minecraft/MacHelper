@@ -167,10 +167,11 @@ public enum HealthCheck {
         }
         if let free = system.diskFreeBytes, let total = system.diskTotalBytes, total > 0 {
             let share = free / total
-            if share < 0.1 {
+            let level = DiskSpaceLevels.level(freeBytes: free)
+            if level == .critical {
                 add("disk.low", .critical, String(localized: "Startup disk almost full", bundle: .module),
                     String(localized: "Only \(bytes(free)) (\(pct(share))) is free. macOS needs free space for updates, swap and caches; run Optimize or Disk Analysis.", bundle: .module))
-            } else if share < 0.2 {
+            } else if level == .low {
                 add("disk.low", .warning, String(localized: "Startup disk getting full", bundle: .module),
                     String(localized: "\(bytes(free)) (\(pct(share))) is free.", bundle: .module))
             }

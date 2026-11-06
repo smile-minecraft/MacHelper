@@ -1,3 +1,4 @@
+import Diagnostics
 import Metrics
 import SwiftUI
 
@@ -49,12 +50,14 @@ enum StatusRules {
         return Reading(level: .good, word: String(localized: "Cool"))
     }
 
-    /// Free fraction of the startup disk.
-    static func disk(free: Double?) -> Reading? {
-        guard let f = free else { return nil }
-        if f < 0.08 { return Reading(level: .critical, word: String(localized: "Almost full")) }
-        if f < 0.2 { return Reading(level: .attention, word: String(localized: "Getting low")) }
-        return Reading(level: .good, word: String(localized: "Plenty of space"))
+    /// Free bytes on the startup disk (see `DiskSpaceLevels`: 25 GB or more is fine, under 10 GB is critical).
+    static func disk(freeBytes: Int64?) -> Reading? {
+        guard let b = freeBytes else { return nil }
+        switch DiskSpaceLevels.level(freeBytes: Double(b)) {
+        case .critical: return Reading(level: .critical, word: String(localized: "Almost full"))
+        case .low: return Reading(level: .attention, word: String(localized: "Getting low"))
+        case .healthy: return Reading(level: .good, word: String(localized: "Plenty of space"))
+        }
     }
 
     /// For 0…1 values shown in the menu bar (CPU, GPU, memory).
@@ -66,6 +69,8 @@ enum StatusRules {
 
 @MainActor
 extension MonitorStore {
+    var diskFreeBytes: Int64? { disk.map { Int64($0.availableBytes) } }
+
     var diskFreeFraction: Double? {
         disk.flatMap { $0.totalBytes > 0 ? Double($0.availableBytes) / Double($0.totalBytes) : nil }
     }

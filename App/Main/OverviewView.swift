@@ -1,4 +1,5 @@
 import AppKit
+import Diagnostics
 import HelperProtocol
 import Metrics
 import Storage
@@ -68,11 +69,12 @@ private struct Headline: View {
         if store.memory?.pressure == .critical {
             return Verdict(sentence: String(localized: "Memory is running out"), value: nil, level: .critical, action: ("Check Health", .health))
         }
-        if let f = store.diskFreeFraction, let free, f < 0.08 {
+        let diskLevel = store.diskFreeBytes.map { DiskSpaceLevels.level(freeBytes: Double($0)) }
+        if diskLevel == .critical, let free {
             return Verdict(sentence: String(localized: "The disk is almost full, \(free) left"), value: free, level: .critical,
                            action: ("Free Up Space", .optimize))
         }
-        if let f = store.diskFreeFraction, let free, f < 0.2 {
+        if diskLevel == .low, let free {
             return Verdict(sentence: String(localized: "Your Mac runs smoothly, \(free) of space left"), value: free, level: .attention,
                            action: ("Free Up Space", .optimize))
         }
@@ -99,7 +101,7 @@ private struct Headline: View {
     /// brief to recolor it); it holds up a sign toward the suggested action.
     private var mood: SlimeMascot.Mood {
         let levels = [StatusRules.temperature(store.cpuCelsius)?.level, StatusRules.memory(store.memory)?.level,
-                      StatusRules.disk(free: store.diskFreeFraction)?.level, verdict.level].compactMap { $0 }
+                      StatusRules.disk(freeBytes: store.diskFreeBytes)?.level, verdict.level].compactMap { $0 }
         var m = SlimeMascot.Mood(level: levels.max() ?? .good, holdsSign: verdict.action != nil)
         m.sleepy = m.level == .good && !m.holdsSign && (store.cpu?.total ?? 1) < 0.05
         return m
@@ -146,7 +148,7 @@ private struct Readouts: View {
                 Readout(title: "Temperature", value: Fmt.celsius(store.cpuCelsius), reading: StatusRules.temperature(store.cpuCelsius),
                         series: store.history[.temperature], maxValue: nil)
                 Readout(title: "Free space", value: store.disk.map { Fmt.bytes($0.availableBytes) } ?? "–",
-                        reading: StatusRules.disk(free: store.diskFreeFraction), series: nil, maxValue: nil,
+                        reading: StatusRules.disk(freeBytes: store.diskFreeBytes), series: nil, maxValue: nil,
                         bar: store.diskFreeFraction.map { 1 - $0 })
             }
             if advanced {
@@ -271,9 +273,9 @@ private struct ToDoList: View {
 
     private var items: [Item] {
         var out: [Item] = []
-        if let d = store.disk, let f = store.diskFreeFraction, f < 0.2 {
+        if let d = store.disk, let level = store.diskFreeBytes.map({ DiskSpaceLevels.level(freeBytes: Double($0)) }), level != .healthy {
             out.append(Item(id: "disk", text: String(localized: "Only \(Fmt.bytes(d.availableBytes)) of space is left."),
-                            level: f < 0.08 ? .critical : .attention, action: "Free Up Space", section: .optimize))
+                            level: level == .critical ? .critical : .attention, action: "Free Up Space", section: .optimize))
         }
         if let p = store.memory?.pressure, p != .normal {
             out.append(Item(id: "memory", text: String(localized: "Memory is tight; quitting unused apps helps."),

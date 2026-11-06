@@ -52,6 +52,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             NSApp.terminate(nil)
             return
         }
+        if let i = args.firstIndex(of: "--export-mascot-icon"), i + 1 < args.count {
+            exportMascotIcon(to: URL(fileURLWithPath: args[i + 1]))
+            NSApp.terminate(nil)
+            return
+        }
         if let i = args.firstIndex(of: "--snapshot-mascot"), i + 1 < args.count {
             renderMascotSheet(to: URL(fileURLWithPath: args[i + 1]))
             return
@@ -115,6 +120,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                 try? rep.representation(using: .png, properties: [:])?.write(to: dir.appending(path: "window-\(section.rawValue).png"))
             }
             NSApp.terminate(nil)
+        }
+    }
+
+    /// Build aid: `MacHelper --export-mascot-icon DIR` writes px.mascot@1x/2x/3x.png, the idle slime
+    /// on a 32×32 pixel grid, so the empty-state art matches the animated mascot exactly.
+    private func exportMascotIcon(to dir: URL) {
+        var cells: [(Int, Int, CGColor)] = []
+        SlimeRenderer.paint(SlimePose.make(mood: .init(), frame: 12, tappedAt: nil)) { x, y, color in   // eyes open (frames 0–1 blink)
+            cells.append((x, y, NSColor(color).cgColor))
+        }
+        guard let minX = cells.map(\.0).min(), let maxX = cells.map(\.0).max(),
+              let minY = cells.map(\.1).min(), let maxY = cells.map(\.1).max() else { return }
+        let grid = 32
+        // Centered, a little below the middle so it sits like the other pixel art.
+        let offX = (grid - (maxX - minX + 1)) / 2 - minX
+        let offY = (grid - (maxY - minY + 1) + 1) / 2 + 1 - minY
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        for scale in 1...3 {
+            let cell = 2 * scale, side = grid * cell
+            guard let ctx = CGContext(data: nil, width: side, height: side, bitsPerComponent: 8, bytesPerRow: 0,
+                                      space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { continue }
+            for (x, y, color) in cells {
+                ctx.setFillColor(color)
+                // CoreGraphics' origin is bottom-left; the renderer's is top-left.
+                ctx.fill(CGRect(x: (x + offX) * cell, y: side - (y + offY + 1) * cell, width: cell, height: cell))
+            }
+            guard let image = ctx.makeImage() else { continue }
+            let rep = NSBitmapImageRep(cgImage: image)
+            try? rep.representation(using: .png, properties: [:])?.write(to: dir.appending(path: "px.mascot@\(scale)x.png"))
         }
     }
 

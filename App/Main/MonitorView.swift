@@ -7,6 +7,9 @@ struct MonitorView: View {
     let store: MonitorStore
     @AppStorage("monitor.range") private var range: Range = .live
     @State private var samples: [MetricSample] = []
+    /// The range whose data the charts show. It follows `range` only once that range's history has
+    /// loaded, so switching ranges keeps the old charts up instead of flashing the empty state.
+    @State private var shownRange: Range?
 
     enum Range: String, CaseIterable, Identifiable {
         case live, hour, day, week
@@ -58,7 +61,10 @@ struct MonitorView: View {
                     let data = m.series.map { ($0.name, points($0.live, $0.stored)) }.filter { !$0.1.isEmpty }
                     return data.isEmpty ? nil : (m, data)
                 }
-                if shown.isEmpty {
+                let loading = shownRange == nil
+                if shown.isEmpty, loading {
+                    Color.clear.frame(minHeight: 360)
+                } else if shown.isEmpty {
                     PixelEmptyState(art: "px.mascot",
                                     title: hasEnabledModules ? "No data yet" : "No menu bar metrics selected",
                                     message: hasEnabledModules
@@ -78,9 +84,12 @@ struct MonitorView: View {
             .padding(.vertical, 22)
         }
         .task(id: range) {
-            guard range != .live, let db = store.persistentHistory else { samples = []; return }
             let r = range
-            samples = (try? await Task.detached { try db.samples(since: Date().addingTimeInterval(-r.seconds), bucket: r.bucket) }.value) ?? []
+            guard r != .live, let db = store.persistentHistory else { shownRange = r; return }
+            let loaded = (try? await Task.detached { try db.samples(since: Date().addingTimeInterval(-r.seconds), bucket: r.bucket) }.value) ?? []
+            guard !Task.isCancelled else { return }
+            samples = loaded
+            shownRange = r
         }
         .onAppear { store.watchProcesses(true) }
         .onDisappear { store.watchProcesses(false) }
@@ -90,8 +99,11 @@ struct MonitorView: View {
         MonitorModule.allCases.contains { store.isActive($0) }
     }
 
+    /// What the charts draw: the selected range once loaded, the previous one until then.
+    private var chartRange: Range { shownRange ?? range }
+
     private func points(_ live: SeriesKey, _ stored: KeyPath<MetricSample, Double?>) -> [ChartPoint] {
-        if range == .live {
+        if chartRange == .live {
             let cutoff = Date().addingTimeInterval(-300)
             return (store.history[live] ?? []).filter { $0.date >= cutoff }
         }
@@ -140,7 +152,7 @@ struct MonitorView: View {
                 }
             }
             .chartXAxis {
-                if range == .live {
+                if chartRange == .live {
                     AxisMarks(values: .stride(by: .minute)) { _ in AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])); AxisValueLabel(format: xFormat) }
                 } else {
                     AxisMarks(values: .automatic(desiredCount: 5)) { _ in AxisValueLabel(format: xFormat) }
@@ -156,11 +168,11 @@ struct MonitorView: View {
     /// Live samples are at most 30 s apart; history uses one point per bucket. A delta
     /// larger than this starts a new segment, so a single missing bucket breaks the line.
     private var segmentGap: TimeInterval {
-        range == .live ? 45 : range.bucket
+        chartRange == .live ? 45 : chartRange.bucket
     }
 
     private var xFormat: Date.FormatStyle {
-        range == .week ? .dateTime.weekday(.abbreviated).hour() : .dateTime.hour().minute()
+        chartRange == .week ? .dateTime.weekday(.abbreviated).hour() : .dateTime.hour().minute()
     }
 
     private func label(_ v: Double, _ f: Format) -> String {

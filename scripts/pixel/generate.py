@@ -538,26 +538,6 @@ def logo_fan():
     return logo_finish(cv)
 
 
-def mascot():
-    """A small helper robot: rounded head, visor with two eyes, antenna with a bulb."""
-    cv = Canvas(32)
-    cv.round_rect(6, 9, 25, 26, 5, 's')          # head
-    cv.rect(14, 4, 17, 8, 's')                      # antenna stem
-    cv.disc(16, 4, 2.4, 'a')                        # bulb
-    cv.rect(3, 15, 5, 20, 's')                      # ears
-    cv.rect(26, 15, 28, 20, 's')
-    cv.bevel()
-    cv.round_rect(9, 13, 22, 21, 3, 'd', flat=True)  # visor
-    for ex in (12, 18):
-        cv.rect(ex, 15, ex + 1, 18, 'M', flat=True)  # eyes
-        cv.set(ex, 15, 'W', flat=True)
-    cv.rect(10, 23, 11, 23, 'R', flat=True)         # cheeks
-    cv.rect(20, 23, 21, 23, 'R', flat=True)
-    cv.rect(14, 23, 17, 23, 't', flat=True)         # mouth
-    cv.set(15, 3, 'W', flat=True)
-    cv.outline()
-    return cv
-
 
 def empty_clean():
     """Empty state: a sparkling clean disk."""
@@ -612,7 +592,8 @@ ICONS = {
     'px.cpu': icon_cpu, 'px.gpu': icon_gpu, 'px.memory': icon_memory, 'px.ssd': icon_ssd, 'px.network': icon_network,
     'px.temperature': icon_temperature, 'px.battery': icon_battery, 'px.power': icon_power,
 }
-ART = {'px.mascot': mascot, 'px.empty.clean': empty_clean, 'px.empty.scan': empty_scan, 'px.empty.box': empty_box, 'AppIcon': app_icon,
+# px.mascot is not drawn here: `MacHelper --export-mascot-icon DIR` renders the app's own slime.
+ART = {'px.empty.clean': empty_clean, 'px.empty.scan': empty_scan, 'px.empty.box': empty_box, 'AppIcon': app_icon,
        'logo.apple': logo_apple, 'logo.slime': logo_slime, 'logo.sprout': logo_sprout, 'logo.fan': logo_fan}
 
 if __name__ == '__main__':

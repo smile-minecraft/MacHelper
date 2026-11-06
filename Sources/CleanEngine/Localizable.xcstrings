@@ -126,7 +126,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "App 本体"
+            "value": "App 本身"
           }
         },
         "zh-Hant": {
@@ -228,7 +228,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "后台启动项"
+            "value": "后台项目"
           }
         },
         "zh-Hant": {
@@ -330,7 +330,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "bundle ID 相符"
+            "value": "bundle ID 匹配"
           }
         },
         "zh-Hant": {
@@ -398,7 +398,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清除预览缩略图缓存并重新加载 QuickLook 插件，修正缩略图错误或过时。"
+            "value": "清除预览缩略图缓存并重新加载快速查看插件，修复错误或过时的缩略图。"
           }
         },
         "zh-Hant": {
@@ -432,7 +432,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "指令（~/.local/bin）"
+            "value": "命令（~/.local/bin）"
           }
         },
         "zh-Hant": {
@@ -466,7 +466,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "容器信息指向这个 App"
+            "value": "容器元数据指向这个 App"
           }
         },
         "zh-Hant": {
@@ -500,7 +500,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "当机报告"
+            "value": "崩溃报告"
           }
         },
         "zh-Hant": {
@@ -534,7 +534,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "家目录里的数据（~/.名称）"
+            "value": "个人文件夹中的数据（~/.名称）"
           }
         },
         "zh-Hant": {
@@ -636,7 +636,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "修正「打开方式」菜单重复或错误。会重置文件类型的默认 App，需要几分钟。"
+            "value": "修复「打开方式」菜单中重复或错误的项目。会重置各文件类型的默认 App，需要几分钟。"
           }
         },
         "zh-Hant": {
@@ -704,7 +704,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "释放闲置内存"
+            "value": "释放非活跃内存"
           }
         },
         "zh-Hant": {
@@ -738,7 +738,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "App 内的辅助程序或延伸功能"
+            "value": "App 内的辅助程序或扩展"
           }
         },
         "zh-Hant": {
@@ -772,7 +772,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Homebrew 清理旧版本"
+            "value": "Homebrew：移除旧版本"
           }
         },
         "zh-Hant": {
@@ -840,7 +840,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "是 git 保存库，可能是你自己的设置或项目"
+            "value": "是 git 仓库，可能是你自己的设置或项目"
           }
         },
         "zh-Hant": {
@@ -874,7 +874,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Homebrew 清单列出"
+            "value": "Homebrew 列出"
           }
         },
         "zh-Hant": {
@@ -942,7 +942,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 自己"
+            "value": "MacHelper 本身"
           }
         },
         "zh-Hant": {
@@ -1044,7 +1044,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "依 App 名称比对，请确认"
+            "value": "按 App 名称匹配，请确认"
           }
         },
         "zh-Hant": {
@@ -1078,7 +1078,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "依开发者名称比对，请确认"
+            "value": "按开发者名称匹配，请确认"
           }
         },
         "zh-Hant": {
@@ -1112,7 +1112,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "插件与延伸功能"
+            "value": "插件与扩展"
           }
         },
         "zh-Hant": {
@@ -1180,7 +1180,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清空磁盘缓存（purge）。macOS 本来就会自动管理，通常不需要；之后一段时间文件读取会变慢。"
+            "value": "清除磁盘缓存（purge）。macOS 会自动管理，通常不需要；之后一段时间内读取文件会变慢。"
           }
         },
         "zh-Hant": {
@@ -1282,7 +1282,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "移除对应 runtime 已不存在的 iOS 模拟器（xcrun simctl delete unavailable）。"
+            "value": "移除运行时已不存在的 iOS 模拟器（xcrun simctl delete unavailable）。"
           }
         },
         "zh-Hant": {
@@ -1316,7 +1316,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "移除已安装套件的旧版本与过期下载（brew cleanup）。"
+            "value": "移除已安装软件包的旧版本与过期下载（brew cleanup）。"
           }
         },
         "zh-Hant": {
@@ -1350,7 +1350,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "移除停止的容器、未使用的网络、悬空映像与建置缓存（docker system prune -f）。需要 Docker 正在运行。"
+            "value": "移除停止的容器、未使用的网络、悬空镜像与构建缓存（docker system prune -f）。需要 Docker 正在运行。"
           }
         },
         "zh-Hant": {
@@ -1384,7 +1384,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重置 QuickLook 缩略图缓存"
+            "value": "重置快速查看缩略图缓存"
           }
         },
         "zh-Hant": {
@@ -1486,7 +1486,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "运行系统例行维护脚本"
+            "value": "运行定期维护脚本"
           }
         },
         "zh-Hant": {
@@ -1520,7 +1520,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "运行的程序在 App 里"
+            "value": "运行 App 内的程序"
           }
         },
         "zh-Hant": {
@@ -1554,7 +1554,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "运行 daily / weekly / monthly 例行脚本（轮替与压缩系统日志、清理暂存）。"
+            "value": "运行 daily / weekly / monthly 例行脚本（轮转与压缩系统日志、清理临时文件）。"
           }
         },
         "zh-Hant": {
@@ -1656,7 +1656,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "窗口状态"
+            "value": "已保存的窗口状态"
           }
         },
         "zh-Hant": {
@@ -1690,7 +1690,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "共用容器（Group Containers）"
+            "value": "共享容器（Group Containers）"
           }
         },
         "zh-Hant": {
@@ -1758,7 +1758,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "指令 %@ 也在使用它，可能是另外安装的指令列工具"
+            "value": "命令 %@ 也在使用它，可能是另外安装的命令行工具"
           }
         },
         "zh-Hant": {
@@ -1792,7 +1792,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dock 或 Launchpad 图标异常时有用。Dock 会闪一下后恢复。"
+            "value": "Dock 或启动台图标异常时有用。Dock 会闪一下然后恢复。"
           }
         },
         "zh-Hant": {
@@ -1826,7 +1826,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Finder 卡住或图标异常时有用。进行中的拷贝会被中断。"
+            "value": "Finder 卡住或图标显示异常时有用。正在进行的拷贝会被中断。"
           }
         },
         "zh-Hant": {
@@ -1860,7 +1860,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "网域解析错误或刚改过 DNS 设置时有用。"
+            "value": "域名解析出错，或刚更改过 DNS 设置时有用。"
           }
         },
         "zh-Hant": {
@@ -1996,7 +1996,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "~/%@ 属于独立安装的指令列工具 %@，不会跟着 App 删除"
+            "value": "~/%@ 属于单独安装的命令行工具 %@，不会随 App 一起删除"
           }
         },
         "zh-Hant": {
@@ -2030,7 +2030,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Docker：清除全部建置缓存"
+            "value": "Docker：清除全部构建缓存"
           }
         },
         "zh-Hant": {
@@ -2064,7 +2064,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "移除所有未使用的建置缓存，不只是悬置的层（docker builder prune -a -f）。之后几次建置映像会比较慢。Docker 必须正在运行。"
+            "value": "移除所有未使用的构建缓存，不只是悬空的层（docker builder prune -a -f）。之后几次构建镜像会比较慢。Docker 必须正在运行。"
           }
         },
         "zh-Hant": {
@@ -2098,7 +2098,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Docker：移除未使用的映像"
+            "value": "Docker：移除未使用的镜像"
           }
         },
         "zh-Hant": {
@@ -2132,7 +2132,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "移除所有没有容器使用的映像，包括你下载或建置、带有标签的映像（docker image prune -a -f）。下次需要时得重新下载或建置。Docker 必须正在运行。"
+            "value": "移除所有没有容器使用的镜像，包括你下载或构建、带有标签的镜像（docker image prune -a -f）。下次需要时得重新下载或构建。Docker 必须正在运行。"
           }
         },
         "zh-Hant": {
@@ -2200,7 +2200,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "删除 Xcode 与 Swift 建置共用的预先编译模块；下次建置会重新产生，速度较慢。这是缓存，会直接永久删除。建置进行中请不要运行。"
+            "value": "删除 Xcode 与 Swift 构建共享的预编译模块；下次构建会重新生成，速度较慢。这是缓存，会直接永久删除。构建进行中请不要运行。"
           }
         },
         "zh-Hant": {
@@ -2234,7 +2234,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "/Library/Logs/DiagnosticReports 里所有用户超过 30 天的当机、停止回应与资源报告。以管理员权限直接删除。"
+            "value": "/Library/Logs/DiagnosticReports 中所有用户超过 30 天的崩溃、无响应与资源报告。以管理员权限直接删除。"
           }
         },
         "zh-Hant": {
@@ -2268,7 +2268,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "/Library/Logs 第一层超过 30 天的日志档；各 App 的子文件夹不动。以管理员权限直接删除。"
+            "value": "/Library/Logs 第一层超过 30 天的日志文件；各 App 的子文件夹不动。以管理员权限直接删除。"
           }
         },
         "zh-Hant": {
@@ -2370,7 +2370,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "旧的系统日志档"
+            "value": "旧的系统日志文件"
           }
         },
         "zh-Hant": {

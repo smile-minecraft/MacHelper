@@ -21,12 +21,27 @@ import Storage
 
     @Test func flagsLoadHeatSwapAndDisk() {
         let r = HealthCheck.evaluate(samples: minutes(60, cpu: 0.9, memory: 0.9, temperature: 98), processes: nil, diskPoints: [], hours: 1,
-                                     system: SystemSnapshot(swapUsedBytes: 5e9, uptimeSeconds: 20 * 86_400, diskFreeBytes: 50e9, diskTotalBytes: 1e12),
+                                     system: SystemSnapshot(swapUsedBytes: 5e9, uptimeSeconds: 20 * 86_400, diskFreeBytes: 8e9, diskTotalBytes: 1e12),
                                      now: now)
         let ids = Set(r.findings.map(\.id))
         #expect(ids == ["cpu.busy", "memory.high", "memory.swap", "thermal.hot", "disk.low", "uptime"])
         #expect(r.overall == .critical)
         #expect(r.findings.first?.severity == .critical, "most severe first")
+    }
+
+    @Test func diskLevelsUseAbsoluteFreeSpace() {
+        #expect(DiskSpaceLevels.level(freeBytes: 37.5e9) == .healthy)
+        #expect(DiskSpaceLevels.level(freeBytes: 25e9) == .healthy)
+        #expect(DiskSpaceLevels.level(freeBytes: 24.9e9) == .low)
+        #expect(DiskSpaceLevels.level(freeBytes: 10e9) == .low)
+        #expect(DiskSpaceLevels.level(freeBytes: 9.9e9) == .critical)
+        // A big disk with a small share free is still fine when the amount is enough.
+        let r = HealthCheck.evaluate(samples: minutes(60, cpu: 0.1), processes: nil, diskPoints: [], hours: 1,
+                                     system: SystemSnapshot(diskFreeBytes: 100e9, diskTotalBytes: 4e12), now: now)
+        #expect(!r.findings.contains { $0.id == "disk.low" })
+        let low = HealthCheck.evaluate(samples: minutes(60, cpu: 0.1), processes: nil, diskPoints: [], hours: 1,
+                                       system: SystemSnapshot(diskFreeBytes: 20e9, diskTotalBytes: 256e9), now: now)
+        #expect(low.findings.first { $0.id == "disk.low" }?.severity == .warning)
     }
 
     @Test func sparseHistoryIsReported() {

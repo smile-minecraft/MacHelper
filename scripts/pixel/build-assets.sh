@@ -3,6 +3,8 @@
 #   px.<name>   16×16 icons  → imagesets at 1×/2×/3× (16, 32, 48 px), pixel-exact upscales
 #   px.<art>    32×32 art    → imagesets at 1×/2×/3× of 64 pt (64, 128, 192 px)
 #   AppIcon     32×32        → AppIcon.appiconset (16 … 1024 px; 16 px via pixel-aware downscale)
+# px.mascot is the app's slime, exported with `MacHelper --export-mascot-icon DIR`, so it never
+# drifts from the animated mascot; this script leaves it alone.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 python3 scripts/pixel/generate.py >/dev/null
@@ -29,7 +31,7 @@ for g in Design/Pixel/*.grid; do
   mc-asset render "$g" --output "$TMP/$name.png" --force >/dev/null
   case $name in
     AppIcon) ;;
-    px.mascot|px.empty.*) imageset "$name" "$TMP/$name.png" 2 ;;
+    px.empty.*) imageset "$name" "$TMP/$name.png" 2 ;;
     logo.*) imageset "$name" "$TMP/$name.png" 8 ;;   # 256 pt: Dock icon and settings previews
     *) imageset "$name" "$TMP/$name.png" 1 ;;
   esac

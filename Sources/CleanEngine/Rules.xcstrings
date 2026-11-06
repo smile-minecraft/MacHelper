@@ -260,7 +260,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "LM Studio 窗口的网页与绘图缓存，打开时会重新创建。模型和对话都会保留。"
+            "value": "LM Studio 窗口的网页与图形缓存，打开时会重新创建。模型和对话都会保留。"
           }
         },
         "zh-Hant": {
@@ -342,7 +342,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "超过一周的本地服务器日志文件。模型和对话都会保留。"
+            "value": "超过一周的本地服务器日志。模型和对话都会保留。"
           }
         },
         "zh-Hant": {
@@ -383,7 +383,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "LM Studio 服务器日志文件"
+            "value": "LM Studio 服务器日志"
           }
         },
         "zh-Hant": {
@@ -424,7 +424,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "轮替下来的服务器日志文件（server-1.log 及更旧的）。目前的日志文件和模型都会保留。"
+            "value": "轮转后的服务器日志（server-1.log 及更早的）。当前日志和模型都会保留。"
           }
         },
         "zh-Hant": {
@@ -465,7 +465,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ollama 旧日志文件"
+            "value": "Ollama 旧日志"
           }
         },
         "zh-Hant": {
@@ -506,7 +506,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "加快重复请求的提示状态缓存，使用 oMLX 时会重新创建；不会动到模型。"
+            "value": "保存的提示状态，可以加快重复请求，使用 oMLX 时会重新创建；不会动到模型。"
           }
         },
         "zh-Hant": {
@@ -588,7 +588,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "前几天轮替下来的服务器日志文件。目前的日志文件和模型都会保留。"
+            "value": "前几天轮转后的服务器日志。当前日志和模型都会保留。"
           }
         },
         "zh-Hant": {
@@ -629,7 +629,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "oMLX 旧日志文件"
+            "value": "oMLX 旧日志"
           }
         },
         "zh-Hant": {
@@ -670,7 +670,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "网站透过 Service Worker 存的脱机缓存，网站会重新下载；可脱机使用的网页第一次需要连接。"
+            "value": "网站通过 Service Worker 保存的离线缓存，网站会重新下载；可离线使用的网页首次需要联网。"
           }
         },
         "zh-Hant": {
@@ -916,7 +916,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "网页与代码缓存。不影响书签、密码与扩充功能。"
+            "value": "网页与代码缓存。不影响书签、密码与扩展。"
           }
         },
         "zh-Hant": {
@@ -1080,7 +1080,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "网页缓存（cache2）。不影响设置文件与书签。"
+            "value": "网页缓存（cache2）。不影响配置文件与书签。"
           }
         },
         "zh-Hant": {
@@ -1244,7 +1244,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bun 的套件下载缓存，需要时会重新下载。"
+            "value": "Bun 的软件包下载缓存，需要时会重新下载。"
           }
         },
         "zh-Hant": {
@@ -1326,7 +1326,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rust crate 的压缩档与解压缩后的源代码，需要时会重新下载。"
+            "value": "Rust crate 的压缩文件与解压后的源代码，需要时会重新下载。"
           }
         },
         "zh-Hant": {
@@ -1367,7 +1367,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cargo 套件缓存"
+            "value": "Cargo 注册表缓存"
           }
         },
         "zh-Hant": {
@@ -1490,7 +1490,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Corepack 下载的套件管理工具版本（pnpm、Yarn），项目需要时会重新下载。"
+            "value": "Corepack 下载的包管理器版本（pnpm、Yarn），项目需要时会重新下载。"
           }
         },
         "zh-Hant": {
@@ -1572,7 +1572,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "gh 指令缓存的 API 回应。"
+            "value": "gh 命令缓存的 API 响应。"
           }
         },
         "zh-Hant": {
@@ -1654,7 +1654,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "go build 的缓存，会自动重建。"
+            "value": "go build 缓存，会自动重建。"
           }
         },
         "zh-Hant": {
@@ -1695,7 +1695,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Go 建置缓存"
+            "value": "Go 构建缓存"
           }
         },
         "zh-Hant": {
@@ -1736,7 +1736,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "依赖与建置缓存。下次建置会重新下载，可能需要较久时间。"
+            "value": "依赖与构建缓存。下次构建会重新下载，可能需要更长时间。"
           }
         },
         "zh-Hant": {
@@ -1818,7 +1818,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已下载的安装包。已安装的套件不受影响。"
+            "value": "已下载的安装包。已安装的软件包不受影响。"
           }
         },
         "zh-Hant": {
@@ -1900,7 +1900,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "编译原生 Node 模块用的标头档。"
+            "value": "编译原生 Node 模块用的头文件。"
           }
         },
         "zh-Hant": {
@@ -1941,7 +1941,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "node-gyp 标头档缓存"
+            "value": "node-gyp 头文件缓存"
           }
         },
         "zh-Hant": {
@@ -2146,7 +2146,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "OpenCode 为插件与模型供应商下载的 npm 套件，需要时会重新下载。OpenCode 程序本身不受影响。"
+            "value": "OpenCode 为插件与模型供应商下载的 npm 软件包，需要时会重新下载。OpenCode 程序本身不受影响。"
           }
         },
         "zh-Hant": {
@@ -2187,7 +2187,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "OpenCode 套件缓存"
+            "value": "OpenCode 软件包缓存"
           }
         },
         "zh-Hant": {
@@ -2228,7 +2228,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Python 套件下载缓存。"
+            "value": "Python 软件包下载缓存。"
           }
         },
         "zh-Hant": {
@@ -2392,7 +2392,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "pnpm 的中继数据缓存。套件存放区（store）不在此列，请用 pnpm store prune。"
+            "value": "pnpm 的元数据缓存。包存储（store）不在此列，请用 pnpm store prune。"
           }
         },
         "zh-Hant": {
@@ -2474,7 +2474,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "下载过的套件来源，需要时会重新下载。"
+            "value": "下载过的软件包源码，需要时会重新下载。"
           }
         },
         "zh-Hant": {
@@ -2638,7 +2638,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Yarn 的套件缓存。"
+            "value": "Yarn 的软件包缓存。"
           }
         },
         "zh-Hant": {
@@ -2720,7 +2720,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Oh My Zsh 的补全与插件缓存，下次打开 shell 时重新产生（那次启动会稍慢）。"
+            "value": "Oh My Zsh 的补全与插件缓存，下次打开 shell 时重新生成（那次启动会稍慢）。"
           }
         },
         "zh-Hant": {
@@ -3130,7 +3130,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "App 写下的日志与 DiagnosticReports。MacHelper 自己的操作记录不会被清除。"
+            "value": "App 写入的日志与 DiagnosticReports。MacHelper 自己的操作日志不会被清除。"
           }
         },
         "zh-Hant": {
@@ -3171,7 +3171,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "App 日志与当机报告"
+            "value": "App 日志与崩溃报告"
           }
         },
         "zh-Hant": {
@@ -3294,7 +3294,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "请先确认清单：这里可能有你想保留的文件。"
+            "value": "请先确认列表：这里可能有你想保留的文件。"
           }
         },
         "zh-Hant": {
@@ -3458,7 +3458,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "旧版本的封存盘。删除后就无法用它来符号化旧版的当机报告，请确认不再需要。"
+            "value": "旧版本的归档。删除后就无法用它来符号化旧版本的崩溃报告，请确认不再需要。"
           }
         },
         "zh-Hant": {
@@ -3540,7 +3540,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "建置中间产物与索引。下次建置会重新产生（第一次会比较慢）。"
+            "value": "构建中间产物与索引。下次构建会重新生成（第一次会比较慢）。"
           }
         },
         "zh-Hant": {
@@ -3592,7 +3592,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "连接实机调试时下载的符号档。超过 30 天未用的版本，下次接上该版本设备时会重新下载。"
+            "value": "连接真机调试时下载的符号文件。超过 30 天未用的版本，下次接上该版本设备时会重新下载。"
           }
         },
         "zh-Hant": {
@@ -3756,7 +3756,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Xcode 平行测试时创建的模拟器复本，下次平行测试会重新创建。"
+            "value": "Xcode 并行测试时创建的模拟器副本，下次并行测试会重新创建。"
           }
         },
         "zh-Hant": {

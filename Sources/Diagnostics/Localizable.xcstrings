@@ -3,6 +3,30 @@
   "strings": {
     "%@ (%@) is free.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hay %@ (%@) libres."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空き %1$@（%2$@）。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@(%2$@) 사용 가능."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用 %1$@（%2$@）。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -13,6 +37,30 @@
     },
     "%@ keeps the CPU busy": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ mantiene ocupada la CPU"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ が CPU を使い続けています"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@이(가) CPU를 계속 사용 중"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 持续占用 CPU"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -23,6 +71,30 @@
     },
     "%@ of memory has been moved to disk. A restart clears it; if it keeps growing, the Mac needs more memory than it has for this workload.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se han movido %@ de memoria al disco. Un reinicio lo libera; si sigue creciendo, este Mac necesita más memoria de la que tiene para este trabajo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ のメモリがディスクに移されています。再起動すると解消されます。増え続ける場合は、この作業量に対して Mac のメモリが足りていません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메모리 %@이(가) 디스크로 옮겨졌습니다. 재시동하면 비워지며, 계속 늘어난다면 이 작업량에 비해 Mac의 메모리가 부족한 것입니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已有 %@ 的内存被移到磁盘。重启后会清空；如果持续增长，说明当前的工作负载需要比这台 Mac 更多的内存。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -33,6 +105,30 @@
     },
     "%lld login and background items are active. Review them under Startup Items → Login & Background Items.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hay %lld ítems de inicio y en segundo plano activos. Revísalos en Ítems de arranque → Ítems de inicio y en segundo plano."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 個のログイン項目とバックグラウンド項目が有効です。「起動項目」→「ログイン項目とバックグラウンド項目」で確認してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로그인 및 백그라운드 항목 %lld개가 활성화되어 있습니다. 시동 항목 → 로그인 및 백그라운드 항목에서 확인하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前有 %lld 个登录项与后台项目在运行，可以到「启动项 → 登录与后台项目」查看。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -43,6 +139,30 @@
     },
     "A restart clears swap and finishes pending updates.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reiniciar libera el espacio de intercambio y termina las actualizaciones pendientes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再起動するとスワップが解消され、保留中のアップデートも完了します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재시동하면 스왑이 비워지고 대기 중인 업데이트가 완료됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启可以清空交换空间，并完成待安装的更新。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -53,6 +173,30 @@
     },
     "At the current rate of %@ a day, the startup disk is full in about %@ days.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al ritmo actual de %@ al día, el disco de arranque se llenará en unos %@ días."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今のペース（1 日あたり %1$@）だと、起動ディスクは約 %2$@ 日でいっぱいになります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "현재 하루 %1$@씩 줄어드는 속도라면 약 %2$@일 후 시동 디스크가 가득 찹니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按当前每天 %1$@ 的速度，启动磁盘大约 %2$@ 天后会满。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -63,6 +207,30 @@
     },
     "CPU often fully loaded": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU a menudo al máximo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU がたびたびフル稼働"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU가 자주 최대 부하"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU 经常满载"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -73,6 +241,30 @@
     },
     "CPU use was 80%% or higher in %@ of the recorded minutes.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La CPU estuvo al 80 %% o más en el %@ de los minutos registrados."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記録された時間のうち %@ の分で、CPU 使用率が 80%% 以上でした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기록된 시간 중 %@에서 CPU 사용량이 80%% 이상이었습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在已记录的时间里，有 %@ 的分钟 CPU 使用率达到 80%% 以上。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -83,6 +275,30 @@
     },
     "Free space is shrinking": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El espacio libre está disminuyendo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空き容量が減り続けています"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "여유 공간이 계속 줄고 있음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用空间持续减少"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -93,6 +309,30 @@
     },
     "It used %@ of a core on average and was among the busiest processes in %@ of the minutes.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usó de media el %@ de un núcleo y estuvo entre los procesos más activos en el %@ de los minutos."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均で 1 コアの %1$@ を使い、%2$@ の分で最も忙しいプロセスの一つでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "평균적으로 코어 하나의 %1$@을(를) 사용했고, %2$@의 시간 동안 가장 바쁜 프로세스 중 하나였습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均占用单个核心的 %1$@，并在 %2$@ 的分钟里位列最忙的进程。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -103,6 +343,30 @@
     },
     "Limited history": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historial limitado"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "履歴が少ない"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기록 부족"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "历史数据不足"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -113,6 +377,30 @@
     },
     "Many background items": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muchos ítems en segundo plano"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バックグラウンド項目が多い"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "백그라운드 항목이 많음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后台项目很多"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -123,6 +411,30 @@
     },
     "Memory nearly full": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memoria casi llena"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メモリがほぼいっぱい"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메모리가 거의 가득 참"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内存快用完了"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -133,6 +445,30 @@
     },
     "Memory use averaged %@. Quitting apps you don’t need, or the ones at the top of the memory list, helps.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El uso de memoria fue de media del %@. Ayuda cerrar las apps que no necesites o las primeras de la lista de memoria."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メモリ使用率は平均 %@ でした。不要な App や、メモリ一覧の上位にある App を終了すると改善します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메모리 사용량이 평균 %@였습니다. 필요 없는 앱이나 메모리 목록 상위의 앱을 종료하면 도움이 됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内存平均使用率 %@。退出不需要的 App，或内存排行最前面的进程，会有帮助。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -143,6 +479,30 @@
     },
     "Not restarted for %lld days": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin reiniciar desde hace %lld días"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 日間再起動していません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld일 동안 재시동하지 않음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已经 %lld 天没有重启"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -153,6 +513,30 @@
     },
     "Only %@ (%@) is free. macOS needs free space for updates, swap and caches; run Optimize or Disk Analysis.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo quedan %@ (%@) libres. macOS necesita espacio para actualizaciones, intercambio y cachés; ejecuta Optimizar o Análisis del disco."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空きは %1$@（%2$@）だけです。macOS はアップデート、スワップ、キャッシュに空き容量を必要とします。「最適化」か「ディスク分析」を実行してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "여유 공간이 %1$@(%2$@)뿐입니다. macOS는 업데이트, 스왑, 캐시에 여유 공간이 필요하므로 최적화 또는 디스크 분석을 실행하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只剩 %1$@（%2$@）可用。macOS 需要空间来更新、交换和缓存；请运行「一键优化」或「磁盘分析」。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -163,6 +547,30 @@
     },
     "Only %@ of this period has data. Turn on background recording so the report also covers time when MacHelper isn’t open.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo hay datos del %@ de este periodo. Activa el registro en segundo plano para que el informe cubra también el tiempo en que MacHelper no está abierto."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この期間でデータがあるのは %@ だけです。バックグラウンド記録をオンにすると、MacHelper を開いていない時間もレポートに含まれます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 기간 중 %@에만 데이터가 있습니다. 백그라운드 기록을 켜면 MacHelper가 열려 있지 않은 시간도 보고서에 포함됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这段时间只有 %@ 有数据。打开后台记录后，报告也能覆盖 MacHelper 没有打开的时间。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -173,6 +581,30 @@
     },
     "Running hot": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temperatura alta"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高温状態"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "온도 높음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "温度偏高"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -183,6 +615,30 @@
     },
     "Startup disk almost full": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disco de arranque casi lleno"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "起動ディスクがほぼいっぱい"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시동 디스크가 거의 가득 참"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启动磁盘快满了"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -193,6 +649,30 @@
     },
     "Startup disk getting full": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El disco de arranque se está llenando"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "起動ディスクの空きが少なくなっています"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시동 디스크 공간이 부족해지는 중"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启动磁盘空间偏少"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -203,6 +683,30 @@
     },
     "Swap in use": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usando espacio de intercambio"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スワップを使用中"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스왑 사용 중"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在使用交换空间"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
@@ -213,6 +717,30 @@
     },
     "The CPU was at 95 °C or more in %@ of the recorded minutes; the system may slow it down to cool off. Check airflow and the busiest processes.": {
       "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La CPU estuvo a 95 °C o más en el %@ de los minutos registrados; el sistema puede reducir su velocidad para enfriarse. Revisa la ventilación y los procesos más activos."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記録された時間のうち %@ の分で CPU が 95 °C 以上になり、冷却のためにシステムが速度を落とす場合があります。通気と最も忙しいプロセスを確認してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기록된 시간 중 %@에서 CPU가 95 °C 이상이었으며, 시스템이 열을 식히려고 속도를 낮출 수 있습니다. 통풍과 가장 바쁜 프로세스를 확인하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在已记录的时间里，有 %@ 的分钟 CPU 达到 95 °C 以上，系统可能会降频散热。请检查通风和最忙的进程。"
+          }
+        },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",

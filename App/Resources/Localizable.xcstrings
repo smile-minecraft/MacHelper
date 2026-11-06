@@ -160,7 +160,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已选 %@，%lld 项维护工作"
+            "value": "已选 %@，%lld 项维护任务"
           }
         },
         "zh-Hant": {
@@ -228,7 +228,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@，跟着「一并移除 App 数据」一起选"
+            "value": "%@，与「一并移除 App 数据」一同选中"
           }
         },
         "zh-Hant": {
@@ -636,7 +636,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld度 %lld%%"
+            "value": "%lld° %lld%%"
           }
         },
         "zh-Hant": {
@@ -704,7 +704,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "15 分"
+            "value": "15 分钟"
           }
         },
         "zh-Hant": {
@@ -772,7 +772,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "5 分"
+            "value": "5 分钟"
           }
         },
         "zh-Hant": {
@@ -908,7 +908,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "加入"
+            "value": "添加"
           }
         },
         "zh-Hant": {
@@ -942,7 +942,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "加入项目文件夹…"
+            "value": "添加项目文件夹…"
           }
         },
         "zh-Hant": {
@@ -1044,7 +1044,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "加入你放项目的文件夹，就能找出 node_modules、target、.build 等可以重建的产物。"
+            "value": "添加你放项目的文件夹，就能找出 node_modules、target、.build 等可以重建的产物。"
           }
         },
         "zh-Hant": {
@@ -1078,7 +1078,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "加入收集篮"
+            "value": "添加到收集篮"
           }
         },
         "zh-Hant": {
@@ -1350,7 +1350,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "App 签章"
+            "value": "App 签名"
           }
         },
         "zh-Hant": {
@@ -1384,7 +1384,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已套用"
+            "value": "已应用"
           }
         },
         "zh-Hant": {
@@ -1418,7 +1418,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "套用"
+            "value": "应用"
           }
         },
         "zh-Hant": {
@@ -1520,7 +1520,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "压缩档"
+            "value": "压缩文件"
           }
         },
         "zh-Hant": {
@@ -1656,7 +1656,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "自动清理：开"
+            "value": "自动清理：已开启"
           }
         },
         "zh-Hant": {
@@ -1894,7 +1894,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "长条"
+            "value": "条形"
           }
         },
         "zh-Hant": {
@@ -2030,7 +2030,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "CPU 目前 %@，看看下方最耗资源的进程。"
+            "value": "CPU 当前为 %@，请查看下方最耗资源的进程。"
           }
         },
         "zh-Hant": {
@@ -2404,7 +2404,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "选择要分析的位置，然后按「扫描」。扫描只会读取，不会修改任何文件。"
+            "value": "选择要分析的位置，然后点按「扫描」。扫描只会读取，不会修改任何文件。"
           }
         },
         "zh-Hant": {
@@ -2608,7 +2608,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清掉的项目会移到废纸篓，要清空废纸篓后才会真正释放空间。"
+            "value": "清理的项目会移到废纸篓，清空废纸篓后才会真正释放空间。"
           }
         },
         "zh-Hant": {
@@ -2778,7 +2778,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "点一下区块进入该文件夹；右键或拖到右侧收集篮。"
+            "value": "点按区块进入该文件夹；右键点按或拖到右侧收集篮。"
           }
         },
         "zh-Hant": {
@@ -2812,7 +2812,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "点一下圆环进入文件夹，点中心返回上一层；右键或拖到右侧收集篮。"
+            "value": "点按圆环进入文件夹，点中心返回上一层；右键点按或拖到右侧收集篮。"
           }
         },
         "zh-Hant": {
@@ -2846,7 +2846,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "拷贝体"
+            "value": "副本"
           }
         },
         "zh-Hant": {
@@ -2880,7 +2880,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "保留最旧的，其余加入收集篮"
+            "value": "保留最旧的，其余添加到收集篮"
           }
         },
         "zh-Hant": {
@@ -2948,7 +2948,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已保存的扫描只能浏览：收集、移到废纸篓和重复文件比对已禁用。"
+            "value": "已保存的扫描只能浏览：收集、移到废纸篓和重复文件比较已禁用。"
           }
         },
         "zh-Hant": {
@@ -3016,7 +3016,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "指令列工具"
+            "value": "命令行工具"
           }
         },
         "zh-Hant": {
@@ -3118,7 +3118,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在比对文件内容…"
+            "value": "正在比较文件内容…"
           }
         },
         "zh-Hant": {
@@ -3322,7 +3322,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "各内核"
+            "value": "各核心"
           }
         },
         "zh-Hant": {
@@ -3594,7 +3594,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "目前"
+            "value": "当前"
           }
         },
         "zh-Hant": {
@@ -3662,7 +3662,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "自订"
+            "value": "自定义"
           }
         },
         "zh-Hant": {
@@ -4240,7 +4240,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重复文件比对没有运行，因为 macOS 无法停止自动下载仅限云端的文件。"
+            "value": "重复文件比较没有运行，因为 macOS 无法停止自动下载仅限云端的文件。"
           }
         },
         "zh-Hant": {
@@ -4274,7 +4274,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重复文件比对失败：%@"
+            "value": "重复文件比较失败：%@"
           }
         },
         "zh-Hant": {
@@ -4308,7 +4308,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已保存的扫描不能比对重复文件，请重新扫描以更新。"
+            "value": "已保存的扫描不能比较重复文件，请重新扫描以更新。"
           }
         },
         "zh-Hant": {
@@ -4376,7 +4376,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "节能内核"
+            "value": "能效核心"
           }
         },
         "zh-Hant": {
@@ -4444,7 +4444,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "激活自动清理"
+            "value": "启用自动清理"
           }
         },
         "zh-Hant": {
@@ -4478,7 +4478,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "激活"
+            "value": "启用"
           }
         },
         "zh-Hant": {
@@ -4512,7 +4512,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已激活，但记录器没有回报"
+            "value": "已启用，但记录器没有响应"
           }
         },
         "zh-Hant": {
@@ -4580,7 +4580,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每一项都会记录在操作记录里，之后可以查看。"
+            "value": "每一项都会记录在操作日志里，之后可以查看。"
           }
         },
         "zh-Hant": {
@@ -4886,7 +4886,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "寻找重复文件"
+            "value": "查找重复文件"
           }
         },
         "zh-Hant": {
@@ -4920,7 +4920,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "搜索已移除 App 的残留"
+            "value": "查找已移除 App 的残留"
           }
         },
         "zh-Hant": {
@@ -5022,7 +5022,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "扫描到 %@，%@ 个文件，%@ 秒"
+            "value": "在 %2$@ 个文件中找到 %1$@，耗时 %3$@ 秒"
           }
         },
         "zh-Hant": {
@@ -5396,7 +5396,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "连接测试"
+            "value": "握手"
           }
         },
         "zh-Hant": {
@@ -5498,7 +5498,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Helper 未激活"
+            "value": "Helper 未启用"
           }
         },
         "zh-Hant": {
@@ -5600,7 +5600,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Helper 指定 %lld rpm"
+            "value": "Helper 目标 %lld rpm"
           }
         },
         "zh-Hant": {
@@ -5702,7 +5702,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "取最高值"
+            "value": "最高温度"
           }
         },
         "zh-Hant": {
@@ -5736,7 +5736,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "最高温 %@"
+            "value": "最高温度 %@"
           }
         },
         "zh-Hant": {
@@ -5770,7 +5770,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "CPU 芯片最高温"
+            "value": "最热的 CPU 传感器"
           }
         },
         "zh-Hant": {
@@ -5804,7 +5804,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "GPU 最高温"
+            "value": "最热的 GPU 传感器"
           }
         },
         "zh-Hant": {
@@ -5872,7 +5872,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "闲置"
+            "value": "空闲"
           }
         },
         "zh-Hant": {
@@ -6076,7 +6076,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "监控项目"
+            "value": "项目"
           }
         },
         "zh-Hant": {
@@ -6110,7 +6110,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "项目会移到废纸篓，可以从废纸篓恢复。系统与个人重要文件夹受保护，不会被移除。"
+            "value": "项目会移到废纸篓，可以从废纸篓恢复。系统文件夹与重要的个人文件夹受保护，不会被移除。"
           }
         },
         "zh-Hant": {
@@ -6314,7 +6314,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "最大文件"
+            "value": "最大"
           }
         },
         "zh-Hant": {
@@ -6450,7 +6450,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "最久没用"
+            "value": "最久未使用"
           }
         },
         "zh-Hant": {
@@ -6620,7 +6620,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "平均负载（1 · 5 · 15 分）"
+            "value": "平均负载（1 · 5 · 15 分钟）"
           }
         },
         "zh-Hant": {
@@ -6722,7 +6722,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "区域 IP"
+            "value": "本地 IP"
           }
         },
         "zh-Hant": {
@@ -7096,7 +7096,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "维护工作"
+            "value": "维护任务"
           }
         },
         "zh-Hant": {
@@ -7266,7 +7266,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "内存快不够了"
+            "value": "内存快不够用了"
           }
         },
         "zh-Hant": {
@@ -7640,7 +7640,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "把选择的残留档（%@）移到废纸篓？"
+            "value": "把选择的残留文件（%@）移到废纸篓？"
           }
         },
         "zh-Hant": {
@@ -7742,7 +7742,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "移到废纸篓：%@，删错了可以从废纸篓拿回来。"
+            "value": "移到废纸篓：%@。误删的项目可以从废纸篓找回。"
           }
         },
         "zh-Hant": {
@@ -8048,7 +8048,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "永不低于系统要求的转速（建议）"
+            "value": "永不低于系统要求的转速（推荐）"
           }
         },
         "zh-Hant": {
@@ -8116,7 +8116,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "下次：约 %@ 之后"
+            "value": "下次：大约 %@ 后"
           }
         },
         "zh-Hant": {
@@ -8184,7 +8184,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "没有文件夹变化超过 50 MB。"
+            "value": "没有文件夹的变化超过 50 MB。"
           }
         },
         "zh-Hant": {
@@ -8218,7 +8218,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "没有选择菜单栏指针"
+            "value": "没有选择菜单栏指标"
           }
         },
         "zh-Hant": {
@@ -8456,7 +8456,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "没有可清理项目"
+            "value": "没有可清理的项目"
           }
         },
         "zh-Hant": {
@@ -8524,7 +8524,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "目前：%1$@（%2$@）"
+            "value": "当前：%1$@（%2$@）"
           }
         },
         "zh-Hant": {
@@ -8626,7 +8626,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "脱机"
+            "value": "离线"
           }
         },
         "zh-Hant": {
@@ -8932,7 +8932,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "只加不减"
+            "value": "只升不降"
           }
         },
         "zh-Hant": {
@@ -9374,7 +9374,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "性能内核 %@ · 节能内核 %@"
+            "value": "性能核心 %@ · 能效核心 %@"
           }
         },
         "zh-Hant": {
@@ -9442,7 +9442,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "各内核使用率"
+            "value": "各核心使用率"
           }
         },
         "zh-Hant": {
@@ -9510,7 +9510,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "性能内核"
+            "value": "性能核心"
           }
         },
         "zh-Hant": {
@@ -9646,7 +9646,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "设置文件"
+            "value": "配置"
           }
         },
         "zh-Hant": {
@@ -9714,7 +9714,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "项目建置产物"
+            "value": "项目构建产物"
           }
         },
         "zh-Hant": {
@@ -9748,7 +9748,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "项目建置产物（%@）"
+            "value": "项目构建产物（%@）"
           }
         },
         "zh-Hant": {
@@ -10020,7 +10020,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "透过 Helper 读取风扇"
+            "value": "通过 Helper 读取风扇"
           }
         },
         "zh-Hant": {
@@ -10224,7 +10224,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "定期在后台清理「低风险」项目：App 缓存、日志、浏览器与开发工具缓存。正在运行的 App 会跳过，不会清空废纸篓，也不需要开着 MacHelper。"
+            "value": "定期在后台清理低风险项目：App 缓存、日志、浏览器与开发工具缓存。会跳过正在运行的 App，不会清空废纸篓，也不需要打开 MacHelper。"
           }
         },
         "zh-Hant": {
@@ -10258,7 +10258,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重新启动"
+            "value": "重新打开"
           }
         },
         "zh-Hant": {
@@ -10360,7 +10360,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "连同残留档一起移除 App。"
+            "value": "连同残留文件一起移除 App。"
           }
         },
         "zh-Hant": {
@@ -10632,7 +10632,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "运行 %lld 项维护工作。"
+            "value": "运行 %lld 项维护任务。"
           }
         },
         "zh-Hant": {
@@ -10666,7 +10666,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "立即运行一次"
+            "value": "立即运行"
           }
         },
         "zh-Hant": {
@@ -10972,7 +10972,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "扫描缓存、日志与残留档，再清理你勾选的项目。"
+            "value": "扫描缓存、日志与残留文件，再清理你勾选的项目。"
           }
         },
         "zh-Hant": {
@@ -11006,7 +11006,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "先扫描并列出可清理的项目。你看过、勾选之后才会清理；默认移到废纸篓，可以恢复。"
+            "value": "先扫描并列出可清理的项目。你查看并勾选后才会清理；默认移到废纸篓，可以恢复。"
           }
         },
         "zh-Hant": {
@@ -11278,7 +11278,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "看空间用在哪里，找出重复文件与变大的文件夹。"
+            "value": "查看空间用在哪里，找出重复文件和变大的内容。"
           }
         },
         "zh-Hant": {
@@ -11312,7 +11312,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "区段"
+            "value": "分段"
           }
         },
         "zh-Hant": {
@@ -11448,7 +11448,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "与另一份共用保存空间，单独删除它几乎不会释放空间。"
+            "value": "与另一个副本共享存储空间，单独删除它几乎不会释放空间。"
           }
         },
         "zh-Hant": {
@@ -11584,7 +11584,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已跳过 %lld 项：含有 git 追踪的文件或嵌套 repository。"
+            "value": "已跳过 %lld 项：其中包含 git 跟踪的文件或嵌套的仓库。"
           }
         },
         "zh-Hant": {
@@ -11720,7 +11720,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "移到废纸篓的空间要等清空废纸篓后才会释放。"
+            "value": "废纸篓中的项目所占的空间，要清空废纸篓后才会释放。"
           }
         },
         "zh-Hant": {
@@ -12162,7 +12162,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Swap"
+            "value": "交换空间"
           }
         },
         "zh-Hant": {
@@ -12196,7 +12196,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "自动切换设置文件"
+            "value": "自动切换配置"
           }
         },
         "zh-Hant": {
@@ -12468,7 +12468,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "温度超过安全上限，已暂时交还系统控制"
+            "value": "温度超过安全上限，已交还系统控制"
           }
         },
         "zh-Hant": {
@@ -12638,7 +12638,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "固件似乎没有套用 Helper 的转速。部分机型要等系统先启动风扇后，手动控制才会生效。"
+            "value": "固件似乎没有应用 Helper 的转速。部分机型要等系统先启动风扇后，手动控制才会生效。"
           }
         },
         "zh-Hant": {
@@ -12672,7 +12672,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "由上往下，第一条符合的规则生效；都不符合时，使用你在上方套用的设置。"
+            "value": "从上到下，第一条匹配的规则生效；都不匹配时，使用你在上方应用的设置。"
           }
         },
         "zh-Hant": {
@@ -12740,7 +12740,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "由 macOS 固件依温度自行控制风扇。这是最安全的设置。"
+            "value": "由 macOS 固件根据温度自动控制风扇。这是最安全的设置。"
           }
         },
         "zh-Hant": {
@@ -12774,7 +12774,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重新启动 MacHelper 后套用新的语言。"
+            "value": "重新打开 MacHelper 后使用新的语言。"
           }
         },
         "zh-Hant": {
@@ -12842,7 +12842,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这些项目以 bundle ID 命名，但对应的 App 已经找不到；后台启动项则是它要启动的程序已不存在。这是推测，请逐项确认后再勾选，默认全部不勾。"
+            "value": "这些项目以 bundle ID 命名，但对应的 App 已经找不到；后台项目则是它要启动的程序已不存在。这只是推测，请逐项确认后再勾选，默认全部不勾选。"
           }
         },
         "zh-Hant": {
@@ -12876,7 +12876,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "目前还顺，但可能很快会开始使用置换空间。"
+            "value": "当前运行还算流畅，但可能很快会开始使用交换空间。"
           }
         },
         "zh-Hant": {
@@ -13046,7 +13046,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "高占用进程"
+            "value": "最耗资源的进程"
           }
         },
         "zh-Hant": {
@@ -13216,7 +13216,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "矩形树状图"
+            "value": "矩形树图"
           }
         },
         "zh-Hant": {
@@ -13250,7 +13250,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "矩形树状图：%@，点一下区块进入"
+            "value": "矩形树图：%@，点按区块进入"
           }
         },
         "zh-Hant": {
@@ -13284,7 +13284,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "请在「设置」→「菜单栏」打开至少一个指针，才会记录它的历史。进程用量历史有自己的开关，位于「设置」→「通用」→「数据管理」。"
+            "value": "请在「设置」→「菜单栏」打开至少一个指标，才会记录它的历史。进程用量历史有自己的开关，位于「设置」→「通用」→「数据管理」。"
           }
         },
         "zh-Hant": {
@@ -13522,7 +13522,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已开机 %@"
+            "value": "已运行 %@"
           }
         },
         "zh-Hant": {
@@ -13624,7 +13624,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用历程"
+            "value": "使用历史"
           }
         },
         "zh-Hant": {
@@ -13862,7 +13862,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "等待「登录项」核准"
+            "value": "等待在「登录项」中批准"
           }
         },
         "zh-Hant": {
@@ -13964,7 +13964,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "某个 App 运行时…"
+            "value": "当 App 运行时…"
           }
         },
         "zh-Hant": {
@@ -14066,7 +14066,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "内核占用"
+            "value": "联动内存"
           }
         },
         "zh-Hant": {
@@ -14168,7 +14168,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "调度也可以用指令运行：machelper autoclean --now"
+            "value": "调度也可以用命令运行：machelper autoclean --now"
           }
         },
         "zh-Hant": {
@@ -14236,7 +14236,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "超过门槛时，你会收到像这样的通知。"
+            "value": "超过阈值时，你会收到这样的通知。"
           }
         },
         "zh-Hant": {
@@ -14270,7 +14270,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "可用，共 %@"
+            "value": "可用（共 %@）"
           }
         },
         "zh-Hant": {
@@ -14610,7 +14610,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "还没有操作记录。"
+            "value": "还没有操作日志。"
           }
         },
         "zh-Hant": {
@@ -14712,7 +14712,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "大小取自操作记录，不代表磁盘空间的变化。移到废纸篓的项目在清空废纸篓前仍占用空间。"
+            "value": "大小取自操作日志，不代表磁盘空间的实际变化。移到废纸篓的项目在清空废纸篓前仍会占用空间。"
           }
         },
         "zh-Hant": {
@@ -14814,7 +14814,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这个页面只读取记录，不会移除任何项目。"
+            "value": "此页面只读取日志，不会移除任何项目。"
           }
         },
         "zh-Hant": {
@@ -15018,7 +15018,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "变更保留天数不会立刻删除数据。超过新天数的旧数据，会在下一次记录历史时移除。"
+            "value": "更改保留天数不会立刻删除数据。超过新天数的旧数据，会在下一次记录历史时移除。"
           }
         },
         "zh-Hant": {
@@ -15324,7 +15324,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "保留监控历史"
+            "value": "监控历史保留"
           }
         },
         "zh-Hant": {
@@ -15596,7 +15596,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "记录传感器与内核用量"
+            "value": "记录传感器与核心用量"
           }
         },
         "zh-Hant": {
@@ -15630,7 +15630,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清除传感器与内核历史…"
+            "value": "清除传感器与核心历史…"
           }
         },
         "zh-Hant": {
@@ -15664,7 +15664,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "要清除传感器与内核历史吗？"
+            "value": "要清除传感器与核心历史吗？"
           }
         },
         "zh-Hant": {
@@ -15698,7 +15698,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清除传感器与内核历史"
+            "value": "清除传感器与核心历史"
           }
         },
         "zh-Hant": {
@@ -15732,7 +15732,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法保存传感器与内核用量设置：%@"
+            "value": "无法保存传感器与核心用量设置：%@"
           }
         },
         "zh-Hant": {
@@ -15766,7 +15766,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法清除传感器与内核历史：%@"
+            "value": "无法清除传感器与核心历史：%@"
           }
         },
         "zh-Hant": {
@@ -15800,7 +15800,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "传感器与内核历史"
+            "value": "传感器与核心历史"
           }
         },
         "zh-Hant": {
@@ -15902,7 +15902,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "CPU 内核群组"
+            "value": "CPU 核心集群"
           }
         },
         "zh-Hant": {
@@ -15936,7 +15936,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "最后出现"
+            "value": "最后出现时间"
           }
         },
         "zh-Hant": {
@@ -15970,7 +15970,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已不再回报"
+            "value": "已不再报告"
           }
         },
         "zh-Hant": {
@@ -16004,7 +16004,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "尚无传感器与内核历史"
+            "value": "还没有传感器与核心历史"
           }
         },
         "zh-Hant": {
@@ -16072,7 +16072,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每分钟从 CPU 与温度采样中，为每个温度传感器与 CPU 内核群组记录一条平均值。打开后每分钟会增加数十列数据，不需要细节时请保持关闭。这个开关同时适用于 MacHelper 与后台记录，但需要打开对应的 CPU 或温度菜单栏项目。关闭后会停止新的传感器与内核采样。已保存的历史会保留到下一次记录移除超过保留期限的数据，或由你清除。"
+            "value": "每分钟从 CPU 与温度采样中，为每个温度传感器与 CPU 核心集群记录一条平均值。打开后每分钟会增加数十行数据，不需要细节时请保持关闭。这个开关同时适用于 MacHelper 与后台记录，但需要打开对应的 CPU 或温度菜单栏项目。关闭后会停止新的传感器与核心采样。已保存的历史会保留到下一次记录移除超过保留期限的数据，或由你清除。"
           }
         },
         "zh-Hant": {
@@ -16106,7 +16106,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这会永久删除所有已保存的传感器温度与 CPU 内核群组历史，无法撤销。监控历史、进程历史、设置与操作历史都不受影响。"
+            "value": "这会永久删除所有已保存的传感器温度与 CPU 核心集群历史，无法撤销。监控历史、进程历史、设置与操作历史都不受影响。"
           }
         },
         "zh-Hant": {
@@ -16140,7 +16140,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "个别传感器温度与 CPU 内核用量每分钟记录一次。请在「设置」→「通用」→「数据管理」打开「记录传感器与内核用量」，稍后再回来查看。"
+            "value": "单个传感器温度与 CPU 核心用量每分钟记录一次。请在「设置」→「通用」→「数据管理」打开「记录传感器与核心用量」，稍后再回来查看。"
           }
         },
         "zh-Hant": {
@@ -16174,7 +16174,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这会永久删除所有已保存的进程名称、CPU 用量与内存用量，无法撤销。监控历史、传感器与内核历史、设置与操作记录都不受影响。"
+            "value": "这会永久删除所有已保存的进程名称、CPU 用量与内存用量，无法撤销。监控历史、传感器与核心历史、设置与操作日志都不受影响。"
           }
         },
         "zh-Hant": {
@@ -16412,7 +16412,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "开始记录满一分钟后就会出现进程排行。请在设置 → 通用 → 数据管理打开「记录进程用量」，再回来查看。"
+            "value": "开始记录一分钟后就会出现进程排行。请在「设置」→「通用」→「数据管理」打开「记录进程用量」，稍后再回来查看。"
           }
         },
         "zh-Hant": {
@@ -16548,7 +16548,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "通知门槛与冷却时间"
+            "value": "通知阈值与冷却时间"
           }
         },
         "zh-Hant": {
@@ -16582,7 +16582,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "套用导入"
+            "value": "应用导入"
           }
         },
         "zh-Hant": {
@@ -16616,7 +16616,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "备份与还原"
+            "value": "备份与恢复"
           }
         },
         "zh-Hant": {
@@ -16718,7 +16718,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法导入%@：%@"
+            "value": "无法导入 %@：%@"
           }
         },
         "zh-Hant": {
@@ -16820,7 +16820,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法读取自订规则：%@"
+            "value": "无法读取自定义规则：%@"
           }
         },
         "zh-Hant": {
@@ -16888,7 +16888,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "自订清理规则"
+            "value": "自定义清理规则"
           }
         },
         "zh-Hant": {
@@ -16990,7 +16990,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "导出勾选的设置…"
+            "value": "导出所选设置…"
           }
         },
         "zh-Hant": {
@@ -17024,7 +17024,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "把勾选的设置导出成一个文件，或在这一台或另一台 Mac 上导入。设置文件不含监控历史、扫描缓存、操作记录、后台记录，也不含 Helper 注册信息。"
+            "value": "把所选设置导出成一个文件，或在这台或另一台 Mac 上导入。设置文件不包含监控历史、扫描缓存、操作日志、后台记录和 Helper 注册信息。"
           }
         },
         "zh-Hant": {
@@ -17296,7 +17296,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "导入的规则不会默认选择。"
+            "value": "导入的规则默认不选中。"
           }
         },
         "zh-Hant": {
@@ -17330,7 +17330,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "导入时会取代标示「将被取代」的类别。文件中没有的类别不会变动。"
+            "value": "导入时会替换标为「将被替换」的类别。文件中没有的类别保持不变。"
           }
         },
         "zh-Hant": {
@@ -17364,7 +17364,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "内容无效"
+            "value": "无效"
           }
         },
         "zh-Hant": {
@@ -17432,7 +17432,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "没有变更"
+            "value": "没有更改"
           }
         },
         "zh-Hant": {
@@ -17466,7 +17466,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法导入"
+            "value": "不兼容"
           }
         },
         "zh-Hant": {
@@ -17500,7 +17500,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这个文件没有可取代的设置，不会变更任何内容。"
+            "value": "这个文件中没有会替换本机设置的内容，不会进行任何更改。"
           }
         },
         "zh-Hant": {
@@ -17534,7 +17534,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "优化扫描文件夹"
+            "value": "优化扫描的文件夹"
           }
         },
         "zh-Hant": {
@@ -17568,7 +17568,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "确认每个类别会做什么。在你选择「套用导入」之前，不会变更任何设置。"
+            "value": "确认每个类别会做什么。在你选择「应用导入」之前，不会更改任何设置。"
           }
         },
         "zh-Hant": {
@@ -17602,7 +17602,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "设置文件不含监控历史、扫描缓存、操作记录或后台记录。"
+            "value": "设置文件不含监控历史、扫描缓存、操作日志或后台记录。"
           }
         },
         "zh-Hant": {
@@ -17704,7 +17704,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "目前的值无效：%@"
+            "value": "当前的值无效：%@"
           }
         },
         "zh-Hant": {
@@ -17738,7 +17738,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "磁盘门槛必须介于 5 到 200 GB。"
+            "value": "磁盘阈值必须在 5 到 200 GB 之间。"
           }
         },
         "zh-Hant": {
@@ -17840,7 +17840,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "温度门槛必须介于 70 到 105 °C。"
+            "value": "温度阈值必须在 70 到 105 °C 之间。"
           }
         },
         "zh-Hant": {
@@ -17874,7 +17874,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "下列类别无法还原：%@。"
+            "value": "以下类别无法恢复：%@。"
           }
         },
         "zh-Hant": {
@@ -17908,7 +17908,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这不是 MacHelper 的设置文件。没有变更任何设置。"
+            "value": "这不是 MacHelper 的设置文件。没有更改任何设置。"
           }
         },
         "zh-Hant": {
@@ -17942,7 +17942,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这个文件由较新版本的 MacHelper 创建，无法导入。没有变更任何设置。"
+            "value": "这个文件由较新版本的 MacHelper 创建，无法导入。没有更改任何设置。"
           }
         },
         "zh-Hant": {
@@ -17976,7 +17976,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "将被取代"
+            "value": "将被替换"
           }
         },
         "zh-Hant": {
@@ -18010,7 +18010,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清理白名单与额外清除文件夹会整份取代。目前文字档中的注解与空行不会保留。"
+            "value": "清理白名单与额外清除文件夹会整体替换。当前文本文件中的注释与空行不会保留。"
           }
         },
         "zh-Hant": {
@@ -18044,7 +18044,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "规则档含有重复的规则 ID。"
+            "value": "规则文件含有重复的规则 ID。"
           }
         },
         "zh-Hant": {
@@ -18078,7 +18078,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这个类别在文件中是空的。导入会清除目前的值。"
+            "value": "这个类别在文件中是空的。导入会清除当前的值。"
           }
         },
         "zh-Hant": {
@@ -18248,7 +18248,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清除全部建置缓存或未使用的映像，可回收的空间可能比 Docker 的估计多；这里不会移除任何数据卷。"
+            "value": "清除全部构建缓存或未使用的镜像，可回收的空间可能比 Docker 估计的多；这里不会移除任何数据卷。"
           }
         },
         "zh-Hant": {
@@ -18356,7 +18356,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "映像"
+            "value": "镜像"
           }
         },
         "zh-Hant": {
@@ -18476,7 +18476,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "建置缓存"
+            "value": "构建缓存"
           }
         },
         "zh-Hant": {
@@ -18612,7 +18612,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$lld 个项目，%2$lld 天"
+            "value": "%2$lld 天内 %1$lld 个项目"
           }
         },
         "zh-Hant": {
@@ -18646,7 +18646,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "根据最近的监控历史、可用空间与后台项目做一次性检查。"
+            "value": "对最近的监控历史、可用空间与后台项目做一次检查。"
           }
         },
         "zh-Hant": {
@@ -18680,7 +18680,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "代理程序"
+            "value": "代理"
           }
         },
         "zh-Hant": {
@@ -18782,7 +18782,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "后台工作"
+            "value": "后台任务"
           }
         },
         "zh-Hant": {
@@ -18816,7 +18816,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "CPU 最忙"
+            "value": "CPU 占用最高"
           }
         },
         "zh-Hant": {
@@ -18850,7 +18850,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "依月份"
+            "value": "按月份"
           }
         },
         "zh-Hant": {
@@ -18884,7 +18884,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "依规则"
+            "value": "按规则"
           }
         },
         "zh-Hant": {
@@ -18952,7 +18952,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "CPU 是该进程列入最忙排行期间占用单一内核的比例。"
+            "value": "CPU 是该进程处于最忙排行期间占用单个核心的比例。"
           }
         },
         "zh-Hant": {
@@ -19054,7 +19054,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法读取登录项清单：%@"
+            "value": "无法读取登录项列表：%@"
           }
         },
         "zh-Hant": {
@@ -19224,7 +19224,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "取得可用空间趋势"
+            "value": "获取可用空间趋势"
           }
         },
         "zh-Hant": {
@@ -19326,7 +19326,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "历史时数"
+            "value": "历史小时数"
           }
         },
         "zh-Hant": {
@@ -19360,7 +19360,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "内存最大"
+            "value": "内存占用最高"
           }
         },
         "zh-Hant": {
@@ -19394,7 +19394,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "启动代理程序"
+            "value": "启动代理"
           }
         },
         "zh-Hant": {
@@ -19496,7 +19496,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 或后台记录运行时，每小时记录一次可用空间；大约 12 小时后会出现趋势。"
+            "value": "MacHelper 或后台记录运行时，每小时记录一次可用空间；大约 12 小时后会显示趋势。"
           }
         },
         "zh-Hant": {
@@ -19564,7 +19564,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这段期间没有发现问题。"
+            "value": "这段时间没有发现问题。"
           }
         },
         "zh-Hant": {
@@ -19632,7 +19632,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "上次大幅变动后的数据还不够算出趋势（约需 12 小时）。"
+            "value": "距离上次大幅变化的数据还不足以计算趋势（约需 12 小时）。"
           }
         },
         "zh-Hant": {
@@ -19700,7 +19700,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "目前没有可清理的项目。"
+            "value": "当前没有可清理的项目。"
           }
         },
         "zh-Hant": {
@@ -19768,7 +19768,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "期间"
+            "value": "时间段"
           }
         },
         "zh-Hant": {
@@ -19938,7 +19938,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "回传启动磁盘的可用空间；每小时记录足够时，也会回传减少的速度。"
+            "value": "返回启动磁盘的可用空间；如果有足够的每小时记录，也会返回减少的速度。"
           }
         },
         "zh-Hant": {
@@ -20074,7 +20074,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "根据已记录的历史运行 MacHelper 健康检查，并以文字回传结果。"
+            "value": "根据已记录的历史运行 MacHelper 健康检查，并以文本返回结果。"
           }
         },
         "zh-Hant": {
@@ -20176,7 +20176,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每天约减少 %1$@；照这个速度，约 %2$lld 天后会满。"
+            "value": "每天约减少 %1$@；按这个速度，大约 %2$lld 天后会满。"
           }
         },
         "zh-Hant": {
@@ -20346,7 +20346,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "到「设置 → 通用 → 数据管理」打开「记录进程用量」，就能看到哪些进程最忙。"
+            "value": "在「设置」→「通用」→「数据管理」打开「记录进程用量」，就能看到哪些进程最忙。"
           }
         },
         "zh-Hant": {
@@ -20380,7 +20380,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "开机时间"
+            "value": "运行时间"
           }
         },
         "zh-Hant": {
@@ -20448,7 +20448,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "目前显示的记录中，每条规则、侦测器或工作移除了多少，由大到小排列。从没出现在这里的规则，可能不值得勾选。"
+            "value": "当前显示的记录中，每条规则、检测器或任务移除了多少，从大到小排列。从未出现在这里的规则，可能不值得勾选。"
           }
         },
         "zh-Hant": {
@@ -20482,7 +20482,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "macOS 登记在登录时或后台运行的项目，包括 App 自行加入的。这份清单只供查看，要变更请到「登录项」。"
+            "value": "macOS 注册在登录时或后台运行的项目，包括 App 自行添加的。这份列表只供查看，要更改请到「登录项」。"
           }
         },
         "zh-Hant": {
@@ -20516,7 +20516,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这会永久删除每分钟的监控历史（包含其中所有指针）与每小时的可用空间记录。此操作无法撤销。进程用量历史、传感器与内核历史、其他设置与操作记录都不受影响。"
+            "value": "这会永久删除每分钟的监控历史（包含其中所有指标）与每小时的可用空间记录。此操作无法撤销。进程用量历史、传感器与核心历史、其他设置与操作日志都不受影响。"
           }
         },
         "zh-Hant": {
@@ -20686,7 +20686,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "直接删除：%@ 的低风险缓存与日志，App 会自行重建，不会进废纸篓。"
+            "value": "直接删除：%@ 的低风险缓存与日志，App 会自行重建，不会进入废纸篓。"
           }
         },
         "zh-Hant": {
@@ -20754,7 +20754,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "删除默认勾选的低风险缓存与日志（与调度清理相同的范围），App 会自行重建这些数据。正在运行的 App 会跳过。开始前会先询问。"
+            "value": "删除默认勾选的低风险缓存与日志（与定时清理的范围相同），App 会自行重建这些数据。会跳过正在运行的 App。开始前会先询问。"
           }
         },
         "zh-Hant": {
@@ -20890,7 +20890,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这只是预览，按下「清理」前不会删除任何东西。低风险项目会直接删除，中、高风险项目移到废纸篓。"
+            "value": "这只是预览，点按「清理」前不会删除任何东西。低风险项目会直接删除，中、高风险项目会移到废纸篓。"
           }
         },
         "zh-Hant": {
@@ -21128,7 +21128,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在设置中激活 Helper 后才能切换"
+            "value": "在设置中启用 Helper 后才能切换"
           }
         },
         "zh-Hant": {
@@ -21230,7 +21230,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "只有可以安全重复运行、而且不会失去系统无法重建之数据的任务，才能在后台自动运行。"
+            "value": "只有可以安全重复运行、并且不会丢失系统无法重建的数据的任务，才能在后台自动运行。"
           }
         },
         "zh-Hant": {
@@ -21400,7 +21400,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这个系统后台程序会对所有用户停止，直到你在这里重新激活前都不会再启动。安装它的 App 可能无法正常运作（例如更新程序、VPN 或网络辅助程序）。plist 档不会被修改或删除。"
+            "value": "这个系统守护进程会对所有用户停止，在你在这里重新启用之前都不会再启动。安装它的 App 可能无法正常工作（例如更新程序、VPN 或网络辅助程序）。plist 文件不会被修改或删除。"
           }
         },
         "zh-Hant": {
@@ -21536,7 +21536,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Helper 已把 %lld 个系统层级项目移到废纸篓。"
+            "value": "Helper 已把 %lld 个系统级项目移到废纸篓。"
           }
         },
         "zh-Hant": {
@@ -21570,7 +21570,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld 个系统层级项目会由 Helper 移到废纸篓。"
+            "value": "%lld 个系统级项目会由 Helper 移到废纸篓。"
           }
         },
         "zh-Hant": {
@@ -21604,7 +21604,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "勾选的项目会由 Helper 移到你的废纸篓，之后可以放回原处。只依名称比对到的项目默认不勾，确定属于这个 App 才勾选。"
+            "value": "勾选的项目会由 Helper 移到你的废纸篓，之后可以放回原处。仅按名称匹配到的项目默认不勾选，确定属于这个 App 再勾选。"
           }
         },
         "zh-Hant": {
@@ -21638,7 +21638,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在设置中激活 Helper 后才能把这些项目移到废纸篓；在那之前请手动移除。"
+            "value": "在设置中启用 Helper 后才能把这些项目移到废纸篓；在那之前请手动移除。"
           }
         },
         "zh-Hant": {
@@ -21672,7 +21672,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "依名称比对"
+            "value": "按名称匹配"
           }
         },
         "zh-Hant": {
@@ -21706,7 +21706,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "系统层级"
+            "value": "系统级"
           }
         },
         "zh-Hant": {
@@ -21774,7 +21774,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "剩下 %@。现在清理一下，电脑会更顺畅。"
+            "value": "还剩 %@。现在清理一下，Mac 会更流畅。"
           }
         },
         "zh-Hant": {
@@ -21978,7 +21978,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "蓝（CPU、链接）"
+            "value": "蓝色（CPU、链接）"
           }
         },
         "zh-Hant": {
@@ -22148,7 +22148,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "选择 VS Code 色彩主题（.json）"
+            "value": "选择 VS Code 颜色主题（.json）"
           }
         },
         "zh-Hant": {
@@ -22182,7 +22182,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "要显示哪些数值与图表样式，请到「菜单栏」分页设置。"
+            "value": "要显示哪些数值及其图表样式，请在「菜单栏」标签页中设置。"
           }
         },
         "zh-Hant": {
@@ -22216,7 +22216,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "依状态替数值上色（注意、警告）"
+            "value": "按状态为数值着色（注意、警告）"
           }
         },
         "zh-Hant": {
@@ -22352,7 +22352,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "青（网络）"
+            "value": "青色（网络）"
           }
         },
         "zh-Hant": {
@@ -22556,7 +22556,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在编辑深色版本（把系统外观切成浅色才能编辑浅色版本）。"
+            "value": "正在编辑深色版本（将系统外观切换为浅色才能编辑浅色版本）。"
           }
         },
         "zh-Hant": {
@@ -22590,7 +22590,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在编辑浅色版本（把系统外观切成深色才能编辑深色版本）。"
+            "value": "正在编辑浅色版本（将系统外观切换为深色才能编辑深色版本）。"
           }
         },
         "zh-Hant": {
@@ -22658,7 +22658,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "淡色文字"
+            "value": "淡色文本"
           }
         },
         "zh-Hant": {
@@ -22828,7 +22828,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "启动磁盘共 %@ 的可用空间。"
+            "value": "可用，启动磁盘共 %@。"
           }
         },
         "zh-Hant": {
@@ -22896,7 +22896,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "安全地释放空间，清理前每一项都会先让你看过。"
+            "value": "安全地释放空间。清理前，每一项都会先让你确认。"
           }
         },
         "zh-Hant": {
@@ -22964,7 +22964,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "灰"
+            "value": "灰色"
           }
         },
         "zh-Hant": {
@@ -22998,7 +22998,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "绿（正常）"
+            "value": "绿色（正常）"
           }
         },
         "zh-Hant": {
@@ -23066,7 +23066,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "处理器现在有多忙。"
+            "value": "处理器当前的繁忙程度。"
           }
         },
         "zh-Hant": {
@@ -23270,7 +23270,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "可以导入 VS Code、Cursor、VSCodium 与 Windsurf 的色彩主题（已安装的主题或 .json 主题档）。只会读取颜色。"
+            "value": "可以导入 VS Code、Cursor、VSCodium 与 Windsurf 的颜色主题（已安装的主题或 .json 主题文件）。只会读取颜色。"
           }
         },
         "zh-Hant": {
@@ -23304,7 +23304,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "项目标示"
+            "value": "项目标签"
           }
         },
         "zh-Hant": {
@@ -23542,7 +23542,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "橘（温度）"
+            "value": "橙色（温度）"
           }
         },
         "zh-Hant": {
@@ -23746,7 +23746,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "红（警告）"
+            "value": "红色（警告）"
           }
         },
         "zh-Hant": {
@@ -23814,7 +23814,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重设"
+            "value": "重置"
           }
         },
         "zh-Hant": {
@@ -23848,7 +23848,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "给开着的 App 使用的空间，不够时一切都会变慢。"
+            "value": "供打开的 App 使用的空间，不够时一切都会变慢。"
           }
         },
         "zh-Hant": {
@@ -23984,7 +23984,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "次要文字"
+            "value": "次要文本"
           }
         },
         "zh-Hant": {
@@ -24052,7 +24052,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "选择与浮起"
+            "value": "选中与浮起"
           }
         },
         "zh-Hant": {
@@ -24120,7 +24120,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "显示所有页面、图表与技术细节：监控历史、风扇曲线、启动代理程序和各进程的数字。"
+            "value": "显示所有页面、图表与技术细节：监控历史、风扇曲线、启动代理和各进程的数字。"
           }
         },
         "zh-Hant": {
@@ -24154,7 +24154,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "用白话显示最重要的信息：Mac 状况好不好、还有多少空间，以及一键清理。监控图表、风扇曲线和启动项会隐藏。"
+            "value": "用通俗的语言显示最重要的信息：Mac 状态如何、还有多少空间，以及一键清理。监控图表、风扇曲线和启动项会隐藏。"
           }
         },
         "zh-Hant": {
@@ -24256,7 +24256,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "保存空间"
+            "value": "存储空间"
           }
         },
         "zh-Hant": {
@@ -24324,7 +24324,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "系统圆体"
+            "value": "系统圆角"
           }
         },
         "zh-Hant": {
@@ -24358,7 +24358,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "内文"
+            "value": "正文"
           }
         },
         "zh-Hant": {
@@ -24392,7 +24392,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "文字大小"
+            "value": "文本大小"
           }
         },
         "zh-Hant": {
@@ -24494,7 +24494,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "有点紧"
+            "value": "偏紧"
           }
         },
         "zh-Hant": {
@@ -24528,7 +24528,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "标题和大数字使用标题字体；说明与清单使用正文字体，保持好读。像素字体是 MacHelper 内附的免费字体「俐方体11号」。"
+            "value": "标题和大数字使用标题字体；说明与列表使用正文字体，便于阅读。像素字体是 MacHelper 自带的免费字体「俐方体11号」。"
           }
         },
         "zh-Hant": {
@@ -24664,7 +24664,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "紫（GPU）"
+            "value": "紫色（GPU）"
           }
         },
         "zh-Hant": {
@@ -24766,7 +24766,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "忙的时候变热是正常的，需要时风扇会自动加速。"
+            "value": "负载高时变热是正常的，需要时风扇会自动加速。"
           }
         },
         "zh-Hant": {
@@ -24800,7 +24800,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "想做什么？"
+            "value": "你想做什么？"
           }
         },
         "zh-Hant": {
@@ -24868,7 +24868,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "黄（注意）"
+            "value": "黄色（注意）"
           }
         },
         "zh-Hant": {
@@ -25004,7 +25004,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "选择放有图标图片的文件夹"
+            "value": "选择存放图标图片的文件夹"
           }
         },
         "zh-Hant": {
@@ -25072,7 +25072,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "选择要在哪里创建「MacHelper Icons」文件夹"
+            "value": "选择在哪里创建「MacHelper Icons」文件夹"
           }
         },
         "zh-Hant": {
@@ -25106,7 +25106,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "点一下图标就能换成你自己的图片，换过的图标在任何图标组都会使用。图标包是一个文件夹，里面的图片以图标代号命名（cpu.png、fans.svg…）；导出范本可以看到所有代号。文件夹里 MacHelper 用不到的文件会被跳过。"
+            "value": "点按图标就能换成你自己的图片，换过的图标在任何图标集中都会使用。图标包是一个文件夹，里面的图片以图标名称命名（cpu.png、fans.svg…）；导出模板可以看到所有名称。文件夹里 MacHelper 用不到的图片会被忽略。"
           }
         },
         "zh-Hant": {
@@ -25208,7 +25208,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "导出成范本…"
+            "value": "导出为模板…"
           }
         },
         "zh-Hant": {
@@ -25242,7 +25242,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已导出图标范本。"
+            "value": "已导出图标模板。"
           }
         },
         "zh-Hant": {
@@ -25276,7 +25276,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "图标组"
+            "value": "图标集"
           }
         },
         "zh-Hant": {
@@ -25718,7 +25718,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "空白清单"
+            "value": "空列表"
           }
         },
         "zh-Hant": {
@@ -25786,7 +25786,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已选 %1$@／共 %2$@"
+            "value": "%1$@ / %2$@"
           }
         },
         "zh-Hant": {
@@ -25820,7 +25820,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已选 %1$lld／共 %2$lld 项"
+            "value": "%1$lld / %2$lld 项任务"
           }
         },
         "zh-Hant": {
@@ -25854,7 +25854,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "选一个现成的外观，会一次设置好颜色、形状、标题字体和图标。之后在下面调整任何细节，就会变成你自己的版本。"
+            "value": "选一个现成的外观，一次设置好颜色、形状、标题字体和图标。之后调整下面的任何细节，就会变成你自己的版本。"
           }
         },
         "zh-Hant": {
@@ -25888,7 +25888,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "加入项目文件夹"
+            "value": "添加项目文件夹"
           }
         },
         "zh-Hant": {
@@ -25922,7 +25922,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "所属 App"
+            "value": "所属"
           }
         },
         "zh-Hant": {
@@ -25956,7 +25956,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "内文"
+            "value": "正文"
           }
         },
         "zh-Hant": {
@@ -26024,7 +26024,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "简洁的系统风格，跟着浅色／深色模式切换。"
+            "value": "简洁的系统风格，随浅色／深色模式切换。"
           }
         },
         "zh-Hant": {
@@ -26092,7 +26092,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "自订：你已调整过下面的细节。选一个外观可以从它重新开始。"
+            "value": "自定义：你已调整过下面的细节。选一个外观可以从它重新开始。"
           }
         },
         "zh-Hant": {
@@ -26194,7 +26194,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "编辑内置主题时，修改会另存成一份副本，原本的主题不会变。导入的 VS Code 主题保留原本的颜色；只会读取文件里的颜色。"
+            "value": "编辑内置主题时，修改会另存为副本，原主题不会改变。导入的 VS Code 主题保留原来的颜色；只会读取文件中的颜色。"
           }
         },
         "zh-Hant": {
@@ -26228,7 +26228,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "所有数值都使用菜单栏原本的文字颜色。"
+            "value": "所有数值都使用菜单栏本身的文本颜色。"
           }
         },
         "zh-Hant": {
@@ -26262,7 +26262,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "字体、文字大小与形状"
+            "value": "字体、文本大小与形状"
           }
         },
         "zh-Hant": {
@@ -26296,7 +26296,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "图形"
+            "value": "图表"
           }
         },
         "zh-Hant": {
@@ -26534,7 +26534,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "识别名称"
+            "value": "标签"
           }
         },
         "zh-Hant": {
@@ -26568,7 +26568,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每个数值旁标示"
+            "value": "每个数值旁显示"
           }
         },
         "zh-Hant": {
@@ -26636,7 +26636,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "菜单栏的字体、标示与数值颜色请到「菜单栏」分页设置。"
+            "value": "菜单栏的字体、标签与数值颜色请在「菜单栏」标签页中设置。"
           }
         },
         "zh-Hant": {
@@ -26670,7 +26670,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "找不到 VS Code 系列的编辑器。可以改用「选择 .json 文件…」导入主题档。"
+            "value": "找不到 VS Code 系列的编辑器。可以改用「选择 .json 文件…」导入主题文件。"
           }
         },
         "zh-Hant": {
@@ -26704,7 +26704,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "不标示"
+            "value": "不显示"
           }
         },
         "zh-Hant": {
@@ -26806,7 +26806,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "像素图（内置）"
+            "value": "像素画（内置）"
           }
         },
         "zh-Hant": {
@@ -27146,7 +27146,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "偏高时淡色提示"
+            "value": "偏高时用淡色提示"
           }
         },
         "zh-Hant": {
@@ -27248,7 +27248,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "标题和大数字使用标题字体；说明与清单使用正文字体，保持好读。"
+            "value": "标题和大数字使用标题字体；说明与列表使用正文字体，便于阅读。"
           }
         },
         "zh-Hant": {
@@ -27282,7 +27282,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "关闭项目会完全停止量测。「显示在菜单栏」只决定它是否出现在菜单栏，面板和主窗口仍会显示。"
+            "value": "关闭某个项目会在所有地方停止测量。「显示在菜单栏」只决定它是否出现在菜单栏，面板和主窗口仍会显示。"
           }
         },
         "zh-Hant": {
@@ -27316,7 +27316,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "双行显示（名称在上、数值在下，比较省空间）"
+            "value": "双行显示（名称在上、数值在下，更省空间）"
           }
         },
         "zh-Hant": {
@@ -27350,7 +27350,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "更新频率"
+            "value": "更新间隔"
           }
         },
         "zh-Hant": {
@@ -27418,7 +27418,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "需要注意的数值会变成接近白色的淡黄或淡红，仍然清楚好读。"
+            "value": "需要注意的数值会显示为接近白色的淡黄或淡红，仍然清晰易读。"
           }
         },
         "zh-Hant": {
@@ -27452,7 +27452,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "运行时机"
+            "value": "运行时间点"
           }
         },
         "zh-Hant": {
@@ -27486,7 +27486,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "白色（菜单栏文字颜色）"
+            "value": "白色（菜单栏文本颜色）"
           }
         },
         "zh-Hant": {
@@ -27554,7 +27554,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "像一台安静的仪表：平常是中性灰，只有需要注意时才出现颜色。"
+            "value": "沉稳的仪表盘：平时是中性灰色，只有需要注意时才出现颜色。"
           }
         },
         "zh-Hant": {
@@ -27758,7 +27758,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "可用空间每天约少 %1$@，照这速度大约 %2$lld 天后会用完。"
+            "value": "可用空间每天约减少 %1$@，按这个速度大约 %2$lld 天后会用完。"
           }
         },
         "zh-Hant": {
@@ -27826,7 +27826,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "仪表"
+            "value": "仪表盘"
           }
         },
         "zh-Hant": {
@@ -27894,7 +27894,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "内存有点紧，关掉用不到的 App 会有帮助。"
+            "value": "内存有点紧张，退出用不到的 App 会有帮助。"
           }
         },
         "zh-Hant": {
@@ -27928,7 +27928,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "需要你处理的事"
+            "value": "需要你处理的事项"
           }
         },
         "zh-Hant": {
@@ -27962,7 +27962,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "目前没有。"
+            "value": "暂时没有。"
           }
         },
         "zh-Hant": {
@@ -28166,7 +28166,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已连续开机 %@。"
+            "value": "已连续运行 %@，未重启。"
           }
         },
         "zh-Hant": {
@@ -28200,7 +28200,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "上传 %@/s"
+            "value": "上传 %@/秒"
           }
         },
         "zh-Hant": {
@@ -28234,7 +28234,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mac 过热了，目前 %@"
+            "value": "Mac 过热了，当前 %@"
           }
         },
         "zh-Hant": {
@@ -28268,7 +28268,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mac 运作顺畅"
+            "value": "Mac 运行顺畅"
           }
         },
         "zh-Hant": {
@@ -28302,7 +28302,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mac 运作顺畅，空间剩 %@"
+            "value": "Mac 运行顺畅，还剩 %@ 空间"
           }
         },
         "zh-Hant": {
@@ -28948,7 +28948,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "允许「完全磁盘访问权限」以检查所有项目"
+            "value": "允许「完全磁盘访问权限」以查看全部内容"
           }
         },
         "zh-Hant": {
@@ -28982,7 +28982,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已检查 %lld／%lld 个位置"
+            "value": "已检查 %lld / %lld 个位置"
           }
         },
         "zh-Hant": {
@@ -29050,7 +29050,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "停止并显示目前找到的项目"
+            "value": "停止并显示当前找到的项目"
           }
         },
         "zh-Hant": {
@@ -29118,7 +29118,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "完整扫描"
+            "value": "扫描全部"
           }
         },
         "zh-Hant": {
@@ -29526,7 +29526,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "一周以上未变动"
+            "value": "一周以上未使用"
           }
         },
         "zh-Hant": {
@@ -29560,7 +29560,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "一个月以上未变动"
+            "value": "一个月以上未使用"
           }
         },
         "zh-Hant": {
@@ -29594,7 +29594,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "三个月以上未变动"
+            "value": "三个月以上未使用"
           }
         },
         "zh-Hant": {
@@ -29662,7 +29662,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "由大到小"
+            "value": "从大到小"
           }
         },
         "zh-Hant": {
@@ -29696,7 +29696,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "依名称"
+            "value": "按名称"
           }
         },
         "zh-Hant": {
@@ -29764,7 +29764,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "符合项目"
+            "value": "匹配项"
           }
         },
         "zh-Hant": {
@@ -29798,7 +29798,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "勾选所有符合项目"
+            "value": "勾选所有匹配项"
           }
         },
         "zh-Hant": {
@@ -29832,7 +29832,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "取消勾选所有符合项目"
+            "value": "取消勾选所有匹配项"
           }
         },
         "zh-Hant": {
@@ -30036,7 +30036,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清理、卸载，以及从磁盘分析移到废纸篓时，MacHelper 都会跳过这些文件和文件夹（包含里面的所有内容）。在预览中对项目右键点按，选「永不清理这个项目」就能加入。"
+            "value": "清理、卸载，以及从磁盘分析移到废纸篓时，MacHelper 都会跳过这些文件和文件夹（包含里面的所有内容）。在预览中右键点按项目，选「永不清理这个项目」就能添加。"
           }
         },
         "zh-Hant": {
@@ -30070,7 +30070,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢复清理"
+            "value": "重新允许清理"
           }
         },
         "zh-Hant": {
@@ -30206,7 +30206,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "存放在 clean-whitelist.txt，命令行工具也会使用。"
+            "value": "保存在 clean-whitelist.txt 中，命令行工具也会使用。"
           }
         },
         "zh-Hant": {
@@ -30376,7 +30376,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "1. 按「打开系统设置」。"
+            "value": "1. 点按「打开系统设置」。"
           }
         },
         "zh-Hant": {
@@ -30546,7 +30546,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 只会读取这些文件夹，列出可以清理的项目；没有你的确认，什么都不会删除。"
+            "value": "MacHelper 只会读取这些文件夹来列出可清理的项目；未经你确认，不会删除任何东西。"
           }
         },
         "zh-Hant": {
@@ -30648,7 +30648,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "用 Homebrew 安装、有新版本可用的 App。"
+            "value": "用 Homebrew 安装且有新版本可用的 App。"
           }
         },
         "zh-Hant": {
@@ -30716,7 +30716,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "也列出浏览器这类平常会自己安装更新的 App"
+            "value": "也列出浏览器等通常会自行安装更新的 App"
           }
         },
         "zh-Hant": {
@@ -30818,7 +30818,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这一页会更新用 Homebrew 安装的 App（brew install --cask）。请先到 brew.sh 安装 Homebrew。"
+            "value": "此页面用于更新通过 Homebrew 安装的 App（brew install --cask）。请先从 brew.sh 安装 Homebrew。"
           }
         },
         "zh-Hant": {
@@ -30988,7 +30988,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "更新会逐一对每个 App 运行 brew upgrade --cask，并记录在操作记录中。开着的 App 会先退出，更新后再重新打开。"
+            "value": "更新会逐个对每个 App 运行 brew upgrade --cask，并记录在操作日志中。正在运行的 App 会先退出，更新后再重新打开。"
           }
         },
         "zh-Hant": {
@@ -31090,7 +31090,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@检查"
+            "value": "检查于 %@"
           }
         },
         "zh-Hant": {
@@ -31124,7 +31124,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在更新 %1$@（第 %2$lld／%3$lld 个）…"
+            "value": "正在更新 %1$@（第 %2$lld 个，共 %3$lld 个）…"
           }
         },
         "zh-Hant": {
@@ -31158,7 +31158,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已选 %1$lld／%2$lld 个"
+            "value": "已选 %1$lld 个，共 %2$lld 个"
           }
         },
         "zh-Hant": {
@@ -31294,7 +31294,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "以下 App 正开着，会先退出再重新打开：%@。请先保存其中的工作。"
+            "value": "以下 App 正在运行，会先退出再重新打开：%@。请先保存其中的工作。"
           }
         },
         "zh-Hant": {
@@ -31362,7 +31362,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "会自动更新"
+            "value": "自动更新"
           }
         },
         "zh-Hant": {
@@ -31396,7 +31396,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已固定版本"
+            "value": "已固定"
           }
         },
         "zh-Hant": {
@@ -31430,7 +31430,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "打开中"
+            "value": "打开"
           }
         },
         "zh-Hant": {
@@ -31464,7 +31464,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "它的安装程序需要管理者密码，只能在「终端」输入："
+            "value": "它的安装程序需要管理员密码，只能在「终端」输入："
           }
         },
         "zh-Hant": {
@@ -31566,7 +31566,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Homebrew 的消息"
+            "value": "Homebrew 的输出"
           }
         },
         "zh-Hant": {
@@ -31634,7 +31634,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "安全性设置"
+            "value": "安全设置"
           }
         },
         "zh-Hant": {
@@ -31668,7 +31668,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "全部打开"
+            "value": "全部开启"
           }
         },
         "zh-Hant": {
@@ -31736,7 +31736,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 只会读取这些设置，不会修改。按钮会打开系统设置中对应的页面。"
+            "value": "MacHelper 只会读取这些设置，不会修改。按钮会打开「系统设置」中对应的页面。"
           }
         },
         "zh-Hant": {
@@ -31872,7 +31872,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "打开"
+            "value": "已开启"
           }
         },
         "zh-Hant": {
@@ -31906,7 +31906,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "来自不明开发者的 App 第一次打开前需要你同意。"
+            "value": "来自身份不明开发者的 App 在首次打开前需要你批准。"
           }
         },
         "zh-Hant": {
@@ -31940,7 +31940,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "下载的 App 打开时不会被检查。除非某个 App 需要，否则建议重新打开。"
+            "value": "下载的 App 打开时不会经过检查。除非某个 App 需要关闭它，否则建议重新开启。"
           }
         },
         "zh-Hant": {
@@ -31974,7 +31974,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在下载的 App 打开前先检查。"
+            "value": "在打开下载的 App 前先进行检查。"
           }
         },
         "zh-Hant": {
@@ -32042,7 +32042,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "启动磁盘已加密。没有你的密码，即使拆下磁盘也读不到内容。"
+            "value": "启动磁盘已加密。即使拆下磁盘，没有你的密码也无法读取。"
           }
         },
         "zh-Hant": {
@@ -32076,7 +32076,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "启动磁盘没有加密：任何拿到这台 Mac 的人都能读取文件。加密会在后台进行，不影响你继续工作。"
+            "value": "启动磁盘未加密：任何拿到这台 Mac 的人都能读取文件。加密会在后台进行，你可以继续工作。"
           }
         },
         "zh-Hant": {
@@ -32246,7 +32246,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "会过滤连入的连接，而且这台 Mac 不回应网络上的探测（隐形模式）。"
+            "value": "会过滤传入连接，并且这台 Mac 不响应网络探测（隐身模式）。"
           }
         },
         "zh-Hant": {
@@ -32280,7 +32280,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "会过滤连到 App 的连入连接。"
+            "value": "会过滤传入 App 的连接。"
           }
         },
         "zh-Hant": {
@@ -32314,7 +32314,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "App 可以不经询问就接受网络连接。如果会使用公共 Wi-Fi，建议打开。"
+            "value": "App 可以不经询问就接受网络连接。如果使用公共 Wi-Fi，建议开启。"
           }
         },
         "zh-Hant": {
@@ -32348,7 +32348,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "过滤连入的网络连接。"
+            "value": "过滤传入的网络连接。"
           }
         },
         "zh-Hant": {
@@ -32416,7 +32416,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "系统文件无法被修改，管理者或取得你密码的恶意程序也不行。"
+            "value": "系统文件无法被修改，即使是管理员或拿到你密码的恶意软件也不行。"
           }
         },
         "zh-Hant": {
@@ -32450,7 +32450,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "系统文件可以被修改。只能在 macOS 恢复模式中重新打开（csrutil enable）。"
+            "value": "系统文件可以被修改。只能在 macOS 恢复模式中重新开启（csrutil enable）。"
           }
         },
         "zh-Hant": {
@@ -32484,7 +32484,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "部分打开"
+            "value": "部分开启"
           }
         },
         "zh-Hant": {
@@ -32586,7 +32586,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "自动安全性更新"
+            "value": "自动安全更新"
           }
         },
         "zh-Hant": {
@@ -32620,7 +32620,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "安全性回应和恶意软件定义会自动安装。"
+            "value": "安全响应和恶意软件定义会自动安装。"
           }
         },
         "zh-Hant": {
@@ -32654,7 +32654,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "安全性修正和恶意软件定义不会自动安装。请在「软件更新 → 自动更新」中打开「安装安全性回应和系统文件」。"
+            "value": "安全修复和恶意软件定义不会自动安装。请在「软件更新」→「自动更新」中打开「安装安全响应和系统文件」。"
           }
         },
         "zh-Hant": {
@@ -32688,7 +32688,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "只有部分安全性更新会自动安装。请在「软件更新 → 自动更新」中打开「安装安全性回应和系统文件」。"
+            "value": "只有部分安全更新会自动安装。请在「软件更新」→「自动更新」中打开「安装安全响应和系统文件」。"
           }
         },
         "zh-Hant": {
@@ -32722,7 +32722,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "自动安装安全性修正。"
+            "value": "自动安装安全修复。"
           }
         },
         "zh-Hant": {
@@ -32824,7 +32824,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "macOS 内置的恶意软件扫描。定义档安装于 %@。"
+            "value": "macOS 内置的恶意软件扫描器。定义文件安装于 %@。"
           }
         },
         "zh-Hant": {
@@ -32858,7 +32858,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "macOS 内置的恶意软件扫描。"
+            "value": "macOS 内置的恶意软件扫描器。"
           }
         },
         "zh-Hant": {
@@ -32994,7 +32994,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "日志文件异常庞大"
+            "value": "日志异常庞大"
           }
         },
         "zh-Hant": {
@@ -33028,7 +33028,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "里面直接放了 %@ 个文件"
+            "value": "直接包含 %@ 个文件"
           }
         },
         "zh-Hant": {
@@ -33062,7 +33062,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "自 %@ 起没有使用"
+            "value": "自 %@ 起未使用"
           }
         },
         "zh-Hant": {
@@ -33096,7 +33096,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "占目前显示的文件夹"
+            "value": "占当前显示文件夹的比例"
           }
         },
         "zh-Hant": {
@@ -33232,7 +33232,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "超过 %lld 天没有使用（%@）"
+            "value": "超过 %lld 天未使用（%@）"
           }
         },
         "zh-Hant": {
@@ -33300,7 +33300,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "没有发现异常：没有半年没用的大文件，也没有过大的缓存或日志文件文件夹。"
+            "value": "没有发现异常：没有半年未用的大文件，也没有过大的缓存或日志文件夹。"
           }
         },
         "zh-Hant": {
@@ -33368,7 +33368,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 可以替这台 Mac 上的代码 Agent 加入一个 Skill。装好之后，你可以直接问 Agent「帮我清出一些空间」或「为什么 Mac 这么烫？」，它会用 MacHelper 的命令行工具检查。要删除任何东西前，它都会先列出内容并询问你。"
+            "value": "MacHelper 可以为这台 Mac 上的编程 Agent 添加一个 Skill。安装后，你可以直接让 Agent「帮我腾出一些空间」或问它「为什么 Mac 这么烫？」，它会用 MacHelper 的命令行工具检查。删除任何东西之前，它都会先列出内容并询问你。"
           }
         },
         "zh-Hant": {
@@ -33402,7 +33402,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "同时把 machelper 指令加入终端"
+            "value": "同时把 machelper 命令添加到终端"
           }
         },
         "zh-Hant": {
@@ -33436,7 +33436,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "之后也可以在「设置 → 通用」加入或移除。"
+            "value": "之后也可以在「设置 → 通用」添加或移除。"
           }
         },
         "zh-Hant": {
@@ -33572,7 +33572,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已有另一个名为 machelper 的 Skill，不会更动"
+            "value": "已有另一个名为 machelper 的 Skill，不会改动"
           }
         },
         "zh-Hant": {
@@ -33640,7 +33640,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "让 Claude Code 或 Codex 透过 machelper 指令检查并清理这台 Mac。它会先预览，删除任何东西前都会询问。"
+            "value": "让 Claude Code 或 Codex 通过 machelper 命令检查并清理这台 Mac。它会先预览，删除任何东西前都会询问。"
           }
         },
         "zh-Hant": {

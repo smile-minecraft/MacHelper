@@ -34,7 +34,7 @@ extension MonitorStore {
             case .disk:
                 let used = disk.map { 1 - Double($0.availableBytes) / Double(max($0.totalBytes, 1)) }
                 return .init(module: m, text: disk.map { Fmt.compactBytes(Double($0.availableBytes)) } ?? "–",
-                             secondary: nil, fraction: used, series: [], level: StatusRules.disk(free: diskFreeFraction)?.level)
+                             secondary: nil, fraction: used, series: [], level: StatusRules.disk(freeBytes: diskFreeBytes)?.level)
             case .network:
                 return .init(module: m, text: "↑" + Fmt.rate(network?.outBytesPerSecond),
                              secondary: "↓" + Fmt.rate(network?.inBytesPerSecond), fraction: nil, series: history[.netIn] ?? [])
