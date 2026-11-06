@@ -35,8 +35,13 @@ public struct MaintenanceTask: Sendable, Identifiable {
 public enum MaintenanceCatalog {
     static let lsregister = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
     static let brew = ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"].first { FileManager.default.isExecutableFile(atPath: $0) }
-    static let docker = ["/usr/local/bin/docker", "/opt/homebrew/bin/docker", "/Applications/Docker.app/Contents/Resources/bin/docker"]
-        .first { FileManager.default.isExecutableFile(atPath: $0) }
+    /// The Docker CLI, whichever engine provides it (Docker Desktop, OrbStack, Colima via Homebrew).
+    public static let docker: String? = {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        return ["/usr/local/bin/docker", "/opt/homebrew/bin/docker", "\(home)/.orbstack/bin/docker", "\(home)/.docker/bin/docker",
+                "/Applications/Docker.app/Contents/Resources/bin/docker", "/Applications/OrbStack.app/Contents/MacOS/xbin/docker"]
+            .first { FileManager.default.isExecutableFile(atPath: $0) }
+    }()
 
     public static let all: [MaintenanceTask] = {
         var tasks: [MaintenanceTask] = [
@@ -85,6 +90,14 @@ public enum MaintenanceCatalog {
                                          description: String(localized: "Removes stopped containers, unused networks, dangling images and build cache (docker system prune -f). Docker must be running.", bundle: .module),
                                          risk: .medium, selectedByDefault: false,
                                          runner: .user([[docker, "system", "prune", "-f"]]), requires: [docker]))
+            tasks.append(MaintenanceTask(id: "docker.builder.all", title: String(localized: "Docker: clear all build cache", bundle: .module),
+                                         description: String(localized: "Removes all unused build cache, not only dangling layers (docker builder prune -a -f). The next image builds are slower. Docker must be running.", bundle: .module),
+                                         risk: .medium, selectedByDefault: false,
+                                         runner: .user([[docker, "builder", "prune", "-a", "-f"]]), requires: [docker]))
+            tasks.append(MaintenanceTask(id: "docker.images.unused", title: String(localized: "Docker: remove unused images", bundle: .module),
+                                         description: String(localized: "Removes every image no container uses, including tagged images you pulled or built (docker image prune -a -f). They have to be downloaded or rebuilt the next time you need them. Docker must be running.", bundle: .module),
+                                         risk: .high, selectedByDefault: false,
+                                         runner: .user([[docker, "image", "prune", "-a", "-f"]]), requires: [docker]))
         }
         return tasks
     }()

@@ -590,6 +590,46 @@
           }
         }
       }
+    },
+    "Docker: clear all build cache": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker：清除全部建置快取"
+          }
+        }
+      }
+    },
+    "Removes all unused build cache, not only dangling layers (docker builder prune -a -f). The next image builds are slower. Docker must be running.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除所有未使用的建置快取，不只是懸置的層（docker builder prune -a -f）。之後幾次建置映像會比較慢。Docker 必須正在執行。"
+          }
+        }
+      }
+    },
+    "Docker: remove unused images": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker：移除未使用的映像"
+          }
+        }
+      }
+    },
+    "Removes every image no container uses, including tagged images you pulled or built (docker image prune -a -f). They have to be downloaded or rebuilt the next time you need them. Docker must be running.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除所有沒有容器使用的映像，包括你下載或建置、帶有標籤的映像（docker image prune -a -f）。下次需要時得重新下載或建置。Docker 必須正在執行。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -32,6 +32,8 @@ final class OptimizeModel {
     private(set) var artifactReport: CleanReport?
     private(set) var taskResults: [TaskResult] = []
     private(set) var loadError: String?
+    /// `docker system df`, read during the scan when a Docker CLI exists; nil otherwise.
+    private(set) var dockerUsage: Result<DockerUsage, DockerUsage.Failure>?
 
     @ObservationIgnored nonisolated static let rootsKey = "optimize.artifactRoots"
 
@@ -55,6 +57,9 @@ final class OptimizeModel {
         let roots = artifactRoots
         let helperEnabled = HelperClient.shared.status == .enabled
         do {
+            async let docker: Result<DockerUsage, DockerUsage.Failure>? = Task.detached(priority: .userInitiated) {
+                MaintenanceCatalog.docker == nil ? nil : DockerUsage.read()
+            }.value
             let (plan, artifacts, tasks) = try await Task.detached(priority: .userInitiated) {
                 let rules = try RuleSet.load()
                 let plan = CleanScanner(rules: rules).scan()
@@ -68,6 +73,7 @@ final class OptimizeModel {
             self.plan = plan
             self.artifacts = artifacts
             self.tasks = tasks
+            self.dockerUsage = await docker
             phase = .ready
         } catch {
             loadError = "\(error)"

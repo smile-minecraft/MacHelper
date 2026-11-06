@@ -20,6 +20,7 @@
 - [x] **主視窗各頁**：一鍵優化、解除安裝、啟動項目已改用 `Palette` 配色、細分隔線和卡片式底部操作列；2026-11-05 使用者目視確認版面、間距與深色模式沒有問題。
 - [x] **GPU 溫度與 CPU 功耗**：2026-11-05 使用者目視確認沒有問題。
 - [x] **本輪新增功能的實機驗收**：2026-11-06 使用者確認磁碟分析儲存掃描、資料管理、程序用量歷史、感測器與核心歷史、設定備份與還原沒有問題；第六節只勾選這輪實際走過的項目，其餘細項（唯讀快取、外接磁碟、VoiceOver 等）列為已知未測。
+- [ ] **Docker 用量報告與進階清理**（2026-11-06 新增，尚未安裝到 `/Applications`）：`DockerUsage` 讀 `docker system df`（唯讀）；`machelper docker [--json]` 在這台 OrbStack 上顯示 16.15 GB、可回收 8.25 GB。「一鍵優化 → 維護」在 Docker 任務上方顯示各類用量；引擎沒開時顯示琥珀色提示。新增兩個預設不勾選的任務：`docker.builder.all`（`docker builder prune -a -f`，中風險）和 `docker.images.unused`（`docker image prune -a -f`，高風險）；資料卷一律不動。Docker CLI 搜尋路徑加上 `~/.orbstack/bin` 與 `~/.docker/bin`。`swift test` 45 項通過，Release 建置成功，字串鍵已和字串目錄核對。待實機確認：安裝後打開「一鍵優化」掃描，看 Docker 用量列和中文；關掉 OrbStack 再掃描看提示；兩個新任務沒有實際執行過。
 
 ## 二、還沒做的功能
 

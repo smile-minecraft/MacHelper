@@ -5410,6 +5410,140 @@
           }
         }
       }
+    },
+    "Docker disk usage": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker 磁碟用量"
+          }
+        }
+      }
+    },
+    "%@ used, %@ reclaimable according to Docker": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已使用 %1$@，Docker 估計可回收 %2$@"
+          }
+        }
+      }
+    },
+    "%lld (%lld in use)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld 個（%2$lld 個使用中）"
+          }
+        }
+      }
+    },
+    "%@ reclaimable": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可回收 %@"
+          }
+        }
+      }
+    },
+    "Clearing all build cache or unused images can reclaim more than Docker’s estimate; volumes are never removed here.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除全部建置快取或未使用的映像，可回收的空間可能比 Docker 的估計多；這裡不會移除任何資料卷。"
+          }
+        }
+      }
+    },
+    "Docker is installed but its engine isn’t running. Start Docker Desktop or OrbStack, then rescan.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安裝 Docker，但引擎沒有在執行。請先啟動 Docker Desktop 或 OrbStack，再重新掃描。"
+          }
+        }
+      }
+    },
+    "Couldn’t read Docker disk usage: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法讀取 Docker 磁碟用量：%@"
+          }
+        }
+      }
+    },
+    "docker.kind.images": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "映像"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images"
+          }
+        }
+      }
+    },
+    "docker.kind.containers": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containers"
+          }
+        }
+      }
+    },
+    "docker.kind.volumes": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "資料卷"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumes"
+          }
+        }
+      }
+    },
+    "docker.kind.buildCache": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "建置快取"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build cache"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

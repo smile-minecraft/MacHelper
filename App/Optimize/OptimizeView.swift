@@ -60,6 +60,7 @@ struct OptimizeView: View {
                 }
                 if let a = model.artifacts { artifactSection(a) } else { rootsOnlySection }
                 Section("Maintenance") {
+                    if let docker = model.dockerUsage { DockerUsageRow(result: docker) }
                     ForEach($model.tasks) { $row in
                         HStack(alignment: .top) {
                             Toggle(isOn: $row.selected) { EmptyView() }.labelsHidden().disabled(!row.available)
@@ -284,5 +285,53 @@ private struct RiskBadge: View {
             .padding(.horizontal, 5).padding(.vertical, 1)
             .background(color.opacity(0.15), in: Capsule())
             .foregroundStyle(color)
+    }
+}
+
+/// Read-only Docker disk usage shown above the Docker maintenance tasks.
+private struct DockerUsageRow: View {
+    let result: Result<DockerUsage, DockerUsage.Failure>
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Docker disk usage").foregroundStyle(Palette.text)
+            switch result {
+            case .success(let usage):
+                Text("\(Fmt.bytes(Int64(clamping: usage.totalSize))) used, \(Fmt.bytes(Int64(clamping: usage.totalReclaimable))) reclaimable according to Docker")
+                    .font(.caption).foregroundStyle(Palette.textMuted)
+                Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 2) {
+                    ForEach(usage.rows) { r in
+                        GridRow {
+                            Text(label(r.kind, fallback: r.type))
+                            Text("\(r.totalCount) (\(r.active) in use)").gridColumnAlignment(.trailing)
+                            Text(Fmt.bytes(Int64(clamping: r.size))).gridColumnAlignment(.trailing)
+                            Text("\(Fmt.bytes(Int64(clamping: r.reclaimable))) reclaimable").gridColumnAlignment(.trailing)
+                        }
+                    }
+                }
+                .font(.caption.monospacedDigit()).foregroundStyle(Palette.textMuted)
+                Text("Clearing all build cache or unused images can reclaim more than Docker’s estimate; volumes are never removed here.")
+                    .font(.caption2).foregroundStyle(Palette.textMuted)
+            case .failure(.engineNotRunning):
+                Text("Docker is installed but its engine isn’t running. Start Docker Desktop or OrbStack, then rescan.")
+                    .font(.caption).foregroundStyle(Theme.amber)
+            case .failure(.notInstalled):
+                EmptyView()
+            case .failure(.unreadable(let message)):
+                Text("Couldn’t read Docker disk usage: \(message)").font(.caption).foregroundStyle(Theme.amber).textSelection(.enabled)
+            }
+        }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func label(_ kind: DockerUsage.Row.Kind, fallback: String) -> String {
+        switch kind {
+        case .images: String(localized: "docker.kind.images", defaultValue: "Images")
+        case .containers: String(localized: "docker.kind.containers", defaultValue: "Containers")
+        case .volumes: String(localized: "docker.kind.volumes", defaultValue: "Volumes")
+        case .buildCache: String(localized: "docker.kind.buildCache", defaultValue: "Build cache")
+        case .other: fallback
+        }
     }
 }

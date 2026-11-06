@@ -15,7 +15,7 @@ struct MacHelperCLI: ParsableCommand {
         All real operations are logged to ~/Library/Logs/MacHelper/operations.jsonl (see `machelper history`).
         """,
         version: "0.1.0",
-        subcommands: [Clean.self, Purge.self, Optimize.self, Uninstall.self, AutoCleanCommand.self, Startup.self, Analyze.self, Duplicates.self, Status.self, Stats.self, Rules.self, History.self, MonitorCommand.self]
+        subcommands: [Clean.self, Purge.self, Optimize.self, Uninstall.self, AutoCleanCommand.self, Startup.self, Analyze.self, Duplicates.self, Status.self, DockerCommand.self, Stats.self, Rules.self, History.self, MonitorCommand.self]
     )
 
     static func main() {

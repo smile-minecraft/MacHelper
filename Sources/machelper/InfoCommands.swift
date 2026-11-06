@@ -160,3 +160,45 @@ struct Status: ParsableCommand {
         if let b = s.battery { Output.line("Battery  \(pct(b.charge))  \(String(format: "%+.1f W", b.watts))  cycles \(b.cycleCount)") }
     }
 }
+
+struct DockerCommand: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "docker",
+        abstract: "Show how much space Docker uses and how much it can reclaim (read-only).",
+        discussion: """
+        Runs `docker system df`; the engine (Docker Desktop, OrbStack, Colima…) must be running.
+        To reclaim space use `machelper optimize --task docker.prune` (or docker.builder.all, docker.images.unused) --yes.
+        """
+    )
+
+    @OptionGroup var output: OutputOptions
+
+    func run() throws {
+        switch DockerUsage.read() {
+        case .success(let usage):
+            if output.json {
+                struct Out: Encodable { let schemaVersion = 1; let usage: DockerUsage; let totalSize, totalReclaimable: UInt64 }
+                try Output.json(Out(usage: usage, totalSize: usage.totalSize, totalReclaimable: usage.totalReclaimable))
+                return
+            }
+            Output.line("\(Output.pad("TYPE", 14)) \(Output.lpad("COUNT", 7)) \(Output.lpad("ACTIVE", 7)) \(Output.lpad("SIZE", 10)) \(Output.lpad("RECLAIMABLE", 12))")
+            for r in usage.rows {
+                Output.line("\(Output.pad(r.type, 14)) \(Output.lpad("\(r.totalCount)", 7)) \(Output.lpad("\(r.active)", 7)) \(Output.lpad(Output.bytes(r.size), 10)) \(Output.lpad(Output.bytes(r.reclaimable), 12))")
+            }
+            Output.line("\nTotal \(Output.bytes(usage.totalSize)), reclaimable \(Output.bytes(usage.totalReclaimable)) (as reported by Docker).")
+        case .failure(let failure):
+            let message: String = switch failure {
+            case .notInstalled: "Docker CLI not found."
+            case .engineNotRunning: "Docker is installed but its engine is not running. Start Docker Desktop, OrbStack or Colima and try again."
+            case .unreadable(let text): "Could not read Docker disk usage: \(text)"
+            }
+            if output.json {
+                struct Out: Encodable { let schemaVersion = 1; let error: String }
+                try Output.json(Out(error: message))
+            } else {
+                Output.err(message)
+            }
+            throw ExitCode(1)
+        }
+    }
+}
