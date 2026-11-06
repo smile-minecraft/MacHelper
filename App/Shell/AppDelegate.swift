@@ -6,7 +6,7 @@ import SwiftUI
 /// Menu bar app shell. NSStatusItem + NSHostingView rather than MenuBarExtra,
 /// because MenuBarExtra's label cannot host custom drawn content like sparklines.
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var app: AppModel { AppModel.shared }
     private var settings: MonitorSettingsStore { app.settings }
     private var store: MonitorStore { app.store }
@@ -178,7 +178,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             openMain: { [weak self] in self?.openMain() },
             quit: { NSApp.terminate(nil) }
         )
-        popover.contentViewController = NSHostingController(rootView: MonitorPanel(store: store, actions: actions))
+        panelActions = actions
+        popover.delegate = self
+    }
+
+    private var panelActions: PanelActions?
+
+    /// The panel exists only while shown: a hidden hosting view would keep observing the store
+    /// and re-rendering on every sample.
+    private func makePanel() -> NSViewController? {
+        guard let panelActions else { return nil }
+        return NSHostingController(rootView: MonitorPanel(store: store, actions: panelActions))
+    }
+
+    func popoverDidClose(_ notification: Notification) {
+        popover.contentViewController = nil
     }
 
     /// The item only grows while values change ("9%" → "19%" → "9%" would otherwise shift every icon to
@@ -203,6 +217,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             popover.performClose(sender)
         } else {
             NSApp.activate()
+            if popover.contentViewController == nil { popover.contentViewController = makePanel() }
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
     }

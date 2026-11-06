@@ -13,10 +13,15 @@ public enum RiskLevel: String, Codable, Sendable, CaseIterable, Comparable {
 }
 
 public enum CleanAction: String, Codable, Sendable {
-    /// Move to the user's Trash (default; recoverable).
+    /// Move to the user's Trash (recoverable). The default for medium and high risk.
     case trash
-    /// Delete permanently. Only for rules whose items are already "deleted" (emptying the Trash).
+    /// Delete permanently. The default for low risk (caches and logs apps rebuild themselves),
+    /// and for emptying the Trash.
     case delete
+
+    /// What a rule does when its file doesn't say: low-risk items are regenerated data, so they
+    /// are deleted outright; anything riskier goes to the Trash where it can be restored.
+    public static func `default`(for risk: RiskLevel) -> CleanAction { risk == .low ? .delete : .trash }
 }
 
 /// A declarative cleaning rule. Rules only describe *paths*; they can never run commands.
@@ -60,7 +65,7 @@ public struct CleanRule: Codable, Sendable, Identifiable, Hashable {
         skipIfRunning = try c.decodeIfPresent([String].self, forKey: .skipIfRunning) ?? []
         skipIfProcessRunning = try c.decodeIfPresent([String].self, forKey: .skipIfProcessRunning) ?? []
         selectedByDefault = try c.decodeIfPresent(Bool.self, forKey: .selectedByDefault) ?? (risk == .low)
-        action = try c.decodeIfPresent(CleanAction.self, forKey: .action) ?? .trash
+        action = try c.decodeIfPresent(CleanAction.self, forKey: .action) ?? .default(for: risk)
         needsFullDiskAccess = try c.decodeIfPresent(Bool.self, forKey: .needsFullDiskAccess) ?? false
     }
 }

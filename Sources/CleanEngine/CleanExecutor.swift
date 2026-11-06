@@ -43,18 +43,30 @@ public struct CleanExecutor: Sendable {
     public let log: OperationLog
     /// Override: delete permanently instead of moving to the Trash.
     public let permanent: Bool
+    /// Override: move everything to the Trash, even items whose rule deletes them. Items already in
+    /// the Trash (emptying it) are still deleted. Ignored when `permanent` is set.
+    public let alwaysTrash: Bool
 
-    public init(safety: PathSafety, log: OperationLog = .shared, permanent: Bool = false) {
+    public init(safety: PathSafety, log: OperationLog = .shared, permanent: Bool = false, alwaysTrash: Bool = false) {
         self.safety = safety
         self.log = log
         self.permanent = permanent
+        self.alwaysTrash = alwaysTrash
+    }
+
+    static let trashDirectory = MacHelperPaths.home.appending(path: ".Trash").path
+
+    func action(for item: RemovalItem) -> CleanAction {
+        if permanent { return .delete }
+        if alwaysTrash, !(item.path == Self.trashDirectory || item.path.hasPrefix(Self.trashDirectory + "/")) { return .trash }
+        return item.action
     }
 
     public func execute(_ items: [RemovalItem], dryRun: Bool, command: String) -> CleanReport {
         let fm = FileManager.default
         var outcomes: [ItemOutcome] = []
         for item in items {
-            let action: CleanAction = permanent ? .delete : item.action
+            let action = action(for: item)
             // Re-check right before removal: the tree may have changed since the preview.
             let verdict = safety.check(item.path)
             guard verdict == .allowed else {

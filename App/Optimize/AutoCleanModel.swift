@@ -34,9 +34,9 @@ final class AutoCleanModel {
         set { config.frequency = newValue; save() }
     }
 
-    var permanent: Bool {
-        get { config.permanent }
-        set { config.permanent = newValue; save() }
+    var trashInstead: Bool {
+        get { config.trashInstead == true }
+        set { config.trashInstead = newValue; save() }
     }
 
     private func setEnabled(_ on: Bool) async {
@@ -77,6 +77,7 @@ final class AutoCleanModel {
         updated.enabled = config.enabled
         updated.frequency = config.frequency
         updated.permanent = config.permanent
+        updated.trashInstead = config.trashInstead
         config = updated
         save()
         message = String(localized: "Cleaned \(config.lastItemCount) items.")

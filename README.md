@@ -18,7 +18,7 @@ one-click cleanup, disk analysis, an app uninstaller and startup-item management
 - **Fan control** — automatic, fixed speed or temperature curves (quiet / balanced / performance / custom),
   "only increase" mode, hard safety limits, and automatic profile switching by running app or power source.
   Runs through a root helper (`SMAppService` daemon) that verifies the caller's code signature.
-- **One-click optimize** — declarative JSON cleaning rules with preview, Trash by default, protected paths,
+- **One-click optimize** — declarative JSON cleaning rules with preview (low-risk caches deleted directly, medium and high risk to the Trash), protected paths,
   a whitelist, an operation log, maintenance tasks, project build-artifact purge and scheduled auto-clean of
   low-risk items.
 - **Disk analysis** — sunburst and treemap, largest files with kind/age filters, duplicate files (APFS clones

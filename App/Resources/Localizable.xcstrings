@@ -761,16 +761,6 @@
         }
       }
     },
-    "Cleaned caches free space immediately and can’t be restored from the Trash (apps rebuild this data themselves).": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "清掉的快取會立刻釋放空間，無法從垃圾桶復原（這些都是 App 會自己重建的資料）。"
-          }
-        }
-      }
-    },
     "Cleaned items go to the Trash; the space is freed once you empty it.": {
       "localizations": {
         "zh-Hant": {
@@ -1097,26 +1087,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "每天"
-          }
-        }
-      }
-    },
-    "Delete directly, skipping the Trash": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "直接刪除，不經過垃圾桶"
-          }
-        }
-      }
-    },
-    "Delete permanently: %@. This empties what’s already in the Trash and can’t be undone.": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "永久刪除：%@，這是清空垃圾桶裡原本的東西，無法復原。"
           }
         }
       }
@@ -3861,16 +3831,6 @@
         }
       }
     },
-    "This is only a preview; nothing is deleted until you click Clean.": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "目前只是預覽，按「清理」之前不會刪除任何東西。"
-          }
-        }
-      }
-    },
     "This result may be out of date. Scan again to update it.": {
       "localizations": {
         "zh-Hant": {
@@ -5575,16 +5535,6 @@
         }
       }
     },
-    "A low-risk cleanup would move %@ to the Trash.": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "低風險清理會把 %@ 移到垃圾桶。"
-          }
-        }
-      }
-    },
     "A one-off check of the last hours of history, free space and background items.": {
       "localizations": {
         "zh-Hant": {
@@ -5841,46 +5791,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "MacHelper 或背景記錄執行時，每小時記錄一次可用空間；大約 12 小時後會出現趨勢。"
-          }
-        }
-      }
-    },
-    "Measures what a low-risk cleanup would move to the Trash, without removing anything.": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "計算低風險清理會移到垃圾桶的大小，不會移除任何項目。"
-          }
-        }
-      }
-    },
-    "Move %@ of low-risk items to the Trash?": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "要把 %@ 的低風險項目移到垃圾桶嗎？"
-          }
-        }
-      }
-    },
-    "Moved %@ to the Trash.": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已將 %@ 移到垃圾桶。"
-          }
-        }
-      }
-    },
-    "Moves low-risk, selected-by-default items to the Trash (the same selection as scheduled cleaning). Apps that are running are skipped. Asks before it starts.": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "把預設勾選的低風險項目移到垃圾桶（與排程清理相同的範圍），正在執行的 App 會跳過。開始前會先詢問。"
           }
         }
       }
@@ -6181,6 +6091,126 @@
           "stringUnit": {
             "state": "translated",
             "value": "這會永久刪除每分鐘的監控歷史（包含其中所有指標）與每小時的可用空間紀錄。此操作無法復原。程序用量歷史、感測器與核心歷史、其他設定與操作紀錄都不受影響。"
+          }
+        }
+      }
+    },
+    "A low-risk cleanup would free %@.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "低風險清理可以釋放 %@。"
+          }
+        }
+      }
+    },
+    "Auto Clean only touches low-risk caches and logs, which are deleted directly and free space immediately (apps rebuild this data themselves).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動清理只處理低風險的快取與日誌，會直接刪除並立即釋放空間（App 會自行重建這些資料）。"
+          }
+        }
+      }
+    },
+    "Cleaned %@.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已清理 %@。"
+          }
+        }
+      }
+    },
+    "Delete %@ of low-risk caches and logs?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要刪除 %@ 的低風險快取與日誌嗎？"
+          }
+        }
+      }
+    },
+    "Delete directly: %@ of low-risk caches and logs that apps rebuild themselves. They don’t go to the Trash.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直接刪除：%@ 的低風險快取與日誌，App 會自行重建，不會進垃圾桶。"
+          }
+        }
+      }
+    },
+    "Deleted directly": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直接刪除"
+          }
+        }
+      }
+    },
+    "Deletes low-risk, selected-by-default caches and logs (the same selection as scheduled cleaning); apps rebuild this data themselves. Apps that are running are skipped. Asks before it starts.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除預設勾選的低風險快取與日誌（與排程清理相同的範圍），App 會自行重建這些資料。正在執行的 App 會跳過。開始前會先詢問。"
+          }
+        }
+      }
+    },
+    "Empty the Trash: %@. This can’t be undone.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空垃圾桶：%@，無法復原。"
+          }
+        }
+      }
+    },
+    "Measures how much a low-risk cleanup would free, without removing anything.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "計算低風險清理可以釋放多少空間，不會移除任何項目。"
+          }
+        }
+      }
+    },
+    "Move to the Trash instead of deleting": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "改為移到垃圾桶，不直接刪除"
+          }
+        }
+      }
+    },
+    "This is only a preview; nothing is deleted until you click Clean. Low-risk items are deleted directly, medium and high risk go to the Trash.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這只是預覽，按下「清理」前不會刪除任何東西。低風險項目會直接刪除，中、高風險項目移到垃圾桶。"
+          }
+        }
+      }
+    },
+    "To Trash": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移到垃圾桶"
           }
         }
       }

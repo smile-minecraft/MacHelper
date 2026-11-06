@@ -87,7 +87,7 @@ struct OptimizeView: View {
                     Text("\(Fmt.bytes(Int64(clamping: model.selectedBytes))) selected, \(model.selectedTaskCount) maintenance tasks")
                         .font(Theme.smallNumeral)
                         .foregroundStyle(Palette.text)
-                    Text("This is only a preview; nothing is deleted until you click Clean.").font(.caption).foregroundStyle(Palette.textMuted)
+                    Text("This is only a preview; nothing is deleted until you click Clean. Low-risk items are deleted directly, medium and high risk go to the Trash.").font(.caption).foregroundStyle(Palette.textMuted)
                 }
                 Spacer(minLength: 12)
                 Button("Rescan") { Task { await model.scan() } }
@@ -113,8 +113,12 @@ struct OptimizeView: View {
         if model.selectedTrashBytes > 0 {
             lines.append(String(localized: "Move to the Trash: \(Fmt.bytes(Int64(clamping: model.selectedTrashBytes))). Anything removed by mistake can be restored from the Trash."))
         }
-        if model.selectedPermanentBytes > 0 {
-            lines.append(String(localized: "Delete permanently: \(Fmt.bytes(Int64(clamping: model.selectedPermanentBytes))). This empties what’s already in the Trash and can’t be undone."))
+        let directBytes = model.selectedPermanentBytes - model.selectedEmptyTrashBytes
+        if directBytes > 0 {
+            lines.append(String(localized: "Delete directly: \(Fmt.bytes(Int64(clamping: directBytes))) of low-risk caches and logs that apps rebuild themselves. They don’t go to the Trash."))
+        }
+        if model.selectedEmptyTrashBytes > 0 {
+            lines.append(String(localized: "Empty the Trash: \(Fmt.bytes(Int64(clamping: model.selectedEmptyTrashBytes))). This can’t be undone."))
         }
         if model.selectedTaskCount > 0 {
             lines.append(String(localized: "Run \(model.selectedTaskCount) maintenance tasks."))
@@ -260,6 +264,8 @@ private struct RuleRow: View {
                         HStack {
                             Text(result.rule.title).foregroundStyle(Palette.text)
                             RiskBadge(risk: result.rule.risk)
+                            Text(result.rule.action == .delete ? "Deleted directly" : "To Trash")
+                                .font(.caption2).foregroundStyle(Palette.textMuted)
                             if model.isRuleSelected(result.rule.id) == nil { Text("Partial").font(.caption2).foregroundStyle(Palette.textMuted) }
                         }
                         Text(result.rule.description).font(.caption).foregroundStyle(Palette.textMuted)

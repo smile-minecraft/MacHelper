@@ -11,7 +11,8 @@ struct MacHelperCLI: ParsableCommand {
         Commands that remove things only preview by default. Add --yes to actually do it.
         Every command accepts --json for machine-readable output (stable "schemaVersion" field).
         Exit codes: 0 success, 1 failure, 2 partial failure (some items could not be processed).
-        Removals move items to the Trash unless --permanent (or the rule is "empty the Trash").
+        Cleaning rules: low-risk items are deleted directly, medium and high risk go to the Trash
+        (`clean --trash` sends everything to the Trash). Other removals go to the Trash unless --permanent.
         All real operations are logged to ~/Library/Logs/MacHelper/operations.jsonl (see `machelper history`).
         """,
         version: "0.1.0",

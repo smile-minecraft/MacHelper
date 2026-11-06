@@ -127,9 +127,14 @@ final class OptimizeModel {
 
     var selectedTaskCount: Int { tasks.filter(\.selected).count }
 
-    /// Selected bytes that will be permanently deleted (only the "empty the Trash" rule does that).
+    /// Selected bytes that will be permanently deleted: low-risk rules plus emptying the Trash.
     var selectedPermanentBytes: UInt64 {
         plan?.results.filter { $0.rule.action == .delete }.reduce(0) { $0 + $1.selectedSize } ?? 0
+    }
+
+    /// The part of `selectedPermanentBytes` that empties the Trash.
+    var selectedEmptyTrashBytes: UInt64 {
+        plan?.results.filter { $0.rule.id == "user.trash" }.reduce(0) { $0 + $1.selectedSize } ?? 0
     }
 
     /// Selected bytes that will be moved to the Trash (recoverable).

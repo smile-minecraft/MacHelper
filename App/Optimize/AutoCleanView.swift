@@ -20,10 +20,10 @@ struct AutoCleanView: View {
                 }
                 .disabled(!model.enabled)
                 VStack(alignment: .leading, spacing: 2) {
-                    Toggle("Delete directly, skipping the Trash", isOn: $model.permanent)
-                    Text(model.permanent
-                         ? "Cleaned caches free space immediately and can’t be restored from the Trash (apps rebuild this data themselves)."
-                         : "Cleaned items go to the Trash; the space is freed once you empty it.")
+                    Toggle("Move to the Trash instead of deleting", isOn: $model.trashInstead)
+                    Text(model.trashInstead
+                         ? "Cleaned items go to the Trash; the space is freed once you empty it."
+                         : "Auto Clean only touches low-risk caches and logs, which are deleted directly and free space immediately (apps rebuild this data themselves).")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }

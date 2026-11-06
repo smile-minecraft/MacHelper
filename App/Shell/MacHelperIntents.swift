@@ -43,19 +43,19 @@ struct FreeSpaceIntent: AppIntent {
 
 struct PreviewCleanupIntent: AppIntent {
     static let title: LocalizedStringResource = "Preview Low-Risk Cleanup"
-    static let description = IntentDescription("Measures what a low-risk cleanup would move to the Trash, without removing anything.")
+    static let description = IntentDescription("Measures how much a low-risk cleanup would free, without removing anything.")
 
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog {
         let plan = try LowRiskCleanup.plan()
         let size = ByteCountFormatter.string(fromByteCount: Int64(clamping: plan.selectedSize), countStyle: .file)
         return .result(value: Int(clamping: plan.selectedSize),
-                       dialog: IntentDialog(stringLiteral: String(localized: "A low-risk cleanup would move \(size) to the Trash.")))
+                       dialog: IntentDialog(stringLiteral: String(localized: "A low-risk cleanup would free \(size).")))
     }
 }
 
 struct RunCleanupIntent: AppIntent {
     static let title: LocalizedStringResource = "Run Low-Risk Cleanup"
-    static let description = IntentDescription("Moves low-risk, selected-by-default items to the Trash (the same selection as scheduled cleaning). Apps that are running are skipped. Asks before it starts.")
+    static let description = IntentDescription("Deletes low-risk, selected-by-default caches and logs (the same selection as scheduled cleaning); apps rebuild this data themselves. Apps that are running are skipped. Asks before it starts.")
 
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog {
         let plan = try LowRiskCleanup.plan()
@@ -63,24 +63,26 @@ struct RunCleanupIntent: AppIntent {
         guard plan.selectedSize > 0 else {
             return .result(value: 0, dialog: IntentDialog(stringLiteral: String(localized: "Nothing to clean right now.")))
         }
-        let question = IntentDialog(stringLiteral: String(localized: "Move \(size) of low-risk items to the Trash?"))
+        let question = IntentDialog(stringLiteral: String(localized: "Delete \(size) of low-risk caches and logs?"))
         if #available(macOS 15.0, *) {
             try await requestConfirmation(actionName: .go, dialog: question)
         } else {
             try await requestConfirmation(result: .result(dialog: question), confirmationActionName: .go)
         }
         let report = CleanExecutor(safety: .forCleaning()).execute(plan.removalItems, dryRun: false, command: "clean")
-        let moved = ByteCountFormatter.string(fromByteCount: Int64(clamping: report.trashedBytes), countStyle: .file)
-        var text = String(localized: "Moved \(moved) to the Trash.")
+        let total = report.freedBytes + report.trashedBytes
+        let freed = ByteCountFormatter.string(fromByteCount: Int64(clamping: total), countStyle: .file)
+        var text = String(localized: "Cleaned \(freed).")
         if !report.failures.isEmpty { text += " " + String(localized: "\(report.failures.count) items could not be moved.") }
-        return .result(value: Int(clamping: report.trashedBytes), dialog: IntentDialog(stringLiteral: text))
+        return .result(value: Int(clamping: total), dialog: IntentDialog(stringLiteral: text))
     }
 }
 
-/// The scheduled-cleaning selection: low-risk rules that are selected by default; never permanent.
+/// The scheduled-cleaning selection: low-risk rules that are selected by default, following each
+/// rule's action (low-risk items are deleted directly). Never empties the Trash.
 enum LowRiskCleanup {
     static func plan() throws -> CleanPlan {
-        let rules = try RuleSet.load().filter { $0.risk <= AutoClean.maxRisk && $0.selectedByDefault && $0.action == .trash }
+        let rules = try RuleSet.load().filter { $0.risk <= AutoClean.maxRisk && $0.selectedByDefault && $0.id != "user.trash" }
         return CleanScanner(rules: rules).scan()
     }
 }

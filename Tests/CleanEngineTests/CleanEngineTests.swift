@@ -89,7 +89,12 @@ private func rule(_ id: String, _ paths: [String], exclude: [String] = [], minAg
             for p in r.paths { #expect(p.hasPrefix("~/"), "\(r.id): rules must stay in the home folder") }
             #expect(r.paths.allSatisfy { !$0.hasSuffix("~/") && $0 != "~/*" }, "\(r.id): too broad")
             if r.risk == .high { #expect(!r.selectedByDefault, "\(r.id): high risk must not be preselected") }
-            if r.action == .delete { #expect(r.id == "user.trash", "\(r.id): only emptying the Trash deletes permanently") }
+            // Low risk deletes directly; anything riskier must stay recoverable in the Trash.
+            if r.id == "user.trash" {
+                #expect(r.action == .delete && !r.selectedByDefault, "emptying the Trash is permanent and never preselected")
+            } else {
+                #expect(r.action == CleanAction.default(for: r.risk), "\(r.id): action must follow its risk")
+            }
         }
     }
 
@@ -230,7 +235,7 @@ private func rule(_ id: String, _ paths: [String], exclude: [String] = [], minAg
         let rules = try RuleSet.load(includeUserRules: false)
         let eligible = rules.filter { $0.risk <= AutoClean.maxRisk && $0.selectedByDefault }
         #expect(!eligible.contains { $0.id == "user.trash" }, "scheduled cleaning never empties the Trash")
-        #expect(eligible.allSatisfy { $0.action == .trash })
+        #expect(eligible.allSatisfy { $0.action == .delete }, "low-risk rules delete directly")
     }
 }
 

@@ -138,7 +138,7 @@ struct AutoCleanCommand: ParsableCommand {
                 struct Out: Encodable { let schemaVersion = 1; let ran = false; let config: AutoCleanConfig; let due: Bool }
                 try Output.json(Out(config: config, due: config.isDue()))
             } else if status || !runIfDue {
-                Output.line("Auto clean: \(config.enabled ? "on, \(config.frequency.rawValue)" : "off")\(config.permanent ? ", permanent" : ", to Trash")")
+                Output.line("Auto clean: \(config.enabled ? "on, \(config.frequency.rawValue)" : "off")\(config.trashInstead == true ? ", to Trash" : config.permanent ? ", permanent" : ", low-risk items deleted directly")")
                 if let last = config.lastRun {
                     Output.line("Last run: \(last.formatted()) — \(config.lastItemCount) items, trashed \(Output.bytes(config.lastTrashedBytes)), deleted \(Output.bytes(config.lastFreedBytes))")
                 } else {

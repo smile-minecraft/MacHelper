@@ -17,8 +17,12 @@ public struct AutoCleanConfig: Codable, Sendable, Equatable {
 
     public var enabled = false
     public var frequency: Frequency = .weekly
-    /// Delete permanently instead of moving to the Trash. Off by default.
+    /// Delete permanently instead of moving to the Trash. Off by default. Kept for older config
+    /// files; since low-risk rules delete by default it only matters for rules that say "trash".
     public var permanent = false
+    /// Move everything to the Trash instead of following each rule's action. Optional so config
+    /// files written before it existed still decode; nil means off.
+    public var trashInstead: Bool?
     public var lastRun: Date?
     public var lastTrashedBytes: UInt64 = 0
     public var lastFreedBytes: UInt64 = 0
@@ -65,7 +69,7 @@ public enum AutoClean {
     public static func run(config: AutoCleanConfig, rules: [CleanRule]) -> (CleanPlan, CleanReport) {
         let eligible = rules.filter { $0.risk <= maxRisk && $0.selectedByDefault }
         let plan = CleanScanner(rules: eligible).scan()
-        let report = CleanExecutor(safety: .forCleaning(), permanent: config.permanent)
+        let report = CleanExecutor(safety: .forCleaning(), permanent: config.permanent, alwaysTrash: config.trashInstead == true)
             .execute(plan.removalItems, dryRun: false, command: "autoclean")
         return (plan, report)
     }

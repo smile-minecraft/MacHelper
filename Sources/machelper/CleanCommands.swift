@@ -27,8 +27,15 @@ struct Clean: ParsableCommand {
     @Option(name: .long, help: "Only rules in this category (repeatable).")
     var category: [String] = []
 
-    @Flag(name: .long, help: "Delete permanently instead of moving to the Trash.")
+    @Flag(name: .long, help: "Delete everything permanently, including medium and high risk items.")
     var permanent = false
+
+    @Flag(name: .long, help: "Move everything to the Trash, including low-risk items that are normally deleted directly.")
+    var trash = false
+
+    func validate() throws {
+        if permanent && trash { throw ValidationError("--permanent and --trash can't be used together") }
+    }
 
     func run() throws {
         let all = try RuleSet.load()
@@ -49,7 +56,7 @@ struct Clean: ParsableCommand {
         }
 
         let safety = PathSafety.forCleaning()
-        let report = CleanExecutor(safety: safety, permanent: permanent)
+        let report = CleanExecutor(safety: safety, permanent: permanent, alwaysTrash: trash)
             .execute(plan.removalItems, dryRun: !apply.shouldApply, command: "clean")
 
         if output.json {
@@ -72,7 +79,9 @@ struct Clean: ParsableCommand {
         }
         Output.line()
         if report.dryRun {
-            Output.line("Preview: \(Output.bytes(plan.selectedSize)) selected of \(Output.bytes(plan.totalSize)) found. Nothing was removed; add --yes to clean.")
+            let toDelete = report.items.filter { $0.result == .wouldDelete }.reduce(UInt64(0)) { $0 + $1.bytes }
+            let toTrash = report.items.filter { $0.result == .wouldTrash }.reduce(UInt64(0)) { $0 + $1.bytes }
+            Output.line("Preview: \(Output.bytes(plan.selectedSize)) selected of \(Output.bytes(plan.totalSize)) found (\(Output.bytes(toDelete)) deleted directly, \(Output.bytes(toTrash)) to the Trash). Nothing was removed; add --yes to clean.")
         } else {
             Output.line("Trashed \(Output.bytes(report.trashedBytes)), deleted \(Output.bytes(report.freedBytes)).")
             if report.trashedBytes > 0 { Output.line("Space from trashed items is released when the Trash is emptied.") }

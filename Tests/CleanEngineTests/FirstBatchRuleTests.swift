@@ -35,7 +35,7 @@ import Testing
         let safety = PathSafety.forCleaning()
         for id in ids {
             let r = try #require(rules.first { $0.id == id }, "\(id) missing")
-            #expect(r.risk == .low && r.action == .trash)
+            #expect(r.risk == .low && r.action == .delete)
             #expect(r.title != "rule.\(id).title", "\(id) has no translation entry")
             for p in r.paths {
                 // A representative match must be allowed by the cleaning safety rules (not protected, deep enough).
@@ -51,5 +51,37 @@ import Testing
         if let task = MaintenanceCatalog.all.first(where: { $0.id == "clang.module-cache" }) {
             #expect(!task.selectedByDefault && !task.requiresRoot)
         }
+    }
+}
+
+@Suite struct DeletionPolicyTests {
+    private func rule(risk: String, action: String? = nil) throws -> CleanRule {
+        var json: [String: Any] = ["id": "r", "title": "r", "category": "test", "risk": risk, "paths": ["~/x/*"]]
+        if let action { json["action"] = action }
+        return try JSONDecoder().decode(CleanRule.self, from: JSONSerialization.data(withJSONObject: json))
+    }
+
+    @Test func actionFollowsRiskUnlessStated() throws {
+        #expect(try rule(risk: "low").action == .delete)
+        #expect(try rule(risk: "medium").action == .trash)
+        #expect(try rule(risk: "high").action == .trash)
+        #expect(try rule(risk: "low", action: "trash").action == .trash, "an explicit action wins")
+    }
+
+    @Test func alwaysTrashOverridesExceptForTheTrashItself() {
+        let executor = CleanExecutor(safety: .forCleaning(), alwaysTrash: true)
+        let cache = RemovalItem(path: MacHelperPaths.home.path + "/Library/Caches/x", source: "user.caches", bytes: 1, action: .delete)
+        let trashed = RemovalItem(path: MacHelperPaths.home.path + "/.Trash/old", source: "user.trash", bytes: 1, action: .delete)
+        #expect(executor.action(for: cache) == .trash)
+        #expect(executor.action(for: trashed) == .delete)
+        #expect(CleanExecutor(safety: .forCleaning(), permanent: true, alwaysTrash: true).action(for: cache) == .delete)
+    }
+
+    @Test func oldAutoCleanConfigStillDecodes() throws {
+        let old = #"{"enabled":true,"frequency":"daily","permanent":false,"lastTrashedBytes":0,"lastFreedBytes":0,"lastItemCount":0}"#
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let config = try decoder.decode(AutoCleanConfig.self, from: Data(old.utf8))
+        #expect(config.enabled && config.trashInstead == nil)
     }
 }
