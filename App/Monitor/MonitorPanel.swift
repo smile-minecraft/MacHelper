@@ -519,7 +519,16 @@ extension Host {
     static let volumeName: String = (try? URL(fileURLWithPath: "/").resourceValues(forKeys: [.volumeNameKey]).volumeName) ?? "Macintosh HD"
 
     /// First active IPv4 interface (en*), for the network tab.
-    static var primaryInterface: (name: String, address: String)? {
+    /// Cached for 30 s: the network tab re-renders every second and getifaddrs walks every interface.
+    @MainActor static var primaryInterface: (name: String, address: String)? {
+        if let cached = interfaceCache, Date().timeIntervalSince(cached.at) < 30 { return cached.value }
+        let value = readPrimaryInterface()
+        interfaceCache = (Date(), value)
+        return value
+    }
+    @MainActor private static var interfaceCache: (at: Date, value: (name: String, address: String)?)?
+
+    private static func readPrimaryInterface() -> (name: String, address: String)? {
         var ifap: UnsafeMutablePointer<ifaddrs>?
         guard getifaddrs(&ifap) == 0, let first = ifap else { return nil }
         defer { freeifaddrs(ifap) }

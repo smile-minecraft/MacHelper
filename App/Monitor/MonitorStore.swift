@@ -105,6 +105,24 @@ struct ChartPoint: Hashable, Sendable {
     let value: Double
 }
 
+/// One live series. Each is observed on its own, so a CPU sample only re-renders views that
+/// draw the CPU series instead of every chart in the app.
+@MainActor
+@Observable
+final class LiveSeries {
+    fileprivate(set) var points: [ChartPoint] = []
+}
+
+/// Read access to the live series: `store.history[.cpu]` (nil until the series has data).
+@MainActor
+struct LiveHistory {
+    fileprivate let series: [SeriesKey: LiveSeries]
+    subscript(key: SeriesKey) -> [ChartPoint]? {
+        guard let points = series[key]?.points, !points.isEmpty else { return nil }
+        return points
+    }
+}
+
 /// Latest readings plus one hour of in-memory history per series.
 /// (24 h / 7 d history comes with the GRDB Storage module.)
 @MainActor
@@ -119,7 +137,8 @@ final class MonitorStore {
     private(set) var temperatures: [TemperatureReading] = []
     private(set) var fans: [FanReading] = []
     private(set) var power: PowerReading?
-    private(set) var history: [SeriesKey: [ChartPoint]] = [:]
+    @ObservationIgnored private let liveSeries = Dictionary(uniqueKeysWithValues: SeriesKey.allCases.map { ($0, LiveSeries()) })
+    var history: LiveHistory { LiveHistory(series: liveSeries) }
     private(set) var processes: ProcessSnapshot?
     @ObservationIgnored private let processSampler = ProcessSampler()
     /// Persistent per-minute history (nil if the database can't be opened).
@@ -143,7 +162,8 @@ final class MonitorStore {
     let availableModules: Set<MonitorModule>
     @ObservationIgnored private let sources: MetricSources
     @ObservationIgnored private var tasks: [MonitorModule: (config: ModuleConfig, task: Task<Void, Never>)] = [:]
-    @ObservationIgnored private static let historyWindow: TimeInterval = 3600
+    /// Every live chart shows at most the last five minutes; keep a little more for edge points.
+    @ObservationIgnored private static let historyWindow: TimeInterval = 330
 
     init(settings: MonitorSettingsStore, sources: MetricSources = MetricSources()) {
         self.settings = settings
@@ -371,13 +391,14 @@ final class MonitorStore {
         })
 
     private func record(_ key: SeriesKey, _ value: Double, _ date: Date) {
-        var points = history[key, default: []]
+        guard let series = liveSeries[key] else { return }
+        var points = series.points
         points.append(ChartPoint(date: date, value: value))
         let cutoff = date.addingTimeInterval(-Self.historyWindow)
         if let first = points.first, first.date < cutoff {
-            points.removeAll { $0.date < cutoff }
+            points.removeFirst(points.firstIndex { $0.date >= cutoff } ?? points.count)
         }
-        history[key] = points
+        series.points = points
         if let column = key.historyColumn,
            let finished = minute.addTracked(column, value, at: date),
            let db = persistentHistory {
