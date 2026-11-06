@@ -22,7 +22,7 @@ struct StartupView: View {
                 }
                 Spacer()
                 IconButton(symbol: "arrow.clockwise", help: "Refresh") {
-                    Task { if model.tab == .launchd { await model.load() } else { await model.loadBackground() } }
+                    Task { if model.tab == .launchd { await model.load() } else { await model.loadBackground(forceRefresh: true) } }
                 }
             }
             .padding(.horizontal, 12).padding(.vertical, 10)

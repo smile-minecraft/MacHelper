@@ -1,3 +1,4 @@
+import CleanEngine
 import FanControl
 import Foundation
 import PrivilegedOps
@@ -103,6 +104,18 @@ enum SelfTest {
                     for t in preview.targets {
                         out("syscleanup:  \(t.id) dry-run \(t.count) files, \(t.bytes) bytes\(t.unavailable.map { " (unavailable: \($0))" } ?? "")")
                     }
+                    // v5, read-only: background items through the Helper (no password prompt).
+                    let dump = try await client.dumpBackgroundItems()
+                    switch BackgroundItems.items(fromDump: dump) {
+                    case .success(let items):
+                        out("btm:         \(items.count) records for this user and the system, \(BackgroundItems.activeCount(items)) active")
+                    case .failure(.unavailable(let why)):
+                        out("btm:         FAILED \(why)")
+                    }
+                    // v6, read-only: CPU and memory counters for every process (root and other users' included).
+                    let counters = try await client.processCounters()
+                    let readable = counters.filter { ProcessCounters.read($0.pid) != nil }.count
+                    out("processes:   \(counters.count) from the Helper, \(counters.count - readable) of them unreadable without it")
                 } catch {
                     out("error:       \(error)")
                 }

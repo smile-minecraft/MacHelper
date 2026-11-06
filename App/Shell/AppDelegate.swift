@@ -38,7 +38,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         _ = try? HelperClient.shared.refreshRegistrationIfNeeded()
         startHeartbeat()
         let args = CommandLine.arguments
-        if !args.contains("--snapshot") && !args.contains("--snapshot-disk") {
+        // Snapshot instances run next to the real app: never let them drive the fans.
+        if !args.contains(where: { $0.hasPrefix("--snapshot") }) {
             fanModel.onUserApplied = { [weak self] policy in self?.fanSwitcher.userApplied(policy) }
             fanSwitcher.start()
         }

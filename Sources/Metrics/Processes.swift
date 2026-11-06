@@ -45,7 +45,10 @@ public final class ProcessSampler: @unchecked Sendable {
 
     public init() {}
 
-    public func sample(top: Int = 8) -> ProcessSnapshot {
+    /// - Parameter privileged: counters read by the root Helper (pid → cumulative CPU nanoseconds and
+    ///   footprint), used for processes this user can't inspect. Without them those processes are
+    ///   counted in `hiddenCount`.
+    public func sample(top: Int = 8, privileged: [Int32: (cpuNanos: UInt64, footprint: UInt64)]? = nil) -> ProcessSnapshot {
         lock.lock()
         defer { lock.unlock() }
         let count = proc_listallpids(nil, 0)
@@ -61,9 +64,18 @@ public final class ProcessSampler: @unchecked Sendable {
             let ok = withUnsafeMutablePointer(to: &info) { p in
                 p.withMemoryRebound(to: rusage_info_t?.self, capacity: 1) { proc_pid_rusage(pid, RUSAGE_INFO_V4, $0) }
             }
-            guard ok == 0 else { hidden += 1; continue }
-            // ri_user_time / ri_system_time are mach ticks on Apple Silicon.
-            let cpuNanos = (info.ri_user_time + info.ri_system_time) * timebase.numer / timebase.denom
+            let cpuNanos: UInt64, footprint: UInt64
+            if ok == 0 {
+                // ri_user_time / ri_system_time are mach ticks on Apple Silicon.
+                cpuNanos = (info.ri_user_time + info.ri_system_time) * timebase.numer / timebase.denom
+                footprint = info.ri_phys_footprint
+            } else if let counter = privileged?[pid] {
+                cpuNanos = counter.cpuNanos
+                footprint = counter.footprint
+            } else {
+                hidden += 1
+                continue
+            }
             let at = now * timebase.numer / timebase.denom
             seen[pid] = (cpuNanos, at)
             var cpu = 0.0
@@ -71,7 +83,7 @@ public final class ProcessSampler: @unchecked Sendable {
                 cpu = Double(cpuNanos - prev.cpuNanos) / Double(at - prev.at)
             }
             usages.append(ProcessUsage(pid: pid, name: Self.name(pid), path: Self.path(pid), cpu: cpu,
-                                       memoryBytes: info.ri_phys_footprint))
+                                       memoryBytes: footprint))
         }
         last = seen.mapValues { (cpuNanos: $0.0, at: $0.1) }
         return ProcessSnapshot(byCPU: Array(usages.sorted { $0.cpu > $1.cpu }.prefix(top)),

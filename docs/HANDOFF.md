@@ -32,7 +32,7 @@
 - [ ] **第二批**（2026-11-06）：
   - **健康檢查**：新的側欄頁「健康檢查」，對應 `machelper doctor [--hours N] [--json]`，邏輯在新模組 `Diagnostics`，像素圖示 `px.health`。根據歷史資料判斷 CPU 滿載、單一程序持續占用（以單核心計）、記憶體、置換空間、高溫、磁碟空間、空間趨勢、開機天數、背景項目數量。這台跑出三項：MacHelper 自己 24 小時平均占用單核心約 72%；可用空間 13%；有 44 個背景項目。
   - **可用空間趨勢**：資料庫 migration `v6` 新增 `disk_space` 表，App 和背景記錄每小時寫一筆，保留 400 天，「清除監控歷史」會一併清掉。趨勢以最近一次大幅回升之後的資料做線性回歸，至少需要 12 小時。正式資料庫要等新版 App 或背景記錄啟動才會建表；唯讀讀取在建表前回傳空陣列。
-  - **登入與背景項目**：「啟動項目」頁新增分頁，讀取 `sfltool dumpbtm`（不需管理員權限），對應 `machelper login-items [--all] [--json]`。只能檢視；依父 App 或有名稱的開發者分組；同一項目出現在多個 UID 時只列一次；啟用但未允許的項目算停用。Helper v4 不需要為此開頭。
+  - **登入與背景項目**：「啟動項目」頁新增分頁，讀取 `sfltool dumpbtm`，對應 `machelper login-items [--all] [--json]`。（更正：以一般使用者執行時 sfltool 每次都會要求管理員密碼，見第四批。）只能檢視；依父 App 或有名稱的開發者分組；同一項目出現在多個 UID 時只列一次；啟用但未允許的項目算停用。Helper v4 不需要為此開頭。
   - **清理成效統計**：「設定 → 歷史紀錄」新增「依規則」與「依月份」，對應 `machelper history --by-rule`。
   - **捷徑**：四個 App Intents：檢查 Mac 健康狀態、取得可用空間趨勢、預覽低風險清理、執行低風險清理（會先確認；範圍和排程清理相同，只丟垃圾桶）。捷徑片語只有英文。
   - 待實機確認：
@@ -76,11 +76,33 @@
     - 啟動項目頁切換一個全使用者 agent 和一個系統 daemon，再切回來；`launchctl print-disabled system` 確認狀態。
     - 自動清理「立即執行」後「上次執行」列出兩個維護任務的結果（這台沒有選定 Xcode，模擬器任務會略過）。
 
+- [ ] **第四批**（2026-11-06，使用者要求）：
+  - **背景項目完全不用密碼**：`sfltool dumpbtm` 以一般使用者執行時會取得 `system.privilege.admin`，每次都跳密碼（健康檢查頁每切換一次期間就問一次）。改成：
+    - Helper 協定升到 v5，新增 `dumpBackgroundItems`：固定指令 `/usr/bin/sfltool dumpbtm`，以 root 執行；用連線的 effective UID 只回傳呼叫者和全系統（UID -2、0）的紀錄，其他帳號的區段不會傳出（`PrivilegedOps.BackgroundTaskDump.filter`，無法解析的標頭一律丟掉）。
+    - App 只經 Helper 讀取（`App/Startup/BackgroundItemsSource.swift`，快取 5 分鐘），App 內不再執行 sfltool。沒有 Helper 時顯示「需要 Helper」，不跳密碼。
+    - 健康檢查切換期間會沿用快取；「啟動項目 → 登入與背景項目」的重新整理按鈕會強制重讀。
+    - `SystemSnapshot.current()` 預設不讀背景項目。CLI `doctor` 要加 `--background-items` 才讀（會問密碼）；`login-items` 照舊直接執行 sfltool，說明裡註明會問密碼。
+    - 實機：`--selftest` 顯示 `protocol v5`、`btm: 155 records …, 46 active`，沒有要求密碼。
+  - **GPU 分頁改列占用高的程序**：選單列面板 GPU 分頁底部的「溫度」感測器清單換成「占用最多的程序」。資料來自 IORegistry 裡各 GPU user client（`IOAccelerator` 的子項）的 `IOUserClientCreator` 和 `AppUsage.accumulatedGPUTime`，兩次取樣之差除以經過時間，不需要 root（`Metrics.GPUProcessSampler`）。和 CPU 程序清單同一個迴圈，每 2 秒，只在面板或頁面開著時取樣；排序沿用「黏性排序」。上方的溫度圓環和「最熱的 GPU 感測器」保留。
+  - `swift test` 222 項通過（新增 10 項，含新的 `MetricsTests`）。2026-11-06 備份到 `~/Desktop/MacHelper-backup-20261106174646/` 後安裝 build `202611061746`。
+  - 待實機確認：GPU 分頁的程序清單（播影片或開 3D 畫面時看數字）；健康檢查切換三個期間都不再跳密碼；背景記錄仍是關閉的，要在 App 裡重新開啟。
+
+- [ ] **第五批**（2026-11-06，使用者要求「處理系統層級項目、優化介面」）：
+  - Helper 協定升到 v6，新增兩個 XPC 操作：
+    - `moveSystemLeftovers`：解除安裝時 `/Library` 等系統位置的殘留改由 Helper **移到使用者的垃圾桶**（不刪除）。哪些路徑屬於這個 App 仍由 App 判斷；Helper 只接受固定系統資料夾正下方的項目（`/Library/Application Support` 允許 `<廠商>/<產品>` 兩層），拒絕隱藏檔、`com.apple.`／`Apple`／MacHelper 開頭、幾個共用資料夾；`/usr/local/bin`、`/opt/homebrew/bin` 只收指向 `.app/` 的符號連結；launchd plist 移走前先 `bootout`。全程用 `O_NOFOLLOW` 目錄 fd 與 `renameat`；呼叫者的 `~/.Trash` 必須是自己擁有的真資料夾；移入後以 fd 逐層 `fchownat` 交給使用者（硬連結檔、裝置檔不改），清空垃圾桶不用密碼。白名單在 `PrivilegedOps/SystemLeftovers.swift`。
+    - 解除安裝頁的「系統層級」區塊改成可勾選；名稱含 bundle ID 的預設勾選，只靠名稱比對的標「依名稱比對」且預設不勾。沒有 Helper 時維持只列出。
+    - `processCounters`：Helper 以 root 讀所有程序的累計 CPU 時間與記憶體（只傳數字，不傳名稱或參數）。App 的程序清單和程序歷史用它補上原本讀不到的程序。實機：819 個程序，其中 247 個原本讀不到。
+  - 介面：
+    - 監控與感測器歷史圖表：目前數值移到標題旁，不再和右側 y 軸最上方的刻度疊在一起。
+    - 健康檢查摘要卡：八個數字平均分成四欄，不再擠在左側；背景項目讀不到時標「需要 Helper」。
+    - GPU 程序清單：低於 0.5% 的不列；只有相差不到 1 個百分點時才沿用上次順序，0% 不會排在 1% 前面。
+    - 「Launch Agents」分頁譯為「啟動代理程式」；刪除沒用到的 `DiskAnalysisView.hoverCard`。
+    - `--snapshot-window` 也不再啟動風扇自動切換（之前只有 `--snapshot`、`--snapshot-disk` 會跳過）。用團隊簽章時 Helper 重註冊檢查是空跑，所以快照第二實例可以安全執行。
+  - `swift test` 234 項通過（新增 12 項）。備份到 `~/Desktop/MacHelper-backup-20261106180443/` 後安裝 build `202611061804`；`--selftest` 顯示 `protocol v6`、`processes: 819 from the Helper, 247 of them unreadable without it`。
+  - 待實機確認：實際解除安裝一個留有 `/Library` 殘留的 App，看垃圾桶裡的項目可以放回、清空垃圾桶不需密碼；概覽／監控的程序清單出現 root 程序（例如 `WindowServer`、`kernel_task` 以外的系統常駐程式）。
+
 ## 二、還沒做的功能
 
-- [ ] **系統層級的項目要管理員權限**（剩下的部分；啟動項目開關與系統日誌清理已在第三批完成）：
-  - 解除安裝時 `/Library` 底下的殘留只列出來
-  - 287 個 root 程序看不到 CPU 和記憶體用量
 - [ ] **睡眠／喚醒測試**：風扇策略在喚醒後的 reassert 邏輯沒有在實機上驗證過。
 
 電池充電上限與桌面小工具已由使用者決定取消，不再規劃。
@@ -88,7 +110,6 @@
 ## 三、設計還可以再修
 
 - [ ] 選單列圖示本身（`StatusItemView`）可以參考 Stats 的多種樣式再精緻化。
-- [ ] `DiskAnalysisView.hoverCard` 已經沒有使用，可以刪掉。
 
 ## 四、常用指令與檔案
 
@@ -762,7 +783,7 @@ fi
 
 ### GPU 溫度與 CPU 功耗
 
-- [ ] 打開選單列小面板，切到 GPU。預期：溫度和「GPU 最高溫」都有數值，不是「不可用」；下方列出 `Tg` 開頭的 GPU 感測器。
+- [ ] 打開選單列小面板，切到 GPU。預期：溫度和「GPU 最高溫」都有數值，不是「不可用」；下方「高佔用程序」列出使用 GPU 的程序（第四批起取代原本的感測器清單）。
 - [ ] 切到 CPU，讓機器有一點負載（例如多開幾個 App）。預期：「CPU 功耗」有瓦數，負載時會變動，不是一直 0；沒有讀值時顯示「不可用」。
 - [ ] 打開主視窗的「概覽」。預期：「功耗」磁磚顯示系統瓦數，下面寫「CPU … · GPU …」。
 - [ ] 看「監控」的溫度歷史和「概覽」的溫度磁磚。預期：都仍是 CPU 類別的最高溫，不會混入 GPU 溫度。

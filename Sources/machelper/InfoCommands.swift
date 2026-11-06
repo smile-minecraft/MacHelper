@@ -213,6 +213,8 @@ struct LoginItemsCommand: ParsableCommand {
         Reads the Background Task Management database (sfltool dumpbtm): the list behind
         System Settings → General → Login Items, including items apps register themselves.
         Change them in System Settings; `machelper startup` manages LaunchAgent plists.
+        macOS asks for an administrator password each time sfltool reads the database; the
+        MacHelper app reads it through its Helper instead and never asks.
         """
     )
 
@@ -256,12 +258,17 @@ struct DoctorCommand: ParsableCommand {
         abstract: "One-off health report from the monitoring history (read-only).",
         discussion: """
         Looks at the stored history (CPU, memory, temperature, busiest processes, free-space trend)
-        plus swap, uptime and login items. Works best with background recording turned on.
+        plus swap and uptime. Works best with background recording turned on.
+        Login items are counted only with --background-items, because reading them (sfltool)
+        asks for an administrator password; the app's health check counts them through its Helper.
         Exit code 0 also when problems are found; check "overall" in --json output.
         """
     )
 
     @OptionGroup var output: OutputOptions
+
+    @Flag(name: .long, help: "Also count login and background items (macOS asks for an administrator password).")
+    var backgroundItems = false
 
     @Option(name: .long, help: "Hours of history to look at (1–720).")
     var hours: Double = 24
@@ -272,7 +279,7 @@ struct DoctorCommand: ParsableCommand {
 
     func run() throws {
         let history = try MetricsHistory(readOnly: true)
-        let report = try HealthCheck.run(history: history, hours: hours, system: .current())
+        let report = try HealthCheck.run(history: history, hours: hours, system: .current(includeBackgroundItems: backgroundItems))
         if output.json {
             struct Out: Encodable { let schemaVersion = 1; let overall: HealthReport.Severity; let report: HealthReport }
             try Output.json(Out(overall: report.overall, report: report))

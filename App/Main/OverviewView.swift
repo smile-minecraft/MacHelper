@@ -271,10 +271,13 @@ struct TopProcesses: View {
 @MainActor
 enum ProcessIcon {
     private static var cache: [String: NSImage] = [:]
-    static func icon(for p: ProcessUsage) -> NSImage {
-        let key = p.appPath ?? "exec"
+    static func icon(for p: ProcessUsage) -> NSImage { icon(appPath: p.appPath) }
+    static func icon(for p: GPUProcessUsage) -> NSImage { icon(appPath: p.appPath) }
+
+    static func icon(appPath: String?) -> NSImage {
+        let key = appPath ?? "exec"
         if let i = cache[key] { return i }
-        let i = p.appPath.map { NSWorkspace.shared.icon(forFile: $0) } ?? NSWorkspace.shared.icon(for: .unixExecutable)
+        let i = appPath.map { NSWorkspace.shared.icon(forFile: $0) } ?? NSWorkspace.shared.icon(for: .unixExecutable)
         cache[key] = i
         return i
     }

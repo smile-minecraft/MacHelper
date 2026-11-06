@@ -83,3 +83,13 @@ import Storage
         #expect(try h.diskSpace(since: start.addingTimeInterval(-1)).isEmpty)
     }
 }
+
+@Suite struct SystemSnapshotPasswordTests {
+    /// Reading background items locally runs sfltool, which asks for an administrator password.
+    /// The default snapshot must never do that (the app gets the count from the Helper).
+    @Test func defaultSnapshotDoesNotReadBackgroundItems() {
+        let s = SystemSnapshot.current()
+        #expect(s.activeBackgroundItems == nil)
+        #expect(s.uptimeSeconds != nil)
+    }
+}

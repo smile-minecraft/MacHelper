@@ -145,10 +145,28 @@ private struct AppDetail: View {
                         }
                     }
                     if !plan.systemItems.isEmpty {
-                        Section("System Level (needs an administrator; remove manually)") {
+                        Section {
                             ForEach(plan.systemItems, id: \.self) { p in
-                                Text(p).font(.caption).foregroundStyle(Palette.textMuted)
-                                    .contextMenu { Button("Show in Finder") { model.reveal(p) } }
+                                HStack(spacing: 8) {
+                                    Toggle(isOn: Binding(get: { model.systemSelection.contains(p) }, set: { _ in model.toggleSystem(p) })) { EmptyView() }
+                                        .labelsHidden().disabled(!model.helperEnabled)
+                                    Text(p).font(.caption).foregroundStyle(model.helperEnabled ? Palette.text : Palette.textMuted)
+                                        .lineLimit(1).truncationMode(.middle).help(p)
+                                    Spacer(minLength: 4)
+                                    if !UninstallModel.isStrongSystemMatch(p, bundleID: app.bundleID) {
+                                        Text("Matched by name").font(.caption2).foregroundStyle(Theme.amber)
+                                    }
+                                }
+                                .contextMenu { Button("Show in Finder") { model.reveal(p) } }
+                            }
+                        } header: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("System Level")
+                                Text(model.helperEnabled
+                                     ? "Checked items are moved to your Trash by the Helper, so you can put them back. Items matched only by name are left unchecked; check them only if they clearly belong to this app."
+                                     : "Enable the Helper in Settings to move these to the Trash; until then remove them manually.")
+                                    .font(.caption).foregroundStyle(Palette.textMuted).textCase(nil)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
                     }
@@ -168,7 +186,9 @@ private struct AppDetail: View {
                 .confirmationDialog("Uninstall \(app.name)?", isPresented: $confirm, titleVisibility: .visible) {
                     Button("Move to Trash", role: .destructive) { Task { await model.uninstall() } }
                 } message: {
+                    let systemCount = plan.systemItems.filter(model.systemSelection.contains).count
                     Text("The \(plan.items.filter(\.selected).count) selected items (\(Fmt.bytes(Int64(clamping: plan.selectedSize)))) will be moved to the Trash, where you can get them back. App Store apps may ask for an administrator password.")
+                        + Text(systemCount > 0 ? "\n" + String(localized: "\(systemCount) system-level items are moved to the Trash by the Helper.") : "")
                 }
             } else {
                 Spacer()

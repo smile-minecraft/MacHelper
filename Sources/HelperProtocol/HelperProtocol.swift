@@ -9,7 +9,7 @@ public enum HelperConstants {
     /// Name of the helper executable inside `MacHelper.app/Contents/MacOS/`.
     public static let helperExecutableName = "MacHelperHelper"
     /// Bump when the XPC interface changes; the app refuses to talk to a mismatched helper.
-    public static let protocolVersion = 4
+    public static let protocolVersion = 6
 }
 
 /// XPC interface exported by the root Helper daemon.
@@ -38,6 +38,21 @@ public enum HelperConstants {
     /// Enables or disables a third-party job in /Library/LaunchDaemons. The Helper reads the label
     /// from the plist itself and refuses Apple's and MacHelper's own jobs. Never edits or deletes files.
     func setSystemDaemonEnabled(_ plistPath: String, enabled: Bool, reply: @escaping @Sendable (_ error: String?) -> Void)
+
+    // v5
+
+    /// `sfltool dumpbtm` run as root (no password prompt), limited to the calling user's records and
+    /// the system-wide ones. Fixed command; takes no arguments from the app.
+    func dumpBackgroundItems(reply: @escaping @Sendable (_ text: String?, _ error: String?) -> Void)
+
+    // v6
+
+    /// `request` is an encoded `SystemLeftovers.Request`. Each path must sit directly in one of the
+    /// fixed system folders; it is moved (never deleted) into the calling user's Trash. Reply:
+    /// encoded `SystemLeftovers.Result`.
+    func moveSystemLeftovers(_ request: Data, reply: @escaping @Sendable (_ json: Data?, _ error: String?) -> Void)
+    /// Encoded `[ProcessCounter]` for every process: CPU time and memory only, no names or arguments.
+    func processCounters(reply: @escaping @Sendable (_ json: Data?, _ error: String?) -> Void)
 }
 
 public enum HelperTiming {

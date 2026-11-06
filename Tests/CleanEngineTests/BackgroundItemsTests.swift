@@ -94,3 +94,30 @@ import Testing
         #expect(wrapper?.enabled == false, "enabled but not allowed does not run")
     }
 }
+
+@Suite struct BackgroundItemsDumpTests {
+    @Test func parsesHelperDumpForThisUser() {
+        let dump = """
+         Records for UID 501 : X
+         #1:
+                         UUID: AAAA0001
+                         Name: Agent
+                         Type: legacy agent (0x10008)
+                  Disposition: [enabled, allowed, notified] (0xb)
+                   Identifier: com.mine.agent
+         Records for UID 777 : Y
+         #1:
+                         UUID: CCCC0001
+                         Type: legacy agent (0x10008)
+                  Disposition: [enabled, allowed, notified] (0xb)
+                   Identifier: com.other.agent
+        """
+        guard case .success(let items) = BackgroundItems.items(fromDump: dump, uid: 501) else {
+            Issue.record("expected items"); return
+        }
+        #expect(items.map(\.identifier) == ["com.mine.agent"])
+        #expect(BackgroundItems.activeCount(items, uid: 501) == 1)
+        #expect(BackgroundItems.items(fromDump: "", uid: 501) == .failure(.unavailable("no records")))
+        #expect(BackgroundItems.items(fromDump: "", uid: 501, failureText: " boom \n") == .failure(.unavailable("boom")))
+    }
+}

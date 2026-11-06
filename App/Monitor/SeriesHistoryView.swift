@@ -213,13 +213,14 @@ struct SeriesHistoryView: View {
     }
 
     private func chart(_ title: LocalizedStringKey, plots: [Plot], format: Format) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
+        VStack(alignment: .leading, spacing: 14) {
+            // Same header as the monitor charts: value beside the title, clear of the y-axis labels.
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(title).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(Palette.text)
-                Spacer()
                 if let first = plots.first, let last = first.points.last {
                     Text(label(last.value, format)).font(Theme.smallNumeral).foregroundStyle(first.color)
                 }
+                Spacer()
             }
             Chart {
                 ForEach(plots) { plot in

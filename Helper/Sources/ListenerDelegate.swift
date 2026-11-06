@@ -65,7 +65,7 @@ final class ListenerDelegate: NSObject, NSXPCListenerDelegate, @unchecked Sendab
         // The kernel enforces this on every message, not just at connect time.
         connection.setCodeSigningRequirement(clientRequirement)
         connection.exportedInterface = NSXPCInterface(with: HelperXPC.self)
-        connection.exportedObject = HelperService(driver: driver, engine: engine)
+        connection.exportedObject = HelperService(driver: driver, engine: engine, clientUID: Int(connection.effectiveUserIdentifier))
         connection.invalidationHandler = { xpcLog.info("Client disconnected") }
         connection.resume()
         xpcLog.notice("Accepted connection from pid \(connection.processIdentifier)")
@@ -76,10 +76,13 @@ final class ListenerDelegate: NSObject, NSXPCListenerDelegate, @unchecked Sendab
 final class HelperService: NSObject, HelperXPC, @unchecked Sendable {
     private let driver: FanDriver
     private let engine: FanControlEngine
+    /// Effective UID of the connected app, from the kernel (not from the app's own claims).
+    private let clientUID: Int
 
-    init(driver: FanDriver, engine: FanControlEngine) {
+    init(driver: FanDriver, engine: FanControlEngine, clientUID: Int) {
         self.driver = driver
         self.engine = engine
+        self.clientUID = clientUID
     }
 
     func handshake(reply: @escaping @Sendable (Int, String) -> Void) {
@@ -160,7 +163,71 @@ final class HelperService: NSObject, HelperXPC, @unchecked Sendable {
         }
     }
 
-    private static func exec(_ argv: [String]) -> (Int32, String) {
+    func dumpBackgroundItems(reply: @escaping @Sendable (String?, String?) -> Void) {
+        let uid = clientUID
+        DispatchQueue.global(qos: .utility).async {
+            guard FileManager.default.isExecutableFile(atPath: BackgroundTaskDump.tool) else {
+                reply(nil, "sfltool not available on this macOS")
+                return
+            }
+            let (status, output) = Self.exec([BackgroundTaskDump.tool] + BackgroundTaskDump.arguments, timeout: 30)
+            guard status == 0 else { reply(nil, "sfltool dumpbtm: \(output.suffix(300)) (exit \(status))"); return }
+            reply(BackgroundTaskDump.filter(output, uid: uid), nil)
+        }
+    }
+
+    func moveSystemLeftovers(_ request: Data, reply: @escaping @Sendable (Data?, String?) -> Void) {
+        let decoded: SystemLeftovers.Request
+        do { decoded = try JSONDecoder().decode(SystemLeftovers.Request.self, from: request) } catch {
+            reply(nil, "bad request: \(error)")
+            return
+        }
+        guard decoded.paths.count <= SystemLeftovers.maxPaths else { reply(nil, "too many paths"); return }
+        let uid = clientUID
+        // The caller's own Trash; never root's, never another account's.
+        guard uid > 0, let pw = getpwuid(uid_t(uid)), let dir = pw.pointee.pw_dir else {
+            reply(nil, "no home folder for uid \(uid)")
+            return
+        }
+        let trash = String(cString: dir) + "/.Trash"
+        let owner = SystemLeftovers.Owner(uid: uid_t(uid), gid: pw.pointee.pw_gid)
+        DispatchQueue.global(qos: .utility).async {
+            let items = decoded.paths.map { path in
+                SystemLeftovers.moveToTrash(path, trash: trash, owner: owner) { area in
+                    try Self.stopJob(at: path, area: area, uid: uid)
+                }
+            }
+            for item in items where item.error == nil {
+                xpcLog.notice("Moved system leftover \(item.path, privacy: .public) to the Trash of uid \(uid)")
+            }
+            do { reply(try JSONEncoder().encode(SystemLeftovers.Result(items: items)), nil) } catch { reply(nil, "\(error)") }
+        }
+    }
+
+    /// A launchd plist about to be moved: stop its job first (a loaded job keeps running without
+    /// its plist). Apple's and MacHelper's own jobs are refused.
+    private static func stopJob(at path: String, area: SystemLeftovers.Area, uid: Int) throws {
+        let kind: SystemJobControl.Kind
+        switch area.dir {
+        case SystemJobControl.Kind.daemon.directory: kind = .daemon
+        case SystemJobControl.Kind.agent.directory: kind = .agent
+        default: return
+        }
+        let label: String
+        do { label = try SystemJobControl.validate(plistPath: path, kind: kind) } catch let e as SystemJobControl.ValidationError {
+            if case .protectedLabel = e { throw e }
+            return  // unreadable or odd plist: nothing loaded from it can be stopped by label
+        }
+        _ = exec(["/bin/launchctl", "bootout", kind == .daemon ? "system/\(label)" : "gui/\(uid)/\(label)"])
+    }
+
+    func processCounters(reply: @escaping @Sendable (Data?, String?) -> Void) {
+        DispatchQueue.global(qos: .utility).async {
+            do { reply(try JSONEncoder().encode(ProcessCounters.readAll()), nil) } catch { reply(nil, "\(error)") }
+        }
+    }
+
+    private static func exec(_ argv: [String], timeout: TimeInterval = 60) -> (Int32, String) {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: argv[0])
         p.arguments = Array(argv.dropFirst())
@@ -168,6 +235,7 @@ final class HelperService: NSObject, HelperXPC, @unchecked Sendable {
         p.standardOutput = pipe
         p.standardError = pipe
         do { try p.run() } catch { return (-1, "\(error)") }
+        DispatchQueue.global().asyncAfter(deadline: .now() + timeout) { if p.isRunning { p.terminate() } }
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         p.waitUntilExit()
         return (p.terminationStatus, String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines))

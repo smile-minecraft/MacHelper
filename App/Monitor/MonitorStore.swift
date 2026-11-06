@@ -141,6 +141,9 @@ final class MonitorStore {
     var history: LiveHistory { LiveHistory(series: liveSeries) }
     private(set) var processes: ProcessSnapshot?
     @ObservationIgnored private let processSampler = ProcessSampler()
+    /// Busiest GPU users, sampled with the process list (only while someone is watching).
+    private(set) var gpuProcesses: [GPUProcessUsage]?
+    @ObservationIgnored private let gpuProcessSampler = GPUProcessSampler()
     /// Persistent per-minute history (nil if the database can't be opened).
     @ObservationIgnored let persistentHistory: MetricsHistory? = {
         do {
@@ -234,6 +237,23 @@ final class MonitorStore {
                                hiddenCount: new.hiddenCount)
     }
 
+    private nonisolated static func privilegedCounters() async -> [Int32: (cpuNanos: UInt64, footprint: UInt64)]? {
+        guard HelperClient.shared.status == .enabled,
+              let counters = try? await HelperClient.shared.processCounters() else { return nil }
+        return Dictionary(counters.map { ($0.pid, (cpuNanos: $0.cpuNanos, footprint: $0.footprint)) }, uniquingKeysWith: { a, _ in a })
+    }
+
+    /// GPU shares are small and jumpy: rows under 0.5 % (shown as 0 %) are dropped, and the previous
+    /// order is kept only between rows less than one percentage point apart, so a clearly busier
+    /// process always moves up.
+    private func stabilizedGPU(_ new: [GPUProcessUsage]) -> [GPUProcessUsage] {
+        let position = Dictionary(uniqueKeysWithValues: (gpuProcesses ?? []).enumerated().map { ($1.pid, $0) })
+        return Array(new.filter { $0.gpu >= 0.005 }.sorted { a, b in
+            if abs(a.gpu - b.gpu) < 0.01, let pa = position[a.pid], let pb = position[b.pid] { return pa < pb }
+            return a.gpu > b.gpu
+        }.prefix(10))
+    }
+
     /// Process history is collected whether or not a view is open. Each cycle re-reads the
     /// shared switch from the database; while it is off the sampler is never called, so no
     /// process name is read at all.
@@ -244,7 +264,7 @@ final class MonitorStore {
             let sampler = ProcessSampler()
             while !Task.isCancelled {
                 if (try? store.isProcessCollectionEnabled()) == true {
-                    let readings = Self.processReadings(sampler.sample(top: 20))
+                    let readings = Self.processReadings(sampler.sample(top: 20, privileged: await Self.privilegedCounters()))
                     if let finished = accumulator.add(readings) {
                         do {
                             try db.recordProcessMinute(finished)
@@ -300,11 +320,17 @@ final class MonitorStore {
         }
         guard processTask == nil else { return }
         let sampler = processSampler
+        let gpuSampler = gpuProcessSampler
         processTask = Task { [weak self] in
             while !Task.isCancelled {
-                let snapshot = await Task.detached(priority: .utility) { sampler.sample(top: 20) }.value
+                // Root and other users' processes: counters from the Helper when it runs.
+                let privileged = await Self.privilegedCounters()
+                let (snapshot, gpu) = await Task.detached(priority: .utility) {
+                    (sampler.sample(top: 20, privileged: privileged), gpuSampler.sample(top: 10))
+                }.value
                 guard let self, !Task.isCancelled else { return }
                 self.processes = self.stabilized(snapshot)
+                self.gpuProcesses = self.stabilizedGPU(gpu)
                 try? await Task.sleep(for: .seconds(2))
             }
         }

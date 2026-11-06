@@ -280,14 +280,50 @@ private struct GPUTab: View {
                 if let w = store.power?.gpuWatts { KeyValueRow(label: String(localized: "GPU power"), value: Fmt.watts(w), dot: Theme.amber) }
                 KeyValueRow(label: String(localized: "Hottest GPU sensor"), value: Fmt.celsius(gpuTemp), dot: Series.tempColor(gpuTemp))
             }
-            let sensors = store.temperatures.filter { $0.category == .gpu }.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-            if !sensors.isEmpty {
-                HairlineHeader(text: "Temperatures")
-                VStack(spacing: 0) {
-                    ForEach(Array(sensors.prefix(8))) { r in
-                        KeyValueRow(label: Fmt.sensorName(r.name), value: Fmt.celsius(r.celsius), dot: Series.tempColor(r.celsius))
+            HairlineHeader(text: "Top processes")
+            GPUProcessTable(items: store.gpuProcesses.map { Array($0.prefix(6)) })
+        }
+    }
+}
+
+/// Busiest GPU users. `nil` while the first two samples are pending; empty when nothing used the
+/// GPU in the last interval (or this GPU publishes no per-process time).
+private struct GPUProcessTable: View {
+    let items: [GPUProcessUsage]?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if let items {
+                if items.isEmpty {
+                    Text("No process used the GPU in the last few seconds")
+                        .font(.system(size: 12)).foregroundStyle(Palette.textMuted)
+                        .frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 6)
+                }
+                ForEach(Array(items.enumerated()), id: \.element.id) { i, p in
+                    HStack(spacing: 8) {
+                        Image(nsImage: ProcessIcon.icon(for: p)).resizable().frame(width: 18, height: 18)
+                        Text(p.name).font(.system(size: 13)).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.middle)
+                        Spacer(minLength: 4)
+                        Text(Fmt.percent(p.gpu)).frame(width: 58, alignment: .trailing).foregroundStyle(Palette.text)
+                    }
+                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                    .frame(height: 28)
+                    .overlay(alignment: .bottom) {
+                        if i < items.count - 1 { Rectangle().fill(Palette.hairline).frame(height: 1) }
+                    }
+                    .contentShape(Rectangle())
+                    .help(p.path ?? p.name)
+                    .contextMenu {
+                        if let app = NSRunningApplication(processIdentifier: p.pid) {
+                            Button("Quit \(app.localizedName ?? p.name)") { app.terminate() }
+                        }
+                        if let path = p.appPath ?? p.path {
+                            Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)]) }
+                        }
                     }
                 }
+            } else {
+                SkeletonRows(count: 4).padding(.vertical, 8)
             }
         }
     }

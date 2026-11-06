@@ -217,21 +217,6 @@ struct DiskAnalysisView: View {
         }
     }
 
-    @ViewBuilder private var hoverCard: some View {
-        if let h = model.hover {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(h.title).bold().lineLimit(1)
-                Text("\(Fmt.bytes(Int64(clamping: h.size))) · \(h.detail)").monospacedDigit()
-                if let path = h.path { Text(path).font(.caption2).foregroundStyle(.secondary).lineLimit(2).truncationMode(.middle) }
-            }
-            .font(.caption)
-            .padding(8)
-            .frame(maxWidth: 360, alignment: .leading)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
-            .allowsHitTesting(false)
-        }
-    }
-
     private func row(_ node: DiskNode, total: UInt64) -> some View {
         HStack {
             Image(systemName: node.isDirectory ? (node.skippedCloudOnly ? "icloud.slash" : "folder.fill") : "doc")

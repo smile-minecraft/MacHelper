@@ -29,11 +29,12 @@ final class StartupModel {
         }
     }
 
-    /// Reads the Background Task Management list (sfltool, a few seconds).
-    func loadBackground() async {
+    /// Reads the Background Task Management list through the Helper (a few seconds, no password).
+    /// The refresh button passes `forceRefresh`; opening the tab reuses a recent read.
+    func loadBackground(forceRefresh: Bool = false) async {
         guard !loadingBackground else { return }
         loadingBackground = true
-        let result = await Task.detached(priority: .userInitiated) { BackgroundItems.read() }.value
+        let result = await BackgroundItemsSource.load(forceRefresh: forceRefresh)
         switch result {
         case .success(let items):
             backgroundGroups = BackgroundItems.groups(items)

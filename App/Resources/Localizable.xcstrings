@@ -3621,16 +3621,6 @@
         }
       }
     },
-    "System Level (needs an administrator; remove manually)": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "系統層級（需要管理員權限，請手動移除）"
-          }
-        }
-      }
-    },
     "System control": {
       "localizations": {
         "zh-Hant": {
@@ -3687,16 +3677,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "溫度來源"
-          }
-        }
-      }
-    },
-    "Temperatures": {
-      "localizations": {
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "溫度"
           }
         }
       }
@@ -5750,7 +5730,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "Launch Agents"
+            "value": "啟動代理程式"
           }
         }
       }
@@ -6341,6 +6321,96 @@
           "stringUnit": {
             "state": "translated",
             "value": "這個系統背景程式會對所有使用者停止，直到你在這裡重新啟用前都不會再啟動。安裝它的 App 可能無法正常運作（例如更新程式、VPN 或網路輔助程式）。plist 檔不會被修改或刪除。"
+          }
+        }
+      }
+    },
+    "Needs the Helper (Settings → Helper). Without it macOS would ask for an administrator password every time.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要 Helper（設定 → Helper）。沒有 Helper，macOS 每次都會要求輸入管理員密碼。"
+          }
+        }
+      }
+    },
+    "No process used the GPU in the last few seconds": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近幾秒沒有程序使用 GPU"
+          }
+        }
+      }
+    },
+    "Needs the Helper": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要 Helper"
+          }
+        }
+      }
+    },
+    "%lld system items moved to the Trash by the Helper.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 已把 %lld 個系統層級項目移到垃圾桶。"
+          }
+        }
+      }
+    },
+    "%lld system-level items are moved to the Trash by the Helper.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 個系統層級項目會由 Helper 移到垃圾桶。"
+          }
+        }
+      }
+    },
+    "Checked items are moved to your Trash by the Helper, so you can put them back. Items matched only by name are left unchecked; check them only if they clearly belong to this app.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "勾選的項目會由 Helper 移到你的垃圾桶，之後可以放回原處。只依名稱比對到的項目預設不勾，確定屬於這個 App 才勾選。"
+          }
+        }
+      }
+    },
+    "Enable the Helper in Settings to move these to the Trash; until then remove them manually.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在設定中啟用 Helper 後才能把這些項目移到垃圾桶；在那之前請手動移除。"
+          }
+        }
+      }
+    },
+    "Matched by name": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依名稱比對"
+          }
+        }
+      }
+    },
+    "System Level": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統層級"
           }
         }
       }

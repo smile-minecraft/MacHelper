@@ -99,11 +99,12 @@ struct MonitorView: View {
     }
 
     private func chart(_ m: Metric, _ data: [(String, [ChartPoint])]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
+        VStack(alignment: .leading, spacing: 14) {
+            // The current value sits next to the title, away from the trailing y-axis labels.
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(m.title).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(Palette.text)
-                Spacer()
                 if let last = data.first?.1.last { Text(label(last.value, m.format)).font(Theme.smallNumeral).foregroundStyle(m.color) }
+                Spacer()
             }
             Chart {
                 ForEach(data, id: \.0) { name, pts in

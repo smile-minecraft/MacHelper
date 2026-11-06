@@ -64,17 +64,32 @@ public struct BackgroundItemGroup: Sendable, Identifiable, Hashable {
 public enum BackgroundItems {
     public enum Failure: Error, Equatable, Sendable { case unavailable(String) }
 
-    /// Runs `sfltool dumpbtm` (no administrator rights needed) and returns this user's items
-    /// plus the system-wide ones (UID -2 and 0).
+    /// Runs `sfltool dumpbtm` in this process and returns this user's items plus the system-wide
+    /// ones (UID -2 and 0).
+    ///
+    /// As a normal user sfltool asks for an administrator password on every run (it obtains
+    /// `system.privilege.admin`). The app therefore never calls this; it gets the dump from the root
+    /// Helper and uses `items(fromDump:)`. Only the CLI's explicit `login-items` command runs it.
     public static func read(uid: Int = Int(getuid()), timeout: TimeInterval = 20) -> Result<[BackgroundItem], Failure> {
         let tool = "/usr/bin/sfltool"
         guard FileManager.default.isExecutableFile(atPath: tool) else { return .failure(.unavailable("sfltool not found")) }
         let (status, text) = MaintenanceRunner.exec([tool, "dumpbtm"], timeout: timeout)
+        return items(fromDump: text, uid: uid, failureText: status == 0 ? nil : text)
+    }
+
+    /// Parses a `sfltool dumpbtm` dump (for example from the Helper) into this user's and the
+    /// system-wide items.
+    public static func items(fromDump text: String, uid: Int = Int(getuid()), failureText: String? = nil) -> Result<[BackgroundItem], Failure> {
         let items = parse(text).filter { $0.uid == uid || $0.uid == -2 || $0.uid == 0 }
         if items.isEmpty {
-            return .failure(.unavailable(status == 0 ? "no records" : String(text.trimmingCharacters(in: .whitespacesAndNewlines).suffix(300))))
+            return .failure(.unavailable(failureText.map { String($0.trimmingCharacters(in: .whitespacesAndNewlines).suffix(300)) } ?? "no records"))
         }
         return .success(items)
+    }
+
+    /// Active background items, the number the health check reports.
+    public static func activeCount(_ items: [BackgroundItem], uid: Int = Int(getuid())) -> Int {
+        groups(items, uid: uid).flatMap(\.items).filter(\.isActive).count
     }
 
     public static func parse(_ text: String) -> [BackgroundItem] {

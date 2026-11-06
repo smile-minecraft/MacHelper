@@ -1,3 +1,4 @@
+import CleanEngine
 import Diagnostics
 import Foundation
 import Observation
@@ -25,9 +26,17 @@ final class HealthModel {
         }
         loading = true
         let hours = window.rawValue
+        // Through the Helper, cached for a few minutes: switching the period never re-reads it,
+        // and nothing here runs sfltool (which would ask for a password).
+        let backgroundCount: Int? = switch await BackgroundItemsSource.load() {
+        case .success(let items): BackgroundItems.activeCount(items)
+        case .failure: nil
+        }
         let result = await Task.detached(priority: .userInitiated) { () -> Result<(HealthReport, [DiskSpacePoint]), Error> in
             Result {
-                let report = try HealthCheck.run(history: history, hours: hours, system: .current())
+                var system = SystemSnapshot.current()
+                system.activeBackgroundItems = backgroundCount
+                let report = try HealthCheck.run(history: history, hours: hours, system: system)
                 let points = try history.diskSpace(since: Date().addingTimeInterval(-30 * 86_400))
                 return (report, points)
             }

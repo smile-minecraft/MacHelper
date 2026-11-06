@@ -16,7 +16,7 @@ struct CheckHealthIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
         let history = try MetricsHistory(readOnly: true)
-        let report = try HealthCheck.run(history: history, hours: Double(hours), system: .current(includeBackgroundItems: false))
+        let report = try HealthCheck.run(history: history, hours: Double(hours), system: .current())
         let text = report.findings.isEmpty
             ? String(localized: "No problems found in the last \(hours) hours.")
             : report.findings.map { "• \($0.title): \($0.detail)" }.joined(separator: "\n")

@@ -19,6 +19,9 @@ final class UninstallModel {
     private(set) var loadingPlan = false
     var includeUserData = false { didSet { applyUserDataChoice() } }
     private(set) var message: String?
+    /// System-level leftovers to move with the Helper. Starts with the ones named after the bundle ID.
+    var systemSelection: Set<String> = []
+    private(set) var helperEnabled = false
 
     private(set) var orphans: [UninstallItem]?
     private(set) var loadingOrphans = false
@@ -56,6 +59,8 @@ final class UninstallModel {
         }.value
         guard selectedAppID == app.id else { return }
         plan = p
+        helperEnabled = HelperClient.shared.status == .enabled
+        systemSelection = helperEnabled ? Set(p.systemItems.filter { Self.isStrongSystemMatch($0, bundleID: app.bundleID) }) : []
         loadingPlan = false
     }
 
@@ -86,6 +91,16 @@ final class UninstallModel {
         for i in plan!.items.indices where plan!.items[i].followsUserData {
             plan!.items[i].selected = includeUserData
         }
+    }
+
+    /// The bundle ID appears in the item's own name: clearly this app's. Name-only matches stay unchecked.
+    nonisolated static func isStrongSystemMatch(_ path: String, bundleID: String) -> Bool {
+        guard !bundleID.isEmpty else { return false }
+        return (path as NSString).lastPathComponent.lowercased().contains(bundleID.lowercased())
+    }
+
+    func toggleSystem(_ path: String) {
+        if systemSelection.contains(path) { systemSelection.remove(path) } else { systemSelection.insert(path) }
     }
 
     var selectedOrphanBytes: UInt64 { orphans?.filter(\.selected).reduce(0) { $0 + $1.size } ?? 0 }
@@ -122,10 +137,28 @@ final class UninstallModel {
             message = "\(error)"
             return
         }
-        let failed = report.items.filter { $0.result == .failed || $0.result == .skipped }
+        var failed = report.items.filter { $0.result == .failed || $0.result == .skipped }.map { $0.message ?? $0.path }
+        let systemPaths = plan.systemItems.filter(systemSelection.contains)
+        var systemMoved = 0
+        if !systemPaths.isEmpty {
+            do {
+                let result = try await HelperClient.shared.moveSystemLeftovers(systemPaths)
+                let source = "uninstall.\(plan.app.bundleID)"
+                OperationLog.shared.append(result.items.map {
+                    OperationLog.Entry(time: Date(), command: "uninstall", path: $0.path, source: source, bytes: 0,
+                                       result: $0.error == nil ? "trashed" : "failed",
+                                       message: $0.error ?? $0.trashedAs.map { "Trash: \($0)" })
+                })
+                systemMoved = result.items.filter { $0.error == nil }.count
+                failed += result.items.compactMap(\.error)
+            } catch {
+                failed.append("\(error)")
+            }
+        }
         message = failed.isEmpty
             ? String(localized: "Uninstalled \(plan.app.name); \(Fmt.bytes(Int64(clamping: report.trashedBytes))) moved to the Trash.")
-            : String(localized: "Some items weren’t processed (\(failed.count)): \(failed.first?.message ?? "")")
+                + (systemMoved > 0 ? " " + String(localized: "\(systemMoved) system items moved to the Trash by the Helper.") : "")
+            : String(localized: "Some items weren’t processed (\(failed.count)): \(failed.first ?? "")")
         if !report.items.contains(where: { $0.result == .failed && $0.path == plan.app.path }) {
             selectedAppID = nil
             self.plan = nil

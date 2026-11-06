@@ -61,7 +61,7 @@ struct Uninstall: ParsableCommand {
                 Output.line("\(mark) \(Output.lpad(Output.bytes(i.size), 10))  \(Output.pad(i.kind.rawValue, 14)) \(Output.shortPath(i.path))\(note)")
             }
             for k in plan.kept { Output.line("[-] kept: \(Output.shortPath(k.path)): \(k.reason)") }
-            for s in plan.systemItems { Output.line("[!] needs admin, remove manually: \(s)") }
+            for s in plan.systemItems { Output.line("[!] system-level, remove manually or from the MacHelper app (Helper): \(s)") }
             Output.line()
             if report.dryRun {
                 Output.line("Preview: \(Output.bytes(plan.selectedSize)) selected. Add --yes to uninstall\(withData ? "" : " (add --with-data to include app data)").")

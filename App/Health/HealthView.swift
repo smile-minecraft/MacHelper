@@ -112,32 +112,36 @@ struct HealthView: View {
     // MARK: Summary
 
     private func summary(_ report: HealthReport) -> some View {
-        Grid(alignment: .leading, horizontalSpacing: 28, verticalSpacing: 6) {
-            GridRow {
-                stat("CPU", "\(Fmt.percent(report.cpu.average)) · \(Fmt.percent(report.cpu.maximum))")
-                stat("Memory", "\(Fmt.percent(report.memory.average)) · \(Fmt.percent(report.memory.maximum))")
-                stat("Temperature", Fmt.celsius(report.temperature.maximum))
-                stat("Power", Fmt.watts(report.power.average))
+        VStack(alignment: .leading, spacing: 12) {
+            // Four equal columns across the card instead of a block packed to the left.
+            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 14) {
+                GridRow {
+                    stat("CPU", "\(Fmt.percent(report.cpu.average)) · \(Fmt.percent(report.cpu.maximum))")
+                    stat("Memory", "\(Fmt.percent(report.memory.average)) · \(Fmt.percent(report.memory.maximum))")
+                    stat("Temperature", Fmt.celsius(report.temperature.maximum))
+                    stat("Power", Fmt.watts(report.power.average))
+                }
+                GridRow {
+                    stat("Recorded", Fmt.percent(report.coverage))
+                    stat("Swap", report.system.swapUsedBytes.map { Fmt.bytes(Int64($0)) } ?? "–")
+                    stat("Uptime", report.system.uptimeSeconds.map { Duration.seconds($0).formatted(.units(allowed: [.days, .hours], width: .abbreviated)) } ?? "–")
+                    stat("Background items", report.system.activeBackgroundItems.map { "\($0)" } ?? "–",
+                         note: report.system.activeBackgroundItems == nil ? String(localized: "Needs the Helper") : nil)
+                }
             }
-            GridRow {
-                stat("Recorded", Fmt.percent(report.coverage))
-                stat("Swap", report.system.swapUsedBytes.map { Fmt.bytes(Int64($0)) } ?? "–")
-                stat("Uptime", report.system.uptimeSeconds.map { Duration.seconds($0).formatted(.units(allowed: [.days, .hours], width: .abbreviated)) } ?? "–")
-                stat("Background items", report.system.activeBackgroundItems.map { "\($0)" } ?? "–")
-            }
+            Text("CPU and memory: average · highest. Temperature: highest. Power: average.")
+                .font(.caption2).foregroundStyle(Palette.textFaint)
         }
         .card()
-        .overlay(alignment: .bottomTrailing) {
-            Text("CPU and memory: average · highest. Temperature: highest. Power: average.")
-                .font(.caption2).foregroundStyle(Palette.textFaint).padding(8)
-        }
     }
 
-    private func stat(_ title: LocalizedStringKey, _ value: String) -> some View {
+    private func stat(_ title: LocalizedStringKey, _ value: String, note: String? = nil) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title).font(.caption).foregroundStyle(Palette.textMuted)
             Text(value).font(Theme.smallNumeral).foregroundStyle(Palette.text)
+            if let note { Text(note).font(.caption2).foregroundStyle(Theme.amber) }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
     }
 

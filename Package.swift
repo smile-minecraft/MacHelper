@@ -56,6 +56,7 @@ let package = Package(
         .testTarget(name: "DiskScanTests", dependencies: ["DiskScan"]),
         .testTarget(name: "CleanEngineTests", dependencies: ["CleanEngine"]),
         .testTarget(name: "PrivilegedOpsTests", dependencies: ["PrivilegedOps"]),
+        .testTarget(name: "MetricsTests", dependencies: ["Metrics"]),
         .testTarget(name: "StorageTests", dependencies: ["Storage"]),
         .testTarget(name: "DiagnosticsTests", dependencies: ["Diagnostics", "Storage"]),
         .testTarget(name: "SettingsPortabilityTests", dependencies: ["SettingsPortability", "CleanEngine", "FanControl"]),

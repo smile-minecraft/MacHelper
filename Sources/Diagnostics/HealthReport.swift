@@ -68,8 +68,10 @@ public struct SystemSnapshot: Codable, Sendable, Equatable {
         self.activeBackgroundItems = activeBackgroundItems
     }
 
-    /// Reads swap, uptime, disk space and (optionally, takes a few seconds) background items.
-    public static func current(includeBackgroundItems: Bool = true) -> SystemSnapshot {
+    /// Reads swap, uptime and disk space. `activeBackgroundItems` is filled by the caller: reading
+    /// it locally (`sfltool`) asks for an administrator password, so the app gets it from the Helper
+    /// and the CLI only reads it when asked to (`includeBackgroundItems`).
+    public static func current(includeBackgroundItems: Bool = false) -> SystemSnapshot {
         var s = SystemSnapshot()
         var swap = xsw_usage()
         var size = MemoryLayout<xsw_usage>.size
@@ -84,7 +86,7 @@ public struct SystemSnapshot: Codable, Sendable, Equatable {
             s.diskTotalBytes = disk.total
         }
         if includeBackgroundItems, case .success(let items) = BackgroundItems.read() {
-            s.activeBackgroundItems = BackgroundItems.groups(items).flatMap(\.items).filter(\.isActive).count
+            s.activeBackgroundItems = BackgroundItems.activeCount(items)
         }
         return s
     }

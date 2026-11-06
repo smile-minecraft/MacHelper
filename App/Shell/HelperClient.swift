@@ -176,6 +176,36 @@ final class HelperClient: @unchecked Sendable {
         }
     }
 
+    /// Background Task Management records via the Helper (root: no password prompt).
+    func dumpBackgroundItems() async throws -> String {
+        try await call(timeout: .seconds(40)) { proxy, done in
+            proxy.dumpBackgroundItems { text, error in
+                if let text { done(.success(text)) } else { done(.failure(HelperClientError.remote(error ?? "unknown"))) }
+            }
+        }
+    }
+
+    /// Moves leftovers out of system folders into this user's Trash (the Helper re-validates each path).
+    func moveSystemLeftovers(_ paths: [String]) async throws -> SystemLeftovers.Result {
+        let json = try JSONEncoder().encode(SystemLeftovers.Request(paths: paths))
+        let data: Data = try await call(timeout: .seconds(120)) { proxy, done in
+            proxy.moveSystemLeftovers(json) { data, error in
+                if let data { done(.success(data)) } else { done(.failure(HelperClientError.remote(error ?? "unknown"))) }
+            }
+        }
+        return try JSONDecoder().decode(SystemLeftovers.Result.self, from: data)
+    }
+
+    /// CPU time and memory of every process, read as root.
+    func processCounters() async throws -> [ProcessCounter] {
+        let data: Data = try await call(timeout: .seconds(4)) { proxy, done in
+            proxy.processCounters { data, error in
+                if let data { done(.success(data)) } else { done(.failure(HelperClientError.remote(error ?? "unknown"))) }
+            }
+        }
+        return try JSONDecoder().decode([ProcessCounter].self, from: data)
+    }
+
     func heartbeat() async throws {
         let _: Bool = try await call { proxy, done in
             proxy.heartbeat { done(.success(true)) }
