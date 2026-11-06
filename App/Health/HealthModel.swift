@@ -17,6 +17,16 @@ final class HealthModel {
     private(set) var diskPoints: [DiskSpacePoint] = []
     private(set) var loading = false
     private(set) var error: String?
+    /// macOS security settings, read with Apple's status commands (independent of the period).
+    private(set) var security: [SecurityCheck]?
+    private(set) var checkingSecurity = false
+
+    func loadSecurity() async {
+        guard !checkingSecurity else { return }
+        checkingSecurity = true
+        security = await Task.detached(priority: .userInitiated) { SecurityAudit.run() }.value
+        checkingSecurity = false
+    }
 
     func load(history: MetricsHistory?) async {
         guard !loading else { return }

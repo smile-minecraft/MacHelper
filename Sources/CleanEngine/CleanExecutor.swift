@@ -14,6 +14,12 @@ public struct CleanReport: Codable, Sendable {
     public let dryRun: Bool
     public let items: [ItemOutcome]
 
+    public init(schemaVersion: Int, dryRun: Bool, items: [ItemOutcome]) {
+        self.schemaVersion = schemaVersion
+        self.dryRun = dryRun
+        self.items = items
+    }
+
     /// Space actually released now (permanent deletions).
     public var freedBytes: UInt64 { items.filter { $0.result == .deleted }.reduce(0) { $0 + $1.bytes } }
     /// Moved to the Trash: released once the Trash is emptied.

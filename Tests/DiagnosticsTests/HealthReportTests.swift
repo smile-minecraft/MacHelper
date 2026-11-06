@@ -48,7 +48,7 @@ import Storage
         let onlyOwn = ProcessUsageHistory(byCPU: [own, quiet], byMemory: [], totalMinuteCount: 60, hiddenCount: 0)
         let r1 = HealthCheck.evaluate(samples: minutes(60, cpu: 0.4), processes: onlyOwn, diskPoints: [], hours: 1, system: SystemSnapshot(), now: now)
         #expect(!r1.findings.contains { $0.id == "cpu.process" }, "MacHelper's own use is not reported")
-        #expect(r1.topByCPU.first?.name == "MacHelper", "it still shows in the busiest list")
+        #expect(!r1.topByCPU.contains { $0.name == "MacHelper" }, "nor listed among the busiest processes")
         let withOther = ProcessUsageHistory(byCPU: [own, other], byMemory: [], totalMinuteCount: 60, hiddenCount: 0)
         let r2 = HealthCheck.evaluate(samples: minutes(60, cpu: 0.4), processes: withOther, diskPoints: [], hours: 1, system: SystemSnapshot(), now: now)
         #expect(r2.findings.contains { $0.id == "cpu.process" && $0.title.contains("spinner") }, "the next real culprit is named")

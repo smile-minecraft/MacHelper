@@ -16,7 +16,7 @@ struct MacHelperCLI: ParsableCommand {
         All real operations are logged to ~/Library/Logs/MacHelper/operations.jsonl (see `machelper history`).
         """,
         version: "0.1.0",
-        subcommands: [Clean.self, Purge.self, Optimize.self, Uninstall.self, AutoCleanCommand.self, Startup.self, Analyze.self, Duplicates.self, Status.self, DockerCommand.self, LoginItemsCommand.self, DoctorCommand.self, Stats.self, Rules.self, History.self, MonitorCommand.self]
+        subcommands: [Clean.self, Purge.self, Optimize.self, Uninstall.self, AutoCleanCommand.self, Startup.self, Analyze.self, Insights.self, Duplicates.self, Guide.self, SkillCommand.self, Status.self, DockerCommand.self, LoginItemsCommand.self, DoctorCommand.self, Stats.self, Rules.self, Ignore.self, Updates.self, Security.self, History.self, MonitorCommand.self]
     )
 
     static func main() {
@@ -25,6 +25,14 @@ struct MacHelperCLI: ParsableCommand {
             var command = try parseAsRoot()
             try command.run()
         } catch {
+            // Agents read stdout as JSON: with --json, a failure is a JSON document too.
+            if CommandLine.arguments.contains("--json"), !(error is ExitCode), !(error is CleanExit) {
+                struct Failure: Encodable { let message: String; let exitCode: Int32 }
+                struct Out: Encodable { let schemaVersion = 1; let error: Failure }
+                let code = exitCode(for: error).rawValue
+                try? Output.json(Out(error: Failure(message: fullMessage(for: error).trimmingCharacters(in: .whitespacesAndNewlines), exitCode: code)))
+                Foundation.exit(code)
+            }
             exit(withError: error)
         }
     }
@@ -80,6 +88,17 @@ enum Output {
     static func line(_ s: String = "") { print(s) }
 
     static func err(_ s: String) { FileHandle.standardError.write(Data((s + "\n").utf8)) }
+
+    /// "500MB", "2 GB", "1.5g", "123" (bytes); decimal units like Finder. Nil when it doesn't parse.
+    static func parseBytes(_ s: String) -> UInt64? {
+        let t = s.trimmingCharacters(in: .whitespaces).lowercased().replacingOccurrences(of: " ", with: "")
+        let units: [(String, Double)] = [("tb", 1e12), ("gb", 1e9), ("mb", 1e6), ("kb", 1e3), ("t", 1e12), ("g", 1e9), ("m", 1e6), ("k", 1e3), ("b", 1)]
+        for (u, m) in units where t.hasSuffix(u) {
+            guard let v = Double(t.dropLast(u.count)), v >= 0 else { return nil }
+            return UInt64(v * m)
+        }
+        return Double(t).flatMap { $0 >= 0 ? UInt64($0) : nil }
+    }
 
     static func bytes(_ b: UInt64) -> String {
         ByteCountFormatter.string(fromByteCount: Int64(clamping: b), countStyle: .file)

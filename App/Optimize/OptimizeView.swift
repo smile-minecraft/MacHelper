@@ -6,13 +6,14 @@ struct OptimizeView: View {
     let autoClean: AutoCleanModel
     @State private var confirm = false
     @State private var showAutoClean = false
+    @State private var showExclusions = false
     @State private var category: String?
 
     var body: some View {
         VStack(spacing: 0) {
             switch model.phase {
             case .idle: start
-            case .scanning: progress(String(localized: "Scanning for items to clean…"))
+            case .scanning: scanning
             case .running: progress(String(localized: "Cleaning…"))
             case .ready: preview
             case .finished: results
@@ -21,6 +22,10 @@ struct OptimizeView: View {
         .frame(minWidth: 680, minHeight: 520)
         .toolbar {
             ToolbarItem {
+                Button { showExclusions = true } label: { Label("Never Clean…", systemImage: "hand.raised") }
+                    .help("Paths MacHelper never cleans")
+            }
+            ToolbarItem {
                 Button { showAutoClean = true } label: {
                     Label(autoClean.config.enabled ? "Auto Clean: On" : "Auto Clean…", systemImage: "clock.arrow.circlepath")
                 }
@@ -28,6 +33,10 @@ struct OptimizeView: View {
             }
         }
         .sheet(isPresented: $showAutoClean) { AutoCleanView(model: autoClean) }
+        .sheet(isPresented: $showExclusions) { ExclusionsView(model: model) }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            model.recheckFullDiskAccess()
+        }
     }
 
     private var start: some View {
@@ -35,9 +44,30 @@ struct OptimizeView: View {
                         message: "Scan first to list what can be cleaned. Nothing is cleaned until you’ve reviewed and checked it; by default items go to the Trash and can be restored.") {
             VStack(spacing: 8) {
                 Button("Start Scan") { Task { await model.scan() } }.buttonStyle(.borderedProminent).controlSize(.large)
+                if model.scanStopped { Text("Scan stopped before any results were ready.").font(.mhCaption).foregroundStyle(Palette.textMuted) }
                 if let e = model.loadError { Text(e).font(.mhCaption).foregroundStyle(Theme.rose) }
+                if !model.fullDiskAccess {
+                    Button("Allow Full Disk Access to see everything") { model.openFullDiskAccessSettings() }
+                        .buttonStyle(.link).font(.mhCaption)
+                }
             }
         }
+    }
+
+    private var scanning: some View {
+        VStack(spacing: 14) {
+            ScanningArt(art: "px.empty.clean")
+            Text("Scanning for items to clean…").font(.mhCallout).foregroundStyle(Palette.textMuted)
+            if let p = model.scanProgress, p.total > 0 {
+                ProgressView(value: Double(p.done), total: Double(p.total)).frame(width: 260)
+                Text("\(p.done) of \(p.total) places checked").font(.mhCaption.monospacedDigit()).foregroundStyle(Palette.textFaint)
+            } else {
+                ProgressView().controlSize(.small)
+            }
+            Button("Stop Scan") { model.stopScan() }
+                .help("Stop and show what has been found so far")
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func progress(_ text: String) -> some View {
@@ -53,6 +83,7 @@ struct OptimizeView: View {
 
     private var preview: some View {
         VStack(spacing: 0) {
+            notices
             // Two panes: categories with their selected size on the left, the chosen category's items on the right.
             HStack(spacing: 0) {
                 categoryList
@@ -86,6 +117,18 @@ struct OptimizeView: View {
         }
     }
 
+    /// Why the preview may be incomplete: the scan was stopped, or Full Disk Access is off.
+    @ViewBuilder private var notices: some View {
+        if model.scanStopped {
+            NoticeBar(icon: "pause.circle", text: String(localized: "Scan stopped early. Only the places checked before that are listed."),
+                      action: String(localized: "Scan Everything")) { Task { await model.scan() } }
+        }
+        if model.hiddenByFullDiskAccess > 0 {
+            NoticeBar(icon: "lock", text: String(localized: "\(model.hiddenByFullDiskAccess) places can’t be checked without Full Disk Access. MacHelper scans again once it’s on."),
+                      action: String(localized: "Open System Settings")) { model.openFullDiskAccessSettings() }
+        }
+    }
+
     // MARK: Categories
 
     private struct Category: Identifiable {
@@ -96,7 +139,12 @@ struct OptimizeView: View {
     }
 
     private var categories: [Category] {
-        var out = model.groups.map { g in
+        var out: [Category] = []
+        if let plan = model.plan, plan.results.contains(where: { !$0.candidates.isEmpty }) {
+            out.append(Category(id: "all", title: String(localized: "All Items"), icon: "list.bullet",
+                                detail: selectedText(plan.selectedSize, of: plan.totalSize)))
+        }
+        out += model.groups.map { g in
             Category(id: g.category, title: g.title, icon: Self.icon(g.category),
                      detail: selectedText(g.results.reduce(0) { $0 + $1.selectedSize }, of: g.results.reduce(0) { $0 + $1.totalSize }))
         }
@@ -126,6 +174,7 @@ struct OptimizeView: View {
         case "downloads": "arrow.down.circle"
         case "mail": "envelope"
         case "backups": "iphone"
+        case "ai": "brain"
         default: "folder"
         }
     }
@@ -151,9 +200,71 @@ struct OptimizeView: View {
         .background(Palette.card)
     }
 
+    private var isRuleCategory: Bool { !["artifacts", "system", "maintenance"].contains(selectedCategory) }
+
     @ViewBuilder private var categoryDetail: some View {
+        VStack(spacing: 0) {
+            if isRuleCategory { filterBar }
+            detailList
+        }
+    }
+
+    private var filterBar: some View {
+        HStack(spacing: 10) {
+            HStack(spacing: 6) {
+                Image(systemName: "magnifyingglass").foregroundStyle(Palette.textFaint)
+                TextField("Search names and paths", text: $model.filter.text).textFieldStyle(.plain)
+                if !model.filter.text.isEmpty {
+                    Button { model.filter.text = "" } label: { Image(systemName: "xmark.circle.fill") }
+                        .buttonStyle(.plain).foregroundStyle(Palette.textFaint).help("Clear search")
+                }
+            }
+            .padding(.horizontal, 8).padding(.vertical, 5)
+            .background(Palette.card, in: SurfaceShape(cornerRadius: 6))
+            .frame(maxWidth: 260)
+            Picker("Size", selection: $model.filter.minBytes) {
+                Text("Any size").tag(UInt64(0))
+                Text("Over 10 MB").tag(UInt64(10_000_000))
+                Text("Over 100 MB").tag(UInt64(100_000_000))
+                Text("Over 1 GB").tag(UInt64(1_000_000_000))
+            }
+            .labelsHidden().fixedSize()
+            Picker("Age", selection: $model.filter.minAgeDays) {
+                Text("Any age").tag(0)
+                Text("Unused 1 week").tag(7)
+                Text("Unused 1 month").tag(30)
+                Text("Unused 3 months").tag(90)
+            }
+            .labelsHidden().fixedSize()
+            Picker("Sort", selection: $model.filter.sort) {
+                Text("Largest first").tag(ItemFilter.Sort.size)
+                Text("By name").tag(ItemFilter.Sort.name)
+                Text("Oldest first").tag(ItemFilter.Sort.oldest)
+            }
+            .labelsHidden().fixedSize()
+            Spacer(minLength: 0)
+            if model.filter.isActive {
+                Menu("Matching") {
+                    Button("Select All Matching") { model.setMatching(selected: true, in: filterScope) }
+                    Button("Deselect All Matching") { model.setMatching(selected: false, in: filterScope) }
+                    Divider()
+                    Button("Clear Filters") { model.filter = ItemFilter(sort: model.filter.sort) }
+                }
+                .fixedSize()
+            }
+        }
+        .controlSize(.small)
+        .padding(.horizontal, 12).padding(.vertical, 8)
+        .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
+    }
+
+    private var filterScope: String? { selectedCategory == "all" ? nil : selectedCategory }
+
+    @ViewBuilder private var detailList: some View {
         List {
             switch selectedCategory {
+            case "all":
+                AllItemsSection(model: model)
             case "artifacts":
                 if let a = model.artifacts { artifactSection(a) } else { rootsOnlySection }
             case "system":
@@ -162,8 +273,10 @@ struct OptimizeView: View {
                 maintenanceSection
             default:
                 if let group = model.groups.first(where: { $0.category == selectedCategory }) {
+                    let shown = model.filter.isActive ? group.results.filter { !model.filter.apply($0).isEmpty } : group.results
                     Section(group.title) {
-                        ForEach(group.results) { r in RuleRow(model: model, result: r) }
+                        ForEach(shown) { r in RuleRow(model: model, result: r) }
+                        if shown.isEmpty { Text("Nothing matches the filters.").foregroundStyle(Palette.textMuted) }
                     }
                 }
             }
@@ -370,8 +483,9 @@ private struct RuleRow: View {
                 }
             }
         } else {
-            DisclosureGroup(isExpanded: $expanded) {
-                ForEach(result.candidates.prefix(300)) { c in
+            let items = model.filter.apply(result)
+            DisclosureGroup(isExpanded: Binding(get: { expanded || model.filter.isActive }, set: { expanded = $0 })) {
+                ForEach(items.prefix(300)) { c in
                     HStack {
                         Toggle(isOn: Binding(get: { c.selected }, set: { _ in model.toggleCandidate(rule: result.rule.id, path: c.path) })) {
                             EmptyView()
@@ -380,10 +494,12 @@ private struct RuleRow: View {
                         Text((c.path as NSString).lastPathComponent).lineLimit(1).truncationMode(.middle).foregroundStyle(Palette.text)
                         if let note = c.note { Text(note).font(.mhCaption2).foregroundStyle(Theme.amber) }
                         Spacer()
+                        if let m = c.modified { Text(m, format: .relative(presentation: .named)).foregroundStyle(Palette.textFaint) }
                         Text(Fmt.bytes(Int64(clamping: c.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
                     }
                     .font(.mhCallout)
                     .help(c.path)
+                    .contextMenu { CandidateMenu(model: model, path: c.path) }
                 }
             } label: {
                 HStack(alignment: .top) {
@@ -401,10 +517,132 @@ private struct RuleRow: View {
                         Text(result.rule.description).font(.mhCaption).foregroundStyle(Palette.textMuted)
                     }
                     Spacer()
-                    Text(Fmt.bytes(Int64(clamping: result.totalSize))).monospacedDigit().foregroundStyle(Palette.text)
+                    Text(Fmt.bytes(Int64(clamping: model.filter.isActive ? items.reduce(0) { $0 + $1.size } : result.totalSize)))
+                        .monospacedDigit().foregroundStyle(Palette.text)
                 }
             }
         }
+    }
+}
+
+/// Every item from every rule in one list, so search, filters and sorting work across categories.
+private struct AllItemsSection: View {
+    let model: OptimizeModel
+
+    var body: some View {
+        let now = Date()
+        let rows = model.plan?.results.flatMap { r in r.candidates.filter { model.filter.matches($0, ruleTitle: r.rule.title, now: now) }.map { (r.rule, $0) } } ?? []
+        let sorted = model.filter.sorted(rows.map(\.1))
+        let rules = Dictionary(rows.map { ($0.1.path, $0.0) }, uniquingKeysWith: { a, _ in a })
+        Section {
+            ForEach(sorted.prefix(500)) { c in
+                HStack {
+                    Toggle(isOn: Binding(get: { c.selected }, set: { _ in model.toggleCandidate(rule: c.ruleID, path: c.path) })) { EmptyView() }
+                        .labelsHidden()
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text((c.path as NSString).lastPathComponent).lineLimit(1).truncationMode(.middle).foregroundStyle(Palette.text)
+                        Text([rules[c.path]?.title, c.note].compactMap { $0 }.joined(separator: ", "))
+                            .font(.mhCaption2).foregroundStyle(Palette.textMuted).lineLimit(1)
+                    }
+                    Spacer()
+                    if let m = c.modified { Text(m, format: .relative(presentation: .named)).font(.mhCaption).foregroundStyle(Palette.textFaint) }
+                    Text(Fmt.bytes(Int64(clamping: c.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
+                }
+                .font(.mhCallout)
+                .help(c.path)
+                .contextMenu { CandidateMenu(model: model, path: c.path) }
+            }
+            if sorted.isEmpty { Text("Nothing matches the filters.").foregroundStyle(Palette.textMuted) }
+        } header: {
+            Text(sorted.count > 500 ? "\(sorted.count) items, showing the first 500" : "\(sorted.count) items")
+        }
+    }
+}
+
+private struct CandidateMenu: View {
+    let model: OptimizeModel
+    let path: String
+
+    var body: some View {
+        Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)]) }
+        Button("Copy Path") {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(path, forType: .string)
+        }
+        Divider()
+        Button("Never Clean This") { model.exclude(path) }
+    }
+}
+
+/// A one-line strip above the preview explaining why it may be incomplete.
+private struct NoticeBar: View {
+    let icon: String
+    let text: String
+    let action: String
+    let perform: () -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon).foregroundStyle(Theme.amber)
+            Text(text).font(.mhCallout).foregroundStyle(Palette.text).lineLimit(2)
+            Spacer(minLength: 12)
+            Button(action, action: perform).controlSize(.small)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 8)
+        .background(Palette.card)
+        .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
+    }
+}
+
+/// The paths MacHelper never cleans: add files, folders or globs, or remove them again.
+struct ExclusionsView: View {
+    let model: OptimizeModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var pattern = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Never Clean").font(.mhTitle2).foregroundStyle(Palette.text)
+            Text("MacHelper skips these files and folders, and everything inside them, when cleaning, uninstalling and moving disk analysis items to the Trash. Right-click an item in the preview and choose Never Clean This to add it.")
+                .font(.mhCallout).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
+            List {
+                ForEach(model.exclusions, id: \.self) { e in
+                    HStack {
+                        Image(systemName: e.contains("*") || e.contains("?") ? "asterisk" : "folder").foregroundStyle(Palette.textMuted).frame(width: 16)
+                        Text(e).font(.mhCallout).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+                        Spacer()
+                        Button { model.removeExclusion(e) } label: { Image(systemName: "minus.circle") }
+                            .buttonStyle(.plain).foregroundStyle(Palette.textMuted).help("Clean this again")
+                    }
+                }
+                if model.exclusions.isEmpty {
+                    Text("Nothing excluded yet.").foregroundStyle(Palette.textMuted)
+                }
+            }
+            .frame(minHeight: 200)
+            HStack {
+                TextField("Path or pattern, e.g. ~/Library/Caches/com.example.*", text: $pattern)
+                    .onSubmit(add)
+                Button("Add", action: add).disabled(pattern.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            if let e = model.exclusionError { Text(e).font(.mhCaption).foregroundStyle(Theme.rose) }
+            HStack {
+                Button("Choose Files or Folders…") { model.addExclusionsFromPanel() }
+                Spacer()
+                Text("Saved in clean-whitelist.txt, also used by the command-line tool.").font(.mhCaption).foregroundStyle(Palette.textFaint)
+                Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(20)
+        .frame(width: 560, height: 460)
+        .background(Palette.base)
+    }
+
+    private func add() {
+        let p = pattern.trimmingCharacters(in: .whitespaces)
+        guard !p.isEmpty else { return }
+        model.addExclusion(p)
+        pattern = ""
     }
 }
 

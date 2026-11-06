@@ -51,13 +51,19 @@ public struct CleanScanner: Sendable {
         self.now = now
     }
 
-    public func scan() -> CleanPlan {
+    public func scan() -> CleanPlan { scan(progress: { _, _ in }, shouldStop: { false }) }
+
+    /// Scans rule by rule. `progress(done, total)` is called before each rule; when `shouldStop`
+    /// returns true the scan ends early and the plan holds only the rules finished so far.
+    public func scan(progress: (Int, Int) -> Void, shouldStop: () -> Bool) -> CleanPlan {
         var claimed: [String] = []   // earlier (more specific) rules win overlapping paths
         var results: [RuleResult] = []
 
         let running = Self.runningBundleIDs()
         let processes = rules.contains { !$0.skipIfProcessRunning.isEmpty } ? Self.runningProcessNames() : []
-        for rule in rules {
+        for (index, rule) in rules.enumerated() {
+            if shouldStop() { break }
+            progress(index, rules.count)
             let busy = rule.skipIfRunning.first(where: running.contains)
                 ?? rule.skipIfProcessRunning.first { processes.contains(String($0.prefix(Self.processNameLength))) }
             if let app = busy {

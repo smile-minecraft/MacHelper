@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "ai.omlx-logs",
+      "title": "oMLX old logs",
+      "description": "Rotated server logs from previous days. The current log and models are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.omlx/logs/server.log.*"
+      ],
+      "minAgeDays": 1
+    },
+    {
+      "id": "ai.omlx-cache",
+      "title": "oMLX prompt cache",
+      "description": "Saved prompt state that speeds up repeated requests. It is rebuilt as you use oMLX; models are not touched.",
+      "category": "ai",
+      "risk": "medium",
+      "paths": [
+        "~/.omlx/cache/*"
+      ],
+      "skipIfProcessRunning": [
+        "omlx-server"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "ai.ollama-logs",
+      "title": "Ollama old logs",
+      "description": "Rotated server logs (server-1.log and older). The current log and models are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.ollama/logs/*-[0-9]*.log"
+      ]
+    },
+    {
+      "id": "ai.lmstudio-logs",
+      "title": "LM Studio server logs",
+      "description": "Local server logs older than a week. Models and chats are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.lmstudio/server-logs/*"
+      ],
+      "minAgeDays": 7
+    },
+    {
+      "id": "ai.lmstudio-cache",
+      "title": "LM Studio app cache",
+      "description": "Web and graphics caches of the LM Studio window, rebuilt when it opens. Models and chats are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/Library/Application Support/LM Studio/Cache/*",
+        "~/Library/Application Support/LM Studio/Code Cache/*",
+        "~/Library/Application Support/LM Studio/GPUCache/*"
+      ],
+      "skipIfRunning": [
+        "ai.elementlabs.lmstudio"
+      ]
+    }
+  ]
+}

@@ -32,6 +32,15 @@ enum DiskPalette {
         }
         return dimmed ? base.opacity(0.35) : base
     }
+
+    /// Bloated folders and unused files: a pale warm tone that stands out from the hue families.
+    static func flagged(highlighted: Bool, dimmed: Bool = false) -> Color {
+        let c = Color(hue: 0.10, saturation: highlighted ? 0.34 : 0.26, brightness: highlighted ? 0.99 : 0.95)
+        return dimmed ? c.opacity(0.35) : c
+    }
+
+    /// Labels on a flagged (pale) block.
+    static let flaggedLabel = Color(hue: 0.08, saturation: 0.55, brightness: 0.30)
 }
 
 /// White label with a soft shadow, truncated to fit `width`.
@@ -59,13 +68,30 @@ struct ChartTooltip: View {
     let info: HoverInfo
     let share: Double?
 
+    /// Small shares keep a decimal (0.2 %), so a 1 GB folder in a 600 GB scan doesn't read as 0 %.
+    static func percent(_ f: Double) -> String {
+        if f > 0, f < 0.001 { return "<0.1%" }
+        return f.formatted(.percent.precision(.fractionLength(f < 0.1 ? 1 : 0)))
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text(info.title).font(.mh(size: 13, weight: .semibold)).lineLimit(1)
-            HStack(spacing: 6) {
-                Text(Fmt.bytes(Int64(clamping: info.size))).font(.display(12, weight: .semibold).monospacedDigit())
-                if let share { Text(Fmt.percent(share)).font(.mh(size: 12).monospacedDigit()).foregroundStyle(Palette.textMuted) }
-                Text("· \(info.detail)").font(.mh(size: 11.5)).foregroundStyle(Palette.textMuted)
+            // The share is the first thing read: big, then the size beside it.
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                if let share {
+                    Text(Self.percent(share)).font(.display(24, weight: .bold).monospacedDigit()).foregroundStyle(Palette.text)
+                }
+                Text(Fmt.bytes(Int64(clamping: info.size))).font(.display(13, weight: .semibold).monospacedDigit())
+                    .foregroundStyle(share == nil ? Palette.text : Palette.textMuted)
+            }
+            if share != nil {
+                Text("of the folder shown").font(.mh(size: 10.5)).foregroundStyle(Palette.textFaint)
+            }
+            Text(info.title).font(.mh(size: 13, weight: .semibold)).lineLimit(1).padding(.top, 2)
+            Text(info.detail).font(.mh(size: 11.5)).foregroundStyle(Palette.textMuted)
+            if let flag = info.flag {
+                Label(flag, systemImage: "exclamationmark.triangle.fill")
+                    .font(.mh(size: 11.5, weight: .medium)).foregroundStyle(Theme.amber)
             }
             if let path = info.path {
                 Text(Fmt.shortPath(path)).font(.mh(size: 10.5)).foregroundStyle(Palette.textFaint).lineLimit(1).truncationMode(.middle)
@@ -184,10 +210,15 @@ struct SunburstChart: View {
             p.addArc(center: center, radius: outer, startAngle: a0, endAngle: a1, clockwise: false)
             p.addArc(center: center, radius: inner, startAngle: a1, endAngle: a0, clockwise: true)
             p.closeSubpath()
-            let color = DiskPalette.color(branch: arc.branch, depth: arc.depth, isFile: !(arc.node?.isDirectory ?? true),
-                                          highlighted: arc.id == hoveredArc, dimmed: !onPath(arc))
+            let color = model.flag(arc.node) != nil
+                ? DiskPalette.flagged(highlighted: arc.id == hoveredArc, dimmed: !onPath(arc))
+                : DiskPalette.color(branch: arc.branch, depth: arc.depth, isFile: !(arc.node?.isDirectory ?? true),
+                                    highlighted: arc.id == hoveredArc, dimmed: !onPath(arc))
             ctx.fill(p, with: .color(color))
             ctx.stroke(p, with: .color(separator), lineWidth: 1.5)
+            if model.flag(arc.node) != nil, onPath(arc) {
+                ctx.stroke(p, with: .color(Theme.amber), lineWidth: 1.5)
+            }
         }
 
         // Labels along the arc, upright, only where they fit.
@@ -199,12 +230,15 @@ struct SunburstChart: View {
             guard arcLength > 40, ring > 20 else { continue }
             let name = arc.node?.name ?? String(localized: "Other")
             let font = Font.mh(size: arc.depth == 1 ? 12.5 : 11, weight: .semibold)
-            guard let label = fittedLabel(lctx, name, font: font, width: arcLength - 14) else { continue }
+            let isFlagged = model.flag(arc.node) != nil
+            let drawCtx = isFlagged ? ctx : lctx
+            guard let label = fittedLabel(drawCtx, name, font: font, width: arcLength - 14,
+                                          color: isFlagged ? DiskPalette.flaggedLabel : .white) else { continue }
             let theta = Angle.degrees(-90 + mid * 360).radians
             let pos = CGPoint(x: center.x + cos(theta) * radius, y: center.y + sin(theta) * radius)
             var rotation = theta + .pi / 2
             if sin(theta) > 0 { rotation -= .pi }          // bottom half: flip so text stays upright
-            var c = lctx
+            var c = drawCtx
             c.translateBy(x: pos.x, y: pos.y)
             c.rotate(by: .radians(rotation))
             c.draw(label, at: .zero, anchor: .center)
@@ -341,8 +375,10 @@ struct TreemapChart: View {
             let r = c.rect.insetBy(dx: 1, dy: 1)
             guard r.width > 1, r.height > 1 else { continue }
             let isHovered = c.id == hoveredCell
-            let color = DiskPalette.color(branch: c.branch, depth: c.depth, rank: c.rank,
-                                          isFile: !(c.node?.isDirectory ?? true), highlighted: isHovered)
+            let color = model.flag(c.node) != nil
+                ? DiskPalette.flagged(highlighted: isHovered)
+                : DiskPalette.color(branch: c.branch, depth: c.depth, rank: c.rank,
+                                    isFile: !(c.node?.isDirectory ?? true), highlighted: isHovered)
             let shape = Path(roundedRect: r, cornerRadius: c.depth == 1 ? 6 : 4, style: .continuous)
             ctx.fill(shape, with: .color(color))
             if c.hasHeader {
@@ -350,23 +386,30 @@ struct TreemapChart: View {
                 let header = Path(roundedRect: CGRect(x: r.minX, y: r.minY, width: r.width, height: 21), cornerRadius: 6, style: .continuous)
                 ctx.fill(header, with: .color(.black.opacity(0.18)))
             }
+            if model.flag(c.node) != nil, !isHovered {
+                ctx.stroke(Path(roundedRect: r.insetBy(dx: 0.75, dy: 0.75), cornerRadius: c.depth == 1 ? 6 : 4, style: .continuous),
+                           with: .color(Theme.amber), lineWidth: 1.5)
+            }
             if c.id == hoveredTop && c.depth == 1 {
                 ctx.stroke(shape, with: .color(.white.opacity(0.85)), lineWidth: 2)
             } else if isHovered {
                 ctx.stroke(shape, with: .color(.white.opacity(0.9)), lineWidth: 1.5)
             }
-            drawLabel(lctx, c, in: r)
+            // Flagged blocks are pale: dark labels without the shadow.
+            drawLabel(model.flag(c.node) != nil ? ctx : lctx, c, in: r)
         }
     }
 
     private func drawLabel(_ ctx: GraphicsContext, _ c: TreemapCell, in r: CGRect) {
         let name = c.node?.name ?? String(localized: "Other")
         let size = Fmt.bytes(Int64(clamping: c.size))
+        let fg: Color = model.flag(c.node) != nil ? DiskPalette.flaggedLabel : .white
         if c.hasHeader {
             guard r.width > 60 else { return }
-            let sizeText = ctx.resolve(Text(size).font(.display(11.5, weight: .semibold).monospacedDigit()).foregroundStyle(.white.opacity(0.85)))
+            let sizeText = ctx.resolve(Text(size).font(.display(11.5, weight: .semibold).monospacedDigit()).foregroundStyle(fg.opacity(0.85)))
             let sw = sizeText.measure(in: CGSize(width: 400, height: 30)).width
-            if let title = fittedLabel(ctx, name, font: .system(size: 12.5, weight: .bold), width: r.width - sw - 24) {
+            let title0 = model.containsFlagged(c.node) ? "⚠︎ " + name : name
+            if let title = fittedLabel(ctx, title0, font: .system(size: 12.5, weight: .bold), width: r.width - sw - 24, color: fg) {
                 ctx.draw(title, at: CGPoint(x: r.minX + 8, y: r.minY + 10.5), anchor: .leading)
             }
             ctx.draw(sizeText, at: CGPoint(x: r.maxX - 8, y: r.minY + 10.5), anchor: .trailing)
@@ -376,10 +419,10 @@ struct TreemapChart: View {
         let big = c.depth == 1
         guard r.width > 54, r.height > (big ? 36 : 30) else { return }
         let nameFont = Font.mh(size: big ? 13.5 : 12, weight: .semibold)
-        guard let title = fittedLabel(ctx, name, font: nameFont, width: r.width - 14) else { return }
+        guard let title = fittedLabel(ctx, name, font: nameFont, width: r.width - 14, color: fg) else { return }
         ctx.draw(title, at: CGPoint(x: r.minX + 7, y: r.minY + 6), anchor: .topLeading)
         if r.height > (big ? 52 : 44) {
-            ctx.draw(Text(size).font(.mh(size: big ? 12 : 11).monospacedDigit()).foregroundStyle(.white.opacity(0.82)),
+            ctx.draw(Text(size).font(.mh(size: big ? 12 : 11).monospacedDigit()).foregroundStyle(fg.opacity(0.82)),
                      at: CGPoint(x: r.minX + 7, y: r.minY + (big ? 25 : 22)), anchor: .topLeading)
         }
     }

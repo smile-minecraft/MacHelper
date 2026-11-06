@@ -8504,6 +8504,1426 @@
           }
         }
       }
+    },
+    "Never Clean…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永不清理…"
+          }
+        }
+      }
+    },
+    "Paths MacHelper never cleans": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 永遠不會清理的路徑"
+          }
+        }
+      }
+    },
+    "Scan stopped before any results were ready.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描在產生任何結果前就停止了。"
+          }
+        }
+      }
+    },
+    "Allow Full Disk Access to see everything": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允許「完全取用磁碟」以檢查所有項目"
+          }
+        }
+      }
+    },
+    "%lld of %lld places checked": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已檢查 %lld／%lld 個位置"
+          }
+        }
+      }
+    },
+    "Stop Scan": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止掃描"
+          }
+        }
+      }
+    },
+    "Stop and show what has been found so far": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止並顯示目前找到的項目"
+          }
+        }
+      }
+    },
+    "Scan stopped early. Only the places checked before that are listed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描已提前停止，只列出停止前檢查過的位置。"
+          }
+        }
+      }
+    },
+    "Scan Everything": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完整掃描"
+          }
+        }
+      }
+    },
+    "%lld places can’t be checked without Full Disk Access. MacHelper scans again once it’s on.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 個位置需要「完全取用磁碟」才能檢查。開啟後 MacHelper 會自動重新掃描。"
+          }
+        }
+      }
+    },
+    "Open System Settings": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打開系統設定"
+          }
+        }
+      }
+    },
+    "All Items": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有項目"
+          }
+        }
+      }
+    },
+    "Search names and paths": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜尋名稱或路徑"
+          }
+        }
+      }
+    },
+    "Clear search": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除搜尋"
+          }
+        }
+      }
+    },
+    "Any size": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不限大小"
+          }
+        }
+      }
+    },
+    "Over 10 MB": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超過 10 MB"
+          }
+        }
+      }
+    },
+    "Over 100 MB": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超過 100 MB"
+          }
+        }
+      }
+    },
+    "Over 1 GB": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超過 1 GB"
+          }
+        }
+      }
+    },
+    "Age": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間"
+          }
+        }
+      }
+    },
+    "Any age": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不限時間"
+          }
+        }
+      }
+    },
+    "Unused 1 week": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一週以上未變動"
+          }
+        }
+      }
+    },
+    "Unused 1 month": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一個月以上未變動"
+          }
+        }
+      }
+    },
+    "Unused 3 months": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "三個月以上未變動"
+          }
+        }
+      }
+    },
+    "Sort": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排序"
+          }
+        }
+      }
+    },
+    "Largest first": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "由大到小"
+          }
+        }
+      }
+    },
+    "By name": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依名稱"
+          }
+        }
+      }
+    },
+    "Oldest first": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最舊的在前"
+          }
+        }
+      }
+    },
+    "Matching": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "符合項目"
+          }
+        }
+      }
+    },
+    "Select All Matching": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "勾選所有符合項目"
+          }
+        }
+      }
+    },
+    "Deselect All Matching": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消勾選所有符合項目"
+          }
+        }
+      }
+    },
+    "Clear Filters": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除篩選"
+          }
+        }
+      }
+    },
+    "Nothing matches the filters.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有符合篩選條件的項目。"
+          }
+        }
+      }
+    },
+    "%lld items, showing the first 500": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共 %lld 個項目，顯示前 500 個"
+          }
+        }
+      }
+    },
+    "Never Clean This": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永不清理這個項目"
+          }
+        }
+      }
+    },
+    "Never Clean": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永不清理"
+          }
+        }
+      }
+    },
+    "MacHelper skips these files and folders, and everything inside them, when cleaning, uninstalling and moving disk analysis items to the Trash. Right-click an item in the preview and choose Never Clean This to add it.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理、解除安裝，以及從磁碟分析移到垃圾桶時，MacHelper 都會略過這些檔案和資料夾（包含裡面的所有內容）。在預覽中對項目按右鍵，選「永不清理這個項目」就能加入。"
+          }
+        }
+      }
+    },
+    "Clean this again": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復清理"
+          }
+        }
+      }
+    },
+    "Nothing excluded yet.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還沒有排除任何項目。"
+          }
+        }
+      }
+    },
+    "Path or pattern, e.g. ~/Library/Caches/com.example.*": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "路徑或萬用字元，例如 ~/Library/Caches/com.example.*"
+          }
+        }
+      }
+    },
+    "Choose Files or Folders…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇檔案或資料夾…"
+          }
+        }
+      }
+    },
+    "Saved in clean-whitelist.txt, also used by the command-line tool.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存放在 clean-whitelist.txt，命令列工具也會使用。"
+          }
+        }
+      }
+    },
+    "AI Tools": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 工具"
+          }
+        }
+      }
+    },
+    "Scan stopped": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描已停止"
+          }
+        }
+      }
+    },
+    "Let MacHelper see the whole disk": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讓 MacHelper 看見整個磁碟"
+          }
+        }
+      }
+    },
+    "macOS hides some folders from apps until you allow it. Without Full Disk Access, MacHelper can’t measure or clean Mail downloads, some app caches and other protected places, and disk analysis misses them.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 會對 App 隱藏部分資料夾，直到你允許為止。沒有「完全取用磁碟」權限，MacHelper 無法計算或清理郵件下載、部分 App 快取和其他受保護的位置，磁碟分析也會漏掉它們。"
+          }
+        }
+      }
+    },
+    "1. Click Open System Settings.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1. 按「打開系統設定」。"
+          }
+        }
+      }
+    },
+    "2. Turn on MacHelper in the Full Disk Access list.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2. 在「完全取用磁碟」列表中打開 MacHelper。"
+          }
+        }
+      }
+    },
+    "3. Come back here. MacHelper checks again by itself.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3. 回到這裡，MacHelper 會自動重新檢查。"
+          }
+        }
+      }
+    },
+    "Full Disk Access is on": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已開啟「完全取用磁碟」"
+          }
+        }
+      }
+    },
+    "Full Disk Access is off": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未開啟「完全取用磁碟」"
+          }
+        }
+      }
+    },
+    "MacHelper only reads these folders to show you what can be cleaned. Nothing is removed without your confirmation.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 只會讀取這些資料夾，列出可以清理的項目；沒有你的確認，什麼都不會刪除。"
+          }
+        }
+      }
+    },
+    "Not Now": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稍後再說"
+          }
+        }
+      }
+    },
+    "App Updates": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 更新"
+          }
+        }
+      }
+    },
+    "Apps you installed with Homebrew that have a newer version.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用 Homebrew 安裝、有新版本可用的 App。"
+          }
+        }
+      }
+    },
+    "Include apps that update themselves": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "包含會自動更新的 App"
+          }
+        }
+      }
+    },
+    "Also list apps such as browsers that normally install their own updates": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "也列出瀏覽器這類平常會自己安裝更新的 App"
+          }
+        }
+      }
+    },
+    "Check Again": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新檢查"
+          }
+        }
+      }
+    },
+    "Homebrew isn’t installed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未安裝 Homebrew"
+          }
+        }
+      }
+    },
+    "This page updates apps installed with Homebrew (brew install --cask). Install Homebrew from brew.sh to use it.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這一頁會更新用 Homebrew 安裝的 App（brew install --cask）。請先到 brew.sh 安裝 Homebrew。"
+          }
+        }
+      }
+    },
+    "Open brew.sh": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打開 brew.sh"
+          }
+        }
+      }
+    },
+    "Checking for updates…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在檢查更新…"
+          }
+        }
+      }
+    },
+    "Homebrew couldn’t check for updates: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 無法檢查更新：%@"
+          }
+        }
+      }
+    },
+    "Updated: %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已更新：%@"
+          }
+        }
+      }
+    },
+    "Updates run brew upgrade --cask for each app, one at a time, and are recorded in the operation history. Apps that are open are quit first and reopened afterwards.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新會逐一對每個 App 執行 brew upgrade --cask，並記錄在操作紀錄中。開著的 App 會先結束，更新後再重新打開。"
+          }
+        }
+      }
+    },
+    "All Homebrew apps are up to date.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有 Homebrew App 都是最新版本。"
+          }
+        }
+      }
+    },
+    "%lld apps have updates.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 個 App 可以更新。"
+          }
+        }
+      }
+    },
+    "Checked %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@檢查"
+          }
+        }
+      }
+    },
+    "Updating %@ (%lld of %lld)…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在更新 %1$@（第 %2$lld／%3$lld 個）…"
+          }
+        }
+      }
+    },
+    "%lld of %lld selected": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已選 %1$lld／%2$lld 個"
+          }
+        }
+      }
+    },
+    "Update %lld Apps…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新 %lld 個 App…"
+          }
+        }
+      }
+    },
+    "Update": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新"
+          }
+        }
+      }
+    },
+    "Update %lld apps?": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要更新 %lld 個 App 嗎？"
+          }
+        }
+      }
+    },
+    "Open now, will be quit and reopened: %@. Save your work in them first.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以下 App 正開著，會先結束再重新打開：%@。請先儲存其中的工作。"
+          }
+        }
+      }
+    },
+    "%@ didn’t quit. Quit it yourself and try again.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 沒有結束。請自行結束後再試一次。"
+          }
+        }
+      }
+    },
+    "Updates itself": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "會自動更新"
+          }
+        }
+      }
+    },
+    "Pinned": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已固定版本"
+          }
+        }
+      }
+    },
+    "Open": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開啟中"
+          }
+        }
+      }
+    },
+    "Its installer needs your administrator password, which only Terminal can ask for:": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它的安裝程式需要管理者密碼，只能在「終端機」輸入："
+          }
+        }
+      }
+    },
+    "Copy": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷貝"
+          }
+        }
+      }
+    },
+    "Open Terminal": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打開終端機"
+          }
+        }
+      }
+    },
+    "What Homebrew said": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 的訊息"
+          }
+        }
+      }
+    },
+    "Not updated": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未更新"
+          }
+        }
+      }
+    },
+    "Security Settings": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安全性設定"
+          }
+        }
+      }
+    },
+    "All on": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部開啟"
+          }
+        }
+      }
+    },
+    "%lld could be safer": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 項可以更安全"
+          }
+        }
+      }
+    },
+    "MacHelper only reads these settings; it never changes them. Buttons open the matching page in System Settings.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 只會讀取這些設定，不會修改。按鈕會打開系統設定中對應的頁面。"
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打開設定"
+          }
+        }
+      }
+    },
+    "Couldn’t be read": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法讀取"
+          }
+        }
+      }
+    },
+    "Gatekeeper": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gatekeeper"
+          }
+        }
+      }
+    },
+    "On": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開啟"
+          }
+        }
+      }
+    },
+    "Apps from unknown developers need your approval before they open the first time.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "來自不明開發者的 App 第一次開啟前需要你同意。"
+          }
+        }
+      }
+    },
+    "Any downloaded app opens without a check. Turn it back on unless you need it off for a specific app.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載的 App 開啟時不會被檢查。除非某個 App 需要，否則建議重新開啟。"
+          }
+        }
+      }
+    },
+    "Checks downloaded apps before they open.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在下載的 App 開啟前先檢查。"
+          }
+        }
+      }
+    },
+    "FileVault disk encryption": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FileVault 磁碟加密"
+          }
+        }
+      }
+    },
+    "The startup disk is encrypted. Without your password nobody can read it, even with the disk removed.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟動磁碟已加密。沒有你的密碼，即使拆下磁碟也讀不到內容。"
+          }
+        }
+      }
+    },
+    "The startup disk isn’t encrypted: anyone who gets this Mac can read its files. Encrypting runs in the background while you keep working.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟動磁碟沒有加密：任何拿到這台 Mac 的人都能讀取檔案。加密會在背景進行，不影響你繼續工作。"
+          }
+        }
+      }
+    },
+    "In progress": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "進行中"
+          }
+        }
+      }
+    },
+    "The disk is being encrypted or decrypted right now.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁碟正在加密或解密。"
+          }
+        }
+      }
+    },
+    "Encrypts the startup disk.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加密啟動磁碟。"
+          }
+        }
+      }
+    },
+    "Firewall": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "防火牆"
+          }
+        }
+      }
+    },
+    "Incoming connections are filtered, and this Mac doesn’t answer probes from the network (stealth mode).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "會過濾連入的連線，而且這台 Mac 不回應網路上的探測（隱形模式）。"
+          }
+        }
+      }
+    },
+    "Incoming connections to apps are filtered.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "會過濾連到 App 的連入連線。"
+          }
+        }
+      }
+    },
+    "Apps can accept connections from the network without asking. Worth turning on if you use public Wi-Fi.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 可以不經詢問就接受網路連線。如果會使用公共 Wi-Fi，建議開啟。"
+          }
+        }
+      }
+    },
+    "Filters incoming network connections.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "過濾連入的網路連線。"
+          }
+        }
+      }
+    },
+    "System Integrity Protection": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統完整性保護"
+          }
+        }
+      }
+    },
+    "System files can’t be changed, not even by an administrator or malware with your password.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統檔案無法被修改，管理者或取得你密碼的惡意程式也不行。"
+          }
+        }
+      }
+    },
+    "System files can be changed. It can only be turned back on from macOS Recovery (csrutil enable).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統檔案可以被修改。只能在 macOS 復原模式中重新開啟（csrutil enable）。"
+          }
+        }
+      }
+    },
+    "Partly on": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分開啟"
+          }
+        }
+      }
+    },
+    "Some protections were turned off in macOS Recovery. They can only be restored there (csrutil enable).": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分保護已在 macOS 復原模式中關閉，只能在那裡恢復（csrutil enable）。"
+          }
+        }
+      }
+    },
+    "Protects system files from changes.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保護系統檔案不被修改。"
+          }
+        }
+      }
+    },
+    "Automatic security updates": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動安全性更新"
+          }
+        }
+      }
+    },
+    "Security responses and malware definitions install by themselves.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安全性回應和惡意軟體定義會自動安裝。"
+          }
+        }
+      }
+    },
+    "Security fixes and malware definitions don’t install by themselves. In Software Update → Automatic Updates, turn on “Install Security Responses and system files”.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安全性修正和惡意軟體定義不會自動安裝。請在「軟體更新 → 自動更新」中打開「安裝安全性回應和系統檔案」。"
+          }
+        }
+      }
+    },
+    "Only some security updates install by themselves. In Software Update → Automatic Updates, turn on “Install Security Responses and system files”.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只有部分安全性更新會自動安裝。請在「軟體更新 → 自動更新」中打開「安裝安全性回應和系統檔案」。"
+          }
+        }
+      }
+    },
+    "Installs security fixes by themselves.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動安裝安全性修正。"
+          }
+        }
+      }
+    },
+    "XProtect malware definitions": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "XProtect 惡意軟體定義"
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本 %@"
+          }
+        }
+      }
+    },
+    "macOS’s built-in malware scanner. Definitions installed %@.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 內建的惡意軟體掃描。定義檔安裝於 %@。"
+          }
+        }
+      }
+    },
+    "macOS’s built-in malware scanner.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 內建的惡意軟體掃描。"
+          }
+        }
+      }
+    },
+    "Grew %@ since %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自 %2$@ 以來增加了 %1$@"
+          }
+        }
+      }
+    },
+    "Grew %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "增加了 %@"
+          }
+        }
+      }
+    },
+    "Unusually large cache": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快取異常龐大"
+          }
+        }
+      }
+    },
+    "Unusually large logs": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記錄檔異常龐大"
+          }
+        }
+      }
+    },
+    "%@ files directly inside": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "裡面直接放了 %@ 個檔案"
+          }
+        }
+      }
+    },
+    "Not used since %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自 %@ 起沒有使用"
+          }
+        }
+      }
+    },
+    "of the folder shown": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "占目前顯示的資料夾"
+          }
+        }
+      }
+    },
+    "Suggestions": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "建議"
+          }
+        }
+      }
+    },
+    "Bloated folders": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "異常膨脹的資料夾"
+          }
+        }
+      }
+    },
+    "Mostly %@ (%@)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主要是 %1$@（%2$@）"
+          }
+        }
+      }
+    },
+    "Not used for %lld days (%@)": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超過 %lld 天沒有使用（%@）"
+          }
+        }
+      }
+    },
+    "Scan a location to find big files that look unused and folders that look bloated.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描一個位置後，這裡會列出看起來用不到的大檔案和異常膨脹的資料夾。"
+          }
+        }
+      }
+    },
+    "Nothing stands out: no big file unused for half a year, no oversized cache or log folder.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有發現異常：沒有半年沒用的大檔案，也沒有過大的快取或記錄檔資料夾。"
+          }
+        }
+      }
+    },
+    "Let your AI agents use MacHelper": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讓你的 AI Agent 使用 MacHelper"
+          }
+        }
+      }
+    },
+    "MacHelper can add a skill to the coding agents on this Mac. With it, you can ask the agent things like “free up some space” or “why is my Mac hot?”, and it runs MacHelper’s command-line tool to check. It always shows you what it would remove and asks before removing anything.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 可以替這台 Mac 上的程式碼 Agent 加入一個 Skill。裝好之後，你可以直接問 Agent「幫我清出一些空間」或「為什麼 Mac 這麼燙？」，它會用 MacHelper 的命令列工具檢查。要刪除任何東西前，它都會先列出內容並詢問你。"
+          }
+        }
+      }
+    },
+    "Also add the machelper command to Terminal": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同時把 machelper 指令加入終端機"
+          }
+        }
+      }
+    },
+    "You can add or remove it later in Settings → General.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "之後也可以在「設定 → 一般」加入或移除。"
+          }
+        }
+      }
+    },
+    "Skill for %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的 Skill"
+          }
+        }
+      }
+    },
+    "Installed": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安裝"
+          }
+        }
+      }
+    },
+    "Will update on next launch": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下次啟動時會更新"
+          }
+        }
+      }
+    },
+    "Another skill named machelper is there; left alone": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已有另一個名為 machelper 的 Skill，不會更動"
+          }
+        }
+      }
+    },
+    "Agent not found": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到這個 Agent"
+          }
+        }
+      }
+    },
+    "Lets Claude Code or Codex check and clean up this Mac through the machelper command. It previews first and asks before removing anything.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讓 Claude Code 或 Codex 透過 machelper 指令檢查並清理這台 Mac。它會先預覽，刪除任何東西前都會詢問。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

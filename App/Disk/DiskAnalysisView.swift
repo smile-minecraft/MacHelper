@@ -10,7 +10,7 @@ struct DiskAnalysisView: View {
     @State private var dropTargeted = false
 
     enum SideTab: String, CaseIterable, Identifiable {
-        case contents, largest, duplicates, changes
+        case contents, largest, duplicates, changes, insights
         var id: String { rawValue }
     }
 
@@ -136,6 +136,7 @@ struct DiskAnalysisView: View {
                     Text("Largest").tag(SideTab.largest)
                     Text("Duplicates").tag(SideTab.duplicates)
                     Text("Changes").tag(SideTab.changes)
+                    Text("Suggestions").tag(SideTab.insights)
                 }
                 .pickerStyle(.segmented).labelsHidden().padding(8)
                 switch sideTab {
@@ -150,6 +151,8 @@ struct DiskAnalysisView: View {
                     DuplicatesList(model: model)
                 case .changes:
                     ChangesList(model: model)
+                case .insights:
+                    InsightsList(model: model)
                 }
                 Divider()
                 collector
@@ -224,7 +227,9 @@ struct DiskAnalysisView: View {
                 .help(node.skippedCloudOnly ? String(localized: "Only in the cloud; contents were not downloaded") : "")
             VStack(alignment: .leading, spacing: 1) {
                 Text(node.name).lineLimit(1).truncationMode(.middle)
-                if sideTab == .largest {
+                if let flag = model.flag(node) {
+                    Text(flag).font(.mhCaption2).foregroundStyle(Theme.amber).lineLimit(1)
+                } else if sideTab == .largest {
                     Text(node.parent?.path ?? "").font(.mhCaption2).foregroundStyle(Palette.textMuted).lineLimit(1).truncationMode(.head)
                 }
             }
@@ -232,6 +237,7 @@ struct DiskAnalysisView: View {
             Text(Fmt.bytes(Int64(clamping: node.size))).monospacedDigit().foregroundStyle(Palette.textMuted)
         }
         .contentShape(Rectangle())
+        .listRowBackground(model.flag(node) != nil ? DiskPalette.flagged(highlighted: false).opacity(0.18) : nil)
         .onTapGesture(count: 2) { if node.isDirectory { model.zoom(to: node) } else { model.quickLook(node) } }
         .contextMenu { NodeMenu(model: model, node: node) }
         .draggable(node.url)
@@ -424,5 +430,62 @@ private struct ChangesList: View {
                 .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center)
                 .padding().frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+    }
+}
+
+/// Big files that look unused and folders that look bloated, found in the current scan.
+private struct InsightsList: View {
+    let model: DiskAnalysisModel
+
+    var body: some View {
+        if let i = model.insights, !(i.unusedFiles.isEmpty && i.bloatedFolders.isEmpty) {
+            List {
+                if !i.bloatedFolders.isEmpty {
+                    Section("Bloated folders") {
+                        ForEach(i.bloatedFolders) { b in
+                            item(path: b.path, size: b.size, icon: "folder.fill", reason: DiskAnalysisModel.reasonText(b),
+                                 extra: b.largestChild.map { c in String(localized: "Mostly \(c) (\(Fmt.bytes(Int64(clamping: b.largestChildSize ?? 0))))") })
+                        }
+                    }
+                }
+                if !i.unusedFiles.isEmpty {
+                    Section("Not used for \(i.unusedDays) days (\(Fmt.bytes(Int64(clamping: i.unusedBytes))))") {
+                        ForEach(i.unusedFiles) { u in
+                            item(path: u.path, size: u.size, icon: "doc", reason: DiskAnalysisModel.reasonText(u), extra: nil)
+                        }
+                    }
+                }
+            }
+            .listStyle(.plain)
+        } else {
+            Text(model.insights == nil
+                 ? "Scan a location to find big files that look unused and folders that look bloated."
+                 : "Nothing stands out: no big file unused for half a year, no oversized cache or log folder.")
+                .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center)
+                .padding().frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    private func item(path: String, size: UInt64, icon: String, reason: String, extra: String?) -> some View {
+        let node = model.node(atPath: path)
+        return HStack(alignment: .top) {
+            Image(systemName: icon).foregroundStyle(Theme.amber)
+            VStack(alignment: .leading, spacing: 1) {
+                Text((path as NSString).lastPathComponent).lineLimit(1).truncationMode(.middle)
+                Text(reason).font(.mhCaption2).foregroundStyle(Theme.amber).lineLimit(2)
+                if let extra { Text(extra).font(.mhCaption2).foregroundStyle(Palette.textMuted).lineLimit(1) }
+                Text(Fmt.shortPath((path as NSString).deletingLastPathComponent)).font(.mhCaption2).foregroundStyle(Palette.textFaint)
+                    .lineLimit(1).truncationMode(.head)
+            }
+            Spacer()
+            Text(Fmt.bytes(Int64(clamping: size))).monospacedDigit().foregroundStyle(Palette.textMuted)
+        }
+        .help(path)
+        .contentShape(Rectangle())
+        .onTapGesture(count: 2) {
+            guard let node else { return }
+            if node.isDirectory { model.zoom(to: node) } else { model.quickLook(node) }
+        }
+        .contextMenu { if let node { NodeMenu(model: model, node: node) } }
     }
 }

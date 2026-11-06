@@ -173,23 +173,24 @@ struct CommandLineToolRow: View {
     }
 
     private func toggle() {
-        let fm = FileManager.default
         error = nil
         do {
-            if installed {
-                try fm.removeItem(atPath: Self.linkPath)
-            } else {
-                try fm.createDirectory(atPath: (Self.linkPath as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
-                if (try? fm.destinationOfSymbolicLink(atPath: Self.linkPath)) != nil { try fm.removeItem(atPath: Self.linkPath) }
-                guard !fm.fileExists(atPath: Self.linkPath) else {
-                    error = String(localized: "~/.local/bin/machelper already exists and isn’t a link; remove it first.")
-                    return
-                }
-                try fm.createSymbolicLink(atPath: Self.linkPath, withDestinationPath: Self.target)
-            }
+            if installed { try FileManager.default.removeItem(atPath: Self.linkPath) } else { try Self.install() }
         } catch let e {
             error = e.localizedDescription
         }
         installed = Self.isInstalled
+    }
+
+    /// Links ~/.local/bin/machelper to the app's CLI; refuses to replace a file that isn't a link.
+    static func install() throws {
+        let fm = FileManager.default
+        try fm.createDirectory(atPath: (linkPath as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
+        if (try? fm.destinationOfSymbolicLink(atPath: linkPath)) != nil { try fm.removeItem(atPath: linkPath) }
+        guard !fm.fileExists(atPath: linkPath) else {
+            throw CocoaError(.fileWriteFileExists, userInfo: [NSLocalizedDescriptionKey:
+                String(localized: "~/.local/bin/machelper already exists and isn’t a link; remove it first.")])
+        }
+        try fm.createSymbolicLink(atPath: linkPath, withDestinationPath: target)
     }
 }

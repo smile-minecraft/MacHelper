@@ -23,6 +23,7 @@ public enum IconCatalog {
         Entry(id: "optimize", title: "Optimize", symbol: "sparkles", tint: .amber),
         Entry(id: "disk", title: "Disk Analysis", symbol: "chart.pie", tint: .violet),
         Entry(id: "uninstall", title: "Uninstall", symbol: "trash", tint: .rose),
+        Entry(id: "updates", title: "App Updates", symbol: "arrow.up.circle", tint: .mint),
         Entry(id: "startup", title: "Startup Items", symbol: "power", tint: .orange),
         Entry(id: "settings", title: "Settings", symbol: "gearshape", tint: .slate),
         Entry(id: "cpu", title: "CPU", symbol: "cpu", tint: .blue),

@@ -206,6 +206,176 @@
         }
       }
     },
+    "rule.ai.lmstudio-cache.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web and graphics caches of the LM Studio window, rebuilt when it opens. Models and chats are kept."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio 視窗的網頁與繪圖快取，開啟時會重新建立。模型和對話都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.lmstudio-cache.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio app cache"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio App 快取"
+          }
+        }
+      }
+    },
+    "rule.ai.lmstudio-logs.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local server logs older than a week. Models and chats are kept."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超過一週的本機伺服器記錄檔。模型和對話都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.lmstudio-logs.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio server logs"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio 伺服器記錄檔"
+          }
+        }
+      }
+    },
+    "rule.ai.ollama-logs.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rotated server logs (server-1.log and older). The current log and models are kept."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輪替下來的伺服器記錄檔（server-1.log 及更舊的）。目前的記錄檔和模型都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.ollama-logs.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama old logs"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama 舊記錄檔"
+          }
+        }
+      }
+    },
+    "rule.ai.omlx-cache.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved prompt state that speeds up repeated requests. It is rebuilt as you use oMLX; models are not touched."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加快重複請求的提示狀態快取，使用 oMLX 時會重新建立；不會動到模型。"
+          }
+        }
+      }
+    },
+    "rule.ai.omlx-cache.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oMLX prompt cache"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oMLX 提示快取"
+          }
+        }
+      }
+    },
+    "rule.ai.omlx-logs.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rotated server logs from previous days. The current log and models are kept."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "前幾天輪替下來的伺服器記錄檔。目前的記錄檔和模型都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.omlx-logs.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oMLX old logs"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oMLX 舊記錄檔"
+          }
+        }
+      }
+    },
     "rule.browser.arc-service-worker.description": {
       "extractionState": "manual",
       "localizations": {

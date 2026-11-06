@@ -52,6 +52,25 @@ public struct CleanRule: Codable, Sendable, Identifiable, Hashable {
              selectedByDefault, action, needsFullDiskAccess
     }
 
+    /// For rules built in code (for example the Trash of external drives), not loaded from a file.
+    public init(id: String, title: String, description: String, category: String, risk: RiskLevel, paths: [String],
+                exclude: [String] = [], minAgeDays: Int = 0, skipIfRunning: [String] = [], skipIfProcessRunning: [String] = [],
+                selectedByDefault: Bool? = nil, action: CleanAction? = nil, needsFullDiskAccess: Bool = false) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.category = category
+        self.risk = risk
+        self.paths = paths
+        self.exclude = exclude
+        self.minAgeDays = minAgeDays
+        self.skipIfRunning = skipIfRunning
+        self.skipIfProcessRunning = skipIfProcessRunning
+        self.selectedByDefault = selectedByDefault ?? (risk == .low)
+        self.action = action ?? .default(for: risk)
+        self.needsFullDiskAccess = needsFullDiskAccess
+    }
+
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(String.self, forKey: .id)

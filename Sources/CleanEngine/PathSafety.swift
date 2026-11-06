@@ -88,12 +88,7 @@ public struct PathSafety: Sendable {
         return depth >= minimumDepth ? .allowed : .tooShallow
     }
 
-    public static func loadWhitelist() -> [String] {
-        guard let text = try? String(contentsOf: MacHelperPaths.whitelistFile, encoding: .utf8) else { return [] }
-        return text.split(whereSeparator: \.isNewline)
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty && !$0.hasPrefix("#") }
-    }
+    public static func loadWhitelist() -> [String] { CleanExclusions().entries() }
 
     /// Resolves symlinks in the parent directory only; the last component stays as-is.
     static func resolveParent(_ path: String) -> String {

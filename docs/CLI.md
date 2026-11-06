@@ -22,7 +22,7 @@ inside the app follows the app's language; a standalone build prints English.
 - Protected paths (Keychains, Preferences, iCloud Drive, Mail, Photos, Messages, `~/.ssh`, `~/Documents`,
   `~/Desktop`, system folders, …) can never be removed, nor can anything containing them.
   Safety is checked when scanning **and again right before each removal**.
-- Your own exclusions: one glob per line in `~/Library/Application Support/MacHelper/clean-whitelist.txt`.
+- Your own exclusions: one glob per line in `~/Library/Application Support/MacHelper/clean-whitelist.txt`. Manage them with `machelper ignore` (list), `machelper ignore add <path>…` and `machelper ignore remove <entry>…`; the app's Optimize → Never Clean… edits the same file.
 - Caches of running apps are found but not selected; rules for running browsers / Xcode are skipped.
 - `purge` never touches artifacts that contain git-tracked files or a nested repository, nor anything under
   a docker-compose project's `volumes/` or `data/`. Artifacts used in the last 7 days are not selected.
@@ -39,10 +39,16 @@ inside the app follows the app's language; a standalone build prints English.
 | `machelper autoclean` | The scheduled low-risk clean plus safe maintenance (QuickLook reset, unavailable simulators): `--status`, `--now`, `--run-if-due` |
 | `machelper startup` | Launch agents / daemons; `--disable`, `--enable` (agents for all users: your account only; system daemons: app only, via the Helper), `--remove LABEL --yes` (your own items only), `--broken` |
 | `machelper analyze [PATH]` | Where the space goes (allocated size, hard links and APFS clones counted once) |
+| `machelper insights [PATH]` | Big files that look unused (not opened, changed or added for `--unused-days`, default 180; outside Library folders, packages and the Trash; model weights skipped) and bloated folders (grew ≥ 1 GB and 50 % since the previous scan, caches > 5 GB, logs > 1 GB, > 50,000 files directly inside). Read-only; saves a size snapshot unless `--no-save` |
 | `machelper duplicates [PATH]` | Files with identical content (size → 64 KB head/tail → SHA-256), clones marked |
 | `machelper stats --range 24h` | Recorded per-minute metric history (retention defaults to 7 days and is adjustable in Settings → General → Data management; background recording continues after the app quits when enabled) |
 | `machelper status` | CPU, GPU, memory, disk, network, temperatures, fans, power, battery |
+| `machelper guide` | The guide for AI agents (same text as the skill) |
+| `machelper skill` | `status` (default), `install [claude|codex]`, `uninstall`: the agent skill in `~/.claude/skills/machelper` and `~/.codex/skills/machelper` |
 | `machelper rules` | Lists rule ids, maintenance task ids and artifact detectors |
+| `machelper ignore` | Paths that are never cleaned: `list` (default), `add PATH…`, `remove ENTRY…` |
+| `machelper updates` | Apps installed with Homebrew that have updates (`--greedy` adds self-updating apps, `--refresh` runs `brew update` first); `updates upgrade CASK… --yes` runs `brew upgrade --cask` for each |
+| `machelper security` | Gatekeeper, FileVault, firewall, System Integrity Protection, automatic security updates and XProtect (read-only) |
 | `machelper history` | The operation log |
 
 All accept `--json`. Root-only tasks (`dns.flush`, `memory.purge`) run through the app's Helper and show
@@ -94,6 +100,13 @@ machelper status --json --watch 10 --interval 2
 - `analyze --json` has `"status": "complete" | "partial"`; partial means some folders were unreadable
   (grant Full Disk Access to the terminal). Partial scans still exit 0, so check this field.
 - Exit codes: `0` success, `1` failure, `2` partial (some items failed), `64` usage error.
+- With `--json`, errors are JSON too: `{"schemaVersion": 1, "error": {"message": …, "exitCode": …}}` on stdout.
+- `analyze` and `insights` print a note on stderr when the scan makes no progress for 10 s: macOS is usually
+  waiting for the user to answer a permission dialog for the terminal.
+- `insights --json`: `insights.unusedFiles[]` (`path`, `size`, `lastUsed`, `kind`) and `insights.bloatedFolders[]`
+  (`path`, `size`, `reasons` ⊂ `grew` `largeCache` `largeLogs` `manyFiles`, `grownBy`, `since`, `directFiles`,
+  `largestChild`, `largestChildSize`); `previousScan` is null on the first run of a path.
+- `machelper --experimental-dump-help` prints every command and option as JSON.
 
 ## Adding rules
 

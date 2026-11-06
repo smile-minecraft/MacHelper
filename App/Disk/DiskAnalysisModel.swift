@@ -67,6 +67,8 @@ struct HoverInfo: Equatable {
     let size: UInt64
     let path: String?
     let detail: String
+    /// Why the item is marked (bloated folder or unused file), if it is.
+    let flag: String?
 }
 
 @MainActor
@@ -111,6 +113,12 @@ final class DiskAnalysisModel {
     var collector: [DiskNode] = []
     // Changes since the previous scan of the same location.
     private(set) var changes: [ScanSnapshot.Change] = []
+    /// Unused-looking big files and bloated folders of the current tree.
+    private(set) var insights: SpaceInsights?
+    /// Flagged nodes → a short reason, for marking them in the charts and the lists.
+    private(set) var flagged: [ObjectIdentifier: String] = [:]
+    /// Folders with a flagged item somewhere inside.
+    private(set) var flaggedAncestors: Set<ObjectIdentifier> = []
     private(set) var changesSince: Date?
     // Duplicate files (found on request).
     private(set) var duplicates: [DuplicateGroup]?
@@ -178,13 +186,17 @@ final class DiskAnalysisModel {
         let key = cacheKey(for: target.url)
         let cache = cache
         Task { [weak self] in
-            let loaded = await Task.detached(priority: .userInitiated) { () -> (ScanResultSnapshot, DiskNode)? in
+            let loaded = await Task.detached(priority: .userInitiated) { () -> (ScanResultSnapshot, DiskNode, SpaceInsights)? in
                 guard let snapshot = cache.load(rootPath: key), let tree = snapshot.rebuildTree() else { return nil }
-                return (snapshot, tree)
+                // A saved scan is a record: nothing under its root is looked up, so only folder findings.
+                var options = SpaceInsights.Options()
+                options.minFileSize = .max
+                return (snapshot, tree, SpaceInsights.find(in: tree, options: options, lastUse: { _ in nil }))
             }.value
             guard let self, self.restoreGeneration == generation else { return }
             self.isLoadingSavedScan = false
-            guard let (snapshot, tree) = loaded else { return }
+            guard let (snapshot, tree, insights) = loaded else { return }
+            self.setInsights(insights, root: tree)
             self.root = tree
             self.focus = tree
             self.progress = snapshot.progress
@@ -224,6 +236,9 @@ final class DiskAnalysisModel {
         duplicatesMessage = nil
         changes = []
         changesSince = nil
+        insights = nil
+        flagged = [:]
+        flaggedAncestors = []
         hover = nil
         lastMessage = nil
         phase = .idle
@@ -246,6 +261,9 @@ final class DiskAnalysisModel {
         duplicatesMessage = nil
         changes = []
         changesSince = nil
+        insights = nil
+        flagged = [:]
+        flaggedAncestors = []
         let url = target.url
         let targetID = target.id
         loadVolume()
@@ -263,15 +281,18 @@ final class DiskAnalysisModel {
                 let result = try scanner.scan(url)
                 var changes: [ScanSnapshot.Change] = []
                 var since: Date?
+                var insights: SpaceInsights?
                 if !result.cancelled {
                     // The saved scan is only replaced by a completed one; a cancelled scan keeps
                     // whatever was saved before it.
                     let scannedAt = Date()
                     let snapshot = ScanSnapshot(root: result.root, date: scannedAt)
-                    if let previous = ScanSnapshot.load(root: snapshot.root) {
+                    let previous = ScanSnapshot.load(root: snapshot.root)
+                    if let previous {
                         changes = snapshot.changes(since: previous)
                         since = previous.date
                     }
+                    insights = SpaceInsights.find(in: result.root, previous: previous, now: scannedAt)
                     try? snapshot.save()
                     try? cache.save(result: result, scannedAt: scannedAt)
                 }
@@ -284,6 +305,7 @@ final class DiskAnalysisModel {
                     self.phase = result.cancelled ? .idle : .done
                     self.changes = changes
                     self.changesSince = since
+                    self.setInsights(insights, root: result.root)
                     self.revision += 1
                     if !result.cancelled {
                         UserDefaults.standard.set(targetID, forKey: Self.lastScanTargetKey)
@@ -350,6 +372,43 @@ final class DiskAnalysisModel {
     }
 
     func node(atPath path: String) -> DiskNode? { root?.descendant(atPath: path) }
+
+    func setInsights(_ i: SpaceInsights?, root: DiskNode) {
+        insights = i
+        var f: [ObjectIdentifier: String] = [:]
+        for b in i?.bloatedFolders ?? [] {
+            if let n = root.descendant(atPath: b.path) { f[ObjectIdentifier(n)] = Self.reasonText(b) }
+        }
+        for u in i?.unusedFiles ?? [] {
+            if let n = root.descendant(atPath: u.path) { f[ObjectIdentifier(n)] = Self.reasonText(u) }
+        }
+        flagged = f
+        var a = Set<ObjectIdentifier>()
+        for b in i?.bloatedFolders ?? [] { root.descendant(atPath: b.path)?.lineage.dropLast().forEach { a.insert(ObjectIdentifier($0)) } }
+        for u in i?.unusedFiles ?? [] { root.descendant(atPath: u.path)?.lineage.dropLast().forEach { a.insert(ObjectIdentifier($0)) } }
+        flaggedAncestors = a
+    }
+
+    func containsFlagged(_ node: DiskNode?) -> Bool { node.map { flaggedAncestors.contains(ObjectIdentifier($0)) } ?? false }
+
+    func flag(_ node: DiskNode?) -> String? { node.flatMap { flagged[ObjectIdentifier($0)] } }
+
+    static func reasonText(_ b: SpaceInsights.BloatedFolder) -> String {
+        b.reasons.map { r -> String in
+            switch r {
+            case .grew:
+                let by = Fmt.bytes(Int64(clamping: b.grownBy ?? 0))
+                return b.since.map { String(localized: "Grew \(by) since \($0.formatted(date: .abbreviated, time: .omitted))") } ?? String(localized: "Grew \(by)")
+            case .largeCache: return String(localized: "Unusually large cache")
+            case .largeLogs: return String(localized: "Unusually large logs")
+            case .manyFiles: return String(localized: "\((b.directFiles ?? 0).formatted()) files directly inside")
+            }
+        }.joined(separator: ", ")
+    }
+
+    static func reasonText(_ u: SpaceInsights.UnusedFile) -> String {
+        String(localized: "Not used since \(u.lastUsed.formatted(date: .abbreviated, time: .omitted))")
+    }
 
     func cancel() {
         scanner?.cancel()
@@ -430,9 +489,9 @@ final class DiskAnalysisModel {
             } else {
                 detail = node.modified.formatted(date: .abbreviated, time: .omitted)
             }
-            return HoverInfo(title: node.name, size: node.size, path: node.path, detail: detail)
+            return HoverInfo(title: node.name, size: node.size, path: node.path, detail: detail, flag: flag(node))
         }
         guard otherSize > 0 else { return nil }
-        return HoverInfo(title: String(localized: "Other smaller items"), size: otherSize, path: nil, detail: String(localized: "\(otherCount.formatted()) items"))
+        return HoverInfo(title: String(localized: "Other smaller items"), size: otherSize, path: nil, detail: String(localized: "\(otherCount.formatted()) items"), flag: nil)
     }
 }

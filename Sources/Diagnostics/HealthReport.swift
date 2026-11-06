@@ -121,7 +121,9 @@ public enum HealthCheck {
                               presence: min(Double($0.minuteCount) / totalMinutes, 1)) }
         }
         // Rank by load over the whole window, so a short spike doesn't outrank a steady consumer.
-        let byCPU = Array(lines(processes?.byCPU ?? []).sorted { $0.averageCPU * $0.presence > $1.averageCPU * $1.presence }.prefix(5))
+        // MacHelper's own processes are left out: the report is about the rest of the Mac.
+        let byCPU = Array(lines(processes?.byCPU ?? []).filter { !ownProcessNames.contains($0.name) }
+            .sorted { $0.averageCPU * $0.presence > $1.averageCPU * $1.presence }.prefix(5))
         let byMemory = Array(lines(processes?.byMemory ?? []).sorted { $0.averageMemoryBytes * $0.presence > $1.averageMemoryBytes * $1.presence }.prefix(5))
         let forecast = DiskSpaceForecast.compute(diskPoints)
 
@@ -144,7 +146,7 @@ public enum HealthCheck {
             }
         }
         // MacHelper's own processes are never reported as the problem (its own numbers stay in the lists).
-        if let top = byCPU.first(where: { !ownProcessNames.contains($0.name) }), top.averageCPU >= 0.5, top.presence >= 0.5 {
+        if let top = byCPU.first, top.averageCPU >= 0.5, top.presence >= 0.5 {
             add("cpu.process", .warning, String(localized: "\(top.name) keeps the CPU busy", bundle: .module),
                 String(localized: "It used \(pct(top.averageCPU)) of a core on average and was among the busiest processes in \(pct(top.presence)) of the minutes.", bundle: .module))
         }

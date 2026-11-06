@@ -2,6 +2,7 @@ import AppKit
 import CleanEngine
 import Foundation
 import Observation
+import os
 import PrivilegedOps
 
 /// Scan → preview → choose → run → report. Nothing is removed before `run()`.
@@ -35,6 +36,17 @@ final class OptimizeModel {
     }
 
     private(set) var phase: Phase = .idle
+    /// Rules checked so far during a scan, and how many there are.
+    private(set) var scanProgress: (done: Int, total: Int)?
+    /// The last scan was stopped early: the plan holds only the rules finished before that.
+    private(set) var scanStopped = false
+    @ObservationIgnored private let stopFlag = OSAllocatedUnfairLock(initialState: false)
+    /// Whether MacHelper can read folders protected by Full Disk Access (checked at each scan and when the app comes back).
+    private(set) var fullDiskAccess = FullDiskAccess.isGranted
+    /// Paths and globs the user never wants cleaned (clean-whitelist.txt).
+    private(set) var exclusions: [String] = CleanExclusions().entries()
+    private(set) var exclusionError: String?
+    var filter = ItemFilter()
     var plan: CleanPlan?
     var artifacts: ArtifactScanResult?
     var tasks: [TaskRow] = []
@@ -63,8 +75,15 @@ final class OptimizeModel {
 
     // MARK: Scan
 
+    func stopScan() { stopFlag.withLock { $0 = true } }
+
     func scan() async {
         phase = .scanning
+        scanProgress = nil
+        scanStopped = false
+        stopFlag.withLock { $0 = false }
+        fullDiskAccess = FullDiskAccess.isGranted
+        exclusions = CleanExclusions().entries()
         loadError = nil
         report = nil
         artifactReport = nil
@@ -76,21 +95,41 @@ final class OptimizeModel {
             async let docker: Result<DockerUsage, DockerUsage.Failure>? = Task.detached(priority: .userInitiated) {
                 MaintenanceCatalog.docker == nil ? nil : DockerUsage.read()
             }.value
-            let (plan, artifacts, tasks) = try await Task.detached(priority: .userInitiated) {
+            let stop = stopFlag
+            let (plan, artifacts, tasks, stopped) = try await Task.detached(priority: .userInitiated) { [weak self] in
                 let rules = try RuleSet.load()
-                let plan = CleanScanner(rules: rules).scan()
-                let artifacts = roots.isEmpty ? nil : ArtifactScanner(detectors: try ArtifactDetector.loadBuiltIn()).scan(roots: roots)
+                var plan = CleanScanner(rules: rules).scan(progress: { done, total in
+                    Task { @MainActor in self?.scanProgress = (done, total) }
+                }, shouldStop: { stop.withLock { $0 } })
+                let stopped = stop.withLock { $0 }
+                if !stopped {
+                    let volumes = VolumeTrash.scan()
+                    if !volumes.candidates.isEmpty { plan.results.append(volumes) }
+                }
+                let artifacts = roots.isEmpty || stopped ? nil : ArtifactScanner(detectors: try ArtifactDetector.loadBuiltIn()).scan(roots: roots)
                 let tasks = MaintenanceCatalog.all.map { t in
                     let available = t.isAvailable && (!t.requiresRoot || helperEnabled)
                     return TaskRow(task: t, selected: t.selectedByDefault && available, available: available)
                 }
-                return (plan, artifacts, tasks)
+                return (plan, artifacts, tasks, stopped)
             }.value
+            scanStopped = stopped
+            guard !stopped || !plan.results.isEmpty else {
+                // Stopped before any rule finished: nothing to show.
+                self.plan = nil
+                phase = .idle
+                return
+            }
             self.plan = plan
             self.artifacts = artifacts
             self.tasks = tasks
             self.dockerUsage = await docker
-            await previewSystemCleanup(helperEnabled: helperEnabled)
+            if stopped {
+                systemRows = SystemCleanupCatalog.all.map { SystemRow(info: $0, preview: nil, selected: false) }
+                systemError = String(localized: "Scan stopped")
+            } else {
+                await previewSystemCleanup(helperEnabled: helperEnabled)
+            }
             phase = .ready
         } catch {
             loadError = "\(error)"
@@ -173,7 +212,7 @@ final class OptimizeModel {
 
     /// The part of `selectedPermanentBytes` that empties the Trash.
     var selectedEmptyTrashBytes: UInt64 {
-        plan?.results.filter { $0.rule.id == "user.trash" }.reduce(0) { $0 + $1.selectedSize } ?? 0
+        plan?.results.filter { $0.rule.id == "user.trash" || $0.rule.id == VolumeTrash.ruleID }.reduce(0) { $0 + $1.selectedSize } ?? 0
     }
 
     /// Selected bytes that will be moved to the Trash (recoverable).
@@ -182,7 +221,7 @@ final class OptimizeModel {
     /// Rules grouped by category, in a fixed display order.
     var groups: [(category: String, title: String, results: [RuleResult])] {
         let order: [(String, String)] = [("caches", String(localized: "App Caches")), ("logs", String(localized: "Logs")), ("browsers", String(localized: "Browsers")),
-                                         ("developer", String(localized: "Developer Tools")), ("trash", String(localized: "Trash")), ("downloads", String(localized: "Downloads")),
+                                         ("developer", String(localized: "Developer Tools")), ("ai", String(localized: "AI Tools")), ("trash", String(localized: "Trash")), ("downloads", String(localized: "Downloads")),
                                          ("mail", String(localized: "Mail")), ("backups", String(localized: "Device Backups"))]
         guard let plan else { return [] }
         var out: [(String, String, [RuleResult])] = []
@@ -196,12 +235,81 @@ final class OptimizeModel {
         return out
     }
 
+    /// Selects or deselects every item that passes the current filter.
+    func setMatching(selected: Bool, in category: String?) {
+        guard plan != nil else { return }
+        let now = Date()
+        for i in plan!.results.indices where category == nil || plan!.results[i].rule.category == category {
+            let title = plan!.results[i].rule.title
+            for j in plan!.results[i].candidates.indices where filter.matches(plan!.results[i].candidates[j], ruleTitle: title, now: now) {
+                plan!.results[i].candidates[j].selected = selected
+            }
+        }
+    }
+
+    // MARK: Exclusions
+
+    /// Never clean this path again: saved to the exclusion list and dropped from the current preview.
+    func exclude(_ path: String) {
+        do {
+            try CleanExclusions().add(CleanExclusions.entry(for: path))
+            exclusionError = nil
+        } catch {
+            exclusionError = "\(error.localizedDescription)"
+            return
+        }
+        exclusions = CleanExclusions().entries()
+        guard plan != nil else { return }
+        for i in plan!.results.indices {
+            plan!.results[i].candidates.removeAll { $0.path == path || $0.path.hasPrefix(path + "/") }
+        }
+    }
+
+    func addExclusion(_ entry: String) {
+        do { try CleanExclusions().add(entry); exclusionError = nil } catch { exclusionError = "\(error.localizedDescription)" }
+        exclusions = CleanExclusions().entries()
+    }
+
+    func addExclusionsFromPanel() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = true
+        panel.allowsMultipleSelection = true
+        panel.showsHiddenFiles = true
+        panel.prompt = String(localized: "Never Clean")
+        guard panel.runModal() == .OK else { return }
+        for url in panel.urls { addExclusion(CleanExclusions.entry(for: url.path)) }
+    }
+
+    /// Removed exclusions show up again on the next scan.
+    func removeExclusion(_ entry: String) {
+        do { try CleanExclusions().remove(entry); exclusionError = nil } catch { exclusionError = "\(error.localizedDescription)" }
+        exclusions = CleanExclusions().entries()
+    }
+
+    // MARK: Full Disk Access
+
+    /// Called when MacHelper becomes active again; scans again once access was just turned on.
+    func recheckFullDiskAccess() {
+        let now = FullDiskAccess.isGranted
+        defer { fullDiskAccess = now }
+        if now, !fullDiskAccess, phase == .ready {
+            Task { await scan() }
+        }
+    }
+
+    /// Rules that found nothing and need Full Disk Access to see their folders.
+    var hiddenByFullDiskAccess: Int {
+        fullDiskAccess ? 0 : (plan?.results.filter { $0.rule.needsFullDiskAccess && $0.candidates.isEmpty }.count ?? 0)
+    }
+
     // MARK: Run
 
     func run() async {
         guard let plan else { return }
         phase = .running
-        let items = plan.removalItems
+        let items = plan.removalItems.filter { $0.source != VolumeTrash.ruleID }
+        let volumeItems = plan.removalItems.filter { $0.source == VolumeTrash.ruleID }
         let artifactItems = artifacts?.artifacts.filter(\.selected).map {
             RemovalItem(path: $0.path, source: "purge.\($0.detector)", bytes: $0.size, action: .trash)
         } ?? []
@@ -211,7 +319,13 @@ final class OptimizeModel {
         let systemIDs = systemRows.filter { $0.selected && $0.count > 0 }.map(\.id)
 
         let (report, artifactReport, userResults) = await Task.detached(priority: .userInitiated) {
-            let report = CleanExecutor(safety: .forCleaning()).execute(items, dryRun: false, command: "clean")
+            var report = CleanExecutor(safety: .forCleaning()).execute(items, dryRun: false, command: "clean")
+            if !volumeItems.isEmpty {
+                // Other drives' Trash: only items inside <volume>/.Trashes/<uid>, re-checked right before removal.
+                let v = CleanExecutor(safety: VolumeTrash.safety(trashFolders: VolumeTrash.trashFolders()))
+                    .execute(volumeItems, dryRun: false, command: "clean")
+                report = CleanReport(schemaVersion: 1, dryRun: false, items: report.items + v.items)
+            }
             let artifactReport = artifactItems.isEmpty ? nil
                 : CleanExecutor(safety: .forArtifacts(roots: artifactRoots)).execute(artifactItems, dryRun: false, command: "purge")
             let runner = MaintenanceRunner()
@@ -269,9 +383,5 @@ final class OptimizeModel {
                                       output: String(localized: "Freed \(Fmt.bytes(Int64(clamping: freed)))")))
     }
 
-    func openFullDiskAccessSettings() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
-            NSWorkspace.shared.open(url)
-        }
-    }
+    func openFullDiskAccessSettings() { FullDiskAccess.openSettings() }
 }

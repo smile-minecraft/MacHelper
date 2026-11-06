@@ -71,6 +71,7 @@ private struct GeneralSettings: View {
             Section {
                 LanguagePicker()
                 CommandLineToolRow()
+                AgentSkillRow()
             }
             SettingsBackupSection(app: app)
         }

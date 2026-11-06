@@ -1,10 +1,11 @@
+import AppKit
 import SwiftUI
 
 /// MacHelper's mascot: a blue pixel slime with eyes only (no nose, no mouth). It squashes and
 /// bounces, blinks, and puts out two little hands to wave, cheer or point. Its face and actions
 /// follow how the Mac is doing. Drawn cell by cell at 8 frames a second (pixel-art timing, cheap to
 /// draw); still when Reduce Motion is on.
-struct SlimeMascot: View {
+struct SlimeMascot: NSViewRepresentable {
     /// What the slime shows. Its color follows the level (blue fine, yellow needs a look, red bad);
     /// it holds up a sign pointing right when there is a suggested action next to it.
     struct Mood: Equatable {
@@ -17,33 +18,101 @@ struct SlimeMascot: View {
     let mood: Mood
     /// Size of one pixel in points.
     var cell: CGFloat = 4
-    @State private var start = Date()
-    @State private var tappedAt: Int?
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     static let columns = 40, rows = 24
-    private static let fps = 8.0
+    static let fps = 8.0
 
-    var body: some View {
-        TimelineView(.periodic(from: start, by: 1 / Self.fps)) { context in
-            let frame = reduceMotion ? 0 : Int(context.date.timeIntervalSince(start) * Self.fps)
-            let pose = SlimePose.make(mood: mood, frame: frame, tappedAt: reduceMotion ? nil : tappedAt)
-            Canvas { ctx, _ in SlimeRenderer.draw(pose, in: ctx, cell: cell) }
-        }
-        .frame(width: CGFloat(Self.columns) * cell, height: CGFloat(Self.rows) * cell)
-        .contentShape(Rectangle())
-        .onTapGesture { tappedAt = Int(Date().timeIntervalSince(start) * Self.fps) }
-        .accessibilityElement()
-        .accessibilityLabel(Text("MacHelper mascot"))
-        .accessibilityValue(Text(moodDescription))
+    // An AppKit view with its own timer: each frame only redraws these pixels. Driving it from a
+    // SwiftUI TimelineView re-ran layout of the whole window eight times a second (about 12% CPU).
+    func makeNSView(context: Context) -> SlimeView { SlimeView(mood: mood, cell: cell) }
+
+    func updateNSView(_ view: SlimeView, context: Context) {
+        view.mood = mood
+        view.cell = cell
     }
 
-    private var moodDescription: String {
-        switch mood.level {
+    func sizeThatFits(_ proposal: ProposedViewSize, nsView: SlimeView, context: Context) -> CGSize? {
+        CGSize(width: CGFloat(Self.columns) * cell, height: CGFloat(Self.rows) * cell)
+    }
+}
+
+final class SlimeView: NSView {
+    var mood: SlimeMascot.Mood { didSet { if mood != oldValue { needsDisplay = true; updateAccessibility() } } }
+    var cell: CGFloat { didSet { if cell != oldValue { invalidateIntrinsicContentSize(); needsDisplay = true } } }
+    private let start = Date()
+    private var tappedAt: Int?
+    private var timer: Timer?
+    private var colors: [Color: CGColor] = [:]
+
+    init(mood: SlimeMascot.Mood, cell: CGFloat) {
+        self.mood = mood
+        self.cell = cell
+        super.init(frame: .zero)
+        setAccessibilityElement(true)
+        setAccessibilityRole(.image)
+        setAccessibilityLabel(String(localized: "MacHelper mascot"))
+        updateAccessibility()
+    }
+
+    required init?(coder: NSCoder) { fatalError("not used") }
+
+
+    override var isFlipped: Bool { true }
+    override var intrinsicContentSize: NSSize {
+        NSSize(width: CGFloat(SlimeMascot.columns) * cell, height: CGFloat(SlimeMascot.rows) * cell)
+    }
+
+    private var reduceMotion: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
+    private var currentFrame: Int { reduceMotion ? 0 : Int(Date().timeIntervalSince(start) * SlimeMascot.fps) }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        timer?.invalidate()
+        timer = nil
+        guard window != nil else { return }
+        let t = Timer(timeInterval: 1 / SlimeMascot.fps, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.tick() }
+        }
+        t.tolerance = 0.02
+        RunLoop.main.add(t, forMode: .common)
+        timer = t
+    }
+
+    private func tick() {
+        // Nothing to do while hidden, covered or with Reduce Motion on.
+        guard let window, window.isVisible, window.occlusionState.contains(.visible), !reduceMotion else { return }
+        needsDisplay = true
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        guard let ctx = NSGraphicsContext.current?.cgContext else { return }
+        let pose = SlimePose.make(mood: mood, frame: currentFrame, tappedAt: reduceMotion ? nil : tappedAt)
+        let c = cell
+        SlimeRenderer.paint(pose) { x, y, color in
+            ctx.setFillColor(cgColor(color))
+            ctx.fill(CGRect(x: CGFloat(x) * c, y: CGFloat(y) * c, width: c, height: c))
+        }
+    }
+
+    private func cgColor(_ color: Color) -> CGColor {
+        if let c = colors[color] { return c }
+        let c = NSColor(color).cgColor
+        colors[color] = c
+        return c
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        tappedAt = Int(Date().timeIntervalSince(start) * SlimeMascot.fps)
+        needsDisplay = true
+    }
+
+    private func updateAccessibility() {
+        let value: String = switch mood.level {
         case .critical: String(localized: "Sweating")
         case .attention: mood.holdsSign ? String(localized: "Pointing at the suggested action") : String(localized: "Alert")
         case .good: mood.sleepy ? String(localized: "Dozing") : String(localized: "Relaxed")
         }
+        setAccessibilityValue(value)
     }
 }
 
@@ -165,6 +234,13 @@ enum SlimeRenderer {
     enum Cell { case body, hand, outline, eye, white, sweat, snore, stick, board, boardEdge, arrow }
 
     static func draw(_ p: SlimePose, in ctx: GraphicsContext, cell: CGFloat) {
+        paint(p) { x, y, color in
+            ctx.fill(Path(CGRect(x: CGFloat(x) * cell, y: CGFloat(y) * cell, width: cell, height: cell)), with: .color(color))
+        }
+    }
+
+    /// Calls `fill` once per painted cell (column, row, color), top-left origin.
+    static func paint(_ p: SlimePose, fill: (Int, Int, Color) -> Void) {
         let w = SlimeMascot.columns, h = SlimeMascot.rows
         var grid = [[Cell?]](repeating: [Cell?](repeating: nil, count: w), count: h)
         func put(_ x: Int, _ y: Int, _ c: Cell) { if x >= 0, x < w, y >= 0, y < h { grid[y][x] = c } }
@@ -284,7 +360,7 @@ enum SlimeRenderer {
                 case .board: color = wood
                 case .arrow: color = arrow
                 }
-                ctx.fill(Path(CGRect(x: CGFloat(x) * cell, y: CGFloat(y) * cell, width: cell, height: cell)), with: .color(color))
+                fill(x, y, color)
             }
         }
     }

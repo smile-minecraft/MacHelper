@@ -225,6 +225,7 @@ private extension OperationKind {
         switch self {
         case .cleanup: "Cleaning"
         case .uninstall: "Uninstall"
+        case .appUpdate: "App Updates"
         case .startup: "Startup Items"
         case .maintenance: "Maintenance"
         case .diskAnalysis: "Disk Analysis"
@@ -236,6 +237,7 @@ private extension OperationKind {
         switch self {
         case .cleanup: Theme.mint
         case .uninstall: Theme.rose
+        case .appUpdate: Theme.mint
         case .startup: Theme.orange
         case .maintenance: Theme.amber
         case .diskAnalysis: Theme.violet

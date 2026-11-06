@@ -1,5 +1,6 @@
 import ArgumentParser
 import CleanEngine
+import Diagnostics
 import Foundation
 
 struct Clean: ParsableCommand {
@@ -256,5 +257,135 @@ struct History: ParsableCommand {
             Output.line("\(f.string(from: e.time))  \(Output.pad(e.command, 9)) \(Output.pad(e.result, 8)) \(Output.lpad(e.bytes > 0 ? Output.bytes(e.bytes) : "", 9))  \(what)")
         }
         if entries.isEmpty { Output.line("No operations logged yet.") }
+    }
+}
+
+struct Ignore: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        abstract: "List or change the paths MacHelper never cleans (clean-whitelist.txt).",
+        subcommands: [List.self, Add.self, Remove.self], defaultSubcommand: List.self)
+
+    struct List: ParsableCommand {
+        static let configuration = CommandConfiguration(abstract: "List the excluded paths and globs.")
+        @OptionGroup var output: OutputOptions
+
+        func run() throws {
+            let entries = CleanExclusions().entries()
+            if output.json {
+                struct Out: Encodable { let schemaVersion = 1; let file: String; let entries: [String] }
+                try Output.json(Out(file: MacHelperPaths.whitelistFile.path, entries: entries))
+                return
+            }
+            for e in entries { Output.line(e) }
+            if entries.isEmpty { Output.line("Nothing excluded. Add paths with: machelper ignore add <path>") }
+        }
+    }
+
+    struct Add: ParsableCommand {
+        static let configuration = CommandConfiguration(abstract: "Never clean these paths or globs (~ is your home folder).")
+        @Argument(help: "Paths or globs.") var paths: [String]
+
+        func run() throws {
+            let ex = CleanExclusions()
+            for p in paths {
+                // Existing paths are stored as absolute (~/…) paths; anything else is kept as a glob.
+                let url = URL(fileURLWithPath: expandTilde(p))
+                let entry = FileManager.default.fileExists(atPath: url.path) ? CleanExclusions.entry(for: url.standardizedFileURL.path) : p
+                try ex.add(entry)
+                Output.line("Excluded: \(entry)")
+            }
+        }
+    }
+
+    struct Remove: ParsableCommand {
+        static let configuration = CommandConfiguration(abstract: "Clean these entries again (as listed by `machelper ignore`).")
+        @Argument(help: "Entries exactly as listed.") var entries: [String]
+
+        func run() throws {
+            let ex = CleanExclusions()
+            for e in entries {
+                guard ex.entries().contains(e) else { Output.err("Not in the list: \(e)"); throw ExitCode(1) }
+                try ex.remove(e)
+                Output.line("Removed: \(e)")
+            }
+        }
+    }
+}
+
+struct Updates: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        abstract: "List apps installed with Homebrew that have updates, and update them.",
+        subcommands: [List.self, Upgrade.self], defaultSubcommand: List.self)
+
+    struct List: ParsableCommand {
+        static let configuration = CommandConfiguration(abstract: "List outdated Homebrew apps (casks).")
+        @OptionGroup var output: OutputOptions
+        @Flag(name: .long, help: "Also list apps that update themselves.") var greedy = false
+        @Flag(name: .long, help: "Run `brew update` first.") var refresh = false
+
+        func run() throws {
+            switch HomebrewUpdates.outdated(greedy: greedy, refresh: refresh) {
+            case .failure(.notInstalled):
+                Output.err("Homebrew is not installed.")
+                throw ExitCode(1)
+            case .failure(.failed(let message)):
+                Output.err("brew failed: \(message)")
+                throw ExitCode(1)
+            case .success(let casks):
+                if output.json {
+                    struct Out: Encodable { let schemaVersion = 1; let casks: [OutdatedCask] }
+                    try Output.json(Out(casks: casks))
+                    return
+                }
+                for c in casks {
+                    let notes = [c.pinned ? "pinned" : nil, c.autoUpdates ? "updates itself" : nil,
+                                 c.needsAdmin ? "needs a password: \(c.terminalCommand)" : nil].compactMap { $0 }
+                    Output.line("\(Output.pad(c.token, 28)) \(Output.pad(c.installedVersion, 14)) → \(Output.pad(c.currentVersion, 14))\(notes.isEmpty ? "" : " (" + notes.joined(separator: ", ") + ")")")
+                }
+                if casks.isEmpty { Output.line("All Homebrew apps are up to date.") }
+            }
+        }
+    }
+
+    struct Upgrade: ParsableCommand {
+        static let configuration = CommandConfiguration(abstract: "Update these casks (preview unless --yes).")
+        @OptionGroup var apply: ApplyOptions
+        @Argument(help: "Cask names as listed by `machelper updates`.") var casks: [String]
+
+        func run() throws {
+            for c in casks where !HomebrewUpdates.isValidToken(c) {
+                Output.err("Not a cask name: \(c)")
+                throw ExitCode(1)
+            }
+            guard apply.shouldApply else {
+                for c in casks { Output.line("Would run: brew upgrade --cask \(c)") }
+                Output.line("Nothing was changed; add --yes to update.")
+                return
+            }
+            var failed = false
+            for c in casks {
+                let r = HomebrewUpdates.upgrade(c)
+                Output.line(r.ok ? "Updated \(c)" : "Failed \(c)\(r.neededPassword ? " (needs a password; run brew upgrade --cask \(c) in Terminal)" : ""):\n\(r.output)")
+                failed = failed || !r.ok
+            }
+            if failed { throw ExitCode(1) }
+        }
+    }
+}
+
+struct Security: ParsableCommand {
+    static let configuration = CommandConfiguration(abstract: "Show macOS security settings (read-only).")
+    @OptionGroup var output: OutputOptions
+
+    func run() throws {
+        let checks = SecurityAudit.run()
+        if output.json {
+            struct Out: Encodable { let schemaVersion = 1; let checks: [SecurityCheck] }
+            try Output.json(Out(checks: checks))
+            return
+        }
+        for c in checks {
+            Output.line("\(Output.pad(c.id, 12)) \(Output.pad(c.state.rawValue, 8)) \(c.detail ?? "")")
+        }
     }
 }

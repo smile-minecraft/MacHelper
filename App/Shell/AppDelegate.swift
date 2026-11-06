@@ -43,6 +43,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             fanModel.onUserApplied = { [weak self] policy in self?.fanSwitcher.userApplied(policy) }
             fanSwitcher.start()
         }
+        // After an update, rewrite the agent skills MacHelper installed (never a SKILL.md it didn't write).
+        if !args.contains(where: { $0.hasPrefix("--snapshot") || $0 == "--export-icon-template" }) {
+            Task.detached(priority: .utility) { AgentSkillSetup.refreshInstalled() }
+        }
         if let dir = ThemeStore.shared.exportTemplateOnLaunch {
             do { try ThemeStore.shared.exportIconTemplate(to: dir) } catch { print("export failed: \(error)") }
             NSApp.terminate(nil)
@@ -54,6 +58,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
         if let i = args.firstIndex(of: "--snapshot-disk"), i + 2 < args.count {
             renderDiskSnapshots(scan: args[i + 1], to: URL(fileURLWithPath: args[i + 2]))
+            return
+        }
+        // Debug aid for measuring CPU per page: `--snapshot-section overview` opens that page and stays there.
+        if let i = args.firstIndex(of: "--snapshot-section"), i + 1 < args.count, let section = AppSection(rawValue: args[i + 1]) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(2))
+                app.show(section)
+            }
             return
         }
         if let i = args.firstIndex(of: "--snapshot-window"), i + 1 < args.count {
@@ -139,6 +151,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         Task { @MainActor in
             let root = await Task.detached { try? DiskScanner().scan(URL(fileURLWithPath: path)).root }.value
             guard let root else { NSApp.terminate(nil); return }
+            let insights = await Task.detached { SpaceInsights.find(in: root) }.value
+            diskModel.setInsights(insights, root: root)
+            if let flagged = insights.bloatedFolders.first.flatMap({ root.descendant(atPath: $0.path) })
+                ?? insights.unusedFiles.first.flatMap({ root.descendant(atPath: $0.path) }),
+               let info = diskModel.hoverInfo(for: flagged) {
+                render(ChartTooltip(info: info, share: Double(flagged.size) / Double(max(root.size, 1))).padding(20)
+                    .background(Color(white: 0.12)).environment(\.colorScheme, .dark), "tooltip-dark", dir)
+            }
             let size = CGSize(width: 640, height: 640)
             let sunburst = SunburstLayout(center: root, maxDepth: 4)
             let cells = TreemapLayout(center: root, bounds: CGRect(origin: .zero, size: size), minArea: size.width * size.height * 0.004).cells
@@ -188,6 +208,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             DispatchQueue.main.async { self?.resizeStatusItem(to: width) }
         }
         let hosting = ClickThroughHostingView(rootView: view)
+        // The item's width comes from the view's own measurement callback above; without size
+        // constraints AppKit doesn't re-measure the SwiftUI tree (minSize) on every redraw of the
+        // menu bar copies, which was most of the remaining CPU time.
+        hosting.sizingOptions = []
         hosting.translatesAutoresizingMaskIntoConstraints = false
         button.addSubview(hosting)
         NSLayoutConstraint.activate([

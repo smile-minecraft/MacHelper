@@ -2,12 +2,13 @@ import Foundation
 
 /// The screen that groups recorded operations by the feature that produced them.
 public enum OperationKind: String, CaseIterable, Sendable {
-    case cleanup, uninstall, startup, maintenance, diskAnalysis, other
+    case cleanup, uninstall, appUpdate, startup, maintenance, diskAnalysis, other
 
     public init(command: String) {
         switch command {
         case "clean", "autoclean", "purge": self = .cleanup
         case "uninstall": self = .uninstall
+        case "brew-upgrade": self = .appUpdate
         case "startup": self = .startup
         case "optimize": self = .maintenance
         case "analyze": self = .diskAnalysis

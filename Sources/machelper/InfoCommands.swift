@@ -30,6 +30,7 @@ struct Analyze: ParsableCommand {
     func run() throws {
         let url = URL(fileURLWithPath: expandTilde(path))
         let scanner = DiskScanner()
+        ScanWatchdog.watch(scanner)
         let result = try scanner.scan(url)
         let root = result.root
 
@@ -307,6 +308,216 @@ struct DoctorCommand: ParsableCommand {
         for f in report.findings {
             Output.line("[\(f.severity.rawValue.uppercased())] \(f.title)")
             Output.line("    \(f.detail)")
+        }
+    }
+}
+
+struct Insights: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        abstract: "Find big files that look unused and folders that look bloated (read-only).",
+        discussion: """
+        Unused: files of at least --min-size not opened (Spotlight), changed or added for --unused-days, outside
+        app data (Library folders), packages (photo libraries, apps) and the Trash.
+        Bloated: folders that grew by at least 1 GB and 50 % since the previous scan of the same path, cache folders
+        over 5 GB, log folders over 1 GB, and folders with over 50,000 files directly inside.
+        Each run saves a size snapshot of the path (shared with the app's Disk Analysis "Changes") so the next run
+        can report growth; pass --no-save to leave it untouched. Nothing is removed: to act on a finding, move the
+        file to the Trash yourself or use `clean` / `uninstall`.
+        """
+    )
+
+    @OptionGroup var output: OutputOptions
+
+    @Argument(help: "Folder to scan (default: your home folder).")
+    var path: String = "~"
+
+    @Option(name: .long, help: "Days without use before a file counts as unused.")
+    var unusedDays = 180
+
+    @Option(name: .long, help: "Smallest file to check, e.g. 100MB, 1GB.")
+    var minSize = "100MB"
+
+    @Option(name: .long, help: "Findings listed per kind.")
+    var limit = 50
+
+    @Flag(name: .long, help: "Don't save this scan as the baseline for growth.")
+    var noSave = false
+
+    func run() throws {
+        guard let minBytes = Output.parseBytes(minSize) else {
+            throw ValidationError("--min-size must look like 500MB or 2GB")
+        }
+        let url = URL(fileURLWithPath: expandTilde(path)).standardizedFileURL
+        var isDir: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir), isDir.boolValue else {
+            throw ValidationError("Not a folder: \(path)")
+        }
+        let scanner = DiskScanner()
+        ScanWatchdog.watch(scanner)
+        let result = try scanner.scan(url)
+        let previous = ScanSnapshot.load(root: result.root.path)
+        var options = SpaceInsights.Options()
+        options.unusedDays = unusedDays
+        options.minFileSize = minBytes
+        options.limit = limit
+        let insights = SpaceInsights.find(in: result.root, previous: previous, options: options)
+        if !noSave { try? ScanSnapshot(root: result.root).save() }
+        let partial = result.progress.unreadableDirectories > 0
+
+        if output.json {
+            struct Out: Encodable {
+                let schemaVersion = 1
+                let status: String
+                let unreadableDirectories: Int
+                let previousScan: Date?
+                let insights: SpaceInsights
+            }
+            try Output.json(Out(status: partial ? "partial" : "complete", unreadableDirectories: result.progress.unreadableDirectories,
+                                previousScan: previous?.date, insights: insights))
+            return
+        }
+        Output.line("Unused for \(unusedDays)+ days (\(Output.bytes(insights.unusedBytes)) in \(insights.unusedFiles.count) files):")
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        for u in insights.unusedFiles {
+            Output.line("  \(Output.lpad(Output.bytes(u.size), 10))  last used \(f.string(from: u.lastUsed))  \(Output.shortPath(u.path))")
+        }
+        if insights.unusedFiles.isEmpty { Output.line("  none") }
+        Output.line("\nBloated folders:")
+        for b in insights.bloatedFolders {
+            var why: [String] = []
+            for r in b.reasons {
+                switch r {
+                case .grew: why.append("grew \(Output.bytes(b.grownBy ?? 0))\(b.since.map { " since " + f.string(from: $0) } ?? "")")
+                case .largeCache: why.append("large cache")
+                case .largeLogs: why.append("large logs")
+                case .manyFiles: why.append("\(b.directFiles ?? 0) files directly inside")
+                }
+            }
+            if let c = b.largestChild, let s = b.largestChildSize { why.append("mostly \(c) (\(Output.bytes(s)))") }
+            Output.line("  \(Output.lpad(Output.bytes(b.size), 10))  \(Output.shortPath(b.path)): \(why.joined(separator: "; "))")
+        }
+        if insights.bloatedFolders.isEmpty { Output.line("  none") }
+        if previous == nil { Output.line("\nNo earlier scan of this path: run again later to see which folders grew.") }
+        if partial { Output.line("\n\(result.progress.unreadableDirectories) folders could not be read. Grant Full Disk Access to your terminal for a complete scan.") }
+    }
+}
+
+/// How agents should call this tool: `machelper` when the link is on the PATH, else the full path.
+enum AgentCommand {
+    static var appCopy: String? {
+        var size: UInt32 = 0
+        _NSGetExecutablePath(nil, &size)
+        var buf = [CChar](repeating: 0, count: Int(size))
+        guard _NSGetExecutablePath(&buf, &size) == 0, let real = realpath(buf, nil) else { return nil }
+        defer { free(real) }
+        let p = String(cString: real)
+        return p.contains(".app/Contents/MacOS/") ? p : nil
+    }
+
+    static var onPath: Bool {
+        (ProcessInfo.processInfo.environment["PATH"] ?? "").split(separator: ":").contains { dir in
+            FileManager.default.isExecutableFile(atPath: String(dir) + "/machelper")
+        }
+    }
+
+    static var command: String { onPath ? "machelper" : (appCopy ?? "machelper") }
+    static var fallback: String? { onPath ? appCopy : nil }
+}
+
+struct Guide: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        abstract: "Print the guide for AI agents (the same text as the agent skill).",
+        discussion: "For the full option list of every command as JSON: machelper --experimental-dump-help")
+
+    func run() throws { Output.line(AgentSkill.markdown(command: AgentCommand.command, fallback: AgentCommand.fallback)) }
+}
+
+struct SkillCommand: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "skill",
+        abstract: "Install the machelper skill for Claude Code and Codex (~/.claude/skills, ~/.codex/skills).",
+        subcommands: [Status.self, Install.self, Uninstall.self], defaultSubcommand: Status.self)
+
+    static func targets(_ ids: [String]) throws -> [AgentSkill.Target] {
+        let all = AgentSkill.targets()
+        if ids.isEmpty { return all.filter(\.detected) }
+        return try ids.map { id in
+            guard let t = all.first(where: { $0.id == id }) else { throw ValidationError("Unknown agent \(id); use claude or codex") }
+            return t
+        }
+    }
+
+    struct Status: ParsableCommand {
+        static let configuration = CommandConfiguration(abstract: "Show where the skill is installed.")
+        @OptionGroup var output: OutputOptions
+
+        func run() throws {
+            let rows = AgentSkill.targets().map { t in (t, AgentSkill.state(t)) }
+            if output.json {
+                struct Row: Encodable { let agent: String; let file: String; let detected: Bool; let state: String }
+                struct Out: Encodable { let schemaVersion = 1; let version: Int; let targets: [Row] }
+                try Output.json(Out(version: AgentSkill.version, targets: rows.map {
+                    Row(agent: $0.0.id, file: $0.0.file.path, detected: $0.0.detected, state: "\($0.1)")
+                }))
+                return
+            }
+            for (t, s) in rows {
+                let text = switch s {
+                case .installed: "installed"
+                case .outdated: "outdated (run: machelper skill install)"
+                case .notInstalled: t.detected ? "not installed" : "not installed (agent not found)"
+                case .foreign: "a different skill named machelper exists; left alone"
+                }
+                Output.line("\(Output.pad(t.title, 12)) \(text)  \(Output.shortPath(t.file.path))")
+            }
+        }
+    }
+
+    struct Install: ParsableCommand {
+        static let configuration = CommandConfiguration(abstract: "Install or update the skill (default: every agent found).")
+        @Argument(help: "claude, codex (default: those found on this Mac).") var agents: [String] = []
+
+        func run() throws {
+            let ts = try SkillCommand.targets(agents)
+            if ts.isEmpty { Output.line("No agent found (~/.claude or ~/.codex). Name one: machelper skill install claude"); return }
+            for t in ts {
+                try AgentSkill.install(t, command: AgentCommand.command, fallback: AgentCommand.fallback)
+                Output.line("Installed for \(t.title): \(Output.shortPath(t.file.path))")
+            }
+        }
+    }
+
+    struct Uninstall: ParsableCommand {
+        static let configuration = CommandConfiguration(abstract: "Remove the skill MacHelper installed.")
+        @Argument(help: "claude, codex (default: all).") var agents: [String] = []
+
+        func run() throws {
+            let ts = agents.isEmpty ? AgentSkill.targets() : try SkillCommand.targets(agents)
+            for t in ts where AgentSkill.state(t) == .installed || AgentSkill.state(t) == .outdated {
+                try AgentSkill.uninstall(t)
+                Output.line("Removed from \(t.title)")
+            }
+        }
+    }
+}
+
+/// A blocked scan usually means macOS is showing a permission dialog for the terminal (Documents,
+/// Downloads, other apps' data…). Says so on stderr once, so a person or an agent knows what to do.
+enum ScanWatchdog {
+    static func watch(_ scanner: DiskScanner, quietSeconds: Int = 10) {
+        Thread.detachNewThread {
+            var last = scanner.progress.files + scanner.progress.directories
+            var quiet = 0
+            while true {
+                Thread.sleep(forTimeInterval: 1)
+                let now = scanner.progress.files + scanner.progress.directories
+                if now == last { quiet += 1 } else { quiet = 0; last = now }
+                if quiet == quietSeconds {
+                    Output.err("The scan has been waiting for \(quietSeconds) s. macOS may be showing a permission dialog for this terminal (for example access to Documents, Downloads or other apps' data); answer it, or give the terminal Full Disk Access in System Settings → Privacy & Security and run again.")
+                    return
+                }
+            }
         }
     }
 }

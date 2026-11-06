@@ -700,6 +700,26 @@
           }
         }
       }
+    },
+    "Trash on other drives": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他磁碟的垃圾桶"
+          }
+        }
+      }
+    },
+    "Permanently deletes the items in the Trash of connected drives. This can’t be undone.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永久刪除已連接磁碟垃圾桶裡的項目，無法復原。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

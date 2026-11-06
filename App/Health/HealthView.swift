@@ -27,6 +27,7 @@ struct HealthView: View {
                     findings(report)
                     summary(report)
                     DiskTrendCard(points: model.diskPoints, forecast: report.diskForecast, free: report.system.diskFreeBytes)
+                    SecuritySection(model: model)
                     processes(report)
                 } else if model.loading {
                     VStack(spacing: 12) {
@@ -41,6 +42,7 @@ struct HealthView: View {
             .frame(maxWidth: 1100).frame(maxWidth: .infinity)
         }
         .task(id: model.window) { await reload() }
+        .task { await model.loadSecurity() }
     }
 
     private func reload() async { await model.load(history: app.store.persistentHistory) }

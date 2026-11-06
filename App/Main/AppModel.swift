@@ -3,7 +3,7 @@ import Observation
 import SwiftUI
 
 enum AppSection: String, CaseIterable, Identifiable, Hashable {
-    case overview, monitor, health, fans, optimize, disk, uninstall, startup
+    case overview, monitor, health, fans, optimize, disk, uninstall, updates, startup
     var id: String { rawValue }
 
     var title: LocalizedStringKey {
@@ -15,6 +15,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         case .optimize: "Optimize"
         case .disk: "Disk Analysis"
         case .uninstall: "Uninstall"
+        case .updates: "App Updates"
         case .startup: "Startup Items"
         }
     }
@@ -30,6 +31,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         case .optimize: Theme.amber
         case .disk: Theme.violet
         case .uninstall: Theme.rose
+        case .updates: Theme.mint
         case .startup: Theme.orange
         }
     }
@@ -38,11 +40,11 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         ThemeStore.shared.isSimple
             ? [(LocalizedStringKey("This Mac"), simpleSections.filter { $0.isThisMac }),
                (LocalizedStringKey("Clean Up"), simpleSections.filter { !$0.isThisMac })]
-            : [("This Mac", [.overview, .monitor, .health, .fans]), ("Clean Up", [.optimize, .disk, .uninstall, .startup])]
+            : [("This Mac", [.overview, .monitor, .health, .fans]), ("Clean Up", [.optimize, .disk, .uninstall, .updates, .startup])]
     }
 
     /// Simple mode keeps the everyday tools; monitoring charts, fan curves and launch agents are advanced.
-    static let simpleSections: [AppSection] = [.overview, .health, .optimize, .disk, .uninstall]
+    static let simpleSections: [AppSection] = [.overview, .health, .optimize, .disk, .uninstall, .updates]
 
     var isThisMac: Bool { [.overview, .monitor, .health, .fans].contains(self) }
 
@@ -63,6 +65,7 @@ final class AppModel {
     let fanSwitcher = FanAutoSwitcher()
     let diskModel = DiskAnalysisModel()
     let optimizeModel = OptimizeModel()
+    let updatesModel = UpdatesModel()
     let autoCleanModel = AutoCleanModel()
     let uninstallModel = UninstallModel()
     let startupModel = StartupModel()

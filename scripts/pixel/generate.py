@@ -238,6 +238,20 @@ def icon_uninstall():
     return cv
 
 
+def icon_updates():
+    """A box with an upward arrow: apps getting a newer version."""
+    cv = Canvas(16)
+    cv.round_rect(2, 7, 13, 14, 1, 'm')
+    cv.rect(2, 7, 13, 8, 'M')
+    for y, (x0, x1) in enumerate([(7, 8), (6, 9), (5, 10), (4, 11)]):
+        cv.rect(x0, 1 + y, x1, 1 + y, 'b')
+    cv.rect(6, 5, 9, 10, 'b')
+    cv.bevel()
+    cv.rect(7, 6, 8, 9, 'B', flat=True)
+    cv.outline()
+    return cv
+
+
 def icon_startup():
     cv = Canvas(16)
     cv.fill(lambda x, y: 16 <= (x - 8) ** 2 + (y - 8.5) ** 2 <= 42 and not (y < 7 and abs(x - 8) < 2.6), 'n')
@@ -594,7 +608,7 @@ def empty_box():
 
 ICONS = {
     'px.overview': icon_overview, 'px.monitor': icon_monitor, 'px.fans': icon_fans, 'px.optimize': icon_optimize,
-    'px.disk': icon_disk, 'px.uninstall': icon_uninstall, 'px.startup': icon_startup, 'px.health': icon_health, 'px.settings': icon_settings,
+    'px.disk': icon_disk, 'px.uninstall': icon_uninstall, 'px.updates': icon_updates, 'px.startup': icon_startup, 'px.health': icon_health, 'px.settings': icon_settings,
     'px.cpu': icon_cpu, 'px.gpu': icon_gpu, 'px.memory': icon_memory, 'px.ssd': icon_ssd, 'px.network': icon_network,
     'px.temperature': icon_temperature, 'px.battery': icon_battery, 'px.power': icon_power,
 }

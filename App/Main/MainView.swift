@@ -5,6 +5,9 @@ import SwiftUI
 struct MainView: View {
     @Bindable var app: AppModel
     @Environment(\.openWindow) private var openWindow
+    @State private var offerFullDiskAccess = FullDiskAccess.shouldOfferOnboarding
+    // The agent skill question comes after the Full Disk Access one, never both at once.
+    @State private var offerAgentSkill = !FullDiskAccess.shouldOfferOnboarding && AgentSkillSetup.shouldOffer
 
     var body: some View {
         NavigationSplitView {
@@ -18,6 +21,10 @@ struct MainView: View {
         }
         .frame(minWidth: 980, minHeight: 640)
         .onAppear { app.openMainWindow = { openWindow(id: "main") } }
+        .sheet(isPresented: $offerFullDiskAccess, onDismiss: { if AgentSkillSetup.shouldOffer { offerAgentSkill = true } }) {
+            FullDiskAccessSheet()
+        }
+        .sheet(isPresented: $offerAgentSkill) { AgentSkillSheet() }
         // Switching to simple mode while on an advanced page goes back to the overview.
         .onChange(of: ThemeStore.shared.settings.mode) { if !app.section.isVisible { app.section = .overview } }
     }
@@ -37,6 +44,7 @@ struct MainView: View {
         case .optimize: OptimizeView(model: app.optimizeModel, autoClean: app.autoCleanModel)
         case .disk: DiskAnalysisView(model: app.diskModel)
         case .uninstall: UninstallView(model: app.uninstallModel)
+        case .updates: UpdatesView(model: app.updatesModel)
         case .startup: StartupView(model: app.startupModel)
         }
     }
@@ -82,8 +90,10 @@ private struct SidebarFooter: View {
         }
         .task {
             while !Task.isCancelled {
-                status = HelperClient.shared.status
-                try? await Task.sleep(for: .seconds(5))
+                // The status only changes when the user turns the Helper on or off in Settings.
+                let now = HelperClient.shared.status
+                if now != status { status = now }
+                try? await Task.sleep(for: .seconds(30))
             }
         }
     }
