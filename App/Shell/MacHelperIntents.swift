@@ -25,18 +25,13 @@ struct CheckHealthIntent: AppIntent {
 }
 
 struct FreeSpaceIntent: AppIntent {
-    static let title: LocalizedStringResource = "Get Free Space Trend"
-    static let description = IntentDescription("Returns free space on the startup disk and, when there’s enough hourly history, how fast it’s shrinking.")
+    static let title: LocalizedStringResource = "Get Free Space"
+    static let description = IntentDescription("Returns free space on the startup disk.")
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
         guard let now = DiskSpaceReader.current() else { throw IntentError.message(String(localized: "The startup disk’s free space couldn’t be read.")) }
         let free = ByteCountFormatter.string(fromByteCount: Int64(now.free), countStyle: .file)
-        var text = String(localized: "\(free) free.")
-        let points = (try? MetricsHistory(readOnly: true).diskSpace(since: Date().addingTimeInterval(-14 * 86_400))) ?? []
-        if let f = DiskSpaceForecast.compute(points), let days = f.daysUntilFull {
-            let perDay = ByteCountFormatter.string(fromByteCount: Int64(-f.bytesPerDay), countStyle: .file)
-            text += " " + String(localized: "Shrinking by about \(perDay) a day; full in about \(Int(days.rounded())) days at this rate.")
-        }
+        let text = String(localized: "\(free) free.")
         return .result(value: text, dialog: IntentDialog(stringLiteral: text))
     }
 }
@@ -99,7 +94,7 @@ struct MacHelperShortcuts: AppShortcutsProvider {
         AppShortcut(intent: CheckHealthIntent(), phrases: ["Check my Mac with \(.applicationName)", "\(.applicationName) health check"],
                     shortTitle: "Check Mac Health", systemImageName: "heart.text.square")
         AppShortcut(intent: FreeSpaceIntent(), phrases: ["How much space is free in \(.applicationName)"],
-                    shortTitle: "Free Space Trend", systemImageName: "internaldrive")
+                    shortTitle: "Free Space", systemImageName: "internaldrive")
         AppShortcut(intent: PreviewCleanupIntent(), phrases: ["Preview cleanup in \(.applicationName)"],
                     shortTitle: "Preview Cleanup", systemImageName: "sparkles")
         AppShortcut(intent: RunCleanupIntent(), phrases: ["Clean up with \(.applicationName)"],

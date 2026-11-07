@@ -90,7 +90,7 @@ struct DiskAnalysisView: View {
         switch model.phase {
         case .idle where model.root == nil:
             PixelEmptyState(art: "px.empty.scan", title: "Disk Analysis",
-                            message: "Choose a location to analyze, then click Scan. Scanning only reads; it never changes any files.") {
+                            message: "Choose a location to analyze, then click Scan.") {
                 Button("Scan \(model.target.title)") { model.scan() }.buttonStyle(.borderedProminent).controlSize(.large)
             }
         case .scanning:
@@ -223,7 +223,7 @@ struct DiskAnalysisView: View {
         if model.progress.protectedDirectories > 0 {
             HStack {
                 Image(systemName: "lock.shield").foregroundStyle(Palette.textMuted)
-                Text("\(model.progress.protectedDirectories) system folders are protected by macOS and weren’t measured. This is normal.")
+                Text("\(model.progress.protectedDirectories) system folders are protected by macOS and weren’t measured.")
                     .foregroundStyle(Palette.textMuted)
                 Button("Show") { showProtected = true }.buttonStyle(.link)
                     .popover(isPresented: $showProtected, arrowEdge: .bottom) { ProtectedFoldersList(paths: model.unreadableFolders(.protectedBySystem)) }
@@ -305,7 +305,7 @@ struct DiskAnalysisView: View {
                             isPresented: $confirmTrash) {
             Button("Move to Trash", role: .destructive) { Task { await model.trashCollector() } }
         } message: {
-            Text("Items go to the Trash and can be restored from there. System and important personal folders are protected and never removed.")
+            Text("Items go to the Trash and can be restored from there.")
         }
     }
 }

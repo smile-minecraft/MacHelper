@@ -27,7 +27,7 @@ struct SecuritySection: View {
                     }
                 }
                 .card(padding: 0)
-                Text("MacHelper only reads these settings; it never changes them. Buttons open the matching page in System Settings.")
+                Text("Buttons open the matching page in System Settings.")
                     .font(.mhCaption).foregroundStyle(Palette.textFaint)
             } else {
                 ProgressView().controlSize(.small)

@@ -42,7 +42,7 @@ struct AgentSkillSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Let your AI agents use MacHelper").font(.mhTitle2).foregroundStyle(Palette.text)
-            Text("MacHelper can add a skill to the coding agents on this Mac. With it, you can ask the agent things like “free up some space” or “why is my Mac hot?”, and it runs MacHelper’s command-line tool to check. It always shows you what it would remove and asks before removing anything.")
+            Text("MacHelper can add a skill to the coding agents on this Mac. With it, you can ask the agent things like “free up some space” or “why is my Mac hot?”, and it runs MacHelper’s command-line tool to check.")
                 .font(.mhCallout).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
             VStack(alignment: .leading, spacing: 6) {
                 ForEach(AgentSkillSetup.detectedTargets) { t in
@@ -110,7 +110,7 @@ struct AgentSkillRow: View {
             }
         }
         if let error { Text(error).settingsCaption(Theme.rose) }
-        Text("Lets Claude Code or Codex check and clean up this Mac through the machelper command. It previews first and asks before removing anything.")
+        Text("Lets Claude Code or Codex check and clean up this Mac through the machelper command.")
             .settingsCaption()
             .onAppear(perform: reload)
     }

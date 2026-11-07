@@ -2381,36 +2381,36 @@
         }
       }
     },
-    "Choose a location to analyze, then click Scan. Scanning only reads; it never changes any files.": {
+    "Choose a location to analyze, then click Scan.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Elige una ubicación y haz clic en Escanear. El escaneo solo lee; nunca cambia ningún archivo."
+            "value": "Elige una ubicación y haz clic en Escanear."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "分析する場所を選んで「スキャン」をクリックします。スキャンは読み取るだけで、ファイルは一切変更しません。"
+            "value": "分析する場所を選んで「スキャン」をクリックします。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "분석할 위치를 선택한 다음 스캔을 클릭하십시오. 스캔은 읽기만 하며 파일을 변경하지 않습니다."
+            "value": "분석할 위치를 선택한 다음 스캔을 클릭하십시오."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "选择要分析的位置，然后点按「扫描」。扫描只会读取，不会修改任何文件。"
+            "value": "选择要分析的位置，然后点按「扫描」。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "選擇要分析的位置，然後按「掃描」。掃描只會讀取，不會修改任何檔案。"
+            "value": "選擇要分析的位置，然後按「掃描」。"
           }
         }
       }
@@ -4557,40 +4557,6 @@
         }
       }
     },
-    "Every item is recorded in the operation log so you can review it later.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cada elemento queda en el registro de operaciones para que puedas revisarlo después."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "すべての項目は操作ログに記録されるので、あとで確認できます。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "모든 항목이 작업 기록에 남아 나중에 확인할 수 있습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每一项都会记录在操作日志里，之后可以查看。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每一項都會記錄在操作紀錄裡，之後可以查看。"
-          }
-        }
-      }
-    },
     "Everything looks good": {
       "localizations": {
         "es": {
@@ -6087,36 +6053,36 @@
         }
       }
     },
-    "Items go to the Trash and can be restored from there. System and important personal folders are protected and never removed.": {
+    "Items go to the Trash and can be restored from there.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los elementos van a la Papelera y se pueden recuperar desde allí. Las carpetas del sistema y las carpetas personales importantes están protegidas y nunca se eliminan."
+            "value": "Los elementos van a la Papelera y se pueden recuperar desde allí."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "項目はゴミ箱に入り、そこから戻せます。システムや大切な個人用フォルダは保護されており、削除されることはありません。"
+            "value": "項目はゴミ箱に入り、そこから戻せます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "항목은 휴지통으로 이동하며 휴지통에서 복원할 수 있습니다. 시스템 폴더와 중요한 개인 폴더는 보호되어 절대 제거되지 않습니다."
+            "value": "항목은 휴지통으로 이동하며 휴지통에서 복원할 수 있습니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "项目会移到废纸篓，可以从废纸篓恢复。系统文件夹与重要的个人文件夹受保护，不会被移除。"
+            "value": "项目会移到废纸篓，可以从废纸篓恢复。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "項目會移到垃圾桶，可以從垃圾桶復原。系統與個人重要資料夾受保護，不會被移除。"
+            "value": "項目會移到垃圾桶，可以從垃圾桶復原。"
           }
         }
       }
@@ -7719,36 +7685,36 @@
         }
       }
     },
-    "Move to the Trash: %@. Anything removed by mistake can be restored from the Trash.": {
+    "Move to the Trash: %@.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mover a la Papelera: %@. Lo que elimines por error se puede recuperar desde la Papelera."
+            "value": "Mover a la Papelera: %@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ゴミ箱に入れる: %@。誤って削除したものはゴミ箱から戻せます。"
+            "value": "ゴミ箱に入れる: %@。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "휴지통으로 이동: %@. 실수로 제거한 항목은 휴지통에서 복원할 수 있습니다."
+            "value": "휴지통으로 이동: %@."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "移到废纸篓：%@。误删的项目可以从废纸篓找回。"
+            "value": "移到废纸篓：%@。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "移到垃圾桶：%@，刪錯了可以從垃圾桶拿回來。"
+            "value": "移到垃圾桶：%@。"
           }
         }
       }
@@ -10983,36 +10949,36 @@
         }
       }
     },
-    "Scan first to list what can be cleaned. Nothing is cleaned until you’ve reviewed and checked it; by default items go to the Trash and can be restored.": {
+    "Scan first to list what can be cleaned.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Escanea primero para ver qué se puede limpiar. No se limpia nada hasta que lo revises y lo marques; de forma predeterminada los elementos van a la Papelera y se pueden recuperar."
+            "value": "Escanea primero para ver qué se puede limpiar."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "まずスキャンして、クリーンできるものを一覧にします。確認してチェックを入れるまで何もクリーンされません。デフォルトでは項目はゴミ箱に入り、元に戻せます。"
+            "value": "まずスキャンして、クリーンできるものを一覧にします。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "먼저 스캔하여 정리할 수 있는 항목을 확인하십시오. 검토하고 체크하기 전에는 아무것도 정리되지 않으며, 기본적으로 항목은 휴지통으로 이동해 복원할 수 있습니다."
+            "value": "먼저 스캔하여 정리할 수 있는 항목을 확인하십시오."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "先扫描并列出可清理的项目。你查看并勾选后才会清理；默认移到废纸篓，可以恢复。"
+            "value": "先扫描并列出可清理的项目。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "先掃描並列出可清理的項目。你看過、勾選之後才會清理；預設移到垃圾桶，可以復原。"
+            "value": "先掃描並列出可清理的項目。"
           }
         }
       }
@@ -12717,36 +12683,36 @@
         }
       }
     },
-    "The macOS firmware controls the fans based on temperature. This is the safest setting.": {
+    "The macOS firmware controls the fans based on temperature.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El firmware de macOS controla los ventiladores según la temperatura. Es el ajuste más seguro."
+            "value": "El firmware de macOS controla los ventiladores según la temperatura."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "macOS のファームウェアが温度に応じてファンを制御します。最も安全な設定です。"
+            "value": "macOS のファームウェアが温度に応じてファンを制御します。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "macOS 펌웨어가 온도에 따라 팬을 제어합니다. 가장 안전한 설정입니다."
+            "value": "macOS 펌웨어가 온도에 따라 팬을 제어합니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "由 macOS 固件根据温度自动控制风扇。这是最安全的设置。"
+            "value": "由 macOS 固件根据温度自动控制风扇。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "由 macOS 韌體依溫度自行控制風扇。這是最安全的設定。"
+            "value": "由 macOS 韌體依溫度自行控制風扇。"
           }
         }
       }
@@ -12819,36 +12785,36 @@
         }
       }
     },
-    "These items are named after a bundle ID whose app can no longer be found; for background items, the program they start no longer exists. This is a guess: review each item before checking it. Nothing is checked by default.": {
+    "These items are named after a bundle ID whose app can no longer be found; for background items, the program they start no longer exists. Nothing is checked by default.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Estos elementos llevan el nombre de un ID de paquete cuya app ya no se encuentra; en los ítems en segundo plano, el programa que abren ya no existe. Es una suposición: revisa cada elemento antes de marcarlo. No hay nada marcado de forma predeterminada."
+            "value": "Estos elementos llevan el nombre de un ID de paquete cuya app ya no se encuentra; en los ítems en segundo plano, el programa que abren ya no existe. No hay nada marcado de forma predeterminada."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "これらの項目は、App が見つからなくなったバンドル ID の名前が付いています。バックグラウンド項目の場合は、起動するプログラムがもう存在しません。推測にすぎないため、チェックを入れる前に一つずつ確認してください。デフォルトでは何もチェックされていません。"
+            "value": "これらの項目は、App が見つからなくなったバンドル ID の名前が付いています。バックグラウンド項目の場合は、起動するプログラムがもう存在しません。デフォルトでは何もチェックされていません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "이 항목들은 더 이상 찾을 수 없는 앱의 번들 ID 이름을 가지고 있으며, 백그라운드 항목은 실행할 프로그램이 더 이상 없습니다. 추정이므로 체크하기 전에 각 항목을 검토하십시오. 기본적으로 아무것도 체크되지 않습니다."
+            "value": "이 항목들은 더 이상 찾을 수 없는 앱의 번들 ID 이름을 가지고 있으며, 백그라운드 항목은 실행할 프로그램이 더 이상 없습니다. 기본적으로 아무것도 체크되지 않습니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这些项目以 bundle ID 命名，但对应的 App 已经找不到；后台项目则是它要启动的程序已不存在。这只是推测，请逐项确认后再勾选，默认全部不勾选。"
+            "value": "这些项目以 bundle ID 命名，但对应的 App 已经找不到；后台项目则是它要启动的程序已不存在。默认全部不勾选。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "這些項目以 bundle ID 命名，但對應的 App 已經找不到；背景啟動項目則是它要啟動的程式已不存在。這是推測，請逐項確認後再勾選，預設全部不勾。"
+            "value": "這些項目以 bundle ID 命名，但對應的 App 已經找不到；背景啟動項目則是它要啟動的程式已不存在。預設全部不勾。"
           }
         }
       }
@@ -14787,40 +14753,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "成功"
-          }
-        }
-      }
-    },
-    "This page only reads the log. It never removes anything.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esta página solo lee el registro. Nunca elimina nada."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このページはログを読むだけで、何も削除しません。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "이 페이지는 기록을 읽기만 하며 아무것도 제거하지 않습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "此页面只读取日志，不会移除任何项目。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "這個頁面只讀取紀錄，不會移除任何項目。"
           }
         }
       }
@@ -18225,40 +18157,6 @@
         }
       }
     },
-    "Clearing all build cache or unused images can reclaim more than Docker’s estimate; volumes are never removed here.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Borrar toda la caché de compilación o las imágenes sin usar puede recuperar más de lo que estima Docker; los volúmenes nunca se eliminan aquí."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "すべてのビルドキャッシュや未使用のイメージを消去すると、Docker の見積もりより多く解放できることがあります。ボリュームはここでは削除されません。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "모든 빌드 캐시나 사용하지 않는 이미지를 지우면 Docker 추정치보다 더 많이 확보할 수 있습니다. 볼륨은 여기서 제거되지 않습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "清除全部构建缓存或未使用的镜像，可回收的空间可能比 Docker 估计的多；这里不会移除任何数据卷。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "清除全部建置快取或未使用的映像，可回收的空間可能比 Docker 的估計多；這裡不會移除任何資料卷。"
-          }
-        }
-      }
-    },
     "Docker is installed but its engine isn’t running. Start Docker Desktop or OrbStack, then rescan.": {
       "localizations": {
         "es": {
@@ -19099,36 +18997,36 @@
         }
       }
     },
-    "Free Space Trend": {
+    "Free Space": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tendencia del espacio libre"
+            "value": "Espacio libre"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "空き容量の推移"
+            "value": "空き容量"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "여유 공간 추세"
+            "value": "여유 공간"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "可用空间趋势"
+            "value": "可用空间"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "可用空間趨勢"
+            "value": "可用空間"
           }
         }
       }
@@ -19201,70 +19099,36 @@
         }
       }
     },
-    "Get Free Space Trend": {
+    "Get Free Space": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Obtener tendencia del espacio libre"
+            "value": "Obtener espacio libre"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "空き容量の推移を取得"
+            "value": "空き容量を取得"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "여유 공간 추세 가져오기"
+            "value": "여유 공간 가져오기"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "获取可用空间趋势"
+            "value": "获取可用空间"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "取得可用空間趨勢"
-          }
-        }
-      }
-    },
-    "Growing by about %@ a day.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aumenta unos %@ al día."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 日あたり約 %@ 増えています。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "하루에 약 %@씩 늘고 있습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每天约增加 %@。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每天約增加 %@。"
+            "value": "取得可用空間"
           }
         }
       }
@@ -19473,36 +19337,36 @@
         }
       }
     },
-    "MacHelper records free space once an hour while it or background recording runs. The trend appears after about 12 hours.": {
+    "MacHelper records free space once an hour while it or background recording runs. The chart appears after a few hours.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper registra el espacio libre una vez por hora mientras está abierto o funciona el registro en segundo plano. La tendencia aparece tras unas 12 horas."
+            "value": "MacHelper registra el espacio libre una vez por hora mientras está abierto o la grabación en segundo plano está activa. El gráfico aparece al cabo de unas horas."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper かバックグラウンド記録が動いている間、空き容量を 1 時間に 1 回記録します。推移は約 12 時間後に表示されます。"
+            "value": "MacHelper は、起動中またはバックグラウンド記録の実行中に 1 時間ごとに空き容量を記録します。グラフは数時間後に表示されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 또는 백그라운드 기록이 실행되는 동안 여유 공간을 1시간에 한 번 기록합니다. 추세는 약 12시간 후에 나타납니다."
+            "value": "MacHelper는 실행 중이거나 백그라운드 기록이 켜져 있을 때 한 시간마다 여유 공간을 기록합니다. 몇 시간 후에 차트가 나타납니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 或后台记录运行时，每小时记录一次可用空间；大约 12 小时后会显示趋势。"
+            "value": "MacHelper 运行时或后台记录开启时，每小时记录一次可用空间。几个小时后就会显示图表。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 或背景記錄執行時，每小時記錄一次可用空間；大約 12 小時後會出現趨勢。"
+            "value": "MacHelper 執行時或背景記錄開啟時，每小時記錄一次可用空間。幾個小時後就會顯示圖表。"
           }
         }
       }
@@ -19605,40 +19469,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "未允許"
-          }
-        }
-      }
-    },
-    "Not enough data since the last big change for a trend yet (needs about 12 hours).": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Todavía no hay datos suficientes desde el último cambio grande para calcular una tendencia (hacen falta unas 12 horas)."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "前回の大きな変化以降のデータが少ないため、まだ推移を出せません（約 12 時間必要です）。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "마지막 큰 변화 이후 데이터가 부족해 아직 추세를 낼 수 없습니다(약 12시간 필요)."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "距离上次大幅变化的数据还不足以计算趋势（约需 12 小时）。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "上次大幅變動後的資料還不夠算出趨勢（約需 12 小時）。"
           }
         }
       }
@@ -19915,36 +19745,36 @@
         }
       }
     },
-    "Returns free space on the startup disk and, when there’s enough hourly history, how fast it’s shrinking.": {
+    "Returns free space on the startup disk.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Devuelve el espacio libre del disco de arranque y, si hay suficiente historial por horas, a qué ritmo disminuye."
+            "value": "Devuelve el espacio libre del disco de arranque."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "起動ディスクの空き容量と、1 時間ごとの履歴が十分にある場合はその減り方を返します。"
+            "value": "起動ディスクの空き容量を返します。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "시동 디스크의 여유 공간과, 시간별 기록이 충분하면 줄어드는 속도를 반환합니다."
+            "value": "시동 디스크의 여유 공간을 반환합니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "返回启动磁盘的可用空间；如果有足够的每小时记录，也会返回减少的速度。"
+            "value": "返回启动磁盘的可用空间。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "回傳啟動磁碟的可用空間；每小時紀錄足夠時，也會回傳減少的速度。"
+            "value": "回傳啟動磁碟的可用空間。"
           }
         }
       }
@@ -20153,74 +19983,6 @@
         }
       }
     },
-    "Shrinking by about %@ a day; full in about %lld days at this rate.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Disminuye unos %@ al día; a este ritmo se llenará en unos %lld días."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 日あたり約 %@ 減っています。このペースだと約 %lld 日でいっぱいになります。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "하루에 약 %@씩 줄고 있으며, 이 속도라면 약 %lld일 후 가득 찹니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每天约减少 %1$@；按这个速度，大约 %2$lld 天后会满。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每天約減少 %1$@；照這個速度，約 %2$lld 天後會滿。"
-          }
-        }
-      }
-    },
-    "Stable: changing by less than 50 MB a day.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Estable: cambia menos de 50 MB al día."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "安定: 1 日の変化は 50 MB 未満です。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "안정적: 하루 변화량이 50 MB 미만입니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "稳定：每天变化不到 50 MB。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "穩定：每天變化不到 50 MB。"
-          }
-        }
-      }
-    },
     "The history database couldn’t be opened.": {
       "localizations": {
         "es": {
@@ -20425,36 +20187,36 @@
         }
       }
     },
-    "What each rule, detector or task removed in the records shown, largest first. Rules that never appear here may not be worth selecting.": {
+    "What each rule, detector or task removed in the records shown, largest first.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lo que eliminó cada regla, detector o tarea en los registros mostrados, de mayor a menor. Las reglas que nunca aparecen aquí quizá no valga la pena seleccionarlas."
+            "value": "Lo que eliminó cada regla, detector o tarea en los registros mostrados, de mayor a menor."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "表示中の記録で各ルール、検出器、作業が削除した量を大きい順に示します。ここに一度も出てこないルールは、選ぶ価値がないかもしれません。"
+            "value": "表示中の記録で各ルール、検出器、作業が削除した量を大きい順に示します。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "표시된 기록에서 각 규칙, 감지기, 작업이 제거한 양을 큰 순서로 보여 줍니다. 여기에 한 번도 나오지 않는 규칙은 선택할 필요가 없을 수 있습니다."
+            "value": "표시된 기록에서 각 규칙, 감지기, 작업이 제거한 양을 큰 순서로 보여 줍니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "当前显示的记录中，每条规则、检测器或任务移除了多少，从大到小排列。从未出现在这里的规则，可能不值得勾选。"
+            "value": "当前显示的记录中，每条规则、检测器或任务移除了多少，从大到小排列。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "目前顯示的紀錄中，每條規則、偵測器或工作移除了多少，由大到小排列。從沒出現在這裡的規則，可能不值得勾選。"
+            "value": "目前顯示的紀錄中，每條規則、偵測器或工作移除了多少，由大到小排列。"
           }
         }
       }
@@ -20867,36 +20629,36 @@
         }
       }
     },
-    "This is only a preview; nothing is deleted until you click Clean. Low-risk items are deleted directly, medium and high risk go to the Trash.": {
+    "Low-risk items are deleted directly, medium and high risk go to the Trash.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esto es solo una vista previa; no se elimina nada hasta que hagas clic en Limpiar. Los elementos de riesgo bajo se eliminan directamente; los de riesgo medio y alto van a la Papelera."
+            "value": "Los elementos de riesgo bajo se eliminan directamente; los de riesgo medio y alto van a la Papelera."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "これはプレビューです。「クリーン」をクリックするまで何も削除されません。低リスクの項目は直接削除し、中・高リスクの項目はゴミ箱に入れます。"
+            "value": "低リスクの項目は直接削除し、中・高リスクの項目はゴミ箱に入れます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "미리 보기일 뿐이며 정리를 클릭하기 전에는 아무것도 삭제되지 않습니다. 낮은 위험 항목은 바로 삭제되고 중간 및 높은 위험 항목은 휴지통으로 이동합니다."
+            "value": "낮은 위험 항목은 바로 삭제되고 중간 및 높은 위험 항목은 휴지통으로 이동합니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这只是预览，点按「清理」前不会删除任何东西。低风险项目会直接删除，中、高风险项目会移到废纸篓。"
+            "value": "低风险项目会直接删除，中、高风险项目会移到废纸篓。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "這只是預覽，按下「清理」前不會刪除任何東西。低風險項目會直接刪除，中、高風險項目移到垃圾桶。"
+            "value": "低風險項目會直接刪除，中、高風險項目移到垃圾桶。"
           }
         }
       }
@@ -26171,36 +25933,36 @@
         }
       }
     },
-    "Editing a built-in theme saves your changes as a new copy, so the original stays. Imported VS Code themes keep their colors; only colors are read from the file.": {
+    "Editing a built-in theme saves your changes as a new copy, so the original stays. Imported VS Code themes keep their colors.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Al editar un tema integrado, los cambios se guardan como una copia nueva y el original se conserva. Los temas de VS Code importados mantienen sus colores; del archivo solo se leen los colores."
+            "value": "Al editar un tema integrado, los cambios se guardan como una copia nueva y el original se conserva. Los temas de VS Code importados mantienen sus colores."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "内蔵のテーマを編集すると、変更は新しいコピーとして保存され、元のテーマはそのまま残ります。読み込んだ VS Code のテーマは色を保ちます。ファイルから読み取るのは色だけです。"
+            "value": "内蔵のテーマを編集すると、変更は新しいコピーとして保存され、元のテーマはそのまま残ります。読み込んだ VS Code のテーマは色を保ちます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "내장 테마를 편집하면 변경 사항이 새 사본으로 저장되어 원본은 그대로 남습니다. 가져온 VS Code 테마는 색상을 유지하며 파일에서는 색상만 읽습니다."
+            "value": "내장 테마를 편집하면 변경 사항이 새 사본으로 저장되어 원본은 그대로 남습니다. 가져온 VS Code 테마는 색상을 유지합니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "编辑内置主题时，修改会另存为副本，原主题不会改变。导入的 VS Code 主题保留原来的颜色；只会读取文件中的颜色。"
+            "value": "编辑内置主题时，修改会另存为副本，原主题不会改变。导入的 VS Code 主题保留原来的颜色。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "編輯內建主題時，修改會另存成一份副本，原本的主題不會變。匯入的 VS Code 主題保留原本的顏色；只會讀取檔案裡的顏色。"
+            "value": "編輯內建主題時，修改會另存成一份副本，原本的主題不會變。匯入的 VS Code 主題保留原本的顏色。"
           }
         }
       }
@@ -27697,108 +27459,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "可用空間"
-          }
-        }
-      }
-    },
-    "Free space hasn’t been shrinking lately.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El espacio libre no ha disminuido últimamente."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最近は空き容量が減っていません。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "최근 여유 공간이 줄어들지 않았습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用空间最近没有减少。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用空間最近沒有減少。"
-          }
-        }
-      }
-    },
-    "Free space shrinks by about %@ a day; at this pace the disk is full in about %lld days.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El espacio libre disminuye unos %@ al día; a este ritmo el disco se llenará en unos %lld días."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "空き容量は 1 日あたり約 %@ 減っています。このペースだと約 %lld 日でディスクがいっぱいになります。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "여유 공간이 하루에 약 %@씩 줄고 있으며, 이 속도라면 약 %lld일 후 디스크가 가득 찹니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用空间每天约减少 %1$@，按这个速度大约 %2$lld 天后会用完。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用空間每天約少 %1$@，照這速度大約 %2$lld 天後會用完。"
-          }
-        }
-      }
-    },
-    "Free space shrinks slowly, about %@ a day.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El espacio libre disminuye despacio, unos %@ al día."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "空き容量はゆっくり減っています（1 日あたり約 %@）。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "여유 공간이 천천히 줄고 있습니다(하루 약 %@)."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用空间缓慢减少，每天约 %@。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用空間緩慢減少，每天約 %@。"
           }
         }
       }
@@ -30523,40 +30183,6 @@
         }
       }
     },
-    "MacHelper only reads these folders to show you what can be cleaned. Nothing is removed without your confirmation.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MacHelper solo lee estas carpetas para mostrarte qué se puede limpiar. No se elimina nada sin tu confirmación."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MacHelper がこれらのフォルダを読むのは、クリーンできるものを表示するためだけです。確認なしに削除することはありません。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MacHelper는 정리할 수 있는 항목을 보여 주기 위해서만 이 폴더를 읽습니다. 확인 없이 아무것도 제거하지 않습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MacHelper 只会读取这些文件夹来列出可清理的项目；未经你确认，不会删除任何东西。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MacHelper 只會讀取這些資料夾，列出可以清理的項目；沒有你的確認，什麼都不會刪除。"
-          }
-        }
-      }
-    },
     "Not Now": {
       "localizations": {
         "es": {
@@ -31713,36 +31339,36 @@
         }
       }
     },
-    "MacHelper only reads these settings; it never changes them. Buttons open the matching page in System Settings.": {
+    "Buttons open the matching page in System Settings.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper solo lee estos ajustes; nunca los cambia. Los botones abren la página correspondiente de Ajustes del Sistema."
+            "value": "Los botones abren la página correspondiente de Ajustes del Sistema."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper はこれらの設定を読み取るだけで、変更はしません。ボタンを押すと「システム設定」の該当ページが開きます。"
+            "value": "ボタンを押すと「システム設定」の該当ページが開きます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper는 이 설정을 읽기만 하며 변경하지 않습니다. 버튼을 누르면 시스템 설정의 해당 페이지가 열립니다."
+            "value": "버튼을 누르면 시스템 설정의 해당 페이지가 열립니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 只会读取这些设置，不会修改。按钮会打开「系统设置」中对应的页面。"
+            "value": "按钮会打开「系统设置」中对应的页面。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 只會讀取這些設定，不會修改。按鈕會打開系統設定中對應的頁面。"
+            "value": "按鈕會打開系統設定中對應的頁面。"
           }
         }
       }
@@ -33345,36 +32971,36 @@
         }
       }
     },
-    "MacHelper can add a skill to the coding agents on this Mac. With it, you can ask the agent things like “free up some space” or “why is my Mac hot?”, and it runs MacHelper’s command-line tool to check. It always shows you what it would remove and asks before removing anything.": {
+    "MacHelper can add a skill to the coding agents on this Mac. With it, you can ask the agent things like “free up some space” or “why is my Mac hot?”, and it runs MacHelper’s command-line tool to check.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper puede añadir una skill a los agentes de programación de este Mac. Con ella puedes pedirle al agente cosas como «libera espacio» o «¿por qué se calienta mi Mac?», y usará la herramienta de línea de comandos de MacHelper para comprobarlo. Siempre te muestra lo que eliminaría y pregunta antes de eliminar nada."
+            "value": "MacHelper puede añadir una skill a los agentes de programación de este Mac. Con ella puedes pedirle al agente cosas como «libera espacio» o «¿por qué se calienta mi Mac?», y usará la herramienta de línea de comandos de MacHelper para comprobarlo."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper は、この Mac のコーディングエージェントにスキルを追加できます。追加すると、エージェントに「容量を空けて」「Mac が熱いのはなぜ？」のように頼むだけで、MacHelper のコマンドラインツールを使って調べてくれます。削除するものは必ず先に見せ、削除する前に確認します。"
+            "value": "MacHelper は、この Mac のコーディングエージェントにスキルを追加できます。追加すると、エージェントに「容量を空けて」「Mac が熱いのはなぜ？」のように頼むだけで、MacHelper のコマンドラインツールを使って調べてくれます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper는 이 Mac의 코딩 에이전트에 스킬을 추가할 수 있습니다. 추가하면 에이전트에게 ‘공간 좀 확보해 줘’나 ‘Mac이 왜 뜨거워?’처럼 물어보면 MacHelper 명령줄 도구로 확인합니다. 제거할 항목은 항상 먼저 보여 주고 제거하기 전에 묻습니다."
+            "value": "MacHelper는 이 Mac의 코딩 에이전트에 스킬을 추가할 수 있습니다. 추가하면 에이전트에게 ‘공간 좀 확보해 줘’나 ‘Mac이 왜 뜨거워?’처럼 물어보면 MacHelper 명령줄 도구로 확인합니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 可以为这台 Mac 上的编程 Agent 添加一个 Skill。安装后，你可以直接让 Agent「帮我腾出一些空间」或问它「为什么 Mac 这么烫？」，它会用 MacHelper 的命令行工具检查。删除任何东西之前，它都会先列出内容并询问你。"
+            "value": "MacHelper 可以为这台 Mac 上的编程 Agent 添加一个 Skill。安装后，你可以直接让 Agent「帮我腾出一些空间」或问它「为什么 Mac 这么烫？」，它会用 MacHelper 的命令行工具检查。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "MacHelper 可以替這台 Mac 上的程式碼 Agent 加入一個 Skill。裝好之後，你可以直接問 Agent「幫我清出一些空間」或「為什麼 Mac 這麼燙？」，它會用 MacHelper 的命令列工具檢查。要刪除任何東西前，它都會先列出內容並詢問你。"
+            "value": "MacHelper 可以替這台 Mac 上的程式碼 Agent 加入一個 Skill。裝好之後，你可以直接問 Agent「幫我清出一些空間」或「為什麼 Mac 這麼燙？」，它會用 MacHelper 的命令列工具檢查。"
           }
         }
       }
@@ -33617,36 +33243,36 @@
         }
       }
     },
-    "Lets Claude Code or Codex check and clean up this Mac through the machelper command. It previews first and asks before removing anything.": {
+    "Lets Claude Code or Codex check and clean up this Mac through the machelper command.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Permite que Claude Code o Codex revisen y limpien este Mac con el comando machelper. Primero muestra una vista previa y pregunta antes de eliminar nada."
+            "value": "Permite que Claude Code o Codex revisen y limpien este Mac con el comando machelper."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Claude Code や Codex が machelper コマンドでこの Mac をチェックしてクリーンできるようにします。まずプレビューし、削除する前に確認します。"
+            "value": "Claude Code や Codex が machelper コマンドでこの Mac をチェックしてクリーンできるようにします。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Claude Code나 Codex가 machelper 명령으로 이 Mac을 확인하고 정리할 수 있게 합니다. 먼저 미리 보고 제거하기 전에 묻습니다."
+            "value": "Claude Code나 Codex가 machelper 명령으로 이 Mac을 확인하고 정리할 수 있게 합니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "让 Claude Code 或 Codex 通过 machelper 命令检查并清理这台 Mac。它会先预览，删除任何东西前都会询问。"
+            "value": "让 Claude Code 或 Codex 通过 machelper 命令检查并清理这台 Mac。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "讓 Claude Code 或 Codex 透過 machelper 指令檢查並清理這台 Mac。它會先預覽，刪除任何東西前都會詢問。"
+            "value": "讓 Claude Code 或 Codex 透過 machelper 指令檢查並清理這台 Mac。"
           }
         }
       }
@@ -33685,36 +33311,36 @@
         }
       }
     },
-    "%lld system folders are protected by macOS and weren’t measured. This is normal.": {
+    "%lld system folders are protected by macOS and weren’t measured.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld carpetas del sistema están protegidas por macOS y no se midieron. Es normal."
+            "value": "%lld carpetas del sistema están protegidas por macOS y no se midieron."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld 個のシステムフォルダは macOS に保護されているため測定していません。これは正常です。"
+            "value": "%lld 個のシステムフォルダは macOS に保護されているため測定していません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "시스템 폴더 %lld개는 macOS가 보호하고 있어 측정하지 않았습니다. 정상입니다."
+            "value": "시스템 폴더 %lld개는 macOS가 보호하고 있어 측정하지 않았습니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld 个系统文件夹受 macOS 保护，没有计算在内，这是正常的。"
+            "value": "%lld 个系统文件夹受 macOS 保护，没有计算在内。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld 個系統資料夾受 macOS 保護，沒有計算在內，這是正常的。"
+            "value": "%lld 個系統資料夾受 macOS 保護，沒有計算在內。"
           }
         }
       }
@@ -33885,40 +33511,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "目前沒有扣分的項目。"
-          }
-        }
-      }
-    },
-    "Based on the state right now and the last 24 hours. Security settings are rated on their own below.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se calcula con el estado actual y las últimas 24 horas. Los ajustes de seguridad se valoran aparte más abajo."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "現在の状態と直近 24 時間をもとに計算しています。セキュリティ設定は下で別に評価します。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "현재 상태와 최근 24시간을 기준으로 계산합니다. 보안 설정은 아래에서 따로 평가합니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "根据当前状态和最近 24 小时计算。安全设置在下方单独评估。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "依據目前的狀態和最近 24 小時計算。安全性設定在下方另外評估。"
           }
         }
       }

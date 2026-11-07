@@ -53,7 +53,7 @@ struct AppearanceSettingsView: View {
                 }
                 if let message { Text(message).settingsCaption() }
             } header: { Text("Colors") } footer: {
-                Text("Editing a built-in theme saves your changes as a new copy, so the original stays. Imported VS Code themes keep their colors; only colors are read from the file.")
+                Text("Editing a built-in theme saves your changes as a new copy, so the original stays. Imported VS Code themes keep their colors.")
                     .settingsCaption()
             }
 

@@ -59,8 +59,6 @@ struct FullDiskAccessSheet: View {
                   systemImage: granted ? "checkmark.circle.fill" : "circle.dashed")
                 .font(.mhCallout.weight(.medium))
                 .foregroundStyle(granted ? Theme.mint : Palette.textMuted)
-            Text("MacHelper only reads these folders to show you what can be cleaned. Nothing is removed without your confirmation.")
-                .font(.mhCaption).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
             HStack {
                 Spacer()
                 if granted {

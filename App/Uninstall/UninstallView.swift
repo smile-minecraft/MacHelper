@@ -203,7 +203,7 @@ private struct OrphansTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("These items are named after a bundle ID whose app can no longer be found; for background items, the program they start no longer exists. This is a guess: review each item before checking it. Nothing is checked by default.")
+            Text("These items are named after a bundle ID whose app can no longer be found; for background items, the program they start no longer exists. Nothing is checked by default.")
                 .font(.mhCallout).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
                 .padding(12)
                 .background(Palette.inset, in: SurfaceShape(cornerRadius: Theme.cardRadius, style: .continuous))

@@ -8,12 +8,11 @@ import SwiftUI
 struct OverviewView: View {
     let app: AppModel
     private var store: MonitorStore { app.store }
-    @State private var diskPoints: [DiskSpacePoint] = []
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
-                Headline(store: store, app: app, diskPoints: diskPoints)
+                Headline(store: store, app: app)
                 Readouts(store: store, advanced: !ThemeStore.shared.isSimple)
                 Rectangle().fill(Palette.hairline).frame(height: 1)
                 HStack(alignment: .top, spacing: 40) {
@@ -34,10 +33,6 @@ struct OverviewView: View {
         .onAppear { store.watchProcesses(true) }
         .onDisappear { store.watchProcesses(false) }
         .task {
-            let history = store.persistentHistory
-            diskPoints = await Task.detached(priority: .utility) {
-                (try? history?.diskSpace(since: Date().addingTimeInterval(-8 * 86_400))) ?? []
-            }.value
             if !ThemeStore.shared.isSimple, app.startupModel.items.isEmpty { await app.startupModel.load() }
         }
     }
@@ -49,7 +44,6 @@ struct OverviewView: View {
 private struct Headline: View {
     let store: MonitorStore
     let app: AppModel
-    let diskPoints: [DiskSpacePoint]
 
     private struct Verdict {
         let sentence: String
@@ -84,17 +78,9 @@ private struct Headline: View {
         return Verdict(sentence: String(localized: "Your Mac runs smoothly"), value: nil, level: .good)
     }
 
-    /// The trend under the sentence: how fast free space shrinks, else how long the Mac has been up.
+    /// The line under the sentence: how long the Mac has been up.
     private var detail: String {
-        if let f = DiskSpaceForecast.compute(diskPoints) {
-            let perDay = Fmt.bytes(Int64(abs(f.bytesPerDay)))
-            if f.bytesPerDay < 0, let days = f.daysUntilFull, days < 365 {
-                return String(localized: "Free space shrinks by about \(perDay) a day; at this pace the disk is full in about \(Int(days.rounded())) days.")
-            }
-            if f.bytesPerDay < 0 { return String(localized: "Free space shrinks slowly, about \(perDay) a day.") }
-            return String(localized: "Free space hasn’t been shrinking lately.")
-        }
-        return String(localized: "Up for \(Host.uptime) without a restart.")
+        String(localized: "Up for \(Host.uptime) without a restart.")
     }
 
     /// The mascot's color is the worst of temperature, memory and free space (CPU spikes are too

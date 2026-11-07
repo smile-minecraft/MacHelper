@@ -62,8 +62,6 @@ struct OperationHistoryView: View {
             }
             Text("Sizes are recorded in the operation log; they don't measure how much disk space changed. Items moved to the Trash still use space until the Trash is emptied.")
                 .settingsCaption()
-            Text("This page only reads the log. It never removes anything.")
-                .settingsCaption(Palette.textFaint)
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
@@ -154,7 +152,7 @@ struct OperationHistoryView: View {
                     .accessibilityElement(children: .combine)
                 }
             } header: {
-                Text("What each rule, detector or task removed in the records shown, largest first. Rules that never appear here may not be worth selecting.")
+                Text("What each rule, detector or task removed in the records shown, largest first.")
                     .font(.mhCaption).foregroundStyle(Palette.textMuted).textCase(nil)
             }
         }

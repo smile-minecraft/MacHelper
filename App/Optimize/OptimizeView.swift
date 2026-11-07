@@ -41,7 +41,7 @@ struct OptimizeView: View {
 
     private var start: some View {
         PixelEmptyState(art: "px.empty.clean", title: "Optimize",
-                        message: "Scan first to list what can be cleaned. Nothing is cleaned until you’ve reviewed and checked it; by default items go to the Trash and can be restored.") {
+                        message: "Scan first to list what can be cleaned.") {
             VStack(spacing: 8) {
                 Button("Start Scan") { Task { await model.scan() } }.buttonStyle(.borderedProminent).controlSize(.large)
                 if model.scanStopped { Text("Scan stopped before any results were ready.").font(.mhCaption).foregroundStyle(Palette.textMuted) }
@@ -97,7 +97,7 @@ struct OptimizeView: View {
                     Text("\(Fmt.bytes(Int64(clamping: model.selectedBytes))) selected, \(model.selectedTaskCount) maintenance tasks")
                         .font(Theme.smallNumeral)
                         .foregroundStyle(Palette.text)
-                    Text("This is only a preview; nothing is deleted until you click Clean. Low-risk items are deleted directly, medium and high risk go to the Trash.").font(.mhCaption).foregroundStyle(Palette.textMuted)
+                    Text("Low-risk items are deleted directly, medium and high risk go to the Trash.").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
                 Spacer(minLength: 12)
                 Button("Rescan") { Task { await model.scan() } }
@@ -312,7 +312,7 @@ struct OptimizeView: View {
     private var confirmMessage: String {
         var lines: [String] = []
         if model.selectedTrashBytes > 0 {
-            lines.append(String(localized: "Move to the Trash: \(Fmt.bytes(Int64(clamping: model.selectedTrashBytes))). Anything removed by mistake can be restored from the Trash."))
+            lines.append(String(localized: "Move to the Trash: \(Fmt.bytes(Int64(clamping: model.selectedTrashBytes)))."))
         }
         let directBytes = model.selectedPermanentBytes - model.selectedEmptyTrashBytes - model.selectedSystemBytes
         if directBytes > 0 {
@@ -327,7 +327,6 @@ struct OptimizeView: View {
         if model.selectedTaskCount > 0 {
             lines.append(String(localized: "Run \(model.selectedTaskCount) maintenance tasks."))
         }
-        lines.append(String(localized: "Every item is recorded in the operation log so you can review it later."))
         return lines.joined(separator: "\n")
     }
 
@@ -684,8 +683,6 @@ private struct DockerUsageRow: View {
                     }
                 }
                 .font(.mhCaption.monospacedDigit()).foregroundStyle(Palette.textMuted)
-                Text("Clearing all build cache or unused images can reclaim more than Docker’s estimate; volumes are never removed here.")
-                    .font(.mhCaption2).foregroundStyle(Palette.textMuted)
             case .failure(.engineNotRunning):
                 Text("Docker is installed but its engine isn’t running. Start Docker Desktop or OrbStack, then rescan.")
                     .font(.mhCaption).foregroundStyle(Theme.amber)

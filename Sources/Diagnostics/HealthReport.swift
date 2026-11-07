@@ -176,11 +176,6 @@ public enum HealthCheck {
                     String(localized: "\(bytes(free)) (\(pct(share))) is free.", bundle: .module))
             }
         }
-        if let forecast, let days = forecast.daysUntilFull, days < 30 {
-            let daysText = days.formatted(.number.precision(.fractionLength(0)))
-            add("disk.trend", days < 7 ? .critical : .warning, String(localized: "Free space is shrinking", bundle: .module),
-                String(localized: "At the current rate of \(bytes(-forecast.bytesPerDay)) a day, the startup disk is full in about \(daysText) days.", bundle: .module))
-        }
         if let uptime = system.uptimeSeconds, uptime >= 14 * 86_400 {
             let days = Int(uptime / 86_400)
             add("uptime", .info, String(localized: "Not restarted for \(days) days", bundle: .module),

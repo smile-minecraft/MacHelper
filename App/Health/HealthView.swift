@@ -29,7 +29,7 @@ struct HealthView: View {
                 if let report = model.report {
                     findings(report)
                     summary(report)
-                    DiskTrendCard(points: model.diskPoints, forecast: report.diskForecast, free: report.system.diskFreeBytes)
+                    DiskTrendCard(points: model.diskPoints, free: report.system.diskFreeBytes)
                     SecuritySection(model: model)
                     processes(report)
                 } else if model.loading {
@@ -80,7 +80,7 @@ struct HealthView: View {
 
     private func action(_ id: String) -> AppSection? {
         switch id {
-        case "disk.low", "disk.trend": .optimize
+        case "disk.low": .optimize
         case "background.many": .startup
         case "cpu.busy", "cpu.process", "memory.high", "thermal.hot": .monitor
         default: nil
@@ -185,10 +185,9 @@ struct HealthView: View {
     }
 }
 
-/// Hourly free space for the last 30 days, with the trend's projection when space is shrinking.
+/// Hourly free space for the last 30 days.
 private struct DiskTrendCard: View {
     let points: [DiskSpacePoint]
-    let forecast: DiskSpaceForecast?
     let free: Double?
 
     var body: some View {
@@ -198,8 +197,10 @@ private struct DiskTrendCard: View {
                 Spacer()
                 if let free { Text(Fmt.bytes(Int64(free))).font(Theme.smallNumeral) }
             }
-            Text(caption).font(.mhCallout).foregroundStyle(Palette.textMuted)
-            if points.count >= 2 {
+            if points.count < 2 {
+                Text("MacHelper records free space once an hour while it or background recording runs. The chart appears after a few hours.")
+                    .font(.mhCallout).foregroundStyle(Palette.textMuted)
+            } else {
                 Chart {
                     ForEach(points, id: \.time) { p in
                         LineMark(x: .value("Time", p.time), y: .value("Free", p.free / 1e9))
@@ -213,21 +214,6 @@ private struct DiskTrendCard: View {
             }
         }
         .card()
-    }
-
-    private var caption: String {
-        guard let forecast else {
-            return points.count < 2
-                ? String(localized: "MacHelper records free space once an hour while it or background recording runs. The trend appears after about 12 hours.")
-                : String(localized: "Not enough data since the last big change for a trend yet (needs about 12 hours).")
-        }
-        let perDay = Fmt.bytes(Int64(abs(forecast.bytesPerDay)))
-        if let days = forecast.daysUntilFull {
-            return String(localized: "Shrinking by about \(perDay) a day; full in about \(Int(days.rounded())) days at this rate.")
-        }
-        return forecast.bytesPerDay < 0
-            ? String(localized: "Stable: changing by less than 50 MB a day.")
-            : String(localized: "Growing by about \(perDay) a day.")
     }
 }
 
@@ -253,8 +239,6 @@ private struct HealthScoreCard: View {
                         }
                     }
                 }
-                Text("Based on the state right now and the last 24 hours. Security settings are rated on their own below.")
-                    .font(.mhCaption).foregroundStyle(Palette.textMuted).padding(.top, 4)
             }
             Spacer(minLength: 0)
         }

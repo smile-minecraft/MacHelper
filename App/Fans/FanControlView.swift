@@ -90,7 +90,7 @@ struct FanControlView: View {
 
             switch model.mode {
             case .automatic:
-                Text("The macOS firmware controls the fans based on temperature. This is the safest setting.")
+                Text("The macOS firmware controls the fans based on temperature.")
                     .font(.mhCallout).foregroundStyle(Palette.textMuted)
             case .fixed:
                 VStack(alignment: .leading) {

@@ -171,40 +171,6 @@
         }
       }
     },
-    "At the current rate of %@ a day, the startup disk is full in about %@ days.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Al ritmo actual de %@ al día, el disco de arranque se llenará en unos %@ días."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今のペース（1 日あたり %1$@）だと、起動ディスクは約 %2$@ 日でいっぱいになります。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "현재 하루 %1$@씩 줄어드는 속도라면 약 %2$@일 후 시동 디스크가 가득 찹니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "按当前每天 %1$@ 的速度，启动磁盘大约 %2$@ 天后会满。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "照目前每天 %1$@ 的速度，啟動磁碟大約 %2$@ 天後會滿。"
-          }
-        }
-      }
-    },
     "CPU often fully loaded": {
       "localizations": {
         "es": {
@@ -269,40 +235,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "在已記錄的時間中，有 %@ 的分鐘 CPU 用量達 80%% 以上。"
-          }
-        }
-      }
-    },
-    "Free space is shrinking": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El espacio libre está disminuyendo"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "空き容量が減り続けています"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "여유 공간이 계속 줄고 있음"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用空间持续减少"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用空間持續減少"
           }
         }
       }
