@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// Top-level tabs: the selected one sits on a raised pill (magpie-style).
@@ -34,7 +35,7 @@ struct TabStrip<Value: Hashable>: View {
         }
         .padding(3)
         .background(Palette.inset, in: SurfaceShape(cornerRadius: 9, style: .continuous))
-        .animation(.snappy(duration: 0.2), value: selection)
+        .animation(Motion.reduced ? nil : .snappy(duration: 0.2), value: selection)
     }
 }
 
@@ -142,7 +143,7 @@ struct Meter: View {
                 }
             }
             .frame(height: 8)
-            .animation(.easeOut(duration: 0.35), value: fraction)
+            .animation(Motion.meter(0.35), value: fraction)
         }
     }
 }
@@ -273,7 +274,7 @@ struct RingGauge: View {
                                 style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                         .rotationEffect(.degrees(-90))
                         .shadow(color: color.opacity(0.35), radius: 3, y: 1.5)
-                        .animation(.easeOut(duration: 0.5), value: fraction)
+                        .animation(Motion.meter(0.5), value: fraction)
                 }
                 Text(value)
                     .font(.display(size * 0.22, weight: .bold).monospacedDigit())
@@ -298,11 +299,11 @@ struct PixelRing: View {
     var body: some View {
         ZStack {
             Circle().stroke(track, lineWidth: lineWidth)
+            // Whole steps of 1/24, drawn without easing: the ring jumps a block at a time like the bars.
             Circle()
-                .trim(from: 0, to: min(max(fraction, 0), 1))
+                .trim(from: 0, to: (min(max(fraction, 0), 1) * 24).rounded() / 24)
                 .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt))
                 .rotationEffect(.degrees(-90))
-                .animation(.easeOut(duration: 0.4), value: fraction)
         }
         .accessibilityHidden(true)
     }
@@ -409,7 +410,7 @@ struct SegmentedRing: View {
             Text(value).font(.display(size * 0.22, weight: .bold).monospacedDigit()).foregroundStyle(Palette.text)
         }
         .frame(width: size, height: size)
-        .animation(.easeOut(duration: 0.4), value: segments.map(\.0))
+        .animation(Motion.meter(0.4), value: segments.map(\.0))
     }
 
     private var ringStyle: StrokeStyle { StrokeStyle(lineWidth: lineWidth, lineCap: .butt) }
@@ -568,5 +569,15 @@ private struct HairlineGridLayout: _VariadicView_MultiViewRoot {
                 if r < rows.count - 1 { Rectangle().fill(Palette.hairline).frame(height: 1) }
             }
         }
+    }
+}
+
+/// Motion rules shared by the gauges: they glide to a new value in the standard look, jump in the
+/// pixel look (it is drawn in whole blocks), and stand still with Reduce Motion.
+enum Motion {
+    static var reduced: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
+
+    static func meter(_ duration: Double) -> Animation? {
+        reduced || ThemeStore.shared.isPixel ? nil : .easeOut(duration: duration)
     }
 }

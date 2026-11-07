@@ -117,6 +117,9 @@ private struct Headline: View {
                 Text(detail).font(.mh(size: 14)).foregroundStyle(Palette.textMuted)
             }
             Spacer(minLength: 16)
+            if let score = app.healthModel.score(store: store) {
+                HealthScoreBadge(score: score) { app.show(.health) }
+            }
             if let (title, section) = v.action {
                 Button { app.show(section) } label: { Text(title) }
                     .buttonStyle(PrimaryButtonStyle())
@@ -186,6 +189,8 @@ private struct Readout: View {
                     Text(word).font(.mh(size: 12.5)).foregroundStyle(level == .good ? Palette.textFaint : level.color)
                 }
             }
+            // No rolling digits here: these change every second, and SwiftUI draws the numeric text
+            // transition (with its blur) on the CPU, which cost about 30 % CPU for the nine readouts.
             Text(value).font(.display(30, weight: .medium).monospacedDigit()).foregroundStyle(level.color)
                 .lineLimit(1).minimumScaleFactor(0.6)
             Group {
@@ -456,5 +461,77 @@ enum ProcessIcon {
         let i = appPath.map { NSWorkspace.shared.icon(forFile: $0) } ?? NSWorkspace.shared.icon(for: .unixExecutable)
         cache[key] = i
         return i
+    }
+}
+
+// MARK: - Health score
+
+extension HealthScore.Level {
+    var status: StatusLevel {
+        switch self {
+        case .good: .good
+        case .attention: .attention
+        case .critical: .critical
+        }
+    }
+}
+
+/// The health score inside a ring filled to the score, green when good, yellow or red when not.
+struct HealthScoreRing: View {
+    let score: HealthScore
+    var size: CGFloat = 92
+    var lineWidth: CGFloat = 8
+
+    var color: Color {
+        switch score.level {
+        case .good: Theme.mint
+        case .attention: Theme.amber
+        case .critical: Theme.rose
+        }
+    }
+
+    var body: some View {
+        let fraction = Double(score.value) / 100
+        ZStack {
+            if ThemeStore.shared.isPixel {
+                PixelRing(fraction: fraction, color: color, track: Palette.inset, lineWidth: lineWidth)
+            } else {
+                Circle().stroke(Palette.inset, lineWidth: lineWidth)
+                Circle()
+                    .trim(from: 0, to: max(fraction, 0.001))
+                    .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .animation(Motion.meter(0.6), value: fraction)
+            }
+            Text(verbatim: "\(score.value)")
+                .font(.display(size * 0.36, weight: .bold).monospacedDigit())
+                .foregroundStyle(Palette.text)
+                .contentTransition(Motion.meter(0.3) == nil ? .identity : .numericText(value: Double(score.value)))
+                .animation(Motion.meter(0.3), value: score.value)
+        }
+        .frame(width: size, height: size)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Health score"))
+        .accessibilityValue(Text(verbatim: "\(score.value)"))
+    }
+}
+
+/// The health score next to the headline; opens Health Check, which lists what lowers it.
+struct HealthScoreBadge: View {
+    let score: HealthScore
+    let action: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                HealthScoreRing(score: score)
+                Text("Health score").font(.mhCaption).foregroundStyle(hovering ? Palette.text : Palette.textMuted)
+            }
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .help(score.deductions.isEmpty ? String(localized: "Nothing lowers the score.")
+              : score.deductions.map { "−\($0.points)  \($0.title)" }.joined(separator: "\n"))
     }
 }

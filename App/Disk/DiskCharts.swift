@@ -135,6 +135,8 @@ struct SunburstChart: View {
     @State private var layout: SunburstLayout?
     @State private var hoveredArc: Int?
     @State private var pointer: CGPoint?
+    /// The folder the current layout belongs to; the zoom transition runs when it changes.
+    @State private var drawnFocus: ObjectIdentifier?
     /// Four rings: deeper sunbursts get unreadably thin outer rings.
     private let maxDepth = 4
 
@@ -164,6 +166,7 @@ struct SunburstChart: View {
                 TooltipLayer(model: model, point: pointer, bounds: size, total: focus.size)
             }
             .frame(width: side, height: side)
+            .modifier(ZoomTransition(focus: drawnFocus, inward: model.zoomedIn))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .accessibilityElement()
             .accessibilityLabel("Sunburst: \(focus.name), \(Fmt.bytes(Int64(clamping: focus.size)))")
@@ -175,6 +178,7 @@ struct SunburstChart: View {
             let f = focus
             let depth = maxDepth
             layout = await Task.detached { SunburstLayout(center: f, maxDepth: depth) }.value
+            drawnFocus = ObjectIdentifier(f)
             hoveredArc = nil
         }
     }
@@ -283,7 +287,7 @@ struct SunburstChart: View {
         guard let node = layout.arc(atFraction: f, depth: depth)?.node else { return }
         // Open one level: the ring-1 folder on the path to what was clicked (or the folder itself).
         let target = node.lineage.first { $0.parent === focus } ?? node
-        if target.isDirectory { withAnimation(.easeInOut(duration: 0.2)) { model.zoom(to: target) } }
+        if target.isDirectory { model.zoom(to: target) }
     }
 
     @ViewBuilder private var contextMenu: some View {
@@ -306,6 +310,9 @@ struct TreemapChart: View {
     @State private var hoveredCell: Int?
     @State private var pointer: CGPoint?
 
+    /// The folder the current layout belongs to; the zoom transition runs when it changes.
+    @State private var drawnFocus: ObjectIdentifier?
+
     init(model: DiskAnalysisModel, focus: DiskNode, precomputed: [TreemapCell] = []) {
         self.model = model
         self.focus = focus
@@ -327,12 +334,14 @@ struct TreemapChart: View {
                     .onDrag { hoveredNode.map { NSItemProvider(object: $0.url as NSURL) } ?? NSItemProvider() }
                 TooltipLayer(model: model, point: pointer, bounds: geo.size, total: focus.size)
             }
+            .modifier(ZoomTransition(focus: drawnFocus, inward: model.zoomedIn))
             .task(id: Key(focus: ObjectIdentifier(focus), revision: model.revision, w: Int(geo.size.width), h: Int(geo.size.height))) {
                 let f = focus
                 let bounds = CGRect(origin: .zero, size: geo.size)
                 // Anything under 0.4 % of the area joins "Other" instead of becoming confetti.
                 let minArea = max(bounds.width * bounds.height * 0.004, 48)
                 cells = await Task.detached { TreemapLayout(center: f, bounds: bounds, minArea: minArea).cells }.value
+                drawnFocus = ObjectIdentifier(f)
                 hoveredCell = nil
             }
             .accessibilityLabel("Treemap: \(focus.name), click a block to open it")
@@ -362,7 +371,7 @@ struct TreemapChart: View {
         guard let c = cell(at: p) else { return }
         let top = c.parent.map { cells[$0] } ?? c
         if let node = top.node, node.isDirectory {
-            withAnimation(.easeInOut(duration: 0.2)) { model.zoom(to: node) }
+            model.zoom(to: node)
         } else if let node = c.node {
             model.quickLook(node)
         }
@@ -444,5 +453,30 @@ struct NodeMenu: View {
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(node.path, forType: .string)
         }
+    }
+}
+
+/// When a chart has drawn a new folder, it grows in from slightly smaller (opening a folder) or
+/// settles from slightly larger (going back up), so a click reads as moving in or out. Nothing
+/// moves in the pixel look or with Reduce Motion, and not on the first layout or a resize.
+private struct ZoomTransition: ViewModifier {
+    let focus: ObjectIdentifier?
+    let inward: Bool
+    @State private var scale: CGFloat = 1
+    @State private var opacity: Double = 1
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(scale)
+            .opacity(opacity)
+            .onChange(of: focus) { old, new in
+                guard old != nil, new != nil, let animation = Motion.meter(0.24) else { return }
+                scale = inward ? 0.9 : 1.08
+                opacity = 0.35
+                withAnimation(animation) {
+                    scale = 1
+                    opacity = 1
+                }
+            }
     }
 }

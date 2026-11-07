@@ -1,3 +1,4 @@
+import Diagnostics
 import SwiftUI
 import Theming
 
@@ -55,14 +56,20 @@ extension MonitorStore {
 /// The view hosted inside the NSStatusItem button.
 struct StatusItemView: View {
     let store: MonitorStore
+    var health: HealthModel? = nil
+    @AppStorage(HealthScoreMenuBar.key) private var showHealthScore = false
     /// Reports the natural width so the status item can resize itself.
     var onWidthChange: (CGFloat) -> Void = { _ in }
 
     var body: some View {
         let compact = store.settings.configuration.compact
         let items = store.menuBarItems()
+        let score = showHealthScore ? health?.score(store: store) : nil
         HStack(spacing: 8) {
-            if items.isEmpty {
+            if let score {
+                HealthScoreMenuBarItem(score: score, compact: compact)
+            }
+            if items.isEmpty, score == nil {
                 PixelIcon(name: "px.monitor", size: 16, label: "MacHelper")
             }
             ForEach(items) { item in
@@ -266,5 +273,54 @@ struct Sparkline<C: Collection>: View where C.Element == ChartPoint {
             }
             ctx.stroke(path, with: .foreground, style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
         }
+    }
+}
+
+/// The health score in the menu bar: a label (icon, "HP" or nothing, like the other items) and the
+/// number, colored only when it isn't good.
+enum HealthScoreMenuBar {
+    static let key = "menuBar.healthScore"
+}
+
+private struct HealthScoreMenuBarItem: View {
+    let score: HealthScore
+    let compact: Bool
+    private var look: AppearanceSettings { ThemeStore.shared.settings }
+
+    private var level: StatusLevel {
+        switch score.level {
+        case .good: .good
+        case .attention: .attention
+        case .critical: .critical
+        }
+    }
+
+    var body: some View {
+        let value = ZStack(alignment: .trailing) {
+            Text(verbatim: "100").hidden()
+            Text(verbatim: "\(score.value)")
+                .foregroundStyle(look.menuBarColored && level != .good ? AnyShapeStyle(ThemeStore.menuBarTint(level)) : AnyShapeStyle(.primary))
+        }
+        .font(ThemeStore.shared.menuBarFont(size: compact && look.menuBarLabel == .text ? 10.5 : 12))
+        .monospacedDigit()
+        HStack(spacing: 3) {
+            if compact && look.menuBarLabel == .text {
+                VStack(alignment: .leading, spacing: -1) {
+                    Text(verbatim: "HP").font(.system(size: 7, weight: .semibold)).foregroundStyle(.secondary)
+                    value
+                }
+            } else {
+                switch look.menuBarLabel {
+                case .icon: PixelIcon(name: "px.health", size: 14, label: "Health score")
+                case .text: Text(verbatim: "HP").font(.system(size: 9, weight: .semibold)).foregroundStyle(.secondary)
+                case .none: EmptyView()
+                }
+                value
+            }
+        }
+        .fixedSize()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Health score"))
+        .accessibilityValue(Text(verbatim: "\(score.value)"))
     }
 }

@@ -23,6 +23,9 @@ struct HealthView: View {
                 if let error = model.error {
                     Text(error).font(.mhCallout).foregroundStyle(Theme.amber).textSelection(.enabled)
                 }
+                if let score = model.score(store: app.store) {
+                    HealthScoreCard(score: score)
+                }
                 if let report = model.report {
                     findings(report)
                     summary(report)
@@ -225,5 +228,36 @@ private struct DiskTrendCard: View {
         return forecast.bytesPerDay < 0
             ? String(localized: "Stable: changing by less than 50 MB a day.")
             : String(localized: "Growing by about \(perDay) a day.")
+    }
+}
+
+/// The score and every deduction behind it.
+private struct HealthScoreCard: View {
+    let score: HealthScore
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 28) {
+            VStack(spacing: 6) {
+                HealthScoreRing(score: score, size: 104, lineWidth: 9)
+                Text("Health score").font(.mhCaption).foregroundStyle(Palette.textMuted)
+            }
+            VStack(alignment: .leading, spacing: 6) {
+                if score.deductions.isEmpty {
+                    Text("Nothing lowers the score.").font(.mhCallout).foregroundStyle(Palette.text)
+                } else {
+                    ForEach(score.deductions) { d in
+                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            Text(verbatim: "−\(d.points)").font(.mh(size: 13, weight: .semibold).monospacedDigit())
+                                .foregroundStyle(Palette.textMuted).frame(width: 34, alignment: .trailing)
+                            Text(d.title).font(.mhCallout).foregroundStyle(Palette.text)
+                        }
+                    }
+                }
+                Text("Based on the state right now and the last 24 hours. Security settings are rated on their own below.")
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted).padding(.top, 4)
+            }
+            Spacer(minLength: 0)
+        }
+        .card()
     }
 }

@@ -33786,6 +33786,210 @@
           }
         }
       }
+    },
+    "Health score": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puntuación de salud"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヘルススコア"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "건강 점수"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康分数"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康分數"
+          }
+        }
+      }
+    },
+    "Health Score": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puntuación de salud"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヘルススコア"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "건강 점수"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康分数"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康分數"
+          }
+        }
+      }
+    },
+    "Nothing lowers the score.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada baja la puntuación."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スコアを下げている項目はありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "점수를 낮추는 항목이 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前没有扣分的项目。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前沒有扣分的項目。"
+          }
+        }
+      }
+    },
+    "Based on the state right now and the last 24 hours. Security settings are rated on their own below.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se calcula con el estado actual y las últimas 24 horas. Los ajustes de seguridad se valoran aparte más abajo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在の状態と直近 24 時間をもとに計算しています。セキュリティ設定は下で別に評価します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "현재 상태와 최근 24시간을 기준으로 계산합니다. 보안 설정은 아래에서 따로 평가합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "根据当前状态和最近 24 小时计算。安全设置在下方单独评估。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依據目前的狀態和最近 24 小時計算。安全性設定在下方另外評估。"
+          }
+        }
+      }
+    },
+    "Show the health score": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar la puntuación de salud"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヘルススコアを表示"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "건강 점수 표시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示健康分数"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示健康分數"
+          }
+        }
+      }
+    },
+    "The same score as on Overview, shown first in the menu bar as HP. It goes down for each problem found now or in the last 24 hours; Health Check lists what lowers it.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La misma puntuación que en Resumen, mostrada al principio de la barra de menús como HP. Baja con cada problema encontrado ahora o en las últimas 24 horas; Revisión de estado muestra qué la baja."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「概要」と同じスコアを、メニューバーの先頭に HP として表示します。現在または直近 24 時間に見つかった問題ごとに下がり、「ヘルスチェック」で理由を確認できます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "개요와 같은 점수를 메뉴 막대 맨 앞에 HP로 표시합니다. 지금 또는 최근 24시간 동안 발견된 문제마다 점수가 내려가며, 상태 점검에서 이유를 볼 수 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与概览页相同的分数，以 HP 显示在菜单栏最前面。当前或最近 24 小时发现的每个问题都会扣分；「健康检查」会列出扣分原因。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "和概覽頁相同的分數，以 HP 顯示在選單列最前面。目前或最近 24 小時發現的每個問題都會扣分；「健康檢查」會列出扣分的原因。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

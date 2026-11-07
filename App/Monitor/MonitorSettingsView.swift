@@ -8,6 +8,7 @@ struct MonitorSettingsView: View {
     var alerts: AlertCenter?
 
     @Bindable private var look = ThemeStore.shared
+    @AppStorage(HealthScoreMenuBar.key) private var showHealthScore = false
 
     var body: some View {
         Form {
@@ -34,6 +35,12 @@ struct MonitorSettingsView: View {
                 Toggle("Two lines (name above value, saves width)", isOn: $settings.configuration.compact)
                     .disabled(look.settings.menuBarLabel != .text)
             } header: { Text("How Values Look") }
+
+            Section {
+                Toggle("Show the health score", isOn: $showHealthScore)
+                Text("The same score as on Overview, shown first in the menu bar as HP. It goes down for each problem found now or in the last 24 hours; Health Check lists what lowers it.")
+                    .settingsCaption()
+            } header: { Text("Health Score") }
 
             if let alerts { AlertSettingsSection(alerts: alerts) }
             Section {

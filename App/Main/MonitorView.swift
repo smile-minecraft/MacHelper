@@ -99,13 +99,26 @@ struct MonitorView: View {
         MonitorModule.allCases.contains { store.isActive($0) }
     }
 
+    /// Live series hold up to one point a second. Nine charts of 300 points each made switching to
+    /// Live stall while Swift Charts built every mark; averaging into at most 110 points looks the
+    /// same at this width.
+    static func thinned(_ points: [ChartPoint], limit: Int = 110) -> [ChartPoint] {
+        guard points.count > limit else { return points }
+        let size = Int((Double(points.count) / Double(limit)).rounded(.up))
+        return stride(from: 0, to: points.count, by: size).map { start in
+            let chunk = points[start..<min(start + size, points.count)]
+            return ChartPoint(date: chunk[chunk.index(chunk.startIndex, offsetBy: chunk.count / 2)].date,
+                              value: chunk.reduce(0) { $0 + $1.value } / Double(chunk.count))
+        }
+    }
+
     /// What the charts draw: the selected range once loaded, the previous one until then.
     private var chartRange: Range { shownRange ?? range }
 
     private func points(_ live: SeriesKey, _ stored: KeyPath<MetricSample, Double?>) -> [ChartPoint] {
         if chartRange == .live {
             let cutoff = Date().addingTimeInterval(-300)
-            return (store.history[live] ?? []).filter { $0.date >= cutoff }
+            return Self.thinned((store.history[live] ?? []).filter { $0.date >= cutoff })
         }
         return samples.compactMap { s in s[keyPath: stored].map { ChartPoint(date: s.time, value: $0) } }
     }

@@ -418,8 +418,13 @@ final class DiskAnalysisModel {
 
     // MARK: Navigation
 
+    /// Whether the last zoom went into a folder (true) or back up (false): the charts' zoom
+    /// transition grows in or shrinks back accordingly.
+    @ObservationIgnored private(set) var zoomedIn = true
+
     func zoom(to node: DiskNode) {
         guard node.isDirectory else { return }
+        if let old = focus { zoomedIn = node.path.hasPrefix(old.path + "/") }
         focus = node
         revision += 1
     }

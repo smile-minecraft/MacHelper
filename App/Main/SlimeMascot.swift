@@ -43,6 +43,13 @@ final class SlimeView: NSView {
     private var tappedAt: Int?
     private var timer: Timer?
     private var colors: [Color: CGColor] = [:]
+    /// The pose on screen. Most frames repeat it (the breathing cycle is slow), so the timer only
+    /// asks for a redraw when the pose actually changes.
+    private var shownPose: SlimePose?
+    /// Each pose rendered once at the screen's pixel size; a frame then draws one image instead of
+    /// a few hundred rectangles.
+    private var images: [SlimePose: CGImage] = [:]
+    private var imageScale: CGFloat = 0
 
     init(mood: SlimeMascot.Mood, cell: CGFloat) {
         self.mood = mood
@@ -81,17 +88,46 @@ final class SlimeView: NSView {
     private func tick() {
         // Nothing to do while hidden, covered or with Reduce Motion on.
         guard let window, window.isVisible, window.occlusionState.contains(.visible), !reduceMotion else { return }
-        needsDisplay = true
+        if currentPose != shownPose { needsDisplay = true }
+    }
+
+    private var currentPose: SlimePose {
+        SlimePose.make(mood: mood, frame: currentFrame, tappedAt: reduceMotion ? nil : tappedAt)
     }
 
     override func draw(_ dirtyRect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
-        let pose = SlimePose.make(mood: mood, frame: currentFrame, tappedAt: reduceMotion ? nil : tappedAt)
-        let c = cell
+        let pose = currentPose
+        shownPose = pose
+        guard let image = image(for: pose) else { return }
+        // The view is flipped; CGImages draw bottom-up, so flip back for the draw.
+        let size = CGSize(width: CGFloat(SlimeMascot.columns) * cell, height: CGFloat(SlimeMascot.rows) * cell)
+        ctx.saveGState()
+        ctx.interpolationQuality = .none
+        ctx.translateBy(x: 0, y: size.height)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(image, in: CGRect(origin: .zero, size: size))
+        ctx.restoreGState()
+    }
+
+    private func image(for pose: SlimePose) -> CGImage? {
+        let scale = (window?.backingScaleFactor ?? 2) * cell
+        if scale != imageScale { images.removeAll(); imageScale = scale }
+        if let cached = images[pose] { return cached }
+        let px = max(1, Int(scale.rounded()))
+        let w = SlimeMascot.columns * px, h = SlimeMascot.rows * px
+        guard let bitmap = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                                     space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
         SlimeRenderer.paint(pose) { x, y, color in
-            ctx.setFillColor(cgColor(color))
-            ctx.fill(CGRect(x: CGFloat(x) * c, y: CGFloat(y) * c, width: c, height: c))
+            bitmap.setFillColor(cgColor(color))
+            bitmap.fill(CGRect(x: x * px, y: h - (y + 1) * px, width: px, height: px))
         }
+        guard let image = bitmap.makeImage() else { return nil }
+        // A mood has a few dozen poses; keep the set bounded if moods change a lot.
+        if images.count > 160 { images.removeAll() }
+        images[pose] = image
+        return image
     }
 
     private func cgColor(_ color: Color) -> CGColor {
@@ -117,9 +153,9 @@ final class SlimeView: NSView {
 }
 
 /// One frame: body shape, eyes, hands and extras, in grid cells.
-struct SlimePose: Equatable {
-    enum Eyes: Equatable { case open, happy, closed, squint, dizzy, wide }
-    enum Hand: Equatable {
+struct SlimePose: Hashable {
+    enum Eyes: Hashable { case open, happy, closed, squint, dizzy, wide }
+    enum Hand: Hashable {
         case hidden
         /// A mitt at the side: 1 = peeking out, 2 = all the way out.
         case out(Int)

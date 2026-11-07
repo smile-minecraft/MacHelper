@@ -37,6 +37,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         // Ad-hoc builds: launchd pins the helper's cdhash, so an updated bundle must re-register.
         _ = try? HelperClient.shared.refreshRegistrationIfNeeded()
         startHeartbeat()
+        // The health score (overview, health page, menu bar) re-checks the last 24 hours every few minutes.
+        app.healthModel.startScoreUpdates { [weak self] in self?.store.persistentHistory }
         let args = CommandLine.arguments
         // Snapshot instances run next to the real app: never let them drive the fans.
         if !args.contains(where: { $0.hasPrefix("--snapshot") || $0 == "--export-icon-template" }) {
@@ -89,10 +91,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             try? await Task.sleep(for: .seconds(8))
             let actions = PanelActions(openSettings: {}, openDiagnostics: {}, openFanControl: {},
                                        openDiskAnalysis: {}, openOptimize: {}, openUninstall: {}, openStartup: {}, openHistory: {}, quit: {})
+            // The panel reads its tab from defaults; put the user's choice back afterwards, since a
+            // snapshot instance must never change the real settings.
+            let savedTab = UserDefaults.standard.object(forKey: "panel.module")
             for scheme in [ColorScheme.light, .dark] {
                 let name = scheme == .light ? "light" : "dark"
                 let bg = scheme == .light ? Color(white: 0.93) : Color(white: 0.15)
-                render(StatusItemView(store: store).background(bg).environment(\.colorScheme, scheme), "menubar-\(name)", dir)
+                render(StatusItemView(store: store, health: app.healthModel).background(bg).environment(\.colorScheme, scheme), "menubar-\(name)", dir)
                 for tab in MonitorPanel.Tab.allCases {
                     UserDefaults.standard.set(tab.rawValue, forKey: "panel.module")
                     render(MonitorPanel(store: store, actions: actions, scrollable: false).environment(\.colorScheme, scheme),
@@ -100,6 +105,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                 }
             }
             render(MonitorSettingsView(settings: settings, available: store.availableModules).background(Color(white: 0.93)), "settings", dir)
+            if let savedTab { UserDefaults.standard.set(savedTab, forKey: "panel.module") }
+            else { UserDefaults.standard.removeObject(forKey: "panel.module") }
             NSApp.terminate(nil)
         }
     }
@@ -238,7 +245,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: 40)
         guard let button = statusItem.button else { return }
 
-        let view = StatusItemView(store: store) { [weak self] width in
+        let view = StatusItemView(store: store, health: app.healthModel) { [weak self] width in
             // Resize after the current SwiftUI update pass, not during it.
             DispatchQueue.main.async { self?.resizeStatusItem(to: width) }
         }

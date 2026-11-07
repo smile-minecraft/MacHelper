@@ -14,10 +14,19 @@ struct MainView: View {
             Sidebar(app: app)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
         } detail: {
-            detail
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Palette.base)
-                .navigationTitle(Text(app.section.title))
+            // Each page fades in, rising a few points, while the previous one fades out, so a
+            // switch reads as one movement instead of a cut. Nothing moves with Reduce Motion.
+            ZStack {
+                detail
+                    .id(app.section)
+                    .transition(Motion.reduced ? .identity : .asymmetric(
+                        insertion: .opacity.combined(with: .offset(y: 8)),
+                        removal: .opacity))
+            }
+            .animation(Motion.reduced ? nil : .easeOut(duration: 0.2), value: app.section)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Palette.base)
+            .navigationTitle(Text(app.section.title))
         }
         .frame(minWidth: 980, minHeight: 640)
         .onAppear { app.openMainWindow = { openWindow(id: "main") } }
