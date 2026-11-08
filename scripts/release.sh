@@ -8,9 +8,12 @@
 # prepare never pushes; publish only uploads what prepare built. Release notes come from the
 # "## [0.2.0]" section of CHANGELOG.md, which must exist before prepare.
 #
-# Signing follows Config/Signing.xcconfig and the git-ignored Config/Local.xcconfig, like install.sh.
-# Releases are not notarized (that needs a paid Developer ID), so people open the app once with
-# System Settings → Privacy & Security → Open Anyway (see README).
+# Releases are signed with the "Developer ID Application" certificate in the login keychain and
+# notarized by Apple, so they open without a Gatekeeper warning. One-time setup:
+#   1. Xcode → Settings → Accounts → Manage Certificates → + → Developer ID Application
+#   2. xcrun notarytool store-credentials machelper-notary --apple-id <Apple ID> --team-id <team>
+#      (with an app-specific password from account.apple.com)
+# NOTARY_PROFILE picks another keychain profile; NOTARIZE=0 skips notarization for a trial build.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -33,7 +36,35 @@ SUMS="$OUT/SHA256SUMS.txt"
 CASK="$OUT/machelper.rb"
 REPO_URL="https://github.com/smile-minecraft/MacHelper"
 
+NOTARY_PROFILE="${NOTARY_PROFILE:-machelper-notary}"
+NOTARIZE="${NOTARIZE:-1}"
+
 fail() { echo "✗ $*" >&2; exit 1; }
+
+# The Developer ID Application identity and its team, from the login keychain.
+signing_identity() {
+  local identities
+  identities="$(security find-identity -v -p codesigning)"
+  SIGN_IDENTITY="$(sed -n 's/.*"\(Developer ID Application: .*\)"$/\1/p' <<< "$identities" | sed -n '1p')"
+  [[ -n "$SIGN_IDENTITY" ]] || fail "No Developer ID Application certificate in the keychain (Xcode → Settings → Accounts → Manage Certificates)."
+  SIGN_TEAM="$(sed -n 's/.*(\([A-Z0-9]\{10\}\))$/\1/p' <<< "$SIGN_IDENTITY")"
+  [[ -n "$SIGN_TEAM" ]] || fail "Couldn't read the team ID from \"$SIGN_IDENTITY\"."
+}
+
+# Sends a file to Apple's notary service, waits for the verdict and prints the log when rejected.
+notarize() {
+  local file="$1" result="$OUT/notary-$(basename "$1").json"
+  echo "  notarizing $(basename "$file") (usually a few minutes)"
+  xcrun notarytool submit "$file" --keychain-profile "$NOTARY_PROFILE" --wait --output-format json > "$result" \
+    || { cat "$result" 2>/dev/null; fail "notarytool failed; check the keychain profile \"$NOTARY_PROFILE\"."; }
+  local verdict id
+  verdict="$(plutil -extract status raw -o - "$result" 2>/dev/null || true)"
+  id="$(plutil -extract id raw -o - "$result" 2>/dev/null || true)"
+  if [[ "$verdict" != Accepted ]]; then
+    [[ -n "$id" ]] && xcrun notarytool log "$id" --keychain-profile "$NOTARY_PROFILE" || true
+    fail "Notarization of $(basename "$file") ended with: ${verdict:-unknown}."
+  fi
+}
 
 # The Homebrew cask for this release, for a tap repository (homebrew-tap/Casks/machelper.rb).
 write_cask() {
@@ -102,10 +133,10 @@ A menu bar system monitor, fan control and cleanup utility for macOS 14 and late
 ```sh
 brew install --cask smile-minecraft/tap/machelper
 ```
-
-MacHelper isn't notarized yet: open it once, then click **Open Anyway** in System Settings → Privacy & Security.
 TAPREADME
   fi
+  # Releases are notarized now; drop the old "open it once, then Open Anyway" line.
+  sed -i '' '/isn.t notarized yet/d' "$tap/README.md"
   HOMEBREW_NO_AUTO_UPDATE=1 brew style --cask smile-minecraft/tap/machelper >/dev/null 2>&1 || echo "  brew style reported problems: brew style --cask smile-minecraft/tap/machelper"
   git -C "$tap" add Casks/machelper.rb README.md
   git -C "$tap" commit -q -m "chore: pin machelper to the $TAG release asset"
@@ -134,18 +165,30 @@ prepare() {
   echo "→ Running tests"
   swift test --quiet > build/release-tests.log 2>&1 || { tail -30 build/release-tests.log; restore_version; fail "Tests failed (log: build/release-tests.log)."; }
 
+  signing_identity
+  echo "  signing as: $SIGN_IDENTITY"
+  if [[ "$NOTARIZE" == 1 ]]; then
+    xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1 \
+      || fail "No notary credentials under \"$NOTARY_PROFILE\": xcrun notarytool store-credentials $NOTARY_PROFILE --apple-id <Apple ID> --team-id $SIGN_TEAM"
+  elif [[ "$ACTION" != build ]]; then
+    fail "NOTARIZE=0 is only for trial builds."
+  fi
+
   BUILD_NUMBER="$(date +%Y%m%d%H%M)"
   echo "→ Building $VERSION ($BUILD_NUMBER)"
   rm -rf "$OUT"
   mkdir -p "$OUT"
   xcodegen generate --quiet
   local log="$OUT/xcodebuild.log"
-  # A clean build in its own folder; no debugger entitlement (get-task-allow) in a shipped app.
+  # A clean build in its own folder, signed with Developer ID and a secure timestamp (both needed
+  # for notarization); no debugger entitlement (get-task-allow) in a shipped app.
   if ! xcodebuild -project MacHelper.xcodeproj -scheme MacHelper -configuration Release \
-      -derivedDataPath build/release/DerivedData -allowProvisioningUpdates \
+      -derivedDataPath build/release/DerivedData \
       MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO \
+      CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$SIGN_IDENTITY" DEVELOPMENT_TEAM="$SIGN_TEAM" \
+      PROVISIONING_PROFILE_SPECIFIER="" OTHER_CODE_SIGN_FLAGS="--timestamp" \
       clean build > "$log" 2>&1; then
-    grep -E "error:" "$log" | sort -u | head -30
+    grep -E "error:" "$log" | sort -u | sed -n '1,30p'
     restore_version
     fail "Build failed (log: $log)."
   fi
@@ -154,14 +197,35 @@ prepare() {
   echo "→ Checking the app"
   codesign --verify --deep --strict "$app" || fail "Signature check failed."
   [[ "$(defaults read "$PWD/$app/Contents/Info" CFBundleShortVersionString)" == "$VERSION" ]] || fail "The app's version isn't $VERSION."
-  if codesign -d --entitlements - --xml "$app" 2>/dev/null | grep -q "get-task-allow"; then fail "The app still has get-task-allow."; fi
+  local entitlements target
+  for target in "$app" "$app/Contents/MacOS/MacHelperHelper" "$app/Contents/MacOS/machelper-cli"; do
+    entitlements="$(codesign -d --entitlements - --xml "$target" 2>/dev/null || true)"
+    if grep -q "get-task-allow" <<< "$entitlements"; then fail "$(basename "$target") still has get-task-allow."; fi
+  done
   for exe in MacHelper MacHelperHelper machelper-cli; do
     [[ -x "$app/Contents/MacOS/$exe" ]] || fail "Missing $exe in the app."
   done
   [[ "$("$app/Contents/MacOS/machelper-cli" --version)" == "$VERSION ($BUILD_NUMBER)" ]] || fail "The bundled CLI doesn't report $VERSION ($BUILD_NUMBER)."
-  local signer
-  signer="$(codesign -dv --verbose=2 "$app" 2>&1 | sed -n 's/^Authority=//p' | head -1)"
-  echo "  signed by: ${signer:-ad-hoc}"
+  local exe_path signer info gatekeeper
+  for exe_path in "$app" "$app/Contents/MacOS/MacHelperHelper" "$app/Contents/MacOS/machelper-cli"; do
+    info="$(codesign -dv --verbose=2 "$exe_path" 2>&1)"
+    signer="$(sed -n 's/^Authority=//p' <<< "$info" | sed -n '1p')"
+    [[ "$signer" == "$SIGN_IDENTITY" ]] || fail "$(basename "$exe_path") is signed by \"${signer:-ad-hoc}\", not $SIGN_IDENTITY."
+    info="$(codesign -dv "$exe_path" 2>&1)"
+    grep -q "flags=.*runtime" <<< "$info" || fail "$(basename "$exe_path") lacks the hardened runtime."
+    grep -q "^Timestamp=" <<< "$info" || fail "$(basename "$exe_path") has no secure timestamp."
+  done
+
+  if [[ "$NOTARIZE" == 1 ]]; then
+    echo "→ Notarizing the app"
+    local upload="$OUT/notarize-app.zip"
+    ditto -c -k --keepParent "$app" "$upload"
+    notarize "$upload"
+    rm -f "$upload"
+    xcrun stapler staple -q "$app" || fail "Couldn't staple the app."
+    gatekeeper="$(spctl -a -t exec -vv "$app" 2>&1)" || fail "Gatekeeper doesn't accept the app."
+    grep -q "Notarized Developer ID" <<< "$gatekeeper" || fail "Gatekeeper doesn't accept the app."
+  fi
 
   echo "→ Packaging"
   ditto -c -k --keepParent "$app" "$ZIP"
@@ -171,6 +235,15 @@ prepare() {
   ln -s /Applications "$stage/Applications"
   hdiutil create -quiet -volname "MacHelper $VERSION" -srcfolder "$stage" -fs APFS -format UDZO "$DMG"
   rm -rf "$stage"
+  codesign --sign "$SIGN_IDENTITY" --timestamp "$DMG" || fail "Couldn't sign the DMG."
+  if [[ "$NOTARIZE" == 1 ]]; then
+    echo "→ Notarizing the DMG"
+    notarize "$DMG"
+    xcrun stapler staple -q "$DMG" || fail "Couldn't staple the DMG."
+    gatekeeper="$(spctl -a -t open --context context:primary-signature -vv "$DMG" 2>&1)" \
+      || fail "Gatekeeper doesn't accept the DMG."
+    grep -q "Notarized Developer ID" <<< "$gatekeeper" || fail "Gatekeeper doesn't accept the DMG."
+  fi
   (cd "$OUT" && shasum -a 256 "$(basename "$DMG")" "$(basename "$ZIP")" > "$(basename "$SUMS")")
   release_notes > "$NOTES"
   write_cask "$(shasum -a 256 "$DMG" | cut -d' ' -f1)" > "$CASK"

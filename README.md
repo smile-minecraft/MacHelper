@@ -49,9 +49,8 @@ and drag MacHelper to Applications. Or with Homebrew:
 brew install --cask smile-minecraft/tap/machelper
 ```
 
-MacHelper isn't notarized by Apple yet, so macOS blocks the first launch. Open it once, then go to
-**System Settings → Privacy & Security** and click **Open Anyway**. Fan control and system cleanup need
-the helper: allow it in **System Settings → General → Login Items** when MacHelper asks.
+MacHelper is signed with a Developer ID and notarized by Apple, so it opens like any other app. Fan
+control and system cleanup need the helper: allow it in **System Settings → General → Login Items** when MacHelper asks.
 
 To see the whole disk, turn on MacHelper in **System Settings → Privacy & Security → Full Disk Access**.
 Folders under System Integrity Protection or owned by another user stay unreadable even then; that's

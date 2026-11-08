@@ -30,7 +30,7 @@ Descarga `MacHelper-<versión>.dmg` desde [Releases](https://github.com/smile-mi
 brew install --cask smile-minecraft/tap/machelper
 ```
 
-MacHelper aún no está notarizado por Apple, así que macOS bloquea la primera apertura. Ábrelo una vez y luego ve a **Ajustes del Sistema → Privacidad y seguridad** y haz clic en **Abrir igualmente**. El control de ventiladores y la limpieza del sistema necesitan el Helper: permítelo en **Ajustes del Sistema → General → Ítems de inicio** cuando MacHelper lo pida.
+MacHelper está firmado con un Developer ID y notarizado por Apple, así que se abre como cualquier otra app. El control de ventiladores y la limpieza del sistema necesitan el Helper: permítelo en **Ajustes del Sistema → General → Ítems de inicio** cuando MacHelper lo pida.
 
 Para ver todo el disco, activa MacHelper en **Ajustes del Sistema → Privacidad y seguridad → Acceso total al disco**. Aun así, las carpetas protegidas por la protección de la integridad del sistema o que pertenecen a otros usuarios no se pueden leer: es una protección de macOS y es normal.
 

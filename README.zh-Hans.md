@@ -30,7 +30,7 @@
 brew install --cask smile-minecraft/tap/machelper
 ```
 
-MacHelper 还没有经过 Apple 公证，所以第一次打开时 macOS 会阻止。先打开一次，再到 **系统设置 → 隐私与安全性** 点按 **仍要打开**。风扇控制和系统清理需要 Helper，MacHelper 询问时请到 **系统设置 → 通用 → 登录项** 允许。
+MacHelper 已使用 Developer ID 签名并通过 Apple 公证，可以直接打开。风扇控制和系统清理需要 Helper，MacHelper 询问时请到 **系统设置 → 通用 → 登录项** 允许。
 
 想看到整个磁盘，请在 **系统设置 → 隐私与安全性 → 完全磁盘访问权限** 中打开 MacHelper。即使打开了，受系统完整性保护或属于其他用户的文件夹仍然无法读取，这是 macOS 的保护，属于正常现象。
 
