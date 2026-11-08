@@ -5,9 +5,43 @@ Each release's notes on GitHub come from its section here (`scripts/release.sh`)
 
 ## [Unreleased]
 
+## [0.2.0]
+
+The first public release. MacHelper is signed with a Developer ID and notarized by Apple, so it opens
+like any other app, without a Gatekeeper warning or an "Open Anyway" step. Requires macOS 14 or later.
+
+### Languages
+- Simplified Chinese, Japanese, Korean and Spanish, alongside English and Traditional Chinese.
+- One language list for the language picker and settings backups.
+- The localization check covers every shipped language, including health check findings and rule text.
+
+### Health
+- A health score on Overview, Health Check and the menu bar, from current disk and memory readings and
+  the latest health check (which covers the last 24 hours; security settings excluded); refreshed every
+  5 minutes.
+- Health check findings translated into all six languages.
+- Free-space levels use absolute values: 25 GB or more is fine, under 10 GB is critical; Overview, the
+  menu bar, the attention list and Health Check share the same thresholds.
+
+### Disk
+- Folders macOS protects (System Integrity Protection, data vaults, other user accounts) no longer count
+  as unreadable; they are listed separately as protected, and disk analysis no longer looks incomplete
+  because of them.
+
+### Interface
+- Removed reassurance captions ("only reads", "nothing is removed without your confirmation") and
+  free-space forecasts ("full in about N days"); free space does not change linearly, so those numbers
+  were misleading.
+- Page switches and disk chart changes animate more smoothly, and the monitor charts and mascot use less
+  CPU; Reduce Motion is respected.
+
+### Internal
+- The macOS CI job is skipped while the repository is private; private-repository runner minutes are
+  billed at 10x, and the job runs once the repository is public.
+
 ## [0.1.0]
 
-The first public release. Requires macOS 14 or later; tested on Apple silicon.
+An internal trial build; it was never published. The first public release is 0.2.0.
 
 ### Monitor
 - Menu bar readings for CPU (performance and efficiency cores), GPU, memory pressure, disk and network
@@ -48,5 +82,5 @@ The first public release. Requires macOS 14 or later; tested on Apple silicon.
   text size, simple and advanced modes, replaceable icons and an optional pixel logo.
 - English and Traditional Chinese.
 
-[Unreleased]: https://github.com/smile-minecraft/MacHelper/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/smile-minecraft/MacHelper/releases/tag/v0.1.0
+[Unreleased]: https://github.com/smile-minecraft/MacHelper/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/smile-minecraft/MacHelper/releases/tag/v0.2.0
