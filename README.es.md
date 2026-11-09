@@ -2,7 +2,7 @@
 
 [English](README.md) · [繁體中文](README.zh-Hant.md) · [简体中文](README.zh-Hans.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · Español
 
-Una utilidad todo en uno para Mac con macOS 14 o posterior, en la que todos los datos se quedan en tu Mac: control de ventiladores, monitor del sistema en la barra de menús, limpieza con un clic, análisis del disco, desinstalador de apps y gestión de ítems de arranque. Código abierto con licencia MIT.
+Una utilidad todo en uno para Mac con macOS 14 o posterior, en la que todos los datos se quedan en tu Mac: control de ventiladores, monitor del sistema en la barra de menús, limpieza con un clic, análisis del disco, desinstalador de apps y gestión de ítems de arranque. Código abierto con licencia MIT. Requiere un Mac con Apple Silicon (arm64).
 
 ## Funciones
 

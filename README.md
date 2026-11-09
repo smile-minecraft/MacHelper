@@ -4,6 +4,7 @@ English · [繁體中文](README.zh-Hant.md) · [简体中文](README.zh-Hans.md
 
 An all-in-one, fully local Mac utility for macOS 14 and later: fan control, a menu-bar system monitor,
 one-click cleanup, disk analysis, an app uninstaller and startup-item management. MIT licensed.
+It requires an Apple Silicon Mac (arm64).
 
 ## Features
 

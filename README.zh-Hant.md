@@ -2,7 +2,7 @@
 
 [English](README.md) · 繁體中文 · [简体中文](README.zh-Hans.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md)
 
-給 macOS 14 以上使用的全功能 Mac 工具，所有資料都留在你的 Mac 上：風扇控制、選單列系統監控、一鍵清理、磁碟分析、App 解除安裝和開機啟動項目管理。以 MIT 授權開源。
+給 macOS 14 以上使用的全功能 Mac 工具，所有資料都留在你的 Mac 上：風扇控制、選單列系統監控、一鍵清理、磁碟分析、App 解除安裝和開機啟動項目管理。以 MIT 授權開源。需要 Apple Silicon（arm64）Mac。
 
 ## 功能
 

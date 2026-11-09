@@ -2,7 +2,7 @@
 
 [English](README.md) · [繁體中文](README.zh-Hant.md) · [简体中文](README.zh-Hans.md) · [日本語](README.ja.md) · 한국어 · [Español](README.es.md)
 
-macOS 14 이상을 위한 올인원 Mac 유틸리티로, 모든 데이터가 Mac 안에만 머뭅니다. 팬 제어, 메뉴 막대 시스템 모니터, 원클릭 정리, 디스크 분석, 앱 제거, 시동 항목 관리를 제공합니다. MIT 라이선스 오픈 소스입니다.
+macOS 14 이상을 위한 올인원 Mac 유틸리티로, 모든 데이터가 Mac 안에만 머뭅니다. 팬 제어, 메뉴 막대 시스템 모니터, 원클릭 정리, 디스크 분석, 앱 제거, 시동 항목 관리를 제공합니다. MIT 라이선스 오픈 소스입니다. Apple Silicon(arm64) Mac이 필요합니다.
 
 ## 기능
 
