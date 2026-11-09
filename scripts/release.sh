@@ -80,8 +80,8 @@ cask "machelper" do
   desc "Menu bar system monitor, fan control and cleanup utility"
   homepage "$REPO_URL"
 
-  depends_on macos: :sonoma
   depends_on arch: :arm64
+  depends_on macos: :sonoma
 
   app "MacHelper.app"
   binary "#{appdir}/MacHelper.app/Contents/MacOS/machelper-cli", target: "machelper"
@@ -154,6 +154,11 @@ prepare() {
     git rev-parse -q --verify "refs/tags/$TAG" >/dev/null && fail "Tag $TAG already exists."
   fi
   [[ -n "$(release_notes)" ]] || fail "CHANGELOG.md has no \"## [$VERSION]\" section."
+  # The in-app update window shows the notes in the app's language (see scripts/sparkle/appcast.sh).
+  local lang
+  for lang in zh-Hant zh-Hans ja ko es; do
+    [[ -s "docs/release-notes/$VERSION/$lang.md" ]] || fail "Missing translated release notes: docs/release-notes/$VERSION/$lang.md"
+  done
 
   # Put project.yml back as it was when the build fails, and after a trial build.
   typeset -g SAVED_PROJECT
@@ -306,6 +311,13 @@ publish() {
   # Every MacHelper release is a stable release; never mark a 0.x or beta version as prerelease.
   gh release create "$TAG" "$DMG" "$ZIP" "$SUMS" --title "MacHelper $VERSION" --notes-file "$NOTES" --verify-tag
   update_tap
+  # The appcast goes live last, once the archive it points to can be downloaded.
+  if [[ -f "build/appcast/$TAG/appcast.xml" ]]; then
+    echo "→ Publishing the Sparkle appcast"
+    scripts/sparkle/appcast.sh pages "$VERSION"
+  else
+    echo "No appcast for $VERSION (prepare with SPARKLE_APPCAST=1); the update won't reach installed apps."
+  fi
 }
 
 case "$ACTION" in

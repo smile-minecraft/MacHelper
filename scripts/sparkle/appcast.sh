@@ -1,10 +1,15 @@
 #!/bin/bash
 # Generates a Sparkle appcast for one MacHelper release. Opt-in helper for
-# scripts/release.sh; nothing here pushes, publishes, or creates keys.
+# scripts/release.sh; only `pages` pushes, and nothing here creates keys.
 #
 #   scripts/sparkle/appcast.sh check
 #   scripts/sparkle/appcast.sh appcast <version>
 #   scripts/sparkle/appcast.sh verify <appcast.xml>
+#   scripts/sparkle/appcast.sh pages <version>     copy the appcast and notes to gh-pages and push
+#
+# Release notes: English comes from CHANGELOG.md (notes.md of the release); every other app
+# language comes from docs/release-notes/<version>/<lang>.md and is linked with xml:lang, so
+# Sparkle shows the notes in the language the app runs in.
 #
 # Sparkle tools are found by, in order:
 #   1. $SPARKLE_BIN
@@ -17,6 +22,9 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 REPO_URL="https://github.com/smile-minecraft/MacHelper"
+PAGES_URL="https://smile-minecraft.github.io/MacHelper"
+# App languages besides English; each needs docs/release-notes/<version>/<lang>.md.
+NOTE_LANGS=(zh-Hant zh-Hans ja ko es)
 
 die() { echo "✗ $*" >&2; exit 1; }
 
@@ -83,6 +91,10 @@ do_appcast() {
   [[ -f "$dmg" ]] || die "找不到 DMG：${dmg}（請先跑 scripts/release.sh prepare ${version}）"
   [[ -f "$zip" ]] || die "找不到 ZIP：${zip}（請先跑 scripts/release.sh prepare ${version}）"
   [[ -f "$notes" ]] || die "找不到 release notes：$notes"
+  local lang
+  for lang in "${NOTE_LANGS[@]}"; do
+    [[ -s "docs/release-notes/$version/$lang.md" ]] || die "缺少 ${lang} 的更新說明：docs/release-notes/$version/$lang.md"
+  done
   if [[ -f "$rel/SHA256SUMS.txt" ]]; then
     sums="$rel/SHA256SUMS.txt"
   elif [[ -f "$rel/SHA256SUMS" ]]; then
@@ -119,8 +131,39 @@ do_appcast() {
   command -v xmllint >/dev/null 2>&1 \
     || die "找不到 xmllint，無法驗證 appcast 是否合法：$output"
   xmllint --noout "$output" || die "產生的 appcast 不是合法 XML：$output"
+
+  # One release-notes link per language next to the English default.
+  local localized=""
+  for lang in "${NOTE_LANGS[@]}"; do
+    cp "docs/release-notes/$version/$lang.md" "$stage/$zip_base.$lang.md"
+    localized+="            <sparkle:releaseNotesLink xml:lang=\"$lang\">$PAGES_URL/$zip_base.$lang.md</sparkle:releaseNotesLink>"$'\n'
+  done
+  LOCALIZED="$localized" perl -0pi -e 's{(\s*<sparkle:releaseNotesLink>[^<]*</sparkle:releaseNotesLink>\n)}{$1$ENV{LOCALIZED}}' "$output"
+  [[ "$(grep -c 'xml:lang=' "$output")" -eq "${#NOTE_LANGS[@]}" ]] || die "無法在 appcast 加入各語言的更新說明連結：$output"
+  xmllint --noout "$output" || die "加入語言連結後的 appcast 不是合法 XML：$output"
   echo "appcast 已產生：$output"
   echo "appcast 已準備好，下一步手動檢查與推送（此腳本不會自動 push appcast 或 gh-pages）"
+}
+
+# Copies the appcast and every release-notes file to the gh-pages worktree, commits and pushes.
+do_pages() {
+  [[ $# -eq 1 ]] || usage
+  local version="${1#v}"
+  local stage="build/appcast/v$version"
+  [[ -f "$stage/appcast.xml" ]] || die "找不到 $stage/appcast.xml，請先跑 appcast $version"
+  do_verify "$stage/appcast.xml"
+  local pages="build/gh-pages-worktree"
+  if [[ ! -d "$pages/.git" && ! -f "$pages/.git" ]]; then
+    git fetch -q origin gh-pages
+    git worktree add -q "$pages" gh-pages
+  fi
+  [[ -z "$(git -C "$pages" status --porcelain)" ]] || die "$pages 有未提交的變更"
+  git -C "$pages" pull -q --ff-only
+  cp "$stage/appcast.xml" "$stage"/*.md "$pages/"
+  git -C "$pages" add appcast.xml ./*.md
+  git -C "$pages" commit -q -m "docs: publish appcast for $version"
+  git -C "$pages" push -q origin HEAD
+  echo "✓ appcast 已推送到 gh-pages：$PAGES_URL/appcast.xml"
 }
 
 do_verify() {
@@ -159,5 +202,6 @@ case "$CMD" in
   check) do_check ;;
   appcast) do_appcast "$@" ;;
   verify) do_verify "$@" ;;
+  pages) do_pages "$@" ;;
   *) usage ;;
 esac
