@@ -197,6 +197,18 @@ prepare() {
   fi
   local app=build/release/DerivedData/Build/Products/Release/MacHelper.app
 
+  # Sparkle's release archive is signed for distribution, but its nested XPC services
+  # must carry our Developer ID and a secure timestamp for notarization. Re-sign the
+  # framework (deep, contents first) and then the app seal that contains it.
+  local sparkle="$app/Contents/Frameworks/Sparkle.framework"
+  if [[ -d "$sparkle" ]]; then
+    echo "→ Signing Sparkle.framework with the app's Developer ID"
+    codesign --deep --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$sparkle" \
+      || fail "Couldn't sign Sparkle.framework."
+    codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$app" \
+      || fail "Couldn't re-sign the app after Sparkle."
+  fi
+
   echo "→ Checking the app"
   codesign --verify --deep --strict "$app" || fail "Signature check failed."
   [[ "$(defaults read "$PWD/$app/Contents/Info" CFBundleShortVersionString)" == "$VERSION" ]] || fail "The app's version isn't $VERSION."
