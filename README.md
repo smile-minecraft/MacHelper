@@ -94,6 +94,7 @@ what's new in the language the app runs in.
 | **App uninstaller** | Finds what an app left behind from bundle IDs, embedded helpers, entitlements, container metadata, launchd ownership, Homebrew zap lists and per-app rules. Name-only matches are flagged for review; leftovers of apps already gone are found too. |
 | **Startup items** | Your launch agents (disable, enable, remove), all-users agents and system daemons, with the owning app and broken items marked. |
 | **Homebrew updates** | Updates apps you installed with Homebrew. |
+| **AI agent skill** | Installs a skill for Claude Code and Codex so they use MacHelper safely: always preview first, ask before removing anything. |
 | **Alerts** | Notifications for high CPU temperature, critical memory pressure and low disk space. |
 | **Optional history** | Process, sensor and core history are off by default. Process history keeps only the name, CPU and memory (no paths, arguments or user names). Retention is 1–30 days. |
 | **The slime** | The mascot follows how the Mac is doing (blue, yellow, red), reacts to taps, hovering and dragging, and to events like heat or a finished cleanup. Reduce Motion and VoiceOver are respected. |

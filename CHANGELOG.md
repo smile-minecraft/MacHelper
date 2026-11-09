@@ -16,9 +16,10 @@ your language, and the menu bar item finally keeps its full width.
 
 ### Fixes
 - The menu bar item no longer gets stuck at its launch width with the readings clipped on both sides. Its width is now measured whenever the items, styles, labels or font change.
+- Disk analysis: the side panel's tabs (Contents, Largest, Duplicates, Changes, Suggestions) were cut off in English and other longer languages. The panel is a little wider, and when the names still don't fit, the tabs become a menu with the full names.
 
 ### Documentation
-- A new README with the slime animation and screenshots of the app.
+- A new README with the slime animation and screenshots of the app, in all six languages.
 
 ## [0.3.1]
 

@@ -8,6 +8,7 @@ MacHelper ahora te avisa de las actualizaciones en lugar de instalarlas en silen
 
 ### Correcciones
 - El elemento de la barra de menús ya no se queda con el ancho del inicio y con los valores recortados por ambos lados. Su ancho se mide de nuevo cada vez que cambian los elementos, los estilos, las etiquetas o la fuente.
+- Análisis de disco: las pestañas del panel lateral (Contenido, Más grande, Duplicados, Cambios, Sugerencias) se cortaban en inglés y en otros idiomas largos. El panel es un poco más ancho y, si los nombres siguen sin caber, las pestañas pasan a ser un menú con los nombres completos.
 
 ### Documentación
-- Un README nuevo con la animación del slime y capturas reales de la app.
+- Un README nuevo con la animación del slime y capturas reales de la app, en los seis idiomas.
