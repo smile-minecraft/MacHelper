@@ -13,6 +13,26 @@ struct DiskAnalysisView: View {
     enum SideTab: String, CaseIterable, Identifiable {
         case contents, largest, duplicates, changes, insights
         var id: String { rawValue }
+
+        var title: LocalizedStringKey {
+            switch self {
+            case .contents: "Contents"
+            case .largest: "Largest"
+            case .duplicates: "Duplicates"
+            case .changes: "Changes"
+            case .insights: "Suggestions"
+            }
+        }
+
+        var symbol: String {
+            switch self {
+            case .contents: "folder"
+            case .largest: "arrow.up.arrow.down"
+            case .duplicates: "square.on.square"
+            case .changes: "clock.arrow.circlepath"
+            case .insights: "lightbulb"
+            }
+        }
     }
 
     var body: some View {
@@ -132,14 +152,21 @@ struct DiskAnalysisView: View {
             Divider()
 
             VStack(spacing: 0) {
-                Picker("", selection: $sideTab) {
-                    Text("Contents").tag(SideTab.contents)
-                    Text("Largest").tag(SideTab.largest)
-                    Text("Duplicates").tag(SideTab.duplicates)
-                    Text("Changes").tag(SideTab.changes)
-                    Text("Suggestions").tag(SideTab.insights)
+                // Five tab names don't fit the column in every language: fall back to a smaller
+                // control, then to a menu that still shows the full names.
+                ViewThatFits(in: .horizontal) {
+                    sideTabPicker
+                    sideTabPicker.controlSize(.small)
+                    Picker("", selection: $sideTab) {
+                        ForEach(SideTab.allCases, id: \.self) { tab in
+                            Label { Text(tab.title) } icon: { Image(systemName: tab.symbol) }.tag(tab)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                    .frame(maxWidth: .infinity)
                 }
-                .pickerStyle(.segmented).labelsHidden().padding(8)
+                .padding(8)
                 switch sideTab {
                 case .contents:
                     List { ForEach(Array(focus.children.prefix(60))) { node in row(node, total: focus.size) } }
@@ -158,8 +185,17 @@ struct DiskAnalysisView: View {
                 Divider()
                 collector
             }
-            .frame(width: 320)
+            .frame(width: 340)
         }
+    }
+
+    private var sideTabPicker: some View {
+        Picker("", selection: $sideTab) {
+            ForEach(SideTab.allCases, id: \.self) { tab in Text(tab.title).tag(tab) }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .fixedSize()
     }
 
     private var largestFilters: some View {
