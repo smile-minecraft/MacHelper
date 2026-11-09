@@ -1,68 +1,133 @@
-# MacHelper
+<p align="center">
+  <img src="docs/images/mascot.gif" width="240" alt="The MacHelper slime breathing, waving, hopping and celebrating">
+</p>
 
-English · [繁體中文](README.zh-Hant.md) · [简体中文](README.zh-Hans.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md)
+<h1 align="center">MacHelper</h1>
 
-An all-in-one, fully local Mac utility for macOS 14 and later: fan control, a menu-bar system monitor,
-one-click cleanup, disk analysis, an app uninstaller and startup-item management. MIT licensed.
-It requires an Apple Silicon Mac (arm64).
+<p align="center">
+  <b>A fully local Mac utility: system monitor, fan control, cleanup and disk analysis in one menu bar app.</b>
+</p>
 
-## Features
+<p align="center">
+  <a href="https://github.com/smile-minecraft/MacHelper/releases/latest"><img src="https://img.shields.io/github/v/release/smile-minecraft/MacHelper?label=release&color=5b8def" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/macOS-14%2B-1f2430" alt="macOS 14 or later">
+  <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-1f2430" alt="Apple Silicon">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-4cc38a" alt="MIT license"></a>
+</p>
 
-- **Menu-bar monitor** — CPU (P/E cores), GPU, memory pressure, disk and network throughput, temperatures,
-  fans, power and battery, each configurable as text, line, bar or ring. Top processes by CPU and memory.
-- **History** — per-minute averages (SQLite) kept for 7 days by default; choose 1, 3, 7, 14 or 30 days
-  in Settings → General → Data management. Browsable for 1 h / 24 h / 7 d.
-- **Optional process, sensor and core history** — off by default; enable each under Settings → General → Data
-  management. Process history stores only the process name, CPU use and memory (no paths, command-line
-  arguments or user names), keeping each minute’s top 10 by CPU and by memory. Sensor and core history stores
-  one average per minute for every temperature sensor and CPU core cluster, adding several dozen rows per
-  minute. Both use the same retention setting and can be cleared separately.
-- **Alerts** — notifications for high CPU temperature, critical memory pressure and low disk space.
-- **Fan control** — automatic, fixed speed or temperature curves (quiet / balanced / performance / custom),
-  "only increase" mode, hard safety limits, and automatic profile switching by running app or power source.
-  Runs through a root helper (`SMAppService` daemon) that verifies the caller's code signature.
-- **One-click optimize** — declarative JSON cleaning rules with preview (low-risk caches deleted directly, medium and high risk to the Trash), protected paths,
-  a whitelist, an operation log, maintenance tasks, project build-artifact purge and scheduled auto-clean of
-  low-risk items.
-- **Disk analysis** — sunburst and treemap, largest files with kind/age filters, duplicate files (APFS clones
-  and hard links understood), what changed since the last scan, and a collector to trash items in one go.
-- **App uninstaller** — finds what an app left behind using bundle IDs, embedded helpers, entitlements,
-  container metadata, launchd ownership, Homebrew zap lists and per-app rules; name matches are flagged
-  for review. Also finds leftovers of apps that are already gone.
-- **Startup items** — your launch agents (disable / enable / remove), all-users agents and system daemons,
-  with the owning app and broken items flagged.
-- **Homebrew updates** — updates apps installed with Homebrew.
-- **Self-updates** — checks for a new MacHelper version in the background and asks before installing it.
-- **Security check** — reads Gatekeeper, FileVault, firewall, SIP, automatic security updates and XProtect
-  (read-only).
-- **Space suggestions** — big files not used for six months and folders that look bloated, marked in the
-  disk charts.
-- **CLI** — everything scriptable for automation and AI agents: previews by default, `--json` everywhere.
-  Run `machelper guide` for an overview and `machelper <command> --help` for each command.
-- **Languages** — English, Traditional Chinese, Simplified Chinese, Japanese, Korean and Spanish (String
-  Catalogs; see below to add one). Settings → General → Language overrides the system language.
+<p align="center">
+  English · <a href="README.zh-Hant.md">繁體中文</a> · <a href="README.zh-Hans.md">简体中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a>
+</p>
+
+<p align="center">
+  <img src="docs/images/menubar.png" width="320" alt="MacHelper in the menu bar: CPU with a sparkline, memory and temperature">
+</p>
+
+<p align="center">
+  <img src="docs/images/overview.png" width="860" alt="Overview: health score, live readings and the apps using the most resources">
+</p>
+
+<p align="center">
+  <a href="#install"><b>Install</b></a> ·
+  <a href="#features"><b>Features</b></a> ·
+  <a href="#first-launch"><b>First launch</b></a> ·
+  <a href="#command-line"><b>Command line</b></a> ·
+  <a href="#building"><b>Building</b></a> ·
+  <a href="#releasing"><b>Releasing</b></a>
+</p>
+
+---
+
+Everything MacHelper measures and stores stays on your Mac: no accounts, no analytics, no network calls
+except the update check. It needs macOS 14 or later on an Apple Silicon Mac and is MIT licensed.
 
 ## Install
-
-Download `MacHelper-<version>.dmg` from [Releases](https://github.com/smile-minecraft/MacHelper/releases)
-and drag MacHelper to Applications. Or with Homebrew:
 
 ```sh
 brew install --cask smile-minecraft/tap/machelper
 ```
 
-MacHelper is signed with a Developer ID and notarized by Apple, so it opens like any other app. Fan
-control and system cleanup need the helper: allow it in **System Settings → General → Login Items** when MacHelper asks.
+Or download `MacHelper-<version>.dmg` from [Releases](https://github.com/smile-minecraft/MacHelper/releases/latest)
+and drag MacHelper to Applications. Releases are signed with a Developer ID and notarized by Apple, so the
+app opens like any other. Checksums are in `SHA256SUMS.txt` on each release page.
 
-To see the whole disk, turn on MacHelper in **System Settings → Privacy & Security → Full Disk Access**.
-Folders under System Integrity Protection or owned by another user stay unreadable even then; that's
-macOS protecting them, and disk analysis lists them separately as protected.
+MacHelper keeps itself up to date: it checks in the background, shows an **Update to x.y.z** button in the
+sidebar, the menu bar panel and Settings, and installs only when you click it. The update window shows
+what's new in the language the app runs in.
 
-Checksums for each download are in `SHA256SUMS.txt` on the release page.
+## Features
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>Monitor</h3>
+      <img src="docs/images/monitor.png" alt="Monitor: CPU, GPU, memory, temperature, fans and power charts with warning lines">
+      <p>CPU (performance and efficiency cores), GPU, memory pressure, temperatures, fans, power, battery,
+      disk and network throughput. Live charts and per-minute history for 1 hour, 24 hours or 7 days, with
+      warning lines for memory and heat. Each menu bar item can be text, sparkline, columns, bar, ring,
+      blocks, a heat pill or dual lines.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>Health check</h3>
+      <img src="docs/images/health.png" alt="Health check: score, readings over the last 24 hours and free space history">
+      <p>A health score from the last hours of history, free space and background items, with what lowers
+      it and what to do. Read-only security check of Gatekeeper, FileVault, the firewall, SIP, automatic
+      security updates and XProtect.</p>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" valign="top">
+      <h3>Disk analysis</h3>
+      <img src="docs/images/disk.png" alt="Disk analysis: a sunburst of the home folder next to its largest folders">
+      <p>Sunburst and treemap (click any folder to jump straight into it), the largest files with kind and
+      age filters, duplicates (APFS clones and hard links understood), what changed since the last scan, and
+      space suggestions for big unused files and bloated folders. Drag items to the collector and move them
+      to the Trash in one go.</p>
+    </td>
+  </tr>
+</table>
+
+| | |
+|---|---|
+| **Fan control** | Automatic, fixed speed or temperature curves (quiet, balanced, performance, custom), an “only increase” mode, hard safety limits, and profiles that switch by running app or power source. |
+| **One-click optimize** | Declarative cleaning rules with a preview: low-risk caches are deleted, medium and high risk go to the Trash. Protected paths, a never-clean list, an operation log, maintenance tasks, project build-artifact cleanup and scheduled auto-clean. |
+| **App uninstaller** | Finds what an app left behind from bundle IDs, embedded helpers, entitlements, container metadata, launchd ownership, Homebrew zap lists and per-app rules. Name-only matches are flagged for review; leftovers of apps already gone are found too. |
+| **Startup items** | Your launch agents (disable, enable, remove), all-users agents and system daemons, with the owning app and broken items marked. |
+| **Homebrew updates** | Updates apps you installed with Homebrew. |
+| **Alerts** | Notifications for high CPU temperature, critical memory pressure and low disk space. |
+| **Optional history** | Process, sensor and core history are off by default. Process history keeps only the name, CPU and memory (no paths, arguments or user names). Retention is 1–30 days. |
+| **The slime** | The mascot follows how the Mac is doing (blue, yellow, red), reacts to taps, hovering and dragging, and to events like heat or a finished cleanup. Reduce Motion and VoiceOver are respected. |
+| **Languages** | English, Traditional Chinese, Simplified Chinese, Japanese, Korean and Spanish. Settings → General → Language overrides the system language. |
+
+## First launch
+
+MacHelper walks you through two permissions, one at a time. Both are optional; everything else works
+without them.
+
+1. **Full Disk Access** lets disk analysis and cleanup see protected places such as Mail downloads and
+   other apps' caches. Turn MacHelper on in **System Settings → Privacy & Security → Full Disk Access**;
+   the sheet notices by itself. Folders under System Integrity Protection stay unreadable even then, and
+   disk analysis lists them separately.
+2. **The Helper** is a small root daemon for fan control, system cache and log cleanup, system background
+   items and system process usage. The guide installs it, opens **System Settings → General → Login Items
+   & Extensions** for you to allow it, and confirms it answers. It verifies the code signature of every
+   caller. While it is off, **Set up Helper…** at the bottom of the sidebar opens the guide again.
+
+## Command line
+
+The app bundles `machelper` (Homebrew links it for you). Every command previews by default and supports
+`--json`, so it works well in scripts and for AI agents. Run `machelper guide` for an overview and
+`machelper <command> --help` for each command.
+
+```sh
+machelper status --json                 # every reading right now
+machelper clean                         # preview what would be cleaned
+machelper clean --max-risk low --yes    # clean only the low-risk items
+```
 
 ## Building
 
-Requirements: Xcode 16 or later, [XcodeGen](https://github.com/yonaskolb/XcodeGen).
+Requirements: Xcode 16 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```sh
 xcodegen generate
@@ -70,8 +135,8 @@ scripts/install.sh          # Release build → /Applications/MacHelper.app, the
 swift test                  # unit tests for the Swift packages
 ```
 
-Signing: `Config/Signing.xcconfig` defaults to ad-hoc. For a stable helper registration, create a
-git-ignored `Config/Local.xcconfig` with your team (a free Apple ID's Personal Team works):
+`Config/Signing.xcconfig` signs ad-hoc by default. For a Helper registration that survives rebuilds,
+create a git-ignored `Config/Local.xcconfig` with your team (a free Apple ID's Personal Team works):
 
 ```
 DEVELOPMENT_TEAM = XXXXXXXXXX
@@ -79,39 +144,43 @@ CODE_SIGN_STYLE = Automatic
 CODE_SIGN_IDENTITY = Apple Development
 ```
 
-The first launch asks you to allow the helper in **System Settings → General → Login Items**.
-
-## Layout
-
 | Path | |
 |---|---|
-| `App/` | The SwiftUI/AppKit menu-bar app |
+| `App/` | The SwiftUI/AppKit menu bar app |
 | `Helper/` | Root helper daemon (fan writes, root-only maintenance) |
 | `Sources/SMCKit`, `Metrics`, `FanControl` | Hardware access, sampling, fan curves and policies |
 | `Sources/DiskScan` | Fast `getattrlistbulk` scanner, chart layouts, duplicates, scan snapshots |
 | `Sources/CleanEngine` | Cleaning rules, safety checks, uninstaller, startup items, auto-clean |
 | `Sources/Storage` | Metric history (GRDB) |
 | `Sources/machelper` | The CLI |
+| `docs/release-notes/` | Translated release notes shown in the update window |
+
+The README images are made from the app itself: `MacHelper --snapshot-window DIR --dark` renders every page,
+`--snapshot DIR` the menu bar, and `--export-mascot-gif FILE` the slime animation.
 
 ## Releasing
 
 1. Move the changes under **Unreleased** in [CHANGELOG.md](CHANGELOG.md) to a new `## [x.y.z]` section.
-2. `scripts/release.sh build x.y.z` — a trial run: tests, a clean Release build, the DMG and zip.
-3. `scripts/release.sh prepare x.y.z` — the same, then commits the version and tags `vx.y.z` locally.
-4. `scripts/release.sh publish x.y.z` — pushes `main` and the tag, creates the GitHub release with the
-   DMG, zip, checksums and the changelog section as notes, then updates
-   `Casks/machelper.rb` in the [Homebrew tap](https://github.com/smile-minecraft/homebrew-tap) and pushes it.
+   It becomes the GitHub release notes and the English notes in the update window.
+2. Translate that section into `docs/release-notes/x.y.z/<lang>.md` for `zh-Hant`, `zh-Hans`, `ja`, `ko`
+   and `es`. Preparing a release fails while any of them is missing.
+3. `scripts/release.sh build x.y.z` — a trial run: tests, a clean Release build, the DMG and zip.
+4. `SPARKLE_APPCAST=1 scripts/release.sh prepare x.y.z` — tests, a Developer ID build, notarization, then
+   commits the version, tags `vx.y.z` and writes the Sparkle appcast with one release-notes link per language.
+5. `scripts/release.sh publish x.y.z` — pushes `main` and the tag, creates the GitHub release, updates the
+   [Homebrew tap](https://github.com/smile-minecraft/homebrew-tap) and finally publishes the appcast to
+   GitHub Pages, which is when installed copies see the update.
 
 CI (`.github/workflows/ci.yml`) runs the tests and an ad-hoc signed build on every push and pull request.
 
 ## Translating
 
-Source strings are English. Translations live in String Catalogs:
-`App/Resources/Localizable.xcstrings`, `Sources/CleanEngine/Localizable.xcstrings` and
-`Sources/CleanEngine/Rules.xcstrings` (rule text, keyed `rule.<id>.title`). Open them in Xcode and add a
-language, or use `scripts/l10n/add.py --lang ja`. After a build, `scripts/l10n/check.py` lists strings missing in any
-shipped language. A new language also goes into `AppLanguage.all` (`App/Main/AppLanguage.swift`) for the language
-picker, and gets a README.
+Source strings are English. Translations live in String Catalogs: `App/Resources/Localizable.xcstrings`,
+`Sources/CleanEngine/Localizable.xcstrings` and `Sources/CleanEngine/Rules.xcstrings` (rule text, keyed
+`rule.<id>.title`). Open them in Xcode and add a language, or use `scripts/l10n/add.py --lang ja`. After a
+build, `scripts/l10n/check.py` lists strings missing in any shipped language. A new language also goes into
+`AppLanguage.all` (`App/Main/AppLanguage.swift`), `NOTE_LANGS` in `scripts/sparkle/appcast.sh`, and gets a
+README.
 
 ## License
 

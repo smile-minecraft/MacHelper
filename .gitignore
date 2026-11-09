@@ -42,5 +42,8 @@ scratch/
 tmp/
 .idea/
 
-# Local docs: handoff notes, research reports, CLI notes (kept locally, not in the repo)
-docs/
+# Local docs: handoff notes, research reports, CLI notes (kept locally, not in the repo).
+# README images and translated release notes are published.
+docs/*
+!docs/images/
+!docs/release-notes/
