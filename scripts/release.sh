@@ -81,6 +81,7 @@ cask "machelper" do
   homepage "$REPO_URL"
 
   depends_on macos: :sonoma
+  depends_on arch: :arm64
 
   app "MacHelper.app"
   binary "#{appdir}/MacHelper.app/Contents/MacOS/machelper-cli", target: "machelper"
