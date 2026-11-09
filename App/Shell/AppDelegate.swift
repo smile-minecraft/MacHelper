@@ -102,6 +102,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             NSApp.terminate(nil)
             return
         }
+        if let i = args.firstIndex(of: "--export-mascot-gif"), i + 1 < args.count {
+            exportMascotGIF(to: URL(fileURLWithPath: args[i + 1]))
+            NSApp.terminate(nil)
+            return
+        }
         if let i = args.firstIndex(of: "--export-mascot-icon"), i + 1 < args.count {
             exportMascotIcon(to: URL(fileURLWithPath: args[i + 1]))
             NSApp.terminate(nil)
@@ -208,6 +213,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
     }
 
+    /// Docs aid: `MacHelper --export-mascot-gif FILE` writes an animated GIF of the slime at its real
+    /// 8 fps timing: breathing and a blink, an idle wave, a tap hop, a double-tap and a celebration.
+    private func exportMascotGIF(to url: URL) {
+        typealias Frame = (mood: SlimeMascot.Mood, frame: Int, interaction: MascotInteraction?)
+        var frames: [Frame] = []
+        for f in 40..<80 { frames.append((.init(), f, nil)) }                       // breathe, blink, wave
+        for f in 80..<92 { frames.append((.init(), f, .init(reaction: .singleTap, startedAt: 80))) }
+        for f in 92..<108 { frames.append((.init(), f, .init(reaction: .doubleTap, startedAt: 92))) }
+        for f in 108..<132 { frames.append((.init(reaction: .cleanupFinished), f, nil)) }
+        for f in 132..<148 { frames.append((.init(), f, nil)) }
+        let cell = 6
+        let w = SlimeMascot.columns * cell, h = SlimeMascot.rows * cell
+        guard let dest = CGImageDestinationCreateWithURL(url as CFURL, "com.compuserve.gif" as CFString, frames.count, nil) else { return }
+        CGImageDestinationSetProperties(dest, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
+        let delay = [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 1 / SlimeMascot.fps,
+                                                     kCGImagePropertyGIFUnclampedDelayTime: 1 / SlimeMascot.fps]] as CFDictionary
+        for item in frames {
+            guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                                      space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
+            let pose = SlimePose.make(mood: item.mood, frame: item.frame, tappedAt: nil, interaction: item.interaction)
+            SlimeRenderer.paint(pose) { x, y, color in
+                ctx.setFillColor(NSColor(color).cgColor)
+                ctx.fill(CGRect(x: x * cell, y: h - (y + 1) * cell, width: cell, height: cell))
+            }
+            if let image = ctx.makeImage() { CGImageDestinationAddImage(dest, image, delay) }
+        }
+        CGImageDestinationFinalize(dest)
+    }
+
     /// Debug aid: `MacHelper --snapshot-mascot DIR` renders every mood at several frames (rows: moods,
     /// columns: frames), plus a tap reaction row, into mascot.png.
     private func renderMascotSheet(to dir: URL) {
@@ -293,12 +328,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: 40)
         guard let button = statusItem.button else { return }
 
-        let view = StatusItemView(store: store, health: app.healthModel) { [weak self] width in
-            // Resize after the current SwiftUI update pass, not during it.
-            DispatchQueue.main.async { self?.resizeStatusItem(to: width) }
-        }
-        let hosting = ClickThroughHostingView(rootView: view)
-        // The item's width comes from the view's own measurement callback above; without size
+        let hosting = ClickThroughHostingView(rootView: StatusItemView(store: store, health: app.healthModel))
+        // The item's width is measured separately (see `remeasureStatusItem`); without size
         // constraints AppKit doesn't re-measure the SwiftUI tree (minSize) on every redraw of the
         // menu bar copies, which was most of the remaining CPU time.
         hosting.sizingOptions = []
@@ -318,6 +349,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                                                name: NSView.frameDidChangeNotification, object: button)
         button.target = self
         button.action = #selector(togglePopover(_:))
+        remeasureStatusItem()
+        observeStatusLayout()
         button.setAccessibilityLabel(String(localized: "MacHelper System Monitor"))
     }
 
@@ -353,12 +386,53 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         popover.contentViewController = nil
     }
 
-    /// The item only grows while values change ("9%" → "19%" → "9%" would otherwise shift every icon to
-    /// its left); it is re-measured from scratch when the menu bar configuration changes.
+    /// Width the status item was last given, from the off-screen measurement below.
     private var statusWidth: CGFloat = 0
-    private var statusConfig: MonitorConfiguration?
-
+    /// What the last measurement depended on; values alone never change the width because every
+    /// value is laid out in a fixed-width template.
+    private var statusLayoutKey: String?
+    /// Off-screen copy of the menu bar view, used only to read its natural size. The visible copy
+    /// can't report it: inside the status button its preference callbacks stopped after the first
+    /// pass, which left the item stuck at its launch width (22 pt) and clipped the contents.
+    private lazy var statusMeasurer = NSHostingView(rootView: StatusItemView(store: store, health: app.healthModel))
     private var lastReassert = Date.distantPast
+
+    /// Everything the menu bar's width depends on.
+    private func currentStatusLayoutKey() -> String {
+        let look = ThemeStore.shared.settings
+        let showScore = UserDefaults.standard.bool(forKey: HealthScoreMenuBar.key)
+        let hasScore = showScore && app.healthModel.score(store: store) != nil
+        let items = store.menuBarItemsCache.map { item in
+            "\(item.module.rawValue):\(settings.configuration.config(item.module).style):\(item.secondary != nil):\(item.fraction != nil)"
+        }
+        return [items.joined(separator: ","), "\(settings.configuration.compact)", "\(look.menuBarLabel)",
+                "\(look.menuBarFont)", "\(hasScore)"].joined(separator: "|")
+    }
+
+    /// Re-measures whenever something the menu bar shows changes (readings arrive every second;
+    /// the measurement itself only runs when the layout key differs).
+    private func observeStatusLayout() {
+        withObservationTracking {
+            _ = currentStatusLayoutKey()
+        } onChange: { [weak self] in
+            DispatchQueue.main.async {
+                self?.remeasureStatusItem()
+                self?.observeStatusLayout()
+            }
+        }
+    }
+
+    private func remeasureStatusItem() {
+        let key = currentStatusLayoutKey()
+        guard key != statusLayoutKey else { return }
+        statusLayoutKey = key
+        statusMeasurer.rootView = StatusItemView(store: store, health: app.healthModel)
+        statusMeasurer.layoutSubtreeIfNeeded()
+        let width = max(ceil(statusMeasurer.fittingSize.width), 22)
+        guard width != statusWidth else { return }
+        statusWidth = width
+        statusItem.length = width
+    }
 
     @objc private func statusButtonFrameChanged(_ notification: Notification) {
         DispatchQueue.main.async { self.reassertStatusWidth() }
@@ -373,18 +447,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         lastReassert = Date()
         statusItem.length = statusWidth + 1
         statusItem.length = statusWidth
-    }
-
-    private func resizeStatusItem(to width: CGFloat) {
-        let w = max(ceil(width), 22)
-        if statusConfig != settings.configuration {
-            statusConfig = settings.configuration
-            statusWidth = w
-        } else {
-            statusWidth = max(statusWidth, w)
-        }
-        if statusItem.length != statusWidth { statusItem.length = statusWidth }
-        reassertStatusWidth()
     }
 
     @objc private func togglePopover(_ sender: Any?) {

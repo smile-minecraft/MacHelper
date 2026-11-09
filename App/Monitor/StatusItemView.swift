@@ -61,8 +61,6 @@ struct StatusItemView: View {
     let store: MonitorStore
     var health: HealthModel? = nil
     @AppStorage(HealthScoreMenuBar.key) private var showHealthScore = false
-    /// Reports the natural width so the status item can resize itself.
-    var onWidthChange: (CGFloat) -> Void = { _ in }
 
     var body: some View {
         let compact = store.settings.configuration.compact
@@ -82,15 +80,6 @@ struct StatusItemView: View {
         .padding(.horizontal, 6)
         .frame(height: 22)
         .fixedSize()
-        .background(GeometryReader { geo in
-            Color.clear.preference(key: WidthKey.self, value: geo.size.width)
-        })
-        .onPreferenceChange(WidthKey.self) { onWidthChange($0) }
-    }
-
-    private struct WidthKey: PreferenceKey {
-        static let defaultValue: CGFloat = 0
-        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
     }
 }
 
