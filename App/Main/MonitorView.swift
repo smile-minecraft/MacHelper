@@ -5,7 +5,9 @@ import SwiftUI
 
 struct MonitorView: View {
     let store: MonitorStore
+    let app: AppModel
     @AppStorage("monitor.range") private var range: Range = .live
+    @AppStorage("monitor.fill") private var fill = true
     @State private var samples: [MetricSample] = []
     /// The range whose data the charts show. It follows `range` only once that range's history has
     /// loaded, so switching ranges keeps the old charts up instead of flashing the empty state.
@@ -23,6 +25,7 @@ struct MonitorView: View {
 
     private struct Metric: Identifiable {
         let id: String
+        let module: MonitorModule
         let title: LocalizedStringKey
         let color: Color
         let format: Format
@@ -30,28 +33,41 @@ struct MonitorView: View {
     }
 
     private let metrics: [Metric] = [
-        Metric(id: "cpu", title: "CPU", color: Theme.blue, format: .percent,
+        Metric(id: "cpu", module: .cpu, title: "CPU", color: Theme.blue, format: .percent,
                series: [(String(localized: "Total"), .cpu, \.cpu)]),
-        Metric(id: "gpu", title: "GPU", color: Theme.violet, format: .percent, series: [("GPU", .gpu, \.gpu)]),
-        Metric(id: "memory", title: "Memory", color: Theme.cyan, format: .percent,
+        Metric(id: "gpu", module: .gpu, title: "GPU", color: Theme.violet, format: .percent, series: [("GPU", .gpu, \.gpu)]),
+        Metric(id: "memory", module: .memory, title: "Memory", color: Theme.cyan, format: .percent,
                series: [(String(localized: "In use"), .memory, \.memory)]),
-        Metric(id: "temperature", title: "Temperature", color: Theme.orange, format: .celsius,
+        Metric(id: "temperature", module: .temperature, title: "Temperature", color: Theme.orange, format: .celsius,
                series: [(String(localized: "Hottest CPU sensor"), .temperature, \.temperature)]),
-        Metric(id: "fan", title: "Fans", color: Theme.mint, format: .rpm, series: [(String(localized: "Speed"), .fan, \.fan)]),
-        Metric(id: "power", title: "Power", color: Theme.amber, format: .watts, series: [(String(localized: "System"), .power, \.power)]),
-        Metric(id: "network", title: "Network", color: Theme.blue, format: .bytesPerSecond,
+        Metric(id: "fan", module: .fan, title: "Fans", color: Theme.mint, format: .rpm, series: [(String(localized: "Speed"), .fan, \.fan)]),
+        Metric(id: "power", module: .power, title: "Power", color: Theme.amber, format: .watts, series: [(String(localized: "System"), .power, \.power)]),
+        Metric(id: "network", module: .network, title: "Network", color: Theme.blue, format: .bytesPerSecond,
                series: [(String(localized: "Download"), .netIn, \.networkIn), (String(localized: "Upload"), .netOut, \.networkOut)]),
-        Metric(id: "disk", title: "Disk", color: Theme.violet, format: .bytesPerSecond,
+        Metric(id: "disk", module: .disk, title: "Disk", color: Theme.violet, format: .bytesPerSecond,
                series: [(String(localized: "Read"), .diskRead, \.diskRead), (String(localized: "Write"), .diskWrite, \.diskWrite)]),
-        Metric(id: "battery", title: "Battery", color: Theme.mint, format: .percent,
+        Metric(id: "battery", module: .battery, title: "Battery", color: Theme.mint, format: .percent,
                series: [(String(localized: "Charge"), .battery, \.battery)]),
     ]
 
     var body: some View {
+        // Stop the live charts and process list while the main window is closed or minimized.
+        // The menu bar and background recording read the store directly and are unaffected.
+        if app.hasVisibleMainWindow {
+            content
+        } else {
+            Color.clear
+        }
+    }
+
+    @ViewBuilder private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     ChipBar(items: Range.allCases.map { ($0, $0.title) }, selection: $range)
+                    Toggle("Fill under line", isOn: $fill)
+                        .toggleStyle(.checkbox)
+                        .font(.mhCaption)
                     Spacer()
                     Text(range == .live ? String(localized: "Last 5 minutes, updated live")
                          : String(localized: "Averages per \(Duration.seconds(range.bucket).formatted(.units(allowed: [.minutes, .hours], width: .wide)))"))
@@ -132,29 +148,8 @@ struct MonitorView: View {
                 Spacer()
             }
             Chart {
-                ForEach(data, id: \.0) { name, pts in
-                    // Break the line where an expected bucket is missing so the chart never
-                    // paints across sleep, shutdown, or a stalled recorder. Each segment gets
-                    // its own series identity; the shared style value keeps one color and
-                    // one legend entry per metric.
-                    let segments = HistorySegments.split(pts, time: \.date, maxGap: segmentGap)
-                    ForEach(Array(segments.enumerated()), id: \.offset) { index, segment in
-                        let seriesKey = "\(name) · segment \(index)"
-                        ForEach(segment, id: \.date) { p in
-                            LineMark(x: .value("Time", p.date), y: .value("Value", p.value), series: .value("Segment", seriesKey))
-                                .foregroundStyle(by: .value("Series", name))
-                                .interpolationMethod(.monotone)
-                                .lineStyle(StrokeStyle(lineWidth: 1.6))
-                        }
-                        if data.count == 1 {
-                            ForEach(segment, id: \.date) { p in
-                                AreaMark(x: .value("Time", p.date), y: .value("Value", p.value), series: .value("Segment", seriesKey))
-                                    .foregroundStyle(LinearGradient(colors: [m.color.opacity(0.25), m.color.opacity(0.02)], startPoint: .top, endPoint: .bottom))
-                                    .interpolationMethod(.monotone)
-                            }
-                        }
-                    }
-                }
+                seriesMarks(m, data)
+                thresholdMarks(m)
             }
             .chartForegroundStyleScale(range: [m.color, Theme.mint])
             .chartLegend(data.count > 1 ? .visible : .hidden)
@@ -171,11 +166,53 @@ struct MonitorView: View {
                     AxisMarks(values: .automatic(desiredCount: 5)) { _ in AxisValueLabel(format: xFormat) }
                 }
             }
-            .chartYScale(domain: .automatic(includesZero: true))
+            .modifier(ThresholdYScale(top: m.module.chartThresholds.map(\.value).max(),
+                                      peak: data.flatMap(\.1).map(\.value).max()))
             .frame(height: 140)
             .transaction { $0.animation = nil }
         }
         .padding(16)
+    }
+
+    @ChartContentBuilder
+    private func seriesMarks(_ m: Metric, _ data: [(String, [ChartPoint])]) -> some ChartContent {
+        ForEach(data, id: \.0) { name, pts in
+            // Break the line where an expected bucket is missing so the chart never
+            // paints across sleep, shutdown, or a stalled recorder. Each segment gets
+            // its own series identity; the shared style value keeps one color and
+            // one legend entry per metric.
+            let segments = HistorySegments.split(pts, time: \.date, maxGap: segmentGap)
+            ForEach(Array(segments.enumerated()), id: \.offset) { index, segment in
+                let seriesKey = "\(name) · segment \(index)"
+                ForEach(segment, id: \.date) { p in
+                    LineMark(x: .value("Time", p.date), y: .value("Value", p.value), series: .value("Segment", seriesKey))
+                        .foregroundStyle(by: .value("Series", name))
+                        .interpolationMethod(.monotone)
+                        .lineStyle(StrokeStyle(lineWidth: 1.6))
+                }
+                if fill && data.count == 1 {
+                    ForEach(segment, id: \.date) { p in
+                        AreaMark(x: .value("Time", p.date), y: .value("Value", p.value), series: .value("Segment", seriesKey))
+                            .foregroundStyle(LinearGradient(colors: [m.color.opacity(0.25), m.color.opacity(0.02)], startPoint: .top, endPoint: .bottom))
+                            .interpolationMethod(.monotone)
+                    }
+                }
+            }
+        }
+    }
+
+    @ChartContentBuilder
+    private func thresholdMarks(_ m: Metric) -> some ChartContent {
+        ForEach(m.module.chartThresholds) { threshold in
+            RuleMark(y: .value("Threshold", threshold.value))
+                .foregroundStyle(threshold.level.color.opacity(0.75))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                .annotation(position: .top, alignment: .leading) {
+                    Text(threshold.label)
+                        .font(.mhCaption2)
+                        .foregroundStyle(threshold.level.color)
+                }
+        }
     }
 
     /// Live samples are at most 30 s apart; history uses one point per bucket. A delta
@@ -195,6 +232,21 @@ struct MonitorView: View {
         case .rpm: Fmt.rpm(v)
         case .watts: Fmt.watts(v)
         case .bytesPerSecond: Fmt.rate(v)
+        }
+    }
+}
+
+/// Keeps the 0 baseline and extends the top of the y axis past the highest threshold
+/// line when the data itself never reaches it, so the line always stays visible.
+private struct ThresholdYScale: ViewModifier {
+    let top: Double?
+    let peak: Double?
+
+    func body(content: Content) -> some View {
+        if let top, let peak, peak < top {
+            content.chartYScale(domain: 0...top)
+        } else {
+            content.chartYScale(domain: .automatic(includesZero: true))
         }
     }
 }

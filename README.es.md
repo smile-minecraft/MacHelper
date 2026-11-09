@@ -16,7 +16,8 @@ Una utilidad todo en uno para Mac con macOS 14 o posterior, en la que todos los 
 - **Sugerencias de espacio**: archivos grandes sin usar desde hace medio año y carpetas que parecen infladas, marcados en los gráficos.
 - **Desinstalador de apps**: encuentra lo que deja una app mediante IDs de paquete, asistentes integrados, entitlements, metadatos de contenedores, propietarios de launchd, listas zap de Homebrew y reglas por app; las coincidencias solo por nombre se marcan para que las revises. También encuentra restos de apps ya eliminadas.
 - **Ítems de arranque**: tus Launch Agents (desactivar, activar, eliminar), los agentes de todos los usuarios y los daemons del sistema, con la app propietaria y los ítems rotos señalados.
-- **Actualizaciones de apps**: actualiza las apps instaladas con Homebrew.
+- **Actualizaciones de Homebrew**: actualiza las apps instaladas con Homebrew.
+- **Actualizaciones automáticas**: busca y descarga una versión nueva en segundo plano y pregunta antes de instalarla.
 - **Revisión de seguridad**: lee el estado de Gatekeeper, FileVault, el firewall, la protección de la integridad del sistema, las actualizaciones de seguridad automáticas y XProtect (solo lectura; nunca los cambia).
 - **Línea de comandos**: todo se puede automatizar o usar desde agentes de IA. Por defecto solo muestra una vista previa, y todos los comandos admiten `--json`. Ejecuta `machelper guide` para ver un resumen y `machelper <comando> --help` para cada comando.
 - **Skill para agentes de IA**: puedes añadir una skill a Claude Code y Codex para que usen MacHelper con seguridad: siempre previsualizan primero y preguntan antes de eliminar nada.

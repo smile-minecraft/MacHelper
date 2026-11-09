@@ -335,3 +335,95 @@ public enum MonitorAgentHeartbeatStore {
         try JSONEncoder().encode(heartbeat).write(to: url, options: .atomic)
     }
 }
+
+/// A snapshot of background recording taken immediately before Sparkle replaces the
+/// app bundle. The app unregisters the background agent for the install so the old
+/// binary is not running while the bundle is swapped, then the relaunched app (or
+/// the running app, when the update is canceled) consults this handoff to restore
+/// exactly what it stopped. Stored outside the bundle so it survives replacement.
+public struct UpdateAgentHandoff: Codable, Equatable, Sendable {
+    /// The recorder was enabled and registered immediately before the install.
+    public var wasEnabled: Bool
+    /// The last heartbeat was fresh (the recorder was actually sampling).
+    public var wasRunning: Bool
+    public var recordedAt: Date
+
+    public init(wasEnabled: Bool, wasRunning: Bool, recordedAt: Date) {
+        self.wasEnabled = wasEnabled
+        self.wasRunning = wasRunning
+        self.recordedAt = recordedAt
+    }
+}
+
+/// What the app should do with a handoff once the update (or a canceled update)
+/// leaves the service registration in a given state.
+public enum UpdateAgentRestore: Equatable, Sendable {
+    /// Nothing was running before, the handoff is missing, or the user must approve
+    /// again in Login Items. Leave the service alone: a revoked permission stays
+    /// revoked instead of being silently re-enabled.
+    case stayOff
+    /// The service is already enabled; re-publish the profile snapshot so the
+    /// recorder loop sees fresh sampling plans.
+    case republish
+    /// The agent was unregistered for the install; register it again so launchd
+    /// starts the new binary.
+    case reregister
+}
+
+/// Pure stop/restore decisions for the update handoff, kept free of the service
+/// APIs so the state machine stays unit-testable.
+public enum UpdateAgentRestorePlanner {
+    /// Captures whether recording may be resumed after the update. Only an intent
+    /// that was actually enabled and registered counts: recording turned off or
+    /// revoked before the update must not spring back after it.
+    public static func snapshot(enabledIntent: Bool,
+                                serviceStatus: BackgroundServiceStatus,
+                                heartbeat: MonitorAgentHeartbeat?,
+                                now: Date) -> UpdateAgentHandoff {
+        let wasEnabled = enabledIntent && serviceStatus == .enabled
+        let wasRunning: Bool
+        if wasEnabled, let heartbeat,
+           now.timeIntervalSince(heartbeat.lastHeartbeatAt) <= 120,
+           heartbeat.lastSampleAt.map({ now.timeIntervalSince($0) <= 180 }) ?? false {
+            wasRunning = true
+        } else {
+            wasRunning = false
+        }
+        return UpdateAgentHandoff(wasEnabled: wasEnabled, wasRunning: wasRunning, recordedAt: now)
+    }
+
+    /// Decides how to restore after the install completes or is canceled; both
+    /// need the same restore, which is also what unblocks a canceled update.
+    public static func restore(handoff: UpdateAgentHandoff?,
+                               serviceStatus: BackgroundServiceStatus) -> UpdateAgentRestore {
+        guard let handoff, handoff.wasEnabled else { return .stayOff }
+        switch serviceStatus {
+        case .enabled: return .republish
+        case .notRegistered, .notFound: return .reregister
+        case .requiresApproval: return .stayOff
+        }
+    }
+}
+
+/// JSON persistence for the update handoff, next to the profile and heartbeat.
+public enum UpdateAgentHandoffStore {
+    public static let fileName = "update-agent-handoff.json"
+
+    public static func defaultURL(supportDirectory: URL = FileManager.default.homeDirectoryForCurrentUser
+        .appending(path: "Library/Application Support/MacHelper")) -> URL {
+        supportDirectory.appending(path: fileName)
+    }
+
+    public static func load(from url: URL) -> UpdateAgentHandoff? {
+        try? JSONDecoder().decode(UpdateAgentHandoff.self, from: Data(contentsOf: url))
+    }
+
+    public static func save(_ handoff: UpdateAgentHandoff, to url: URL) throws {
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try JSONEncoder().encode(handoff).write(to: url, options: .atomic)
+    }
+
+    public static func clear(from url: URL) {
+        try? FileManager.default.removeItem(at: url)
+    }
+}

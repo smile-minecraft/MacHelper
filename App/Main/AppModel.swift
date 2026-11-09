@@ -1,5 +1,6 @@
 import AppKit
 import Observation
+import SettingsPortability
 import SwiftUI
 
 enum AppSection: String, CaseIterable, Identifiable, Hashable {
@@ -15,7 +16,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         case .optimize: "Optimize"
         case .disk: "Disk Analysis"
         case .uninstall: "Uninstall"
-        case .updates: "App Updates"
+        case .updates: "Homebrew Updates"
         case .startup: "Startup Items"
         }
     }
@@ -73,6 +74,20 @@ final class AppModel {
 
     var section: AppSection = .overview
 
+    /// Whether the main window is on screen. AppDelegate maintains this from NSWindow
+    /// notifications; OverviewView uses it to stop UI-only work while the window is closed
+    /// or miniaturized. Menu bar, background recording and health score read the store
+    /// directly and are unaffected.
+    var hasVisibleMainWindow = false
+
+    /// Any main window on screen. Miniaturized windows are not visible, so the overview
+    /// pauses while the window sits in the Dock.
+    static func mainWindowIsVisible() -> Bool {
+        NSApp.windows.contains {
+            $0.identifier?.rawValue.hasPrefix("main") == true && $0.isVisible && !$0.isMiniaturized
+        }
+    }
+
     /// Set by the main window's view; opens (or brings back) the main window.
     @ObservationIgnored var openMainWindow: (() -> Void)?
 
@@ -83,22 +98,45 @@ final class AppModel {
 
     func show(_ section: AppSection) {
         self.section = section
+        if DockPreference.migrate(.standard) != .never {
+            NSApp.setActivationPolicy(.regular)
+        }
         NSApp.activate()
         if let window = NSApp.windows.first(where: { $0.identifier?.rawValue.hasPrefix("main") == true && $0.canBecomeMain }) {
             window.makeKeyAndOrderFront(nil)
         } else {
             openMainWindow?()
         }
+        // The window may appear after this call; re-evaluate once it has been ordered in.
+        DispatchQueue.main.async { AppModel.applyDockPreference() }
     }
 
     func showSettings() {
+        if DockPreference.migrate(.standard) != .never {
+            NSApp.setActivationPolicy(.regular)
+        }
         NSApp.activate()
         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        DispatchQueue.main.async { AppModel.applyDockPreference() }
     }
 
-    /// Dock icon on (regular app) or off (menu bar only).
+    /// Keeps the app regular while the SwiftUI `Window` scene is being created. Applying the full
+    /// policy before the window exists would launch as accessory, and the main window would never
+    /// appear for `whileWindowOpen` or `always`. A `never` app starts in the menu bar only.
+    static func prepareDockPreference() {
+        // `never` must start in the menu bar, while the other modes need the regular policy
+        // long enough for the SwiftUI Window scene to order the main window in.
+        NSApp.setActivationPolicy(DockPreference.migrate(.standard) == .never ? .accessory : .regular)
+    }
+
+    /// Applies the Dock mode to the current set of windows. A mode of `whileWindowOpen` keeps the
+    /// regular policy while any ordinary window is visible or minimized; the menu bar panel is an
+    /// `NSPanel`, so it never counts as a window here.
     static func applyDockPreference() {
-        let show = UserDefaults.standard.object(forKey: "showInDock") as? Bool ?? true
-        NSApp.setActivationPolicy(show ? .regular : .accessory)
+        let mode = DockPreference.migrate(.standard)
+        let hasOpenWindows = NSApp.windows.contains {
+            $0.canBecomeMain && ($0.isVisible || $0.isMiniaturized)
+        }
+        NSApp.setActivationPolicy(mode.showsDockIcon(hasOpenWindows: hasOpenWindows) ? .regular : .accessory)
     }
 }

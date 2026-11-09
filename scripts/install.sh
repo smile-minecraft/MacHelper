@@ -7,6 +7,7 @@ XCODE_DEFAULT=/Volumes/Smile-Data/Applications/Xcode-27.2.0.app/Contents/Develop
 if [[ -z "${DEVELOPER_DIR:-}" && -d "$XCODE_DEFAULT" ]]; then export DEVELOPER_DIR="$XCODE_DEFAULT"; fi
 BUILD_NUMBER="${BUILD_NUMBER:-$(date +%Y%m%d%H%M)}"
 
+scripts/sparkle/fetch.sh
 xcodegen generate --quiet
 LOG=build/xcodebuild.log
 mkdir -p build

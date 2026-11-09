@@ -18,8 +18,46 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var statusItem: NSStatusItem!
     private let popover = NSPopover()
 
+    /// The Sparkle updater. Created eagerly below so background checks start
+    /// with the rest of the app, and retained so the updater is never deallocated.
+    private let updater: UpdaterController
+
+    override init() {
+        self.updater = UpdaterController.shared
+        super.init()
+    }
+
     func applicationWillFinishLaunching(_ notification: Notification) {
-        AppModel.applyDockPreference()
+        observeWindowVisibility()
+        AppModel.prepareDockPreference()
+    }
+
+    /// Re-evaluates the Dock mode whenever an ordinary window opens, closes, or leaves the Dock.
+    /// The notification can arrive before `isVisible` changes, so the check runs on the next turn.
+    private func observeWindowVisibility() {
+        let center = NotificationCenter.default
+        for name in [NSWindow.didBecomeKeyNotification,
+                     NSWindow.didBecomeMainNotification,
+                     NSWindow.didResignMainNotification,
+                     NSWindow.willCloseNotification,
+                     NSWindow.didMiniaturizeNotification,
+                     NSWindow.didDeminiaturizeNotification] {
+            center.addObserver(self, selector: #selector(windowVisibilityChanged(_:)), name: name, object: nil)
+        }
+    }
+
+    @objc private func windowVisibilityChanged(_ notification: Notification) {
+        // Only main-window notifications move the overview's visibility flag; other windows
+        // (Settings, etc.) still re-evaluate the Dock mode. willClose / didMiniaturize hide
+        // the window even before isVisible flips, so set the flag directly for those.
+        let window = notification.object as? NSWindow
+        let isAboutMainWindow = window?.identifier?.rawValue.hasPrefix("main") == true
+        let hiddenNow = notification.name == NSWindow.willCloseNotification
+            || notification.name == NSWindow.didMiniaturizeNotification
+        DispatchQueue.main.async {
+            AppModel.applyDockPreference()
+            if isAboutMainWindow { self.app.hasVisibleMainWindow = hiddenNow ? false : AppModel.mainWindowIsVisible() }
+        }
     }
 
     /// The menu bar keeps running when the window is closed.
@@ -34,6 +72,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         setUpStatusItem()
         setUpPopover()
+        // Sparkle stops the background recorder before replacing the app; restore it if this
+        // launch is the other side of an update and the user still wants it.
+        app.backgroundRecording.resumeAfterUpdateIfNeeded()
+        // The window scene may not have ordered the main window in yet. Give it a beat before
+        // deciding that a `whileWindowOpen` app has no windows; the window observers also update
+        // the policy as soon as it appears or closes.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            AppModel.applyDockPreference()
+            self.app.hasVisibleMainWindow = AppModel.mainWindowIsVisible()
+        }
         // Ad-hoc builds: launchd pins the helper's cdhash, so an updated bundle must re-register.
         _ = try? HelperClient.shared.refreshRegistrationIfNeeded()
         startHeartbeat()

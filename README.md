@@ -30,7 +30,8 @@ one-click cleanup, disk analysis, an app uninstaller and startup-item management
   for review. Also finds leftovers of apps that are already gone.
 - **Startup items** — your launch agents (disable / enable / remove), all-users agents and system daemons,
   with the owning app and broken items flagged.
-- **App updates** — updates apps installed with Homebrew.
+- **Homebrew updates** — updates apps installed with Homebrew.
+- **Self-updates** — checks for a new MacHelper version in the background and asks before installing it.
 - **Security check** — reads Gatekeeper, FileVault, firewall, SIP, automatic security updates and XProtect
   (read-only).
 - **Space suggestions** — big files not used for six months and folders that look bloated, marked in the
@@ -97,7 +98,7 @@ The first launch asks you to allow the helper in **System Settings → General �
 2. `scripts/release.sh build x.y.z` — a trial run: tests, a clean Release build, the DMG and zip.
 3. `scripts/release.sh prepare x.y.z` — the same, then commits the version and tags `vx.y.z` locally.
 4. `scripts/release.sh publish x.y.z` — pushes `main` and the tag, creates the GitHub release with the
-   DMG, zip, checksums and the changelog section as notes (0.x versions are pre-releases), then updates
+   DMG, zip, checksums and the changelog section as notes, then updates
    `Casks/machelper.rb` in the [Homebrew tap](https://github.com/smile-minecraft/homebrew-tap) and pushes it.
 
 CI (`.github/workflows/ci.yml`) runs the tests and an ad-hoc signed build on every push and pull request.

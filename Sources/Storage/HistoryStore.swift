@@ -72,6 +72,9 @@ public struct HistoryStore: Sendable {
         self.readOnly = readOnly
         var config = Configuration()
         config.readonly = readOnly
+        // WAL is the DatabasePool default; set it explicitly so shared access does not
+        // depend on a library default. Read-only pools ignore this setting.
+        config.journalMode = .wal
         config.busyMode = .timeout(5)
         if !readOnly {
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)

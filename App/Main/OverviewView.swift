@@ -10,30 +10,37 @@ struct OverviewView: View {
     private var store: MonitorStore { app.store }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 32) {
-                Headline(store: store, app: app)
-                Readouts(store: store, advanced: !ThemeStore.shared.isSimple)
-                Rectangle().fill(Palette.hairline).frame(height: 1)
-                HStack(alignment: .top, spacing: 40) {
-                    if ThemeStore.shared.isSimple {
-                        CommonTools(app: app).frame(maxWidth: .infinity, alignment: .topLeading)
-                    } else {
-                        BusiestApps(store: store).frame(maxWidth: .infinity, alignment: .topLeading)
+        // While the main window is closed or miniaturized this renders nothing, so the
+        // store updates below do not re-evaluate the headline, readouts or process list.
+        // The menu bar and background recording read the store directly, not this view.
+        if app.hasVisibleMainWindow {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 32) {
+                    Headline(store: store, app: app)
+                    Readouts(store: store, advanced: !ThemeStore.shared.isSimple)
+                    Rectangle().fill(Palette.hairline).frame(height: 1)
+                    HStack(alignment: .top, spacing: 40) {
+                        if ThemeStore.shared.isSimple {
+                            CommonTools(app: app).frame(maxWidth: .infinity, alignment: .topLeading)
+                        } else {
+                            BusiestApps(store: store).frame(maxWidth: .infinity, alignment: .topLeading)
+                        }
+                        ToDoList(app: app).frame(maxWidth: .infinity, alignment: .topLeading)
                     }
-                    ToDoList(app: app).frame(maxWidth: .infinity, alignment: .topLeading)
+                    MachineLine()
                 }
-                MachineLine()
+                .padding(.horizontal, 40)
+                .padding(.vertical, 32)
+                .frame(maxWidth: 1100, alignment: .leading)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 40)
-            .padding(.vertical, 32)
-            .frame(maxWidth: 1100, alignment: .leading)
-            .frame(maxWidth: .infinity)
-        }
-        .onAppear { store.watchProcesses(true) }
-        .onDisappear { store.watchProcesses(false) }
-        .task {
-            if !ThemeStore.shared.isSimple, app.startupModel.items.isEmpty { await app.startupModel.load() }
+            .onAppear { store.watchProcesses(true) }
+            .onDisappear { store.watchProcesses(false) }
+            .task {
+                if !ThemeStore.shared.isSimple, app.startupModel.items.isEmpty { await app.startupModel.load() }
+            }
+        } else {
+            Color.clear
         }
     }
 }
@@ -44,6 +51,17 @@ struct OverviewView: View {
 private struct Headline: View {
     let store: MonitorStore
     let app: AppModel
+
+    // System reactions: cooldowns and priorities live here so the slime only reacts when
+    // OverviewView decides, and the frequency setting scales every cooldown.
+    @State private var systemReaction: MascotReaction?
+    @State private var reactionExpiresAt: Date?
+    @State private var lastShown: [MascotReaction: Date] = [:]
+    @State private var previousHealthLevel: HealthScore.Level?
+    @State private var previousHealthValue: Int?
+    @State private var previousHelperEnabled: Bool?
+    @State private var previousCharging = false
+    @State private var previousOptimizePhase: OptimizeModel.Phase = .idle
 
     private struct Verdict {
         let sentence: String
@@ -90,13 +108,81 @@ private struct Headline: View {
                       StatusRules.disk(freeBytes: store.diskFreeBytes)?.level, verdict.level].compactMap { $0 }
         var m = SlimeMascot.Mood(level: levels.max() ?? .good, holdsSign: verdict.action != nil)
         m.sleepy = m.level == .good && !m.holdsSign && (store.cpu?.total ?? 1) < 0.05
+        m.reaction = activeSystemReaction
         return m
+    }
+
+    private var activeSystemReaction: MascotReaction? {
+        guard let reaction = systemReaction else { return nil }
+        if reaction.isSustained { return reaction }
+        if let expires = reactionExpiresAt { return Date() < expires ? reaction : nil }
+        return reaction
+    }
+
+    /// Sustained conditions (CPU, memory, disk, temperature, battery), most urgent first.
+    private var sustainedCandidate: MascotReaction? {
+        var candidates: [MascotReaction] = []
+        if let t = store.cpuCelsius, t >= 95 { candidates.append(.tempHot) }
+        if (store.cpu?.total ?? 0) >= 0.85 { candidates.append(.cpuHigh) }
+        if store.memory != nil, store.memory?.pressure != .normal { candidates.append(.memoryTight) }
+        if let free = store.diskFreeBytes, DiskSpaceLevels.level(freeBytes: Double(free)) != .healthy { candidates.append(.diskLow) }
+        if let battery = store.battery, battery.charge <= 0.2, !battery.isCharging { candidates.append(.batteryLow) }
+        return candidates.max { $0.priority < $1.priority }
+    }
+
+    private func isSustainedSatisfied(_ reaction: MascotReaction) -> Bool {
+        switch reaction {
+        case .cpuHigh: (store.cpu?.total ?? 0) >= 0.85
+        case .memoryTight: store.memory != nil && store.memory?.pressure != .normal
+        case .diskLow: store.diskFreeBytes.map { DiskSpaceLevels.level(freeBytes: Double($0)) } != .healthy
+        case .tempHot: (store.cpuCelsius ?? 0) >= 95
+        case .batteryLow: store.battery.map { $0.charge <= 0.2 && !$0.isCharging } ?? false
+        default: false
+        }
+    }
+
+    private func consider(_ reaction: MascotReaction) {
+        // OverviewView already unmounts this view while the window is hidden; this guard
+        // keeps any reaction from starting if it is ever reached without the window on screen.
+        guard app.hasVisibleMainWindow else { return }
+        let now = Date()
+        let multiplier = MascotSettingsStore.shared.frequency.cooldownMultiplier
+        if let last = lastShown[reaction], now.timeIntervalSince(last) < reaction.cooldownSeconds * multiplier { return }
+        if let current = systemReaction, current != reaction {
+            if current.isSustained, current.priority >= reaction.priority { return }
+            if !current.isSustained, let expires = reactionExpiresAt, now < expires, current.priority > reaction.priority { return }
+        }
+        systemReaction = reaction
+        lastShown[reaction] = now
+        reactionExpiresAt = reaction.isSustained ? nil : now.addingTimeInterval(Double(reaction.durationFrames) / 8.0)
+    }
+
+    private func evaluateSustained() {
+        guard app.hasVisibleMainWindow else { return }
+        if let current = systemReaction, current.isSustained, !isSustainedSatisfied(current) {
+            systemReaction = nil
+            reactionExpiresAt = nil
+        }
+        if let candidate = sustainedCandidate {
+            if systemReaction != candidate {
+                if let current = systemReaction, !current.isSustained {
+                    consider(candidate)
+                } else {
+                    systemReaction = candidate
+                    lastShown[candidate] = Date()
+                    reactionExpiresAt = nil
+                }
+            }
+        } else if let current = systemReaction, current.isSustained {
+            systemReaction = nil
+            reactionExpiresAt = nil
+        }
     }
 
     var body: some View {
         let v = verdict
         HStack(alignment: .center, spacing: 24) {
-            SlimeMascot(mood: mood, cell: 4)
+            SlimeMascot(mood: mood, cell: 4, frequency: MascotSettingsStore.shared.frequency)
             VStack(alignment: .leading, spacing: 10) {
                 Text(styled(v)).font(.display(34, weight: .semibold)).foregroundStyle(Palette.text)
                     .fixedSize(horizontal: false, vertical: true)
@@ -109,6 +195,52 @@ private struct Headline: View {
             if let (title, section) = v.action {
                 Button { app.show(section) } label: { Text(title) }
                     .buttonStyle(PrimaryButtonStyle())
+            }
+        }
+        .onAppear {
+            previousHealthLevel = app.healthModel.score(store: store)?.level
+            previousHealthValue = app.healthModel.score(store: store)?.value
+            previousHelperEnabled = HelperClient.shared.status == .enabled
+            previousCharging = store.battery?.isCharging ?? false
+            previousOptimizePhase = app.optimizeModel.phase
+            evaluateSustained()
+        }
+        .onChange(of: store.cpu?.total) { _, _ in evaluateSustained() }
+        .onChange(of: store.memory?.pressure) { _, _ in evaluateSustained() }
+        .onChange(of: store.cpuCelsius) { _, _ in evaluateSustained() }
+        .onChange(of: store.diskFreeBytes) { _, _ in evaluateSustained() }
+        .onChange(of: store.battery?.charge) { _, _ in evaluateSustained() }
+        .onChange(of: store.battery?.isCharging) { _, isCharging in
+            let charging = isCharging ?? false
+            if charging && !previousCharging { consider(.batteryCharging) }
+            previousCharging = charging
+            evaluateSustained()
+        }
+        .onChange(of: app.optimizeModel.phase) { _, phase in
+            if phase == .finished && previousOptimizePhase != .finished { consider(.cleanupFinished) }
+            previousOptimizePhase = phase
+        }
+        .onChange(of: app.healthModel.score(store: store)?.value) { _, value in
+            let newScore = app.healthModel.score(store: store)
+            if let oldLevel = previousHealthLevel, let newLevel = newScore?.level, newLevel != oldLevel {
+                consider(newLevel > oldLevel ? .healthWorsened : .healthImproved)
+            } else if let oldValue = previousHealthValue, let newValue = value, newValue - oldValue >= 5 {
+                consider(.healthImproved)
+            } else if let oldValue = previousHealthValue, let newValue = value, oldValue - newValue >= 5 {
+                consider(.healthWorsened)
+            }
+            previousHealthLevel = newScore?.level
+            previousHealthValue = value
+        }
+        .task {
+            if previousHelperEnabled == nil { previousHelperEnabled = HelperClient.shared.status == .enabled }
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(5))
+                let enabled = HelperClient.shared.status == .enabled
+                if let previous = previousHelperEnabled, previous != enabled {
+                    consider(enabled ? .helperConnected : .helperDisconnected)
+                }
+                previousHelperEnabled = enabled
             }
         }
     }

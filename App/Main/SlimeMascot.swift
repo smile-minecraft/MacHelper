@@ -1,6 +1,147 @@
 import AppKit
 import SwiftUI
 
+/// How often the mascot reacts; persisted in MascotSettingsStore.
+enum MascotFrequency: String, CaseIterable, Codable, Sendable {
+    case quiet, normal, lively
+
+    var title: String {
+        switch self {
+        case .quiet: String(localized: "Quiet")
+        case .normal: String(localized: "Normal")
+        case .lively: String(localized: "Lively")
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .quiet: String(localized: "Reacts only to important events, with long pauses between reactions.")
+        case .normal: String(localized: "Reacts to taps and system events at a steady pace.")
+        case .lively: String(localized: "Reacts often and waves more often.")
+        }
+    }
+
+    /// Cooldowns multiply by this: quiet waits longer, lively repeats sooner.
+    var cooldownMultiplier: Double {
+        switch self {
+        case .quiet: 2.5
+        case .normal: 1
+        case .lively: 0.5
+        }
+    }
+
+    /// Frames between idle waves (8 fps): quiet every 20 s, normal 10 s, lively 5 s.
+    var idleWaveInterval: Int {
+        switch self {
+        case .quiet: 160
+        case .normal: 80
+        case .lively: 40
+        }
+    }
+}
+
+/// One built-in reaction to an interaction or a system event. All art is drawn from cells;
+/// nothing loads external files.
+enum MascotReaction: String, CaseIterable, Hashable, Sendable {
+    case singleTap, doubleTap, hovered, dragged, longPressed
+    case cpuHigh, memoryTight, diskLow, tempHot
+    case batteryLow, batteryCharging
+    case healthImproved, healthWorsened
+    case cleanupFinished, helperConnected, helperDisconnected
+
+    /// Higher wins when a system event and an interaction overlap.
+    var priority: Int {
+        switch self {
+        case .helperDisconnected: 90
+        case .cpuHigh, .tempHot: 85
+        case .memoryTight, .diskLow: 80
+        case .batteryLow: 75
+        case .healthWorsened: 70
+        case .doubleTap: 65
+        case .longPressed: 62
+        case .singleTap: 60
+        case .dragged: 45
+        case .hovered: 30
+        case .cleanupFinished, .batteryCharging: 25
+        case .healthImproved, .helperConnected: 20
+        }
+    }
+
+    /// Seconds before the same reaction may show again (before the frequency multiplier).
+    var cooldownSeconds: Double {
+        switch self {
+        case .singleTap: 0.5
+        case .doubleTap: 1
+        case .hovered: 0.5
+        case .dragged: 0.2
+        case .longPressed: 2
+        case .cpuHigh: 8
+        case .memoryTight: 10
+        case .diskLow: 15
+        case .tempHot: 10
+        case .batteryLow: 20
+        case .batteryCharging: 15
+        case .healthImproved, .healthWorsened: 30
+        case .cleanupFinished: 10
+        case .helperConnected, .helperDisconnected: 10
+        }
+    }
+
+    /// Momentary reactions show for this many frames at 8 fps.
+    var durationFrames: Int {
+        switch self {
+        case .singleTap: 12
+        case .doubleTap: 16
+        case .hovered: 80
+        case .dragged: 12
+        case .longPressed: 16
+        case .cpuHigh, .memoryTight, .diskLow, .tempHot, .batteryLow: 80
+        case .batteryCharging: 24
+        case .healthImproved, .healthWorsened: 24
+        case .cleanupFinished: 24
+        case .helperConnected, .helperDisconnected: 24
+        }
+    }
+
+    /// Sustained conditions (CPU, memory, disk, temperature, battery) hold while true.
+    var isSustained: Bool {
+        switch self {
+        case .cpuHigh, .memoryTight, .diskLow, .tempHot, .batteryLow: true
+        default: false
+        }
+    }
+
+    /// VoiceOver description: the slime's expression, never color alone.
+    var accessibilityValue: String {
+        switch self {
+        case .singleTap: String(localized: "Cheering")
+        case .doubleTap: String(localized: "Cheering loudly")
+        case .hovered: String(localized: "Watching the pointer")
+        case .dragged: String(localized: "Being dragged")
+        case .longPressed: String(localized: "Holding steady")
+        case .cpuHigh: String(localized: "Working hard")
+        case .memoryTight: String(localized: "Tight, sweating")
+        case .diskLow: String(localized: "Disk almost full")
+        case .tempHot: String(localized: "Feeling hot, sweating")
+        case .batteryLow: String(localized: "Battery low")
+        case .batteryCharging: String(localized: "Charging")
+        case .healthImproved: String(localized: "Health improved")
+        case .healthWorsened: String(localized: "Health worse")
+        case .cleanupFinished: String(localized: "Cleanup finished, celebrating")
+        case .helperConnected: String(localized: "Helper connected")
+        case .helperDisconnected: String(localized: "Helper disconnected")
+        }
+    }
+}
+
+/// An interaction's start, measured in the view's frame numbers (8 fps).
+struct MascotInteraction: Hashable {
+    var reaction: MascotReaction
+    var startedAt: Int
+    var shift: Int = 0
+    var look: Int = 0
+}
+
 /// MacHelper's mascot: a blue pixel slime with eyes only (no nose, no mouth). It squashes and
 /// bounces, blinks, and puts out two little hands to wave, cheer or point. Its face and actions
 /// follow how the Mac is doing. Drawn cell by cell at 8 frames a second (pixel-art timing, cheap to
@@ -13,22 +154,26 @@ struct SlimeMascot: NSViewRepresentable {
         var holdsSign = false
         /// Nearly idle (only when everything is fine): dozing.
         var sleepy = false
+        /// A system event reaction from OverviewView, or nil for the baseline mood.
+        var reaction: MascotReaction?
     }
 
     let mood: Mood
     /// Size of one pixel in points.
     var cell: CGFloat = 4
+    var frequency: MascotFrequency = .normal
 
     static let columns = 40, rows = 24
     static let fps = 8.0
 
     // An AppKit view with its own timer: each frame only redraws these pixels. Driving it from a
     // SwiftUI TimelineView re-ran layout of the whole window eight times a second (about 12% CPU).
-    func makeNSView(context: Context) -> SlimeView { SlimeView(mood: mood, cell: cell) }
+    func makeNSView(context: Context) -> SlimeView { SlimeView(mood: mood, cell: cell, frequency: frequency) }
 
     func updateNSView(_ view: SlimeView, context: Context) {
         view.mood = mood
         view.cell = cell
+        view.frequency = frequency
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, nsView: SlimeView, context: Context) -> CGSize? {
@@ -39,8 +184,8 @@ struct SlimeMascot: NSViewRepresentable {
 final class SlimeView: NSView {
     var mood: SlimeMascot.Mood { didSet { if mood != oldValue { needsDisplay = true; updateAccessibility() } } }
     var cell: CGFloat { didSet { if cell != oldValue { invalidateIntrinsicContentSize(); needsDisplay = true } } }
+    var frequency: MascotFrequency { didSet { if frequency != oldValue { needsDisplay = true } } }
     private let start = Date()
-    private var tappedAt: Int?
     private var timer: Timer?
     private var colors: [Color: CGColor] = [:]
     /// The pose on screen. Most frames repeat it (the breathing cycle is slow), so the timer only
@@ -51,9 +196,23 @@ final class SlimeView: NSView {
     private var images: [SlimePose: CGImage] = [:]
     private var imageScale: CGFloat = 0
 
-    init(mood: SlimeMascot.Mood, cell: CGFloat) {
+    // Interaction starts as wall-clock dates so expiry still works with Reduce Motion (frame 0).
+    private var tapDate: Date?
+    private var doubleDate: Date?
+    private var hoverDate: Date?
+    private var hoverLook = 0
+    private var isHovered = false
+    private var dragDate: Date?
+    private var dragShift = 0
+    private var pressDate: Date?
+    private var longPressDate: Date?
+    private var lastTapDate: Date?
+    private var lastInteraction: [MascotReaction: Date] = [:]
+
+    init(mood: SlimeMascot.Mood, cell: CGFloat, frequency: MascotFrequency) {
         self.mood = mood
         self.cell = cell
+        self.frequency = frequency
         super.init(frame: .zero)
         setAccessibilityElement(true)
         setAccessibilityRole(.image)
@@ -67,6 +226,12 @@ final class SlimeView: NSView {
     override var isFlipped: Bool { true }
     override var intrinsicContentSize: NSSize {
         NSSize(width: CGFloat(SlimeMascot.columns) * cell, height: CGFloat(SlimeMascot.rows) * cell)
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach { removeTrackingArea($0) }
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseEnteredAndExited, .mouseMoved, .activeInKeyWindow, .inVisibleRect], owner: self, userInfo: nil))
     }
 
     private var reduceMotion: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
@@ -92,7 +257,24 @@ final class SlimeView: NSView {
     }
 
     private var currentPose: SlimePose {
-        SlimePose.make(mood: mood, frame: currentFrame, tappedAt: reduceMotion ? nil : tappedAt)
+        let frame = currentFrame
+        func inter(_ reaction: MascotReaction, _ date: Date?, shift: Int = 0, look: Int = 0) -> MascotInteraction? {
+            guard let date else { return nil }
+            let age = Int(Date().timeIntervalSince(date) * SlimeMascot.fps)
+            return MascotInteraction(reaction: reaction, startedAt: frame - age, shift: shift, look: look)
+        }
+        var best: MascotInteraction?
+        let candidates = [
+            inter(.singleTap, tapDate),
+            inter(.doubleTap, doubleDate),
+            inter(.hovered, isHovered ? hoverDate : nil, look: hoverLook),
+            inter(.dragged, dragDate, shift: dragShift),
+            inter(.longPressed, longPressDate),
+        ].compactMap { $0 }
+        for cand in candidates where best == nil || cand.reaction.priority > best!.reaction.priority {
+            best = cand
+        }
+        return SlimePose.make(mood: mood, frame: frame, tappedAt: nil, interaction: best, frequency: frequency, reduceMotion: reduceMotion)
     }
 
     override func draw(_ dirtyRect: NSRect) {
@@ -137,12 +319,121 @@ final class SlimeView: NSView {
         return c
     }
 
+    private func scheduleRefresh(after seconds: Double) {
+        let work = DispatchWorkItem { [weak self] in
+            self?.needsDisplay = true
+            self?.updateAccessibility()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds, execute: work)
+    }
+
+    /// Interaction cooldown, scaled by frequency. Returns false while still cooling.
+    private func canTrigger(_ reaction: MascotReaction) -> Bool {
+        let now = Date()
+        let cooldown = reaction.cooldownSeconds * frequency.cooldownMultiplier
+        if let last = lastInteraction[reaction], now.timeIntervalSince(last) < cooldown { return false }
+        lastInteraction[reaction] = now
+        return true
+    }
+
     override func mouseDown(with event: NSEvent) {
-        tappedAt = Int(Date().timeIntervalSince(start) * SlimeMascot.fps)
+        if event.clickCount >= 2 {
+            if canTrigger(.doubleTap) { doubleDate = Date(); scheduleRefresh(after: Double(MascotReaction.doubleTap.durationFrames) / SlimeMascot.fps) }
+        } else {
+            if let last = lastTapDate, Date().timeIntervalSince(last) < 0.4 {
+                if canTrigger(.doubleTap) { doubleDate = Date(); scheduleRefresh(after: Double(MascotReaction.doubleTap.durationFrames) / SlimeMascot.fps) }
+            } else if canTrigger(.singleTap) {
+                tapDate = Date()
+                scheduleRefresh(after: Double(MascotReaction.singleTap.durationFrames) / SlimeMascot.fps)
+            }
+            lastTapDate = Date()
+        }
+        pressDate = Date()
+        // Long press: if the pointer stays down for half a second, trade the tap for holding steady.
+        let pressed = pressDate
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(0.5))
+            guard let self, self.pressDate == pressed else { return }
+            guard self.canTrigger(.longPressed) else { return }
+            self.longPressDate = Date()
+            self.needsDisplay = true
+            self.updateAccessibility()
+            self.scheduleRefresh(after: Double(MascotReaction.longPressed.durationFrames) / SlimeMascot.fps)
+        }
+        needsDisplay = true
+        updateAccessibility()
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        pressDate = nil
         needsDisplay = true
     }
 
+    override func mouseEntered(with event: NSEvent) {
+        isHovered = true
+        if canTrigger(.hovered) { hoverDate = Date() } else { hoverDate = nil }
+        hoverLook = convert(event.locationInWindow, from: nil).x < bounds.width / 2 ? -1 : 1
+        needsDisplay = true
+        updateAccessibility()
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        isHovered = false
+        hoverDate = nil
+        needsDisplay = true
+        updateAccessibility()
+    }
+
+    override func mouseMoved(with event: NSEvent) {
+        guard isHovered else { return }
+        // Re-arm hover once its cooldown passes while the pointer is still over the slime.
+        if hoverDate == nil, canTrigger(.hovered) {
+            hoverDate = Date()
+            needsDisplay = true
+            updateAccessibility()
+        }
+        let look = convert(event.locationInWindow, from: nil).x < bounds.width / 2 ? -1 : 1
+        if look != hoverLook { hoverLook = look; needsDisplay = true }
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard bounds.width > 0 else { return }
+        let active = dragDate != nil && Date().timeIntervalSince(dragDate!) < Double(MascotReaction.dragged.durationFrames) / SlimeMascot.fps
+        if !active, !canTrigger(.dragged) { return }
+        dragDate = Date()
+        // The slime leans toward the pointer; the renderer keeps it inside the grid.
+        let fraction = convert(event.locationInWindow, from: nil).x / bounds.width - 0.5
+        dragShift = max(-4, min(4, Int((fraction * 8).rounded())))
+        needsDisplay = true
+        updateAccessibility()
+        scheduleRefresh(after: Double(MascotReaction.dragged.durationFrames) / SlimeMascot.fps)
+    }
+
+    /// The reaction the slime actually shows, mirroring SlimePose.make's priority choice.
+    private var displayedReaction: MascotReaction? {
+        let now = Date()
+        var best: MascotReaction?
+        func consider(_ reaction: MascotReaction, _ date: Date?) {
+            guard let date else { return }
+            if reaction == .hovered {
+                guard isHovered, now.timeIntervalSince(date) < Double(reaction.durationFrames) / SlimeMascot.fps else { return }
+            } else if now.timeIntervalSince(date) >= Double(reaction.durationFrames) / SlimeMascot.fps { return }
+            if best == nil || reaction.priority > best!.priority { best = reaction }
+        }
+        consider(.hovered, hoverDate)
+        consider(.singleTap, tapDate)
+        consider(.doubleTap, doubleDate)
+        consider(.dragged, dragDate)
+        consider(.longPressed, longPressDate)
+        if let system = mood.reaction, best == nil || system.priority >= best!.priority { return system }
+        return best
+    }
+
     private func updateAccessibility() {
+        if let reaction = displayedReaction {
+            setAccessibilityValue(reaction.accessibilityValue)
+            return
+        }
         let value: String = switch mood.level {
         case .critical: String(localized: "Sweating")
         case .attention: mood.holdsSign ? String(localized: "Pointing at the suggested action") : String(localized: "Alert")
@@ -178,31 +469,144 @@ struct SlimePose: Hashable {
     var sweat: Int?
     /// Floating "Z" progress 0…7 (nil = none).
     var snore: Int?
+    /// Lightning bolt progress 0…7 (nil = none).
+    var bolt: Int?
+    /// Sparkle progress 0…7 (nil = none).
+    var spark: Int?
     /// Body color.
     var tint: StatusLevel = .good
     /// A sign with a right arrow held up in the right hand, poked this many cells to the right (nil = no sign).
     var sign: Int?
 
-    static func make(mood: SlimeMascot.Mood, frame f: Int, tappedAt: Int?) -> SlimePose {
+    static func make(mood: SlimeMascot.Mood, frame f: Int, tappedAt: Int?, interaction: MascotInteraction? = nil, frequency: MascotFrequency = .normal, reduceMotion: Bool = false) -> SlimePose {
         var p = SlimePose()
         // Breathing: a slow squash and stretch.
-        let phase = f % 16
+        let phase = reduceMotion ? 0 : f % 16
         let squash = phase < 4 ? 0 : phase < 6 ? 1 : phase < 12 ? 0 : phase < 14 ? -1 : 0
         p.halfWidth = 10 + squash
         p.height = 11 - squash
-        let blinking = f % 36 < 2
+        let blinking = !reduceMotion && f % 36 < 2
+        let still = reduceMotion
 
-        // A tap wins over everything for 1.5 s: a happy double jump with both hands up.
-        if let t = tappedAt, f - t >= 0, f - t < 12 {
-            let k = (f - t) % 6
-            let jumps = [0, 2, 3, 3, 2, 0]
-            p.jump = jumps[k]
-            p.halfWidth = k == 0 ? 11 : 9
-            p.height = k == 0 ? 10 : 12
-            p.eyes = .happy
+        // A tap from the old call shape still works (snapshot and preview callers).
+        var resolved = interaction
+        if resolved == nil, let t = tappedAt {
+            resolved = MascotInteraction(reaction: .singleTap, startedAt: t)
+        }
+        if let inter = resolved {
+            let age = f - inter.startedAt
+            if age < 0 || age >= inter.reaction.durationFrames { resolved = nil }
+        }
+
+        let system = mood.reaction
+        var chosen: MascotReaction?
+        var chosenShift = 0
+        var chosenLook = 0
+        if let s = system, let i = resolved {
+            if s.priority >= i.reaction.priority {
+                chosen = s
+            } else {
+                chosen = i.reaction
+                chosenShift = i.shift
+                chosenLook = i.look
+            }
+        } else if let s = system {
+            chosen = s
+        } else if let i = resolved {
+            chosen = i.reaction
+            chosenShift = i.shift
+            chosenLook = i.look
+        }
+
+        if let c = chosen {
             p.tint = mood.level
-            p.left = .up(2, lift: 0)
-            p.right = .up(2, lift: 0)
+            // Reduce Motion freezes displacement and animated extras; only expression changes.
+            let displacement: (Int, Int) -> (Int, Int) = { jump, shift in still ? (0, 0) : (jump, shift) }
+            switch c {
+            case .singleTap:
+                let (jump, shift) = displacement(2, 0)
+                p.jump = jump; p.shift = shift
+                p.eyes = .happy
+                p.left = .up(2, lift: 0); p.right = .up(2, lift: 0)
+            case .doubleTap:
+                let (jump, shift) = displacement(3, 0)
+                p.jump = jump; p.shift = shift
+                p.halfWidth = 11; p.height = 10
+                p.eyes = .wide
+                p.left = .up(2, lift: 0); p.right = .up(2, lift: 0)
+            case .hovered:
+                p.eyes = .happy
+                p.look = chosenLook
+                p.right = .up(1, lift: 0)
+                p.left = .out(1)
+            case .dragged:
+                let (_, shift) = displacement(0, chosenShift)
+                p.shift = shift
+                p.eyes = .dizzy
+                p.left = .out(2); p.right = .out(2)
+            case .longPressed:
+                p.halfWidth = 11; p.height = 12
+                p.eyes = .squint
+                p.left = .out(2); p.right = .out(2)
+            case .cpuHigh:
+                // Fast heavy breathing, wide eyes, fresh sweat.
+                p.halfWidth = 10 + (!still && f % 8 < 4 ? 1 : 0)
+                p.height = 11 - (!still && f % 8 < 4 ? 1 : 0)
+                p.eyes = .wide
+                p.sweat = still ? 0 : (f / 2) % 6
+                p.left = .out(1); p.right = .out(1)
+            case .memoryTight:
+                // Compressed, squinting, slow sweat.
+                p.halfWidth = 9; p.height = 11
+                p.eyes = .squint
+                p.sweat = still ? 1 : (f / 4) % 6
+            case .diskLow:
+                // Wobbling with dizzy eyes.
+                let wobble = still ? 0 : (f % 8 < 4 ? 1 : -1)
+                let (_, shift) = displacement(0, wobble)
+                p.shift = shift
+                p.eyes = .dizzy
+                p.left = .out(1); p.right = .out(1)
+            case .tempHot:
+                p.eyes = .squint
+                p.sweat = still ? 0 : (f / 2) % 6
+                p.left = .out(1)
+                if !mood.holdsSign { p.right = .out(1) }
+            case .batteryLow:
+                p.halfWidth = 10; p.height = 10
+                p.eyes = .closed
+                p.left = .out(1); p.right = .out(1)
+                p.snore = still ? 0 : (f / 2) % 8
+            case .batteryCharging:
+                p.eyes = .happy
+                p.left = .up(2, lift: 0); p.right = .up(2, lift: 0)
+                p.bolt = still ? 0 : f % 8
+            case .healthImproved:
+                let (jump, shift) = displacement(2, 0)
+                p.jump = jump; p.shift = shift
+                p.eyes = .happy
+                p.left = .up(2, lift: 0); p.right = .up(2, lift: 0)
+                p.spark = still ? 0 : f % 8
+            case .healthWorsened:
+                p.eyes = .dizzy
+                p.sweat = still ? 0 : (f / 4) % 6
+                p.left = .out(1); p.right = .out(1)
+            case .cleanupFinished:
+                let (jump, shift) = displacement(2, 0)
+                p.jump = jump; p.shift = shift
+                p.eyes = .happy
+                p.left = .up(2, lift: 0); p.right = .up(2, lift: 0)
+                p.spark = still ? 0 : f % 8
+            case .helperConnected:
+                p.eyes = .happy
+                p.look = 1
+                p.right = .up(min(2, 1), lift: still ? 0 : (f / 2) % 2)
+                p.bolt = still ? 0 : f % 8
+            case .helperDisconnected:
+                p.eyes = .dizzy
+                p.sweat = still ? 2 : (f / 4) % 6
+                p.left = .out(1); p.right = .out(1)
+            }
             return p
         }
 
@@ -227,11 +631,12 @@ struct SlimePose: Hashable {
                 p.snore = (f / 2) % 8
             } else {
                 p.eyes = blinking ? .closed : .open
-                // Every 10 s: a wave with the right hand, happy eyes.
-                let cycle = f % 80
-                if cycle >= 56, !mood.holdsSign {
-                    let k = cycle - 56
-                    p.right = .up(min(2, k + 1, 80 - cycle), lift: (k / 2) % 2)
+                // Idle wave, spaced by the selected frequency.
+                let interval = frequency.idleWaveInterval
+                let cycle = f % interval
+                if cycle >= interval - 24, !mood.holdsSign {
+                    let k = cycle - (interval - 24)
+                    p.right = .up(min(2, k + 1, interval - cycle), lift: (k / 2) % 2)
                     p.eyes = .happy
                 }
             }
@@ -266,8 +671,10 @@ enum SlimeRenderer {
     static let wood = Color(red: 0.95, green: 0.84, blue: 0.63)
     static let woodEdge = Color(red: 0.42, green: 0.27, blue: 0.14)
     static let arrow = Color(red: 0.36, green: 0.22, blue: 0.10)
+    static let bolt = Color(red: 1.0, green: 0.85, blue: 0.25)
+    static let spark = Color(red: 1.0, green: 0.95, blue: 0.65)
 
-    enum Cell { case body, hand, outline, eye, white, sweat, snore, stick, board, boardEdge, arrow }
+    enum Cell { case body, hand, outline, eye, white, sweat, snore, stick, board, boardEdge, arrow, bolt, spark }
 
     static func draw(_ p: SlimePose, in ctx: GraphicsContext, cell: CGFloat) {
         paint(p) { x, y, color in
@@ -370,6 +777,18 @@ enum SlimeRenderer {
             let zx = Int(cx + hw * 0.6) + z / 3, zy = top - 2 - z / 2
             for (dx, dy) in [(0, 0), (1, 0), (2, 0), (3, 0), (2, 1), (1, 2), (0, 3), (1, 3), (2, 3), (3, 3)] { put(zx + dx, zy + dy, .snore) }
         }
+        if let b = p.bolt {
+            // A small lightning bolt above the dome, bobbing with the progress.
+            let bx = Int(cx), by = max(1, top - 6 + b / 2)
+            for (dx, dy) in [(0, 0), (1, 0), (-1, 1), (0, 1), (0, 2), (1, 2), (-1, 3), (0, 3)] { put(bx + dx, by + dy, .bolt) }
+        }
+        if let s = p.spark {
+            // Three four-point sparkles around the slime, offset by the progress.
+            let off = s % 3
+            for (sx, sy) in [(Int(cx - hw) - 2, top + 3 + off), (Int(cx + hw) + 2, top + 3 + (off + 1) % 3), (Int(cx), max(1, top - 3 + off))] {
+                put(sx, sy, .spark); put(sx - 1, sy, .spark); put(sx + 1, sy, .spark); put(sx, sy - 1, .spark); put(sx, sy + 1, .spark)
+            }
+        }
 
         // Paint: bevel the body (light top-left edge, dark bottom-right edge and the bottom rows).
         let skin = Self.skin(p.tint)
@@ -395,6 +814,8 @@ enum SlimeRenderer {
                 case .stick, .boardEdge: color = woodEdge
                 case .board: color = wood
                 case .arrow: color = arrow
+                case .bolt: color = bolt
+                case .spark: color = spark
                 }
                 fill(x, y, color)
             }

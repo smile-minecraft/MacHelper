@@ -1,4 +1,5 @@
 import ServiceManagement
+import SettingsPortability
 import SwiftUI
 
 struct SettingsView: View {
@@ -27,9 +28,10 @@ struct SettingsView: View {
 
 private struct GeneralSettings: View {
     let app: AppModel
-    @AppStorage("showInDock") private var showInDock = true
+    @AppStorage(DockPreference.modeKey) private var dockMode = DockMode.whileWindowOpen
     @State private var openAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
+    @State private var autoCheckUpdates = false
 
     var body: some View {
         Form {
@@ -46,12 +48,27 @@ private struct GeneralSettings: View {
                             .settingsCaption()
                     }
                 }
+                HStack {
+                    Button("Check for Updates") { UpdaterController.shared.checkForUpdates() }
+                    Toggle("Automatically check for updates", isOn: $autoCheckUpdates)
+                        .onChange(of: autoCheckUpdates) { _, on in
+                            // Writing back persists the preference through Sparkle.
+                            if on != UpdaterController.shared.automaticallyChecksForUpdates {
+                                UpdaterController.shared.automaticallyChecksForUpdates = on
+                            }
+                        }
+                }
+                .onAppear { autoCheckUpdates = UpdaterController.shared.automaticallyChecksForUpdates }
             }
             BackgroundRecordingSection(model: app.backgroundRecording)
             HistoryManagementSection()
             Section("General") {
-                Toggle("Show in Dock", isOn: $showInDock)
-                    .onChange(of: showInDock) { AppModel.applyDockPreference() }
+                Picker("Dock icon", selection: $dockMode) {
+                    Text("Always").tag(DockMode.always)
+                    Text("While a window is open").tag(DockMode.whileWindowOpen)
+                    Text("Never").tag(DockMode.never)
+                }
+                .onChange(of: dockMode) { AppModel.applyDockPreference() }
                 Toggle("Open at login", isOn: $openAtLogin)
                     .onChange(of: openAtLogin) { _, on in
                         do {
@@ -65,8 +82,10 @@ private struct GeneralSettings: View {
                 if let loginError {
                     Text(loginError).settingsCaption(Theme.rose)
                 }
-                Text("Without the Dock icon, MacHelper lives in the menu bar; its window opens from there.")
-                    .settingsCaption()
+                if dockMode == .never {
+                    Text("Without the Dock icon, MacHelper lives in the menu bar; its window opens from there.")
+                        .settingsCaption()
+                }
             }
             Section {
                 LanguagePicker()

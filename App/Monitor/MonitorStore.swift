@@ -110,7 +110,54 @@ struct ChartPoint: Hashable, Sendable {
 @MainActor
 @Observable
 final class LiveSeries {
-    fileprivate(set) var points: [ChartPoint] = []
+    private var ring: ChartRingBuffer
+    var points: [ChartPoint] { ring.ordered }
+
+    init(capacity: Int) {
+        ring = ChartRingBuffer(capacity: capacity)
+    }
+
+    func append(_ date: Date, _ value: Double, window: TimeInterval) {
+        ring.append(ChartPoint(date: date, value: value))
+        let cutoff = date.addingTimeInterval(-window)
+        while let first = ring.first, first.date < cutoff { ring.removeFirst() }
+    }
+}
+
+/// Fixed-capacity ring of chart points. Appending is O(1) and never shifts or copies
+/// the window; the capacity must always hold every point inside the time window, so
+/// an unexpired point is never overwritten.
+private struct ChartRingBuffer {
+    private var storage: [ChartPoint?]
+    private var head = 0
+    private(set) var count = 0
+
+    init(capacity: Int) {
+        storage = Array(repeating: nil, count: max(capacity, 1))
+    }
+
+    mutating func append(_ point: ChartPoint) {
+        if count == storage.count {
+            storage[head] = point
+            head = (head + 1) % storage.count
+        } else {
+            storage[(head + count) % storage.count] = point
+            count += 1
+        }
+    }
+
+    mutating func removeFirst() {
+        guard count > 0 else { return }
+        storage[head] = nil
+        head = (head + 1) % storage.count
+        count -= 1
+    }
+
+    var first: ChartPoint? { count > 0 ? storage[head] : nil }
+
+    var ordered: [ChartPoint] {
+        (0..<count).compactMap { storage[(head + $0) % storage.count] }
+    }
 }
 
 /// Read access to the live series: `store.history[.cpu]` (nil until the series has data).
@@ -137,7 +184,18 @@ final class MonitorStore {
     private(set) var temperatures: [TemperatureReading] = []
     private(set) var fans: [FanReading] = []
     private(set) var power: PowerReading?
-    @ObservationIgnored private let liveSeries = Dictionary(uniqueKeysWithValues: SeriesKey.allCases.map { ($0, LiveSeries()) })
+    /// Formatted menu bar contents, refreshed from the latest readings. `StatusItemView`
+    /// only observes this cache, so a sample that formats to the same items does not
+    /// re-render the menu bar. Assigned only through `refreshMenuBarCache()`.
+    private(set) var menuBarItemsCache: [MenuBarItemModel] = []
+    @ObservationIgnored private var menuBarCacheRefreshScheduled = false
+    @ObservationIgnored private let liveSeries: [SeriesKey: LiveSeries] = {
+        // The ring must hold every point inside the window: at the shortest sampling
+        // interval (0.5 s, see reconfigure) the window fits window / 0.5 points, plus
+        // margin. A smaller ring would overwrite unexpired points.
+        let capacity = Int(MonitorStore.historyWindow / 0.5) + 128
+        return Dictionary(uniqueKeysWithValues: SeriesKey.allCases.map { ($0, LiveSeries(capacity: capacity)) })
+    }()
     var history: LiveHistory { LiveHistory(series: liveSeries) }
     private(set) var processes: ProcessSnapshot?
     @ObservationIgnored private let processSampler = ProcessSampler()
@@ -215,6 +273,10 @@ final class MonitorStore {
                 tasks[m] = (config, startLoop(m, interval: max(config.interval, 0.5)))
             }
         }
+        // Settings changes (menu bar selection, module start/stop, intervals) can change the
+        // formatted items without a new sample arriving, so refresh now instead of waiting
+        // for one.
+        refreshMenuBarCache()
     }
 
     @ObservationIgnored private var processWatchers = 0
@@ -386,6 +448,27 @@ final class MonitorStore {
             power = r
             recordHistory(MonitorHistorySample.power(r), now)
         }
+        scheduleMenuBarCacheRefresh()
+    }
+
+    /// Coalesces samples from one round into a single cache refresh, so several modules
+    /// sampled the same turn only refresh the menu bar once.
+    private func scheduleMenuBarCacheRefresh() {
+        guard !menuBarCacheRefreshScheduled else { return }
+        menuBarCacheRefreshScheduled = true
+        Task { @MainActor [weak self] in
+            self?.refreshMenuBarCache()
+        }
+    }
+
+    /// Recomputes the formatted menu bar items from the current readings. Only assigns
+    /// when they changed, so an unchanged sample leaves the menu bar view alone.
+    private func refreshMenuBarCache() {
+        menuBarCacheRefreshScheduled = false
+        let items = menuBarItems()
+        if items != menuBarItemsCache {
+            menuBarItemsCache = items
+        }
     }
 
     /// Persists the columns produced by the shared mapping. The in-memory series mirrors
@@ -418,13 +501,7 @@ final class MonitorStore {
 
     private func record(_ key: SeriesKey, _ value: Double, _ date: Date) {
         guard let series = liveSeries[key] else { return }
-        var points = series.points
-        points.append(ChartPoint(date: date, value: value))
-        let cutoff = date.addingTimeInterval(-Self.historyWindow)
-        if let first = points.first, first.date < cutoff {
-            points.removeFirst(points.firstIndex { $0.date >= cutoff } ?? points.count)
-        }
-        series.points = points
+        series.append(date, value, window: Self.historyWindow)
         if let column = key.historyColumn,
            let finished = minute.addTracked(column, value, at: date),
            let db = persistentHistory {

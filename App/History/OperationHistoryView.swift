@@ -223,7 +223,7 @@ private extension OperationKind {
         switch self {
         case .cleanup: "Cleaning"
         case .uninstall: "Uninstall"
-        case .appUpdate: "App Updates"
+        case .appUpdate: "Homebrew Updates"
         case .startup: "Startup Items"
         case .maintenance: "Maintenance"
         case .diskAnalysis: "Disk Analysis"

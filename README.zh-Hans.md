@@ -16,7 +16,8 @@
 - **空间建议**：找出半年以上没用过的大文件和看起来异常膨胀的文件夹，并在图表上标出来。
 - **App 卸载**：用 Bundle ID、内嵌 Helper、权限、容器信息、launchd 所有者、Homebrew zap 列表和各 App 规则找出 App 留下的东西，仅凭名称匹配到的项目会标出来让你确认。也能找出已删除 App 的残留文件。
 - **启动项**：你的 Launch Agent（停用、启用、移除）、所有用户的 Agent 和系统 Daemon，并标出所属 App 和已经失效的项目。
-- **App 更新**：更新用 Homebrew 安装的 App。
+- **Homebrew 更新**：更新用 Homebrew 安装的 App。
+- **自动更新**：后台检查并下载新版本，安装前询问。
 - **安全检查**：读取 Gatekeeper、FileVault、防火墙、系统完整性保护、自动安全更新和 XProtect 的状态（只读取，不会更改）。
 - **命令行工具**：所有功能都能用命令操作，方便自动化和 AI Agent 使用。默认只预览，每个命令都支持 `--json`。运行 `machelper guide` 查看概览，`machelper <命令> --help` 查看各命令说明。
 - **AI Agent Skill**：可以为 Claude Code 和 Codex 安装 Skill，让它们安全地使用 MacHelper：一律先预览，删除前一定先问你。

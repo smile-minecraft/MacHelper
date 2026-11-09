@@ -31,7 +31,6 @@ packages:
   ArgumentParser:
     url: https://github.com/apple/swift-argument-parser
     from: 1.5.0
-
 targets:
   MacHelper:
     type: application
@@ -57,6 +56,10 @@ targets:
     dependencies:
       - package: MacHelperKit
         products: [HelperProtocol, PrivilegedOps, Theming, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, SettingsPortability, Diagnostics]
+      # Xcode 27.2 hangs on Sparkle's SPM binary target; scripts/sparkle/fetch.sh
+      # downloads the official release into build/Vendor before xcodegen runs.
+      - framework: build/Vendor/Sparkle/Sparkle.xcframework
+        embed: true
       - target: MacHelperHelper
         embed: true
         codeSign: false
@@ -76,6 +79,13 @@ targets:
         LSApplicationCategoryType: public.app-category.utilities
         LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
         NSHumanReadableCopyright: "MIT License"
+        # Self-update feed. The feed URL and ED key below are development test values;
+        # the release feed and production key arrive with the appcast work.
+        SUFeedURL: "https://smile-minecraft.github.io/MacHelper/appcast.xml"
+        SUPublicEDKey: "zPSW25aBPeHRwZRhCmrLhYRs1wkiJ6xArxcQNjKvoT8="
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
+        SUAutomaticallyUpdate: false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.machelper.MacHelper

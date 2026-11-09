@@ -3,7 +3,8 @@
 translation in any shipped language, and catalog entries no code uses any more."""
 import glob, json, os, re
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-B = os.path.join(ROOT, 'build/Build/Intermediates.noindex')
+DERIVED_DATA = os.environ.get('DERIVED_DATA', 'build')
+B = os.path.join(ROOT, DERIVED_DATA, 'Build/Intermediates.noindex')
 TARGETS = {'App/Resources/Localizable.xcstrings': B + '/MacHelper.build/Release/MacHelper.build/Objects-normal/arm64/*.stringsdata',
            'Sources/CleanEngine/Localizable.xcstrings': B + '/MacHelperKit.build/Release/CleanEngine-t.build/Objects-normal/arm64/*.stringsdata',
            'Sources/Diagnostics/Localizable.xcstrings': B + '/MacHelperKit.build/Release/Diagnostics-t.build/Objects-normal/arm64/*.stringsdata'}

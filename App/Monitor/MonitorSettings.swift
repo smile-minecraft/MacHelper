@@ -37,9 +37,11 @@ enum MonitorModule: String, Codable, CaseIterable, Identifiable, Sendable {
     /// Styles that make sense for this metric (rates and RPM have no natural 0–100 % scale).
     var supportedStyles: [MenuBarStyle] {
         switch self {
-        case .network, .fan, .power, .temperature: [.text, .sparkline, .columns]
-        case .disk: [.text, .bar, .ring, .blocks]
-        default: MenuBarStyle.allCases
+        case .network: [.text, .sparkline, .columns, .dual]
+        case .fan, .power: [.text, .sparkline, .columns]
+        case .temperature: [.text, .sparkline, .columns, .heat]
+        case .disk: [.text, .bar, .ring, .blocks, .heat]
+        default: MenuBarStyle.allCases.filter { $0 != .dual }
         }
     }
 
@@ -50,12 +52,37 @@ enum MonitorModule: String, Codable, CaseIterable, Identifiable, Sendable {
         default: 1
         }
     }
+
+    /// Fixed horizontal reference lines for the monitor charts. Empty for metrics without a
+    /// meaningful absolute level (rates, RPM, watts).
+    var chartThresholds: [ChartThreshold] {
+        switch self {
+        case .temperature:
+            [ChartThreshold(value: 80, label: String(localized: "Hot"), level: .attention),
+             ChartThreshold(value: 95, label: String(localized: "Too hot"), level: .critical)]
+        case .memory:
+            [ChartThreshold(value: 0.8, label: String(localized: "Tight"), level: .attention),
+             ChartThreshold(value: 0.95, label: String(localized: "Running out"), level: .critical)]
+        default:
+            []
+        }
+    }
+}
+
+/// One fixed reference line in a monitor chart. `value` is in the chart's own units
+/// (degrees Celsius for temperature, a 0...1 fraction for memory).
+struct ChartThreshold: Identifiable, Sendable {
+    let value: Double
+    let label: String
+    let level: StatusLevel
+    var id: Double { value }
 }
 
 enum MenuBarStyle: String, Codable, CaseIterable, Identifiable, Sendable {
     case text, sparkline, bar, ring
     /// Pixel styles: a vertical meter of blocks, and a histogram of block columns.
     case blocks, columns
+    case heat, dual
     var id: String { rawValue }
     var title: String {
         switch self {
@@ -65,6 +92,8 @@ enum MenuBarStyle: String, Codable, CaseIterable, Identifiable, Sendable {
         case .ring: String(localized: "Ring")
         case .blocks: String(localized: "Blocks")
         case .columns: String(localized: "Columns")
+        case .heat: String(localized: "Heat")
+        case .dual: String(localized: "Dual")
         }
     }
 }

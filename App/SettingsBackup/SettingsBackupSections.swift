@@ -30,11 +30,6 @@ struct SettingsBackupError: LocalizedError, CustomStringConvertible {
     var description: String { message }
 }
 
-struct GeneralSettingsPayload: Codable, Equatable {
-    var showInDock: Bool
-    var language: String?
-}
-
 /// Dock and app language. "Open at login" registers a login item, so it stays out of the file.
 struct GeneralSettingsSection: SettingsSection {
     var defaults: UserDefaults = .standard
@@ -50,7 +45,7 @@ struct GeneralSettingsSection: SettingsSection {
     }
 
     private var payload: GeneralSettingsPayload {
-        GeneralSettingsPayload(showInDock: defaults.object(forKey: "showInDock") as? Bool ?? true,
+        GeneralSettingsPayload(dockMode: DockPreference.migrate(defaults),
                                language: Self.currentLanguage(defaults: defaults, domainName: domainName))
     }
 
@@ -76,7 +71,7 @@ struct GeneralSettingsSection: SettingsSection {
 
     func apply(_ data: Data) throws {
         let payload = try SettingsBackupJSON.decode(GeneralSettingsPayload.self, from: data)
-        defaults.set(payload.showInDock, forKey: "showInDock")
+        DockPreference.write(payload.dockMode, to: defaults)
         if let language = payload.language {
             defaults.set([language], forKey: "AppleLanguages")
         } else {

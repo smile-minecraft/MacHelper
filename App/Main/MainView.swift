@@ -41,7 +41,7 @@ struct MainView: View {
     @ViewBuilder private var detail: some View {
         switch app.section {
         case .overview: OverviewView(app: app)
-        case .monitor: MonitorView(store: app.store)
+        case .monitor: MonitorView(store: app.store, app: app)
         case .health: HealthView(app: app, model: app.healthModel)
         case .fans:
             ScrollView {

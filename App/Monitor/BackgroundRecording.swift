@@ -29,6 +29,7 @@ final class BackgroundRecordingModel {
     @ObservationIgnored private let availableModules: Set<MonitorModule>
     @ObservationIgnored private let profileURL: URL
     @ObservationIgnored private let heartbeatURL: URL
+    @ObservationIgnored private let handoffURL: URL
     /// Identifies the message `writeProfileSnapshot` set, so a later successful save clears
     /// only that failure and never an approval or registration message.
     @ObservationIgnored private var saveErrorMessage: String?
@@ -37,11 +38,14 @@ final class BackgroundRecordingModel {
     init(settings: MonitorSettingsStore,
          availableModules: Set<MonitorModule>,
          profileURL: URL = MonitorAgentProfileStore.defaultURL(),
-         heartbeatURL: URL = MonitorAgentHeartbeatStore.defaultURL()) {
+         heartbeatURL: URL = MonitorAgentHeartbeatStore.defaultURL(),
+         handoffURL: URL? = nil) {
         self.settings = settings
         self.availableModules = availableModules
         self.profileURL = profileURL
         self.heartbeatURL = heartbeatURL
+        self.handoffURL = handoffURL
+            ?? profileURL.deletingLastPathComponent().appending(path: UpdateAgentHandoffStore.fileName)
         // Restore the persisted intent so a relaunch never silently disables recording;
         // re-publish a fresh snapshot because sampling settings may have changed while away.
         let profile = MonitorAgentProfileStore.load(from: profileURL)
@@ -136,6 +140,67 @@ final class BackgroundRecordingModel {
     }
 
     func openLoginItems() { SMAppService.openSystemSettingsLoginItems() }
+
+    // MARK: - App update
+
+    /// Stops the agent before Sparkle replaces the bundle. The user's intent stays enabled;
+    /// `resumeAfterUpdateIfNeeded()` restores it on the next launch only if the permission is
+    /// still present. Called from the updater's relaunch-postponement callback.
+    func suspendForUpdate() async {
+        let handoff = UpdateAgentRestorePlanner.snapshot(
+            enabledIntent: enabledIntent,
+            serviceStatus: Self.serviceStatus(agent.status),
+            heartbeat: MonitorAgentHeartbeatStore.load(from: heartbeatURL),
+            now: Date()
+        )
+        do {
+            try UpdateAgentHandoffStore.save(handoff, to: handoffURL)
+        } catch {
+            message = String(localized: "Couldn’t prepare background recording for the update: \(error.localizedDescription)")
+            return
+        }
+        guard handoff.wasEnabled,
+              agent.status == .enabled || agent.status == .requiresApproval else {
+            return
+        }
+        do {
+            try await agent.unregister()
+            for _ in 0..<50 where agent.status != .notRegistered {
+                try? await Task.sleep(for: .milliseconds(100))
+            }
+        } catch {
+            message = String(localized: "Couldn’t stop background recording before the update: \(error.localizedDescription)")
+        }
+        refresh()
+    }
+
+    /// Restores background recording after an update. The handoff records only a service that
+    /// was enabled and registered before the install; a revoked permission, a disabled intent,
+    /// or a pending approval stays off.
+    func resumeAfterUpdateIfNeeded() {
+        guard let handoff = UpdateAgentHandoffStore.load(from: handoffURL) else { return }
+        switch UpdateAgentRestorePlanner.restore(handoff: handoff,
+                                                 serviceStatus: Self.serviceStatus(agent.status)) {
+        case .stayOff:
+            UpdateAgentHandoffStore.clear(from: handoffURL)
+            if agent.status == .requiresApproval { message = Self.approvalMessage }
+        case .republish:
+            guard writeProfileSnapshot() else { return }
+            UpdateAgentHandoffStore.clear(from: handoffURL)
+            message = nil
+        case .reregister:
+            guard writeProfileSnapshot() else { return }
+            do {
+                try agent.register()
+                UpdateAgentHandoffStore.clear(from: handoffURL)
+                message = agent.status == .requiresApproval ? Self.approvalMessage : nil
+            } catch {
+                // Keep the handoff so a later launch can retry after the user approves.
+                if agent.status == .requiresApproval { message = Self.approvalMessage }
+            }
+        }
+        refresh()
+    }
 
     // MARK: - Snapshot publishing
 

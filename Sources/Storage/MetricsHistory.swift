@@ -55,6 +55,9 @@ public final class MetricsHistory: Sendable {
         self.retention = retention
         var config = Configuration()
         config.readonly = readOnly
+        // WAL is the DatabasePool default; set it explicitly so shared access does not
+        // depend on a library default. Read-only pools ignore this setting.
+        config.journalMode = .wal
         // Two processes may open this file (app and background recorder). GRDB returns
         // SQLITE_BUSY immediately by default; wait instead so a lost lock race is not an error.
         config.busyMode = .timeout(5)

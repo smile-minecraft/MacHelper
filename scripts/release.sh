@@ -14,6 +14,8 @@
 #   2. xcrun notarytool store-credentials machelper-notary --apple-id <Apple ID> --team-id <team>
 #      (with an app-specific password from account.apple.com)
 # NOTARY_PROFILE picks another keychain profile; NOTARIZE=0 skips notarization for a trial build.
+# SPARKLE_APPCAST=1 additionally runs scripts/sparkle/appcast.sh after prepare succeeds;
+# by default it does nothing, and the appcast is never pushed automatically.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -178,6 +180,7 @@ prepare() {
   echo "→ Building $VERSION ($BUILD_NUMBER)"
   rm -rf "$OUT"
   mkdir -p "$OUT"
+  scripts/sparkle/fetch.sh
   xcodegen generate --quiet
   local log="$OUT/xcodebuild.log"
   # A clean build in its own folder, signed with Developer ID and a secure timestamp (both needed
@@ -266,6 +269,14 @@ prepare() {
   echo "Ready: $OUT"
   ls -lh "$DMG" "$ZIP" | awk '{print "  " $5 "  " $NF}'
   echo "Try the DMG, then publish with: scripts/release.sh publish $VERSION"
+
+  if [[ "${SPARKLE_APPCAST:-}" == "1" ]]; then
+    echo
+    echo "→ Generating the Sparkle appcast"
+    scripts/sparkle/appcast.sh appcast "$VERSION"
+    echo
+    echo "appcast 已準備好，下一步手動檢查與推送"
+  fi
 }
 
 publish() {
@@ -276,12 +287,11 @@ publish() {
   (cd "$OUT" && shasum -a 256 -c "$(basename "$SUMS")" >/dev/null) || fail "The files changed since prepare."
   gh release view "$TAG" >/dev/null 2>&1 && fail "GitHub release $TAG already exists."
 
-  local pre=()
-  [[ "$VERSION" == 0.* || "$VERSION" == *-* ]] && pre=(--prerelease)
   echo "→ Pushing main and $TAG"
   git push origin main "$TAG"
   echo "→ Creating the GitHub release"
-  gh release create "$TAG" "$DMG" "$ZIP" "$SUMS" --title "MacHelper $VERSION" --notes-file "$NOTES" --verify-tag "${pre[@]}"
+  # Every MacHelper release is a stable release; never mark a 0.x or beta version as prerelease.
+  gh release create "$TAG" "$DMG" "$ZIP" "$SUMS" --title "MacHelper $VERSION" --notes-file "$NOTES" --verify-tag
   update_tap
 }
 

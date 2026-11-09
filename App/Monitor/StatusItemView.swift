@@ -4,13 +4,15 @@ import Theming
 
 /// What the menu bar shows for one module: display text, an optional 0...1 fraction
 /// for bar/ring styles, and the series used by the sparkline.
-struct MenuBarItemModel: Identifiable {
+struct MenuBarItemModel: Identifiable, Equatable {
     let module: MonitorModule
     let text: String
     /// Optional second line (network up/down, disk read/write).
     let secondary: String?
     let fraction: Double?
     let series: [ChartPoint]
+    /// Second series for dual styles (network upload, paired with `series` download).
+    var secondarySeries: [ChartPoint]? = nil
     /// Warning / critical level for coloring; nil = no level for this metric.
     var level: StatusLevel? = nil
     var id: MonitorModule { module }
@@ -38,7 +40,8 @@ extension MonitorStore {
                              secondary: nil, fraction: used, series: [], level: StatusRules.disk(freeBytes: diskFreeBytes)?.level)
             case .network:
                 return .init(module: m, text: "↑" + Fmt.rate(network?.outBytesPerSecond),
-                             secondary: "↓" + Fmt.rate(network?.inBytesPerSecond), fraction: nil, series: history[.netIn] ?? [])
+                             secondary: "↓" + Fmt.rate(network?.inBytesPerSecond), fraction: nil, series: history[.netIn] ?? [],
+                             secondarySeries: history[.netOut])
             case .battery:
                 return .init(module: m, text: Fmt.percent(battery?.charge), secondary: nil, fraction: battery?.charge, series: history[.battery] ?? [])
             case .temperature:
@@ -63,7 +66,7 @@ struct StatusItemView: View {
 
     var body: some View {
         let compact = store.settings.configuration.compact
-        let items = store.menuBarItems()
+        let items = store.menuBarItemsCache
         let score = showHealthScore ? health?.score(store: store) : nil
         HStack(spacing: 8) {
             if let score {
@@ -142,6 +145,12 @@ private struct MenuBarItemView: View {
         return AnyShapeStyle(.primary)
     }
 
+    /// Faint pill fill for heat: status tint when past a threshold, neutral otherwise.
+    private var heatBackground: Color {
+        if look.menuBarColored, let level = item.level, level != .good { return ThemeStore.menuBarTint(level).opacity(0.22) }
+        return Color.secondary.opacity(0.12)
+    }
+
     /// The widest text this module can show: values are laid out in this fixed width, so the item never
     /// changes size (or shifts its neighbours) as numbers change.
     private var template: String {
@@ -163,6 +172,17 @@ private struct MenuBarItemView: View {
     }
 
     @ViewBuilder private var valueText: some View {
+        if style == .heat {
+            plainValueText
+                .padding(.horizontal, 4)
+                .padding(.vertical, 1)
+                .background(Capsule().fill(heatBackground))
+        } else {
+            plainValueText
+        }
+    }
+
+    @ViewBuilder private var plainValueText: some View {
         if let secondary = item.secondary {
             // Two lines need the small system face; the pixel font has no size that fits twice in 22 pt.
             VStack(alignment: .trailing, spacing: -2) {
@@ -182,6 +202,12 @@ private struct MenuBarItemView: View {
         switch style {
         case .text:
             EmptyView()
+        case .heat:
+            EmptyView()
+        case .dual:
+            MenuBarDualLines(primary: Array(item.series.suffix(40)), secondary: Array((item.secondarySeries ?? []).suffix(40)),
+                             fixedMax: item.fraction != nil ? 1 : nil)
+                .frame(width: 30, height: 14)
         case .sparkline:
             Sparkline(points: item.series.suffix(40), fixedMax: item.fraction != nil ? 1 : nil)
                 .frame(width: 30, height: 14)
@@ -272,6 +298,43 @@ struct Sparkline<C: Collection>: View where C.Element == ChartPoint {
                 if i == 0 { path.move(to: p) } else { path.addLine(to: p) }
             }
             ctx.stroke(path, with: .foreground, style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
+        }
+    }
+}
+
+/// Two lines sharing one scale (network download above upload), both anchored to the bottom.
+private struct MenuBarDualLines: View {
+    let primary: [ChartPoint]
+    let secondary: [ChartPoint]
+    /// Fixed scale top (1 for fractions); nil → scale to the data.
+    var fixedMax: Double?
+
+    var body: some View {
+        Canvas { ctx, size in
+            let a = primary.map(\.value)
+            let b = secondary.map(\.value)
+            guard a.count > 1 || b.count > 1 else { return }
+            let all = a + b
+            let top = fixedMax ?? max(all.max() ?? 1, .ulpOfOne)
+            let bottom = fixedMax != nil ? 0 : min(all.min() ?? 0, top * 0.8)
+            let span = max(top - bottom, .ulpOfOne)
+            func path(for values: [Double]) -> Path? {
+                guard values.count > 1 else { return nil }
+                let step = size.width / CGFloat(values.count - 1)
+                var p = Path()
+                for (i, v) in values.enumerated() {
+                    let y = size.height * (1 - CGFloat((v - bottom) / span))
+                    let pt = CGPoint(x: CGFloat(i) * step, y: y)
+                    if i == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
+                }
+                return p
+            }
+            if let p = path(for: b) {
+                ctx.stroke(p, with: .color(.secondary), style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
+            }
+            if let p = path(for: a) {
+                ctx.stroke(p, with: .foreground, style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
+            }
         }
     }
 }

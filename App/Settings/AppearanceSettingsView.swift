@@ -100,6 +100,8 @@ struct AppearanceSettingsView: View {
                     .settingsCaption()
             }
 
+            MascotSettingsSection()
+
             Section {
                 Picker("Icon set", selection: iconSet) {
                     Text("Pixel art (built-in)").tag("pixel")

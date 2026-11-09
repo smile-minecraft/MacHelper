@@ -82,7 +82,10 @@ public final class ProcessSampler: @unchecked Sendable {
             if let prev = last[pid], at > prev.at, cpuNanos >= prev.cpuNanos {
                 cpu = Double(cpuNanos - prev.cpuNanos) / Double(at - prev.at)
             }
-            usages.append(ProcessUsage(pid: pid, name: Self.name(pid), path: Self.path(pid), cpu: cpu,
+            // One proc_pidpath per process: the name comes from the same lookup,
+            // so a sample does not resolve every path twice.
+            let executablePath = Self.path(pid)
+            usages.append(ProcessUsage(pid: pid, name: Self.name(pid, path: executablePath), path: executablePath, cpu: cpu,
                                        memoryBytes: footprint))
         }
         last = seen.mapValues { (cpuNanos: $0.0, at: $0.1) }
@@ -92,9 +95,14 @@ public final class ProcessSampler: @unchecked Sendable {
     }
 
     static func name(_ pid: Int32) -> String {
+        name(pid, path: path(pid))
+    }
+
+    /// Display name for a process whose executable path is already known. Falls back
+    /// to proc_name (limited to 32 characters) only when the path is unreadable.
+    static func name(_ pid: Int32, path: String?) -> String {
+        if let path { return (path as NSString).lastPathComponent }
         var buf = [CChar](repeating: 0, count: 1024)
-        // proc_name is limited to 32 characters; the executable's file name is not.
-        if let p = path(pid) { return (p as NSString).lastPathComponent }
         proc_name(pid, &buf, UInt32(buf.count))
         return String(decoding: buf.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self)
     }
