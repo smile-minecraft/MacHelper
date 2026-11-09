@@ -49,7 +49,11 @@ private struct GeneralSettings: View {
                     }
                 }
                 HStack {
-                    Button("Check for Updates") { UpdaterController.shared.checkForUpdates() }
+                    if UpdaterController.shared.availableVersion != nil {
+                        UpdateAvailableButton()
+                    } else {
+                        Button("Check for Updates") { UpdaterController.shared.checkForUpdates() }
+                    }
                     Toggle("Automatically check for updates", isOn: $autoCheckUpdates)
                         .onChange(of: autoCheckUpdates) { _, on in
                             // Writing back persists the preference through Sparkle.

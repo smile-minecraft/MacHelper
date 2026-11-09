@@ -114,6 +114,8 @@ private struct SidebarFooter: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Divider()
+            UpdateAvailableButton()
+                .padding(.horizontal, 12)
             HStack(spacing: 8) {
                 if status == .enabled {
                     Circle().fill(Theme.mint).frame(width: 8, height: 8)

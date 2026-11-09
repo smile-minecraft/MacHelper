@@ -84,7 +84,7 @@ targets:
         SUFeedURL: "https://smile-minecraft.github.io/MacHelper/appcast.xml"
         SUPublicEDKey: "zPSW25aBPeHRwZRhCmrLhYRs1wkiJ6xArxcQNjKvoT8="
         SUEnableAutomaticChecks: true
-        SUScheduledCheckInterval: 86400
+        SUScheduledCheckInterval: 14400
         SUAutomaticallyUpdate: false
     settings:
       base:

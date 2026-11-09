@@ -114,6 +114,7 @@ struct MonitorPanel: View {
             Circle().fill(enabled ? Theme.accent : Theme.amber).frame(width: 6, height: 6)
             Text(enabled ? "Helper running" : "Helper not enabled").font(.mh(size: 11)).foregroundStyle(Palette.textMuted)
             Spacer()
+            UpdateAvailableButton(compact: true)
             Button("Quit", action: actions.quit)
                 .buttonStyle(.plain)
                 .font(.mh(size: 11.5, weight: .medium))
