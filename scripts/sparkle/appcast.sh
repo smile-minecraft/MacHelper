@@ -102,12 +102,13 @@ do_appcast() {
     *) die "拒絕清理不在預期位置的路徑：$stage" ;;
   esac
   mkdir -p "$stage"
-  cp "$dmg" "$stage/"
+  # Sparkle accepts one archive per bundle version. Use the zip for the appcast;
+  # the DMG stays in the GitHub release for a normal first install.
   cp "$zip" "$stage/"
   # Sparkle only picks up notes named like the archive; notes.md alone is ignored.
-  local dmg_base
-  dmg_base="$(basename "$dmg" .dmg)"
-  cp "$notes" "$stage/$dmg_base.md"
+  local zip_base
+  zip_base="$(basename "$zip" .zip)"
+  cp "$notes" "$stage/$zip_base.md"
 
   local prefix="$REPO_URL/releases/download/v$version/"
   echo "→ 用 $(basename "$BIN_DIR")/generate_appcast 產生 appcast（下載 URL 前綴：${prefix}）"
