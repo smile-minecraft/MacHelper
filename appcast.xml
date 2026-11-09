@@ -1,0 +1,16 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>MacHelper</title>
+        <item>
+            <title>0.3.0</title>
+            <pubDate>Tue, 10 Nov 2026 00:15:19 +0800</pubDate>
+            <sparkle:version>202611092246</sparkle:version>
+            <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <sparkle:releaseNotesLink>https://smile-minecraft.github.io/MacHelper/MacHelper-0.3.0.md</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/smile-minecraft/MacHelper/releases/download/v0.3.0/MacHelper-0.3.0.zip" length="11014754" type="application/octet-stream" sparkle:edSignature="8XAwuvROnzkI90BXBxC2gT0il8SloWbn6slYPQId9wetwUij5T1H3cVgH7bumrAXlZ30ubN5+STIWsD26CVoAw=="/>
+        </item>
+    </channel>
+</rss>
