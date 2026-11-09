@@ -160,7 +160,7 @@ do_pages() {
   [[ -z "$(git -C "$pages" status --porcelain)" ]] || die "$pages 有未提交的變更"
   git -C "$pages" pull -q --ff-only
   cp "$stage/appcast.xml" "$stage"/*.md "$pages/"
-  git -C "$pages" add appcast.xml ./*.md
+  (cd "$pages" && git add appcast.xml ./*.md)
   git -C "$pages" commit -q -m "docs: publish appcast for $version"
   git -C "$pages" push -q origin HEAD
   echo "✓ appcast 已推送到 gh-pages：$PAGES_URL/appcast.xml"
