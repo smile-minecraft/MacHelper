@@ -242,7 +242,11 @@ final class SlimeView: NSView {
         timer?.invalidate()
         timer = nil
         guard window != nil else { return }
-        let t = Timer(timeInterval: 1 / SlimeMascot.fps, repeats: true) { [weak self] _ in
+        // Fire in the middle of each frame, not on its edge: a tick that lands a hair early on a
+        // boundary samples the previous frame, and the next one then skips a frame (visible stutter).
+        let elapsed = Date().timeIntervalSince(start) * SlimeMascot.fps
+        let firstFire = start.addingTimeInterval((elapsed.rounded(.down) + 1.5) / SlimeMascot.fps)
+        let t = Timer(fire: firstFire, interval: 1 / SlimeMascot.fps, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.tick() }
         }
         t.tolerance = 0.02
@@ -502,6 +506,8 @@ struct SlimePose: Hashable {
         var chosen: MascotReaction?
         var chosenShift = 0
         var chosenLook = 0
+        /// Frames since the chosen interaction began; system reactions loop on the clock instead.
+        var chosenAge: Int?
         if let s = system, let i = resolved {
             if s.priority >= i.reaction.priority {
                 chosen = s
@@ -509,6 +515,7 @@ struct SlimePose: Hashable {
                 chosen = i.reaction
                 chosenShift = i.shift
                 chosenLook = i.look
+                chosenAge = f - i.startedAt
             }
         } else if let s = system {
             chosen = s
@@ -516,28 +523,47 @@ struct SlimePose: Hashable {
             chosen = i.reaction
             chosenShift = i.shift
             chosenLook = i.look
+            chosenAge = f - i.startedAt
         }
 
         if let c = chosen {
             p.tint = mood.level
             // Reduce Motion freezes displacement and animated extras; only expression changes.
             let displacement: (Int, Int) -> (Int, Int) = { jump, shift in still ? (0, 0) : (jump, shift) }
+            /// Applies one frame of a hop (crouch, rise, hang, fall, land) to the body.
+            func hop(_ k: Int, height: Int) {
+                guard !still else { return }
+                let (jump, squash) = Self.hop(k, height: height)
+                p.jump = jump
+                p.halfWidth = 10 + squash
+                p.height = 11 - squash
+            }
+            let age = chosenAge ?? 0
+            let remaining = c.durationFrames - age
+            /// Mitts rise over two frames on the way in and drop a step on the way out.
+            func raisedHands() -> Hand {
+                if still { return .up(2, lift: 0) }
+                if chosenAge != nil, age < 1 { return .out(2) }
+                if chosenAge != nil, age < 2 || remaining <= 2 { return .up(1, lift: 0) }
+                return .up(2, lift: 0)
+            }
             switch c {
             case .singleTap:
-                let (jump, shift) = displacement(2, 0)
-                p.jump = jump; p.shift = shift
-                p.eyes = .happy
-                p.left = .up(2, lift: 0); p.right = .up(2, lift: 0)
+                hop(age, height: 2)
+                p.eyes = age < 1 && !still ? .closed : .happy
+                p.left = raisedHands(); p.right = raisedHands()
             case .doubleTap:
-                let (jump, shift) = displacement(3, 0)
-                p.jump = jump; p.shift = shift
-                p.halfWidth = 11; p.height = 10
-                p.eyes = .wide
-                p.left = .up(2, lift: 0); p.right = .up(2, lift: 0)
+                // Two hops: a big one, then a smaller one.
+                let big = Self.hopFrames(height: 3).count
+                hop(age < big ? age : age - big, height: age < big ? 3 : 2)
+                p.eyes = age < 1 && !still ? .closed : .wide
+                p.left = raisedHands(); p.right = raisedHands()
+                if !still, age >= big, (age - big) % 2 == 0 { p.left = .up(2, lift: 1) }
             case .hovered:
                 p.eyes = .happy
                 p.look = chosenLook
-                p.right = .up(1, lift: 0)
+                // Peek, then lift the mitt and give a short wave.
+                p.right = still ? .up(1, lift: 0) : age < 1 ? .out(1) : .up(1, lift: age < 8 ? (age / 2) % 2 : 0)
                 p.left = .out(1)
             case .dragged:
                 let (_, shift) = displacement(0, chosenShift)
@@ -582,8 +608,7 @@ struct SlimePose: Hashable {
                 p.left = .up(2, lift: 0); p.right = .up(2, lift: 0)
                 p.bolt = still ? 0 : f % 8
             case .healthImproved:
-                let (jump, shift) = displacement(2, 0)
-                p.jump = jump; p.shift = shift
+                hop(f % 12, height: 2)
                 p.eyes = .happy
                 p.left = .up(2, lift: 0); p.right = .up(2, lift: 0)
                 p.spark = still ? 0 : f % 8
@@ -592,8 +617,7 @@ struct SlimePose: Hashable {
                 p.sweat = still ? 0 : (f / 4) % 6
                 p.left = .out(1); p.right = .out(1)
             case .cleanupFinished:
-                let (jump, shift) = displacement(2, 0)
-                p.jump = jump; p.shift = shift
+                hop(f % 12, height: 2)
                 p.eyes = .happy
                 p.left = .up(2, lift: 0); p.right = .up(2, lift: 0)
                 p.spark = still ? 0 : f % 8
@@ -648,6 +672,20 @@ struct SlimePose: Hashable {
             p.sign = (k < 2 || (k >= 4 && k < 6)) ? 1 : 0
         }
         return p
+    }
+}
+
+extension SlimePose {
+    /// Jump height and squash (+1 wide and short, -1 narrow and tall) per frame of a hop.
+    static func hopFrames(height: Int) -> [(jump: Int, squash: Int)] {
+        let up = (1..<height).map { (jump: $0, squash: -1) }
+        return [(0, 1)] + up + [(height, 0), (height, 0)] + up.reversed() + [(0, 1), (0, 0)]
+    }
+
+    /// One frame of a hop; past its end the slime rests on the ground.
+    static func hop(_ k: Int, height: Int) -> (jump: Int, squash: Int) {
+        let frames = hopFrames(height: height)
+        return k >= 0 && k < frames.count ? frames[k] : (0, 0)
     }
 }
 

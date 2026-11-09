@@ -310,6 +310,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             hosting.topAnchor.constraint(equalTo: button.topAnchor),
             hosting.bottomAnchor.constraint(equalTo: button.bottomAnchor),
         ])
+        // Something else (the system re-laying out a crowded menu bar, or a menu bar manager moving
+        // items) can leave the button narrower than the length we asked for, clipping the content
+        // on both sides. Watch the button and ask for the full width again when that happens.
+        button.postsFrameChangedNotifications = true
+        NotificationCenter.default.addObserver(self, selector: #selector(statusButtonFrameChanged(_:)),
+                                               name: NSView.frameDidChangeNotification, object: button)
         button.target = self
         button.action = #selector(togglePopover(_:))
         button.setAccessibilityLabel(String(localized: "MacHelper System Monitor"))
@@ -352,6 +358,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var statusWidth: CGFloat = 0
     private var statusConfig: MonitorConfiguration?
 
+    private var lastReassert = Date.distantPast
+
+    @objc private func statusButtonFrameChanged(_ notification: Notification) {
+        DispatchQueue.main.async { self.reassertStatusWidth() }
+    }
+
+    /// Re-applies the measured width when the button ended up narrower (at most once a second,
+    /// so a manager that keeps shrinking it can't start a resize loop).
+    private func reassertStatusWidth() {
+        guard let button = statusItem?.button, statusWidth > 0,
+              button.frame.width + 0.5 < statusWidth,
+              Date().timeIntervalSince(lastReassert) > 1 else { return }
+        lastReassert = Date()
+        statusItem.length = statusWidth + 1
+        statusItem.length = statusWidth
+    }
+
     private func resizeStatusItem(to width: CGFloat) {
         let w = max(ceil(width), 22)
         if statusConfig != settings.configuration {
@@ -361,6 +384,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             statusWidth = max(statusWidth, w)
         }
         if statusItem.length != statusWidth { statusItem.length = statusWidth }
+        reassertStatusWidth()
     }
 
     @objc private func togglePopover(_ sender: Any?) {

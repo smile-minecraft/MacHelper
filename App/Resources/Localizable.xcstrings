@@ -34739,6 +34739,380 @@
           }
         }
       }
+    },
+    "A few features need a small helper that runs with administrator rights: fan control, cleaning system caches and logs, turning system background items on or off, and reading the usage of system processes. Everything else works without it, and you can set it up later from the sidebar.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algunas funciones necesitan un pequeño ayudante que se ejecuta con permisos de administrador: control de ventiladores, limpieza de cachés y registros del sistema, activar o desactivar elementos en segundo plano del sistema y leer el uso de los procesos del sistema. Todo lo demás funciona sin él, y puedes configurarlo más tarde desde la barra lateral."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "いくつかの機能には、管理者権限で動く小さなヘルパーが必要です：ファン制御、システムキャッシュとログの削除、システムのバックグラウンド項目のオン／オフ、システムプロセスの使用量の読み取り。それ以外はヘルパーなしで使えます。あとでサイドバーから設定することもできます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일부 기능에는 관리자 권한으로 실행되는 작은 도우미가 필요합니다: 팬 제어, 시스템 캐시와 로그 정리, 시스템 백그라운드 항목 켜기/끄기, 시스템 프로세스 사용량 읽기. 나머지 기능은 도우미 없이 작동하며, 나중에 사이드바에서 설정할 수도 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有几项功能需要一个以管理员权限运行的小助手：风扇控制、清理系统缓存与日志、开关系统后台项目，以及读取系统进程的用量。其他功能不需要它，之后也可以从侧边栏再设置。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有幾項功能需要一個以管理者權限執行的小幫手：風扇控制、清理系統快取與記錄檔、開關系統背景項目，以及讀取系統行程的用量。其他功能不需要它，之後也可以從側邊欄再設定。"
+          }
+        }
+      }
+    },
+    "All set. MacHelper checked that the Helper answers.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listo. MacHelper comprobó que el Helper responde."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完了しました。Helper が応答することを確認しました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "완료되었습니다. MacHelper가 Helper의 응답을 확인했습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成。MacHelper 已确认 Helper 有响应。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成。MacHelper 已確認 Helper 有回應。"
+          }
+        }
+      }
+    },
+    "Allow it in System Settings": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitirlo en Ajustes del Sistema"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システム設定で許可"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 설정에서 허용"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在系统设置中允许"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在系統設定中允許"
+          }
+        }
+      }
+    },
+    "Helper is running": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper está en ejecución"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper は実行中です"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 실행 중"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 正在运行"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 正在執行"
+          }
+        }
+      }
+    },
+    "In General → Login Items & Extensions, turn on MacHelper under “Allow in the Background”. macOS asks for your password.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En General → Ítems de inicio y extensiones, activa MacHelper en “Permitir en segundo plano”. macOS te pedirá la contraseña."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「一般 → ログイン項目と機能拡張」の「バックグラウンドでの実行を許可」で MacHelper をオンにします。macOS がパスワードを求めます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일반 → 로그인 항목 및 확장 프로그램의 ‘백그라운드에서 허용’에서 MacHelper를 켜세요. macOS가 암호를 묻습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在「通用 → 登录项与扩展」的「允许在后台」中打开 MacHelper。macOS 会要求输入密码。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在「一般 → 登入項目與延伸功能」的「允許在背景執行」中開啟 MacHelper。macOS 會要求輸入密碼。"
+          }
+        }
+      }
+    },
+    "Install Helper": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instalar Helper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper をインストール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 설치"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装 Helper"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安裝 Helper"
+          }
+        }
+      }
+    },
+    "Install the Helper": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instalar el Helper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper をインストール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 설치"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装 Helper"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安裝 Helper"
+          }
+        }
+      }
+    },
+    "MacHelper checks this by itself once the Helper is allowed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper lo comprueba solo cuando permitas el Helper."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper を許可すると、MacHelper が自動で確認します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper를 허용하면 MacHelper가 자동으로 확인합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许 Helper 后，MacHelper 会自动确认。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允許 Helper 後，MacHelper 會自動確認。"
+          }
+        }
+      }
+    },
+    "Set up Helper…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurar Helper…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper を設定…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 설정…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置 Helper…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定 Helper…"
+          }
+        }
+      }
+    },
+    "Set up the MacHelper Helper": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurar el Helper de MacHelper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper をセットアップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 설정"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置 MacHelper Helper"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定 MacHelper Helper"
+          }
+        }
+      }
+    },
+    "macOS adds it to Login Items. Nothing runs until you allow it.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS lo añade a Ítems de inicio. No se ejecuta nada hasta que lo permitas."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS がログイン項目に追加します。許可するまでは何も実行されません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS가 로그인 항목에 추가합니다. 허용하기 전까지는 실행되지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 会把它加入「登录项」。在你允许之前，它不会运行。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 會把它加入「登入項目」。在你允許之前，它不會執行。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -207,10 +207,18 @@ struct MonitorView: View {
             RuleMark(y: .value("Threshold", threshold.value))
                 .foregroundStyle(threshold.level.color.opacity(0.75))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                .annotation(position: .top, alignment: .leading) {
+                // Tags sit at the trailing end, clear of the title and the line's start. The higher
+                // (critical) tag goes above its line and the lower one below, so two close lines
+                // never stack their tags on top of each other.
+                .annotation(position: threshold.level == .critical ? .top : .bottom, alignment: .trailing, spacing: 2,
+                            overflowResolution: .init(x: .fit(to: .plot), y: .fit(to: .plot))) {
                     Text(threshold.label)
                         .font(.mhCaption2)
                         .foregroundStyle(threshold.level.color)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1)
+                        .background(SurfaceShape(capsule: true).fill(Palette.card.opacity(0.85)))
+                        .overlay(SurfaceShape(capsule: true).strokeBorder(threshold.level.color.opacity(0.45), lineWidth: 0.5))
                 }
         }
     }
@@ -244,7 +252,8 @@ private struct ThresholdYScale: ViewModifier {
 
     func body(content: Content) -> some View {
         if let top, let peak, peak < top {
-            content.chartYScale(domain: 0...top)
+            // Leave headroom above the highest line so its tag fits inside the plot; fractions stop at 100 %.
+            content.chartYScale(domain: 0...(top <= 1 ? 1 : top * 1.1))
         } else {
             content.chartYScale(domain: .automatic(includesZero: true))
         }

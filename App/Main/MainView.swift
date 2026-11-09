@@ -5,13 +5,15 @@ import SwiftUI
 struct MainView: View {
     @Bindable var app: AppModel
     @Environment(\.openWindow) private var openWindow
-    @State private var offerFullDiskAccess = FullDiskAccess.shouldOfferOnboarding
-    // The agent skill question comes after the Full Disk Access one, never both at once.
-    @State private var offerAgentSkill = !FullDiskAccess.shouldOfferOnboarding && AgentSkillSetup.shouldOffer
+    /// First-launch sheets, one at a time: Full Disk Access, then the Helper, then the agent skill.
+    @State private var onboarding = OnboardingStep.next(after: nil)
+    @State private var lastOnboarding: OnboardingStep?
+    /// False once the Helper guide is opened by hand from the sidebar: closing it shows nothing else.
+    @State private var chainOnboarding = true
 
     var body: some View {
         NavigationSplitView {
-            Sidebar(app: app)
+            Sidebar(app: app, setUpHelper: { chainOnboarding = false; onboarding = .helper })
                 .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
         } detail: {
             // Each page fades in, rising a few points, while the previous one fades out, so a
@@ -30,10 +32,16 @@ struct MainView: View {
         }
         .frame(minWidth: 980, minHeight: 640)
         .onAppear { app.openMainWindow = { openWindow(id: "main") } }
-        .sheet(isPresented: $offerFullDiskAccess, onDismiss: { if AgentSkillSetup.shouldOffer { offerAgentSkill = true } }) {
-            FullDiskAccessSheet()
+        .sheet(item: $onboarding, onDismiss: { onboarding = chainOnboarding ? OnboardingStep.next(after: lastOnboarding) : nil }) { step in
+            Group {
+                switch step {
+                case .fullDiskAccess: FullDiskAccessSheet()
+                case .helper: HelperSetupSheet()
+                case .agentSkill: AgentSkillSheet()
+                }
+            }
+            .onAppear { lastOnboarding = step }
         }
-        .sheet(isPresented: $offerAgentSkill) { AgentSkillSheet() }
         // Switching to simple mode while on an advanced page goes back to the overview.
         .onChange(of: ThemeStore.shared.settings.mode) { if !app.section.isVisible { app.section = .overview } }
     }
@@ -59,8 +67,28 @@ struct MainView: View {
     }
 }
 
+/// The sheets offered on first launch, in order.
+private enum OnboardingStep: Int, CaseIterable, Identifiable {
+    case fullDiskAccess, helper, agentSkill
+    var id: Int { rawValue }
+
+    var shouldOffer: Bool {
+        switch self {
+        case .fullDiskAccess: FullDiskAccess.shouldOfferOnboarding
+        case .helper: HelperSetup.shouldOfferOnboarding
+        case .agentSkill: AgentSkillSetup.shouldOffer
+        }
+    }
+
+    /// The first step after `previous` that still applies.
+    static func next(after previous: OnboardingStep?) -> OnboardingStep? {
+        allCases.first { $0.rawValue > (previous?.rawValue ?? -1) && $0.shouldOffer }
+    }
+}
+
 private struct Sidebar: View {
     @Bindable var app: AppModel
+    var setUpHelper: () -> Void
 
     var body: some View {
         List(selection: Binding(get: { app.section }, set: { if let s = $0 { app.section = s } })) {
@@ -74,21 +102,33 @@ private struct Sidebar: View {
             }
         }
         .listStyle(.sidebar)
-        .safeAreaInset(edge: .bottom) { SidebarFooter(app: app) }
+        .safeAreaInset(edge: .bottom) { SidebarFooter(app: app, setUpHelper: setUpHelper) }
     }
 }
 
 private struct SidebarFooter: View {
     let app: AppModel
+    var setUpHelper: () -> Void
     @State private var status = HelperClient.shared.status
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Divider()
             HStack(spacing: 8) {
-                Circle().fill(status == .enabled ? Theme.mint : Theme.amber).frame(width: 8, height: 8)
-                Text(status == .enabled ? "Helper running" : "Helper not enabled")
-                    .font(.mhCaption).foregroundStyle(Palette.textMuted)
+                if status == .enabled {
+                    Circle().fill(Theme.mint).frame(width: 8, height: 8)
+                    Text("Helper running").font(.mhCaption).foregroundStyle(Palette.textMuted)
+                } else {
+                    // Not running: the line opens the setup guide.
+                    Button(action: setUpHelper) {
+                        HStack(spacing: 8) {
+                            Circle().fill(Theme.amber).frame(width: 8, height: 8)
+                            Text("Set up Helper…").font(.mhCaption).foregroundStyle(Palette.text)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .help("Helper not enabled")
+                }
                 Spacer()
                 SettingsLink { Image(systemName: "gearshape") }
                     .buttonStyle(.borderless)
@@ -99,10 +139,11 @@ private struct SidebarFooter: View {
         }
         .task {
             while !Task.isCancelled {
-                // The status only changes when the user turns the Helper on or off in Settings.
+                // The status only changes when the user turns the Helper on or off; check sooner
+                // while it is off so the footer follows the setup guide.
                 let now = HelperClient.shared.status
                 if now != status { status = now }
-                try? await Task.sleep(for: .seconds(30))
+                try? await Task.sleep(for: .seconds(status == .enabled ? 30 : 3))
             }
         }
     }

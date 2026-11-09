@@ -285,9 +285,9 @@ struct SunburstChart: View {
         guard let layout, let (f, depth) = SunburstLayout.polar(p, in: size, maxDepth: maxDepth) else { return }
         if depth == 0 { model.zoomOut(); return }
         guard let node = layout.arc(atFraction: f, depth: depth)?.node else { return }
-        // Open one level: the ring-1 folder on the path to what was clicked (or the folder itself).
-        let target = node.lineage.first { $0.parent === focus } ?? node
-        if target.isDirectory { model.zoom(to: target) }
+        // Jump straight to the clicked folder; a click on a file opens the folder that holds it.
+        let target = node.isDirectory ? node : node.parent
+        if let target, target !== focus { model.zoom(to: target) }
     }
 
     @ViewBuilder private var contextMenu: some View {
