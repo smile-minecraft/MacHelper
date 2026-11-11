@@ -176,11 +176,55 @@ import Testing
         #expect(d["gstreamer-runtime"]?.needsAdmin == true && d["gstreamer-runtime"]?.apps == [])
     }
 
+    @Test func selfCaskIsExcludedWhileOthersStayListed() {
+        // This machine: the cask keeps the version it installed (0.3.0) while the app already
+        // updated itself to 0.3.2, so the row would read like a downgrade of the app.
+        let selfRow = HomebrewUpdates.OutdatedRow(token: "machelper", installed: "0.3.0", current: "0.3.2", pinned: false)
+        let obsRow = HomebrewUpdates.OutdatedRow(token: "obs", installed: "33.0.0", current: "33.0.1", pinned: false)
+        let emacsRow = HomebrewUpdates.OutdatedRow(token: "emacs", installed: "28.2", current: "29.1", pinned: false)
+        let details: [String: HomebrewUpdates.Details] = [
+            "machelper": .init(name: "MacHelper", autoUpdates: false, apps: ["MacHelper.app"], needsAdmin: false),
+            "obs": .init(name: "OBS", autoUpdates: true, apps: ["OBS.app"], needsAdmin: false),
+            "emacs": .init(name: "GNU Emacs", autoUpdates: false, apps: [], needsAdmin: false),
+        ]
+        let appBundles: Set<String> = ["MacHelper.app"], tokens: Set<String> = ["machelper"]
+        #expect(HomebrewUpdates.isSelfInstalled(selfRow, details: details, excludingAppBundleNames: appBundles, excludingTokens: tokens))
+        #expect(!HomebrewUpdates.isSelfInstalled(obsRow, details: details, excludingAppBundleNames: appBundles, excludingTokens: tokens))
+        #expect(!HomebrewUpdates.isSelfInstalled(emacsRow, details: details, excludingAppBundleNames: appBundles, excludingTokens: tokens),
+                "a cask without App artifacts and without the own token is listed as before")
+        // A run outside the .app (the bundled CLI) only identifies itself by token, and the App
+        // bundle alone catches a cask that installs the app under a different token.
+        #expect(HomebrewUpdates.isSelfInstalled(selfRow, details: [:], excludingAppBundleNames: appBundles, excludingTokens: tokens))
+        #expect(HomebrewUpdates.isSelfInstalled(.init(token: "own-cask", installed: "1", current: "2", pinned: false),
+                                                details: ["own-cask": .init(name: "MacHelper", autoUpdates: false, apps: ["MacHelper.app"], needsAdmin: false)],
+                                                excludingAppBundleNames: appBundles, excludingTokens: []))
+        // Without Homebrew's details and without the own token nothing can be excluded.
+        #expect(!HomebrewUpdates.isSelfInstalled(.init(token: "any-cask", installed: "1", current: "2", pinned: false),
+                                                 details: [:], excludingAppBundleNames: appBundles, excludingTokens: []))
+        #expect(!HomebrewUpdates.isSelfInstalled(obsRow, details: details, excludingAppBundleNames: [], excludingTokens: []),
+                "without exclusions nothing is dropped")
+    }
+
     @Test func terminalCommandAndTail() {
         let c = OutdatedCask(token: "obs", name: "OBS", installedVersion: "1", currentVersion: "2", pinned: false,
                              autoUpdates: false, appNames: [], needsAdmin: true)
         #expect(c.terminalCommand == "brew upgrade --cask obs")
         #expect(HomebrewUpdates.tail((1...30).map(String.init).joined(separator: "\n"), lines: 3) == "28\n29\n30")
+    }
+
+    /// 防漂移：App/CLI 共用的 cask token 必須與 scripts/release.sh 宣告的 `cask "machelper" do` 一致。
+    /// cask 改名時這個測試會失敗，提醒同步更新 HomebrewUpdates.appCaskToken。不依賴網路或本機 Homebrew。
+    @Test func appCaskTokenMatchesReleaseScript() throws {
+        let repoRoot = URL(filePath: #filePath)
+            .deletingLastPathComponent()   // Tests/CleanEngineTests
+            .deletingLastPathComponent()   // Tests
+            .deletingLastPathComponent()   // 專案根目錄
+        let releaseScript = try String(contentsOf: repoRoot.appending(path: "scripts/release.sh"),
+                                       encoding: .utf8)
+        let match = try #require(releaseScript.firstMatch(of: /cask "([^"]+)" do/),
+                                 "scripts/release.sh 找不到 cask 宣告")
+        #expect(String(match.output.1) == HomebrewUpdates.appCaskToken,
+                "cask 改名時需同步更新 HomebrewUpdates.appCaskToken")
     }
 }
 

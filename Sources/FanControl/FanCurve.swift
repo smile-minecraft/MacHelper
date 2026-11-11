@@ -31,9 +31,49 @@ public struct FanCurve: Codable, Sendable, Hashable {
         return last.fraction
     }
 
-    public static let quiet = FanCurve(points: [.init(celsius: 60, fraction: 0), .init(celsius: 80, fraction: 0.4), .init(celsius: 95, fraction: 1)])
-    public static let balanced = FanCurve(points: [.init(celsius: 50, fraction: 0), .init(celsius: 70, fraction: 0.4), .init(celsius: 90, fraction: 1)])
-    public static let performance = FanCurve(points: [.init(celsius: 40, fraction: 0.2), .init(celsius: 60, fraction: 0.6), .init(celsius: 80, fraction: 1)])
+    // Each preset climbs in ramps separated by short plateaus: the fans settle on a tread instead
+    // of tracking every degree, and the next ramp is steep enough to stay ahead of the heat.
+    // Quiet ≤ Balanced ≤ Performance at every temperature.
+
+    public static let quiet = FanCurve(points: [
+        .init(celsius: 55, fraction: 0.00),
+        .init(celsius: 60, fraction: 0.00),   // tread: stay silent through idle warmth
+        .init(celsius: 68, fraction: 0.12),
+        .init(celsius: 71, fraction: 0.12),   // tread: hold the first quiet step
+        .init(celsius: 80, fraction: 0.40),
+        .init(celsius: 83, fraction: 0.40),   // tread: the old 80 °C anchor speed
+        .init(celsius: 90, fraction: 0.72),
+        .init(celsius: 93, fraction: 0.72),   // tread: keep the fans steady in the low 90s
+        .init(celsius: 95, fraction: 0.88),
+        .init(celsius: 100, fraction: 1.00),
+    ])
+
+    public static let balanced = FanCurve(points: [
+        .init(celsius: 45, fraction: 0.00),
+        .init(celsius: 50, fraction: 0.00),   // tread: no fan noise while the machine idles
+        .init(celsius: 58, fraction: 0.15),
+        .init(celsius: 61, fraction: 0.15),   // tread: first gentle step
+        .init(celsius: 70, fraction: 0.40),
+        .init(celsius: 73, fraction: 0.40),   // tread: the old 70 °C anchor speed
+        .init(celsius: 82, fraction: 0.65),
+        .init(celsius: 85, fraction: 0.65),   // tread: holds through a short workload spike
+        .init(celsius: 92, fraction: 0.92),
+        .init(celsius: 95, fraction: 0.92),   // tread: near full speed before the last ramp
+        .init(celsius: 100, fraction: 1.00),
+    ])
+
+    public static let performance = FanCurve(points: [
+        .init(celsius: 40, fraction: 0.20),
+        .init(celsius: 48, fraction: 0.32),
+        .init(celsius: 51, fraction: 0.32),   // tread: early step to keep the fans audible but calm
+        .init(celsius: 58, fraction: 0.58),
+        .init(celsius: 61, fraction: 0.58),   // tread: the old 60 °C anchor speed
+        .init(celsius: 68, fraction: 0.72),
+        .init(celsius: 71, fraction: 0.72),   // tread: short plateau before the final ramp
+        .init(celsius: 78, fraction: 0.95),
+        .init(celsius: 81, fraction: 1.00),
+        .init(celsius: 100, fraction: 1.00),  // tread: full speed through sustained heat
+    ])
 }
 
 public enum TemperatureSource: String, Codable, Sendable, CaseIterable {

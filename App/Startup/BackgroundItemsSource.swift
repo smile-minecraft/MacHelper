@@ -10,6 +10,12 @@ enum BackgroundItemsSource {
     /// The list changes rarely; reuse a recent read (health check period switches, tab changes).
     static let maxAge: TimeInterval = 300
 
+    /// The active count from a recent read, without waiting for the Helper. Health uses it to
+    /// show its report immediately and fills the count in when the read finishes.
+    static var cachedActiveCount: Int? {
+        cached.map { BackgroundItems.activeCount($0.items) }
+    }
+
     static func load(forceRefresh: Bool = false) async -> Result<[BackgroundItem], BackgroundItems.Failure> {
         if !forceRefresh, let cached, Date().timeIntervalSince(cached.at) < maxAge { return .success(cached.items) }
         guard HelperClient.shared.status == .enabled else {

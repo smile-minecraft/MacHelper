@@ -35181,6 +35181,156 @@
           }
         }
       }
+    },
+    "Fans on this Mac can’t be controlled by MacHelper.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這台 Mac 的風扇無法由 MacHelper 控制。"
+          }
+        }
+      }
+    },
+    "Loading fan status": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "載入風扇狀態"
+          }
+        }
+      }
+    },
+    "Add a fan curve point": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增風扇曲線點"
+          }
+        }
+      }
+    },
+    "Remove a fan curve point": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除風扇曲線點"
+          }
+        }
+      }
+    },
+    "Stop looking for build artifacts in this folder": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止在這個資料夾尋找建置產物"
+          }
+        }
+      }
+    },
+    "Memory is the average footprint while the process was among the largest.": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶體數值是程序在用量最大時的平均足跡。"
+          }
+        }
+      }
+    },
+    "Updating process history…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在更新程序歷程…"
+          }
+        }
+      }
+    },
+    "Updating sensor history…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在更新感測器歷程…"
+          }
+        }
+      }
+    },
+    "Updating the app list…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在更新 App 清單…"
+          }
+        }
+      }
+    },
+    "Updating startup items…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在更新啟動項目…"
+          }
+        }
+      }
+    },
+    "Checking again…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再次檢查…"
+          }
+        }
+      }
+    },
+    "Updating…": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在更新…"
+          }
+        }
+      }
+    },
+    "Remove %@ from project folders": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從專案資料夾移除 %@"
+          }
+        }
+      }
+    },
+    "%@, %@ to %@": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，%@ 至 %@"
+          }
+        }
+      }
+    },
+    "Clean %@ again": {
+      "localizations": {
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再次清除 %@"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

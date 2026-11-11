@@ -17,8 +17,14 @@ struct HealthView: View {
                         Text("7 days").tag(HealthModel.Window.week)
                     }
                     .pickerStyle(.segmented).labelsHidden().fixedSize()
-                    IconButton(symbol: "arrow.clockwise", help: "Run again") { Task { await reload() } }
-                        .disabled(model.loading)
+                    if model.updating {
+                        HStack(spacing: 6) {
+                            ProgressView().controlSize(.small)
+                            Text("Updating…").font(.mhCaption).foregroundStyle(Palette.textMuted)
+                        }
+                    }
+                    IconButton(symbol: "arrow.clockwise", help: "Run again") { Task { await reload(force: true) } }
+                        .disabled(model.loading || model.updating)
                 }
                 if let error = model.error {
                     Text(error).font(.mhCallout).foregroundStyle(Theme.amber).textSelection(.enabled)
@@ -46,9 +52,10 @@ struct HealthView: View {
         }
         .task(id: model.window) { await reload() }
         .task { await model.loadSecurity() }
+        .onDisappear { model.cancelBackgroundRefresh() }
     }
 
-    private func reload() async { await model.load(history: app.store.persistentHistory) }
+    private func reload(force: Bool = false) async { await model.load(history: app.store.persistentHistory, forceRefresh: force) }
 
     // MARK: Findings
 
@@ -159,13 +166,16 @@ struct HealthView: View {
                 .font(.mhCallout).foregroundStyle(Palette.textMuted).card()
         } else {
             HStack(alignment: .top, spacing: 16) {
-                processList("Busiest by CPU", report.topByCPU) { Fmt.percent($0.averageCPU) }
-                processList("Largest by memory", report.topByMemory) { Fmt.memory(UInt64(max($0.averageMemoryBytes, 0))) }
+                processList("Busiest by CPU", report.topByCPU,
+                            note: "CPU is the share of one core while the process was among the busiest.") { Fmt.percent($0.averageCPU) }
+                processList("Largest by memory", report.topByMemory,
+                            note: "Memory is the average footprint while the process was among the largest.") { Fmt.memory(UInt64(max($0.averageMemoryBytes, 0))) }
             }
         }
     }
 
     private func processList(_ title: LocalizedStringKey, _ lines: [HealthReport.ProcessLine],
+                             note: LocalizedStringKey,
                              value: @escaping (HealthReport.ProcessLine) -> String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title).font(.mhHeadline)
@@ -175,11 +185,12 @@ struct HealthView: View {
                     Spacer()
                     Text(value(line)).font(.mhCallout.monospacedDigit()).foregroundStyle(Palette.text)
                     Text("\(Fmt.percent(line.presence)) of the time").font(.mhCaption).foregroundStyle(Palette.textMuted)
-                        .frame(width: 110, alignment: .trailing)
+                        .frame(minWidth: 110, alignment: .trailing)
                 }
             }
-            Text("CPU is the share of one core while the process was among the busiest.")
+            Text(note)
                 .font(.mhCaption2).foregroundStyle(Palette.textFaint)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .card()
     }
@@ -234,7 +245,7 @@ private struct HealthScoreCard: View {
                     ForEach(score.deductions) { d in
                         HStack(alignment: .firstTextBaseline, spacing: 10) {
                             Text(verbatim: "−\(d.points)").font(.mh(size: 13, weight: .semibold).monospacedDigit())
-                                .foregroundStyle(Palette.textMuted).frame(width: 34, alignment: .trailing)
+                                .foregroundStyle(Palette.textMuted).frame(minWidth: 34, alignment: .trailing)
                             Text(d.title).font(.mhCallout).foregroundStyle(Palette.text)
                         }
                     }

@@ -6,8 +6,15 @@ import Observation
 @MainActor
 @Observable
 final class StartupModel {
+    /// Reading every launch agent's plist and owner app is cheap enough to repeat, but not on
+    /// every page switch; the overview also reads this list for its broken-item hint.
+    static let itemsMaxAge: TimeInterval = 60
+
     private(set) var items: [StartupItem] = []
     private(set) var loading = false
+    /// True while the old list stays on screen and a newer one is being read.
+    private(set) var refreshing = false
+    @ObservationIgnored private var itemsLoadedAt: Date?
     var search = ""
     var onlyBroken = false
     private(set) var message: String?
@@ -39,8 +46,10 @@ final class StartupModel {
         case .success(let items):
             backgroundGroups = BackgroundItems.groups(items)
             backgroundError = nil
+            PageLoadProbe.mark(.startup, "background")
         case .failure(.unavailable(let message)):
             backgroundError = message
+            PageLoadProbe.mark(.startup, "background-error")
         }
         loadingBackground = false
     }
@@ -53,12 +62,25 @@ final class StartupModel {
         }
     }
 
-    func load() async {
-        guard !loading else { return }
-        loading = true
+    func load(forceRefresh: Bool = false) async {
+        guard !loading, !refreshing else { return }
+        if !forceRefresh, !items.isEmpty {
+            PageLoadProbe.mark(.startup, "cache")
+            PageLoadProbe.mark(.startup, "items")
+            if let at = itemsLoadedAt, Date().timeIntervalSince(at) < Self.itemsMaxAge { return }
+            refreshing = true
+        } else {
+            loading = true
+        }
+        defer {
+            loading = false
+            refreshing = false
+        }
         helperEnabled = HelperClient.shared.status == .enabled
         items = await Task.detached(priority: .userInitiated) { StartupItems.list() }.value
-        loading = false
+        itemsLoadedAt = Date()
+        PageLoadProbe.mark(.startup, "items")
+        PageLoadProbe.mark(.startup, "refresh")
     }
 
     func canToggle(_ item: StartupItem) -> Bool {
@@ -94,7 +116,8 @@ final class StartupModel {
 
     private func reload() async {
         loading = false
-        await load()
+        refreshing = false
+        await load(forceRefresh: true)
     }
 
     func reveal(_ path: String) {

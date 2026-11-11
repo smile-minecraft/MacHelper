@@ -65,6 +65,16 @@ public enum FanProfile: String, Codable, Sendable, CaseIterable, Identifiable {
         case .custom: nil
         }
     }
+
+    /// The preset whose points are exactly this curve, or `.custom`. A curve saved with an older
+    /// set of preset points no longer matches, so it keeps showing as the user's own curve.
+    public static func matching(_ curve: FanCurve) -> FanProfile {
+        let candidate = FanCurve(points: curve.points)
+        return allCases.first { profile in
+            guard let preset = profile.presetCurve else { return false }
+            return FanCurve(points: preset.points) == candidate
+        } ?? .custom
+    }
 }
 
 // MARK: - Automatic profile switching

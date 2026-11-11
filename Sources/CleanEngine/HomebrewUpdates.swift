@@ -59,6 +59,11 @@ public enum HomebrewUpdates {
 
     public static var brew: String? { Homebrew.brew }
 
+    /// MacHelper 自身安裝用的 cask token。App 與 CLI 共用這個常數來把自己從更新清單中排除；
+    /// cask 改名時這裡與 scripts/release.sh 的 `cask "machelper" do` 都要同步更新，否則
+    /// CleanFlowTests.appCaskTokenMatchesReleaseScript 會失敗。
+    public static let appCaskToken = "machelper"
+
     /// Cask tokens are lowercase names like `visual-studio-code` or `font-sf-pro@2`; never an option.
     public static func isValidToken(_ t: String) -> Bool {
         !t.isEmpty && t.count <= 100 && !t.hasPrefix("-")
@@ -66,8 +71,11 @@ public enum HomebrewUpdates {
     }
 
     /// Outdated casks. Homebrew refreshes its catalog first when it is older than a day (its own rule);
-    /// `refresh` forces `brew update`. `greedy` adds apps that update themselves.
-    public static func outdated(greedy: Bool, refresh: Bool = false) -> Result<[OutdatedCask], Failure> {
+    /// `refresh` forces `brew update`. `greedy` adds apps that update themselves. Casks that installed
+    /// the asking app itself are left out: name its App bundle and, as a fallback, its cask token.
+    public static func outdated(greedy: Bool, refresh: Bool = false,
+                                excludingAppBundleNames: Set<String> = [],
+                                excludingTokens: Set<String> = []) -> Result<[OutdatedCask], Failure> {
         guard let brew else { return .failure(.notInstalled) }
         if refresh {
             let u = run(brew, ["update", "--quiet"], timeout: 180, autoUpdate: true)
@@ -81,12 +89,28 @@ public enum HomebrewUpdates {
         guard !tokens.isEmpty else { return .success([]) }
         let info = run(brew, ["info", "--cask", "--json=v2"] + tokens, timeout: 60, autoUpdate: false)
         let details = info.status == 0 ? parseInfo(Data(info.stdout.utf8)) : [:]
-        return .success(rows.filter { isValidToken($0.token) }.map { row in
+        let listed = rows.filter { row in
+            isValidToken(row.token) && !isSelfInstalled(row, details: details,
+                                                        excludingAppBundleNames: excludingAppBundleNames,
+                                                        excludingTokens: excludingTokens)
+        }
+        return .success(listed.map { row in
             let d = details[row.token]
             return OutdatedCask(token: row.token, name: d?.name ?? row.token, installedVersion: row.installed,
                                 currentVersion: row.current, pinned: row.pinned, autoUpdates: d?.autoUpdates ?? false,
                                 appNames: d?.apps ?? [], needsAdmin: d?.needsAdmin ?? false)
         }.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending })
+    }
+
+    /// True when the cask belongs to the App that is listing updates: it installs an App bundle the
+    /// caller excluded, or its token is one the caller excluded. The installed App bundle decides;
+    /// the token is the fallback for a run outside the .app (the bundled CLI resolves through a
+    /// symlink, so only its install location identifies it).
+    static func isSelfInstalled(_ row: OutdatedRow, details: [String: Details],
+                                excludingAppBundleNames: Set<String>, excludingTokens: Set<String>) -> Bool {
+        if excludingTokens.contains(row.token) { return true }
+        guard let apps = details[row.token]?.apps else { return false }
+        return apps.contains { excludingAppBundleNames.contains($0) }
     }
 
     /// `brew upgrade --cask <token>`, non-interactive: if it needs a password, it fails instead of waiting.

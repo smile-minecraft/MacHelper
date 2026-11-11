@@ -1,6 +1,14 @@
 import Storage
 import SwiftUI
 
+/// Process rankings are re-read when the page is entered again; keep the last result for a
+/// minute so the previous table appears at once while a newer one is read.
+@MainActor
+private enum ProcessHistoryCache {
+    static var entries: [MonitorView.Range: (usage: ProcessUsageHistory, at: Date)] = [:]
+    static let maxAge: TimeInterval = 60
+}
+
 /// Process rankings for the selected range, read from the shared minute history. Only each
 /// minute's top ten by CPU and by memory are stored, so the caption explains that a missing
 /// process may still have been running and each row shows how much of the range it covers.
@@ -9,10 +17,14 @@ struct ProcessHistoryView: View {
     let range: MonitorView.Range
     @State private var usage: ProcessUsageHistory?
     @State private var errorMessage: String?
+    @State private var refreshing = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Process history").font(.mh(size: 13, weight: .semibold)).foregroundStyle(Palette.text)
+            HStack(spacing: 8) {
+                Text("Process history").font(.mh(size: 13, weight: .semibold)).foregroundStyle(Palette.text)
+                if refreshing { ProgressView().controlSize(.small).help("Updating process history…") }
+            }
             if let errorMessage {
                 Text(errorMessage)
                     .font(.mhCaption)
@@ -44,11 +56,27 @@ struct ProcessHistoryView: View {
         .task(id: range) {
             guard let history else { usage = nil; errorMessage = nil; return }
             while !Task.isCancelled {
+                if let cached = ProcessHistoryCache.entries[range] {
+                    usage = cached.usage
+                    errorMessage = nil
+                    PageLoadProbe.mark(.monitor, "processes")
+                    if range != .live, Date().timeIntervalSince(cached.at) < ProcessHistoryCache.maxAge {
+                        refreshing = false
+                        return
+                    }
+                }
                 let now = Date()
                 let since = now.addingTimeInterval(-range.seconds)
+                refreshing = true
+                defer { refreshing = false }
                 do {
-                    usage = try await Task.detached { try history.processUsage(since: since, until: now) }.value
+                    let loaded = try await Task.detached { try history.processUsage(since: since, until: now) }.value
+                    guard !Task.isCancelled else { return }
+                    usage = loaded
                     errorMessage = nil
+                    ProcessHistoryCache.entries[range] = (loaded, Date())
+                    PageLoadProbe.mark(.monitor, "processes")
+                    PageLoadProbe.mark(.monitor, "processes-refresh")
                 } catch {
                     errorMessage = String(localized: "Couldn’t read process history: \(error.localizedDescription)")
                 }

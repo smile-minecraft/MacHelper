@@ -324,7 +324,11 @@ struct Updates: ParsableCommand {
         @Flag(name: .long, help: "Run `brew update` first.") var refresh = false
 
         func run() throws {
-            switch HomebrewUpdates.outdated(greedy: greedy, refresh: refresh) {
+            // This CLI is installed by the same cask as the app; symlinked or not it never lists an
+            // update for itself, because Homebrew keeps the version the user installed.
+            switch HomebrewUpdates.outdated(greedy: greedy, refresh: refresh,
+                                            excludingAppBundleNames: [Bundle.main.bundleURL.lastPathComponent],
+                                            excludingTokens: [HomebrewUpdates.appCaskToken]) {
             case .failure(.notInstalled):
                 Output.err("Homebrew is not installed.")
                 throw ExitCode(1)

@@ -16,7 +16,10 @@ struct SecuritySection: View {
                         .font(.mhCallout).foregroundStyle(weak == 0 ? Palette.textMuted : Theme.amber)
                 }
                 Spacer()
-                IconButton(symbol: "arrow.clockwise", help: "Check Again") { Task { await model.loadSecurity() } }
+                if model.checkingSecurity, model.security != nil {
+                    ProgressView().controlSize(.small).help("Checking again…")
+                }
+                IconButton(symbol: "arrow.clockwise", help: "Check Again") { Task { await model.loadSecurity(forceRefresh: true) } }
                     .disabled(model.checkingSecurity)
             }
             if let checks = model.security {

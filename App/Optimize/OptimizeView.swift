@@ -94,7 +94,7 @@ struct OptimizeView: View {
             }
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(Fmt.bytes(Int64(clamping: model.selectedBytes))) selected, \(model.selectedTaskCount) maintenance tasks")
+                    Text(selectionSummary)
                         .font(Theme.smallNumeral)
                         .foregroundStyle(Palette.text)
                     Text("Low-risk items are deleted directly, medium and high risk go to the Trash.").font(.mhCaption).foregroundStyle(Palette.textMuted)
@@ -115,6 +115,16 @@ struct OptimizeView: View {
         } message: {
             Text(confirmMessage)
         }
+    }
+
+    /// The running total in the footer. Maintenance tasks are only mentioned when some are selected,
+    /// so an empty selection doesn’t read as “0 maintenance tasks”.
+    private var selectionSummary: String {
+        let bytes = Fmt.bytes(Int64(clamping: model.selectedBytes))
+        if model.selectedTaskCount > 0 {
+            return String(localized: "\(bytes) selected, \(model.selectedTaskCount) maintenance tasks")
+        }
+        return String(localized: "\(bytes) selected")
     }
 
     /// Why the preview may be incomplete: the scan was stopped, or Full Disk Access is off.
@@ -210,52 +220,93 @@ struct OptimizeView: View {
     }
 
     private var filterBar: some View {
-        HStack(spacing: 10) {
-            HStack(spacing: 6) {
-                Image(systemName: "magnifyingglass").foregroundStyle(Palette.textFaint)
-                TextField("Search names and paths", text: $model.filter.text).textFieldStyle(.plain)
-                if !model.filter.text.isEmpty {
-                    Button { model.filter.text = "" } label: { Image(systemName: "xmark.circle.fill") }
-                        .buttonStyle(.plain).foregroundStyle(Palette.textFaint).help("Clear search")
+        // One row when there is room. Otherwise the search field keeps its own row and the three
+        // pickers share the next one, so none of them is squeezed into unusable widths at the
+        // window’s minimum size.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) {
+                searchField
+                    .frame(minWidth: 200, idealWidth: 240, maxWidth: 260)
+                sizePicker
+                agePicker
+                sortPicker
+                Spacer(minLength: 0)
+                matchingMenu
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 10) {
+                    searchField
+                    Spacer(minLength: 8)
+                    matchingMenu
                 }
-            }
-            .padding(.horizontal, 8).padding(.vertical, 5)
-            .background(Palette.card, in: SurfaceShape(cornerRadius: 6))
-            .frame(maxWidth: 260)
-            Picker("Size", selection: $model.filter.minBytes) {
-                Text("Any size").tag(UInt64(0))
-                Text("Over 10 MB").tag(UInt64(10_000_000))
-                Text("Over 100 MB").tag(UInt64(100_000_000))
-                Text("Over 1 GB").tag(UInt64(1_000_000_000))
-            }
-            .labelsHidden().fixedSize()
-            Picker("Age", selection: $model.filter.minAgeDays) {
-                Text("Any age").tag(0)
-                Text("Unused 1 week").tag(7)
-                Text("Unused 1 month").tag(30)
-                Text("Unused 3 months").tag(90)
-            }
-            .labelsHidden().fixedSize()
-            Picker("Sort", selection: $model.filter.sort) {
-                Text("Largest first").tag(ItemFilter.Sort.size)
-                Text("By name").tag(ItemFilter.Sort.name)
-                Text("Oldest first").tag(ItemFilter.Sort.oldest)
-            }
-            .labelsHidden().fixedSize()
-            Spacer(minLength: 0)
-            if model.filter.isActive {
-                Menu("Matching") {
-                    Button("Select All Matching") { model.setMatching(selected: true, in: filterScope) }
-                    Button("Deselect All Matching") { model.setMatching(selected: false, in: filterScope) }
-                    Divider()
-                    Button("Clear Filters") { model.filter = ItemFilter(sort: model.filter.sort) }
+                HStack(spacing: 10) {
+                    sizePicker
+                    agePicker
+                    sortPicker
+                    Spacer(minLength: 0)
                 }
-                .fixedSize()
             }
         }
         .controlSize(.small)
         .padding(.horizontal, 12).padding(.vertical, 8)
         .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
+    }
+
+    private var searchField: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass").foregroundStyle(Palette.textFaint)
+            TextField("Search names and paths", text: $model.filter.text).textFieldStyle(.plain)
+            if !model.filter.text.isEmpty {
+                Button { model.filter.text = "" } label: { Image(systemName: "xmark.circle.fill") }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Palette.textFaint)
+                    .help("Clear search")
+                    .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.horizontal, 8).padding(.vertical, 5)
+        .background(Palette.card, in: SurfaceShape(cornerRadius: 6))
+    }
+
+    private var sizePicker: some View {
+        Picker("Size", selection: $model.filter.minBytes) {
+            Text("Any size").tag(UInt64(0))
+            Text("Over 10 MB").tag(UInt64(10_000_000))
+            Text("Over 100 MB").tag(UInt64(100_000_000))
+            Text("Over 1 GB").tag(UInt64(1_000_000_000))
+        }
+        .labelsHidden().fixedSize()
+    }
+
+    private var agePicker: some View {
+        Picker("Age", selection: $model.filter.minAgeDays) {
+            Text("Any age").tag(0)
+            Text("Unused 1 week").tag(7)
+            Text("Unused 1 month").tag(30)
+            Text("Unused 3 months").tag(90)
+        }
+        .labelsHidden().fixedSize()
+    }
+
+    private var sortPicker: some View {
+        Picker("Sort", selection: $model.filter.sort) {
+            Text("Largest first").tag(ItemFilter.Sort.size)
+            Text("By name").tag(ItemFilter.Sort.name)
+            Text("Oldest first").tag(ItemFilter.Sort.oldest)
+        }
+        .labelsHidden().fixedSize()
+    }
+
+    @ViewBuilder private var matchingMenu: some View {
+        if model.filter.isActive {
+            Menu("Matching") {
+                Button("Select All Matching") { model.setMatching(selected: true, in: filterScope) }
+                Button("Deselect All Matching") { model.setMatching(selected: false, in: filterScope) }
+                Divider()
+                Button("Clear Filters") { model.filter = ItemFilter(sort: model.filter.sort) }
+            }
+            .fixedSize()
+        }
     }
 
     private var filterScope: String? { selectedCategory == "all" ? nil : selectedCategory }
@@ -289,7 +340,10 @@ struct OptimizeView: View {
             if let docker = model.dockerUsage { DockerUsageRow(result: docker) }
             ForEach($model.tasks) { $row in
                 HStack(alignment: .top) {
-                    Toggle(isOn: $row.selected) { EmptyView() }.labelsHidden().disabled(!row.available)
+                    Toggle(isOn: $row.selected) { EmptyView() }
+                        .labelsHidden()
+                        .accessibilityLabel(row.task.title)
+                        .disabled(!row.available)
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
                             Text(row.task.title).foregroundStyle(Palette.text)
@@ -334,7 +388,10 @@ struct OptimizeView: View {
         Section {
             ForEach($model.systemRows) { $row in
                 HStack(alignment: .top) {
-                    Toggle(isOn: $row.selected) { EmptyView() }.labelsHidden().disabled(row.count == 0)
+                    Toggle(isOn: $row.selected) { EmptyView() }
+                        .labelsHidden()
+                        .accessibilityLabel(row.info.title)
+                        .disabled(row.count == 0)
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
                             Text(row.info.title).foregroundStyle(Palette.text)
@@ -375,6 +432,7 @@ struct OptimizeView: View {
                 HStack {
                     Toggle(isOn: Binding(get: { art.selected }, set: { _ in model.toggleArtifact(art.path) })) { EmptyView() }
                         .labelsHidden()
+                        .accessibilityLabel((art.path as NSString).lastPathComponent)
                     VStack(alignment: .leading, spacing: 1) {
                         Text((art.path as NSString).lastPathComponent + "  ·  " + (art.projectPath as NSString).lastPathComponent)
                             .foregroundStyle(Palette.text)
@@ -408,7 +466,10 @@ struct OptimizeView: View {
                     Image(systemName: "folder").foregroundStyle(Palette.textMuted)
                     Text(root).font(.mhCaption).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.head)
                     Spacer()
-                    Button { model.removeArtifactRoot(root) } label: { Image(systemName: "minus.circle") }.buttonStyle(.plain)
+                    Button { model.removeArtifactRoot(root) } label: { Image(systemName: "minus.circle") }
+                        .buttonStyle(.plain)
+                        .help("Stop looking for build artifacts in this folder")
+                        .accessibilityLabel("Remove \(root) from project folders")
                 }
             }
             Button("Add Project Folder…") { model.addArtifactRoot() }.controlSize(.small)
@@ -422,9 +483,22 @@ struct OptimizeView: View {
             VStack(alignment: .leading, spacing: 14) {
                 Label("Cleaning Complete", systemImage: "checkmark.seal.fill").font(.mhTitle2).foregroundStyle(Theme.mint)
                 Grid(alignment: .leading, verticalSpacing: 6) {
-                    GridRow { Text("Moved to Trash").foregroundStyle(Palette.textMuted); Text(Fmt.bytes(Int64(clamping: model.trashedBytes))).monospacedDigit().bold().foregroundStyle(Palette.text) }
-                    GridRow { Text("Freed permanently").foregroundStyle(Palette.textMuted); Text(Fmt.bytes(Int64(clamping: model.freedBytes))).monospacedDigit().bold().foregroundStyle(Palette.text) }
-                    if !model.failures.isEmpty { GridRow { Text("Not processed").foregroundStyle(Palette.textMuted); Text("\(model.failures.count) items").foregroundStyle(Theme.amber) } }
+                    GridRow {
+                        Text("Moved to Trash").foregroundStyle(Palette.textMuted)
+                        Text(Fmt.bytes(Int64(clamping: model.trashedBytes)))
+                            .monospacedDigit().bold().foregroundStyle(Palette.text).gridColumnAlignment(.trailing)
+                    }
+                    GridRow {
+                        Text("Freed permanently").foregroundStyle(Palette.textMuted)
+                        Text(Fmt.bytes(Int64(clamping: model.freedBytes)))
+                            .monospacedDigit().bold().foregroundStyle(Palette.text).gridColumnAlignment(.trailing)
+                    }
+                    if !model.failures.isEmpty {
+                        GridRow {
+                            Text("Not processed").foregroundStyle(Palette.textMuted)
+                            Text("\(model.failures.count) items").foregroundStyle(Theme.amber).gridColumnAlignment(.trailing)
+                        }
+                    }
                 }
                 .card(padding: 16)
                 if model.trashedBytes > 0 {
@@ -490,6 +564,7 @@ private struct RuleRow: View {
                             EmptyView()
                         }
                         .labelsHidden()
+                        .accessibilityLabel((c.path as NSString).lastPathComponent)
                         Text((c.path as NSString).lastPathComponent).lineLimit(1).truncationMode(.middle).foregroundStyle(Palette.text)
                         if let note = c.note { Text(note).font(.mhCaption2).foregroundStyle(Theme.amber) }
                         Spacer()
@@ -505,6 +580,7 @@ private struct RuleRow: View {
                     Toggle(isOn: Binding(get: { model.isRuleSelected(result.rule.id) ?? false },
                                          set: { model.setRule(result.rule.id, selected: $0) })) { EmptyView() }
                         .labelsHidden()
+                        .accessibilityLabel(result.rule.title)
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
                             Text(result.rule.title).foregroundStyle(Palette.text)
@@ -538,6 +614,7 @@ private struct AllItemsSection: View {
                 HStack {
                     Toggle(isOn: Binding(get: { c.selected }, set: { _ in model.toggleCandidate(rule: c.ruleID, path: c.path) })) { EmptyView() }
                         .labelsHidden()
+                        .accessibilityLabel((c.path as NSString).lastPathComponent)
                     VStack(alignment: .leading, spacing: 1) {
                         Text((c.path as NSString).lastPathComponent).lineLimit(1).truncationMode(.middle).foregroundStyle(Palette.text)
                         Text([rules[c.path]?.title, c.note].compactMap { $0 }.joined(separator: ", "))
@@ -611,29 +688,35 @@ struct ExclusionsView: View {
                         Text(e).font(.mhCallout).foregroundStyle(Palette.text).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
                         Spacer()
                         Button { model.removeExclusion(e) } label: { Image(systemName: "minus.circle") }
-                            .buttonStyle(.plain).foregroundStyle(Palette.textMuted).help("Clean this again")
+                            .buttonStyle(.plain).foregroundStyle(Palette.textMuted)
+                            .help("Clean this again")
+                            .accessibilityLabel("Clean \(e) again")
                     }
                 }
                 if model.exclusions.isEmpty {
                     Text("Nothing excluded yet.").foregroundStyle(Palette.textMuted)
                 }
             }
-            .frame(minHeight: 200)
+            .frame(height: 220)
             HStack {
                 TextField("Path or pattern, e.g. ~/Library/Caches/com.example.*", text: $pattern)
                     .onSubmit(add)
                 Button("Add", action: add).disabled(pattern.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             if let e = model.exclusionError { Text(e).font(.mhCaption).foregroundStyle(Theme.rose) }
-            HStack {
-                Button("Choose Files or Folders…") { model.addExclusionsFromPanel() }
-                Spacer()
-                Text("Saved in clean-whitelist.txt, also used by the command-line tool.").font(.mhCaption).foregroundStyle(Palette.textFaint)
-                Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Saved in clean-whitelist.txt, also used by the command-line tool.")
+                    .font(.mhCaption).foregroundStyle(Palette.textFaint).fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Button("Choose Files or Folders…") { model.addExclusionsFromPanel() }
+                    Spacer()
+                    Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
+                }
             }
         }
         .padding(20)
-        .frame(width: 560, height: 460)
+        .frame(width: 560)
+        .fixedSize(horizontal: false, vertical: true)
         .background(Palette.base)
     }
 

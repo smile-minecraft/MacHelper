@@ -10,15 +10,18 @@ import ServiceManagement
 @MainActor
 @Observable
 final class FanAutoSwitcher {
-    var enabled: Bool { didSet { save(); evaluate(force: true) } }
-    var rules: [FanAutoRule] { didSet { save(); evaluate(force: true) } }
+    var enabled: Bool { didSet { save(); evaluate() } }
+    var rules: [FanAutoRule] { didSet { save(); evaluate() } }
     private(set) var activeRule: FanAutoRule?
     private(set) var lastError: String?
 
     @ObservationIgnored nonisolated static let rulesKey = "fan.autoRules.v1"
     @ObservationIgnored nonisolated static let enabledKey = "fan.autoEnabled"
     @ObservationIgnored nonisolated static let baseKey = "fan.basePolicy.v1"
+    /// The policy the Helper last confirmed. Only a successful `applyFanPolicy` updates it.
     @ObservationIgnored private var applied: FanPolicy?
+    /// The policy whose request is in flight; at most one request is sent at a time.
+    @ObservationIgnored private var applying: FanPolicy?
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
     @ObservationIgnored private var timer: Timer?
 
@@ -57,7 +60,7 @@ final class FanAutoSwitcher {
                let status = try? await HelperClient.shared.fanControlStatus() {
                 Self.basePolicy = status.policy
             }
-            evaluate(force: true)
+            evaluate()
         }
     }
 
@@ -73,23 +76,31 @@ final class FanAutoSwitcher {
         return type == kIOPMBatteryPowerKey
     }
 
-    func evaluate(force: Bool = false) {
+    func evaluate() {
         let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
         let match = enabled ? FanAutoRule.firstMatch(rules, runningBundleIDs: running, onBattery: Self.onBattery) : nil
-        guard force || match?.id != activeRule?.id else { return }
         let previous = activeRule
-        activeRule = match
+        if match != activeRule { activeRule = match }
         let policy = match?.target.policy ?? Self.basePolicy
-        // Nothing to undo when switching was never active and the base is already in place.
-        guard match != nil || previous != nil || (force && applied != nil && applied != policy) else { return }
-        guard policy != applied, HelperClient.shared.status == .enabled else { return }
-        applied = policy
+        guard FanAutoSwitchDecision.shouldApply(
+            policy: policy,
+            applied: applied,
+            applying: applying,
+            helperEnabled: HelperClient.shared.status == .enabled,
+            hasRuleContext: match != nil || previous != nil
+        ) else { return }
+        applying = policy
         Task {
             do {
                 try await HelperClient.shared.applyFanPolicy(policy)
+                applied = policy
                 lastError = nil
+                if applying == policy { applying = nil }
+                // A rule may have changed while the request was in flight.
+                evaluate()
             } catch {
                 lastError = "\(error)"
+                if applying == policy { applying = nil }
             }
         }
     }

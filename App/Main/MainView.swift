@@ -21,6 +21,7 @@ struct MainView: View {
             ZStack {
                 detail
                     .id(app.section)
+                    .onAppear { PageLoadProbe.mark(app.section, "render") }
                     .transition(Motion.reduced ? .identity : .asymmetric(
                         insertion: .opacity.combined(with: .offset(y: 8)),
                         removal: .opacity))
@@ -32,6 +33,11 @@ struct MainView: View {
         }
         .frame(minWidth: 980, minHeight: 640)
         .onAppear { app.openMainWindow = { openWindow(id: "main") } }
+        .onChange(of: app.section) { _, section in
+            // The timing probe is inert unless `--measure-pages` is running.
+            guard PageLoadProbe.active else { return }
+            DispatchQueue.main.async { PageLoadProbe.mark(section, "render") }
+        }
         .sheet(item: $onboarding, onDismiss: { onboarding = chainOnboarding ? OnboardingStep.next(after: lastOnboarding) : nil }) { step in
             Group {
                 switch step {

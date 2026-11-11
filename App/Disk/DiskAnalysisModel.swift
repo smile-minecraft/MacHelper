@@ -137,6 +137,29 @@ final class DiskAnalysisModel {
     @ObservationIgnored private var restoreGeneration = 0
     @ObservationIgnored private var isLoadingSavedScan = false
 
+    /// Restoring a saved scan parses a multi-megabyte JSON tree and rebuilds every node. Keep
+    /// the last two restored trees for this session so switching back to a location is instant;
+    /// the tree is still labelled with its scan date and can be replaced by a rescan.
+    private struct CachedTree {
+        let scannedAt: Date
+        let elapsed: TimeInterval
+        let progress: ScanProgress
+        let tree: DiskNode
+        let insights: SpaceInsights?
+    }
+    @ObservationIgnored private var treeCache: [String: CachedTree] = [:]
+    private struct CachedVolume {
+        let summary: VolumeSummary
+        let at: Date
+    }
+    @ObservationIgnored private var volumeCache: [String: CachedVolume] = [:]
+    @ObservationIgnored private var volumeOrder: [String] = []
+    /// The volume figures are cheap to read but `tmutil` starts a process; reuse a recent read.
+    static let volumeMaxAge: TimeInterval = 60
+    /// Only a handful of mounted volumes are shown at once; this also keeps a removable
+    /// volume from being remembered forever.
+    private static let volumeCacheLimit = 8
+
     init() {
         let available = ScanTarget.available()
         targets = available
@@ -168,44 +191,92 @@ final class DiskAnalysisModel {
     /// Removes the saved result of the current location and returns to the empty state.
     func clearSavedScan() {
         guard isShowingSavedScan else { return }
+        let key = cacheKey(for: target.url)
         do {
-            try cache.clear(rootPath: cacheKey(for: target.url))
+            try cache.clear(rootPath: key)
         } catch {
             lastMessage = String(localized: "The saved scan could not be cleared: \(error.localizedDescription)")
             return
         }
+        treeCache.removeValue(forKey: key)
         resetDisplay()
         isLoadingSavedScan = false
         revision += 1
     }
 
     private func loadSavedScan() {
+        let key = cacheKey(for: target.url)
+        if let cached = treeCache[key] {
+            restoreGeneration += 1
+            isLoadingSavedScan = false
+            applySavedScan(cached)
+            PageLoadProbe.mark(.disk, "cache")
+            PageLoadProbe.mark(.disk, "content")
+            loadVolume()
+            return
+        }
         restoreGeneration += 1
         let generation = restoreGeneration
         isLoadingSavedScan = true
-        let key = cacheKey(for: target.url)
         let cache = cache
         Task { [weak self] in
-            let loaded = await Task.detached(priority: .userInitiated) { () -> (ScanResultSnapshot, DiskNode, SpaceInsights)? in
+            // Return only the restored tree and its small metadata. Keeping the decoded
+            // `ScanResultSnapshot` alive until the main actor receives it doubles the peak
+            // memory of a large saved scan for no benefit.
+            let loaded = await Task.detached(priority: .userInitiated) {
+                () -> (Date, TimeInterval, ScanProgress, DiskNode, SpaceInsights)? in
                 guard let snapshot = cache.load(rootPath: key), let tree = snapshot.rebuildTree() else { return nil }
                 // A saved scan is a record: nothing under its root is looked up, so only folder findings.
                 var options = SpaceInsights.Options()
                 options.minFileSize = .max
-                return (snapshot, tree, SpaceInsights.find(in: tree, options: options, lastUse: { _ in nil }))
+                let insights = SpaceInsights.find(in: tree, options: options, lastUse: { _ in nil })
+                return (snapshot.scannedAt, snapshot.elapsed, snapshot.progress, tree, insights)
             }.value
             guard let self, self.restoreGeneration == generation else { return }
             self.isLoadingSavedScan = false
-            guard let (snapshot, tree, insights) = loaded else { return }
-            self.setInsights(insights, root: tree)
-            self.root = tree
-            self.focus = tree
-            self.progress = snapshot.progress
-            self.elapsed = snapshot.elapsed
-            self.restoredAt = snapshot.scannedAt
-            self.phase = .done
-            self.revision += 1
+            guard let (scannedAt, elapsed, progress, tree, insights) = loaded else {
+                PageLoadProbe.mark(.disk, "empty")
+                return
+            }
+            let restored = CachedTree(scannedAt: scannedAt, elapsed: elapsed, progress: progress,
+                                      tree: tree, insights: insights)
+            self.treeCache[key] = restored
+            self.evictTreeCache(keeping: key)
+            self.applySavedScan(restored)
+            PageLoadProbe.mark(.disk, "content")
             self.loadVolume()
         }
+    }
+
+    private func applySavedScan(_ cached: CachedTree) {
+        setInsights(cached.insights, root: cached.tree)
+        root = cached.tree
+        focus = cached.tree
+        progress = cached.progress
+        elapsed = cached.elapsed
+        restoredAt = cached.scannedAt
+        phase = .done
+        revision += 1
+    }
+
+    /// Two restored trees cover switching back and forth between the usual locations without
+    /// keeping every scanned tree in memory.
+    private func evictTreeCache(keeping key: String) {
+        guard treeCache.count > 2 else { return }
+        for old in Array(treeCache.keys) where old != key {
+            treeCache.removeValue(forKey: old)
+            if treeCache.count <= 2 { break }
+        }
+    }
+
+    /// Drops restored trees for locations other than the one on screen. The page calls this
+    /// when it closes, so a large scan tree is not kept for a location nobody is looking at.
+    func trimCachedTrees() {
+        let current = cacheKey(for: target.url)
+        treeCache = treeCache.filter { $0.key == current }
+        let volumeKey = target.url.path
+        volumeCache = volumeCache.filter { $0.key == volumeKey }
+        volumeOrder = volumeCache.isEmpty ? [] : [volumeKey]
     }
 
     /// The cache key for a scan location: the same resolved path the scanner records.
@@ -214,14 +285,36 @@ final class DiskAnalysisModel {
     }
 
     private func loadVolume() {
-        volume = nil
         let url = target.url
+        let key = url.path
+        if let cached = volumeCache[key] {
+            volume = cached.summary
+            PageLoadProbe.mark(.disk, "volume")
+            if Date().timeIntervalSince(cached.at) < Self.volumeMaxAge {
+                return
+            }
+        } else {
+            volume = nil
+        }
         Task.detached(priority: .userInitiated) { [weak self] in
             let summary = VolumeSummary.load(for: url)
             await MainActor.run {
                 guard let self, self.target.url == url else { return }
+                guard let summary else { return }
                 self.volume = summary
+                self.storeVolume(summary, for: key)
+                PageLoadProbe.mark(.disk, "volume")
+                PageLoadProbe.mark(.disk, "volume-refresh")
             }
+        }
+    }
+
+    private func storeVolume(_ summary: VolumeSummary, for key: String) {
+        if volumeCache[key] == nil { volumeOrder.append(key) }
+        volumeCache[key] = CachedVolume(summary: summary, at: Date())
+        while volumeOrder.count > Self.volumeCacheLimit {
+            let old = volumeOrder.removeFirst()
+            volumeCache.removeValue(forKey: old)
         }
     }
 
@@ -266,6 +359,7 @@ final class DiskAnalysisModel {
         flaggedAncestors = []
         let url = target.url
         let targetID = target.id
+        let treeKey = cacheKey(for: url)
         loadVolume()
         let cache = cache
 
@@ -282,6 +376,7 @@ final class DiskAnalysisModel {
                 var changes: [ScanSnapshot.Change] = []
                 var since: Date?
                 var insights: SpaceInsights?
+                var restored: CachedTree?
                 if !result.cancelled {
                     // The saved scan is only replaced by a completed one; a cancelled scan keeps
                     // whatever was saved before it.
@@ -295,9 +390,15 @@ final class DiskAnalysisModel {
                     insights = SpaceInsights.find(in: result.root, previous: previous, now: scannedAt)
                     try? snapshot.save()
                     try? cache.save(result: result, scannedAt: scannedAt)
+                    restored = CachedTree(scannedAt: scannedAt, elapsed: result.elapsed,
+                                          progress: result.progress, tree: result.root, insights: insights)
                 }
                 await MainActor.run {
                     guard let self, self.scanner === scanner else { return }
+                    if let restored {
+                        self.treeCache[treeKey] = restored
+                        self.evictTreeCache(keeping: treeKey)
+                    }
                     self.root = result.root
                     self.focus = result.root
                     self.progress = result.progress
@@ -309,6 +410,7 @@ final class DiskAnalysisModel {
                     self.revision += 1
                     if !result.cancelled {
                         UserDefaults.standard.set(targetID, forKey: Self.lastScanTargetKey)
+                        PageLoadProbe.mark(.disk, "content")
                     }
                 }
             } catch is MaterializeProtectionError {

@@ -72,7 +72,12 @@ final class AppModel {
     let startupModel = StartupModel()
     let healthModel = HealthModel()
 
-    var section: AppSection = .overview
+    var section: AppSection = .overview {
+        didSet {
+            // Restored scan trees are large; keep only the location on screen once the page closes.
+            if oldValue == .disk, section != .disk { diskModel.trimCachedTrees() }
+        }
+    }
 
     /// Whether the main window is on screen. AppDelegate maintains this from NSWindow
     /// notifications; OverviewView uses it to stop UI-only work while the window is closed
@@ -138,5 +143,33 @@ final class AppModel {
             $0.canBecomeMain && ($0.isVisible || $0.isMiniaturized)
         }
         NSApp.setActivationPolicy(mode.showsDockIcon(hasOpenWindows: hasOpenWindows) ? .regular : .accessory)
+    }
+}
+
+/// Timing hooks for `--measure-pages`. The mode switches through the main window's pages and
+/// records when each page's first usable content is on screen; every mark is ignored unless
+/// the measurement mode started it.
+@MainActor
+enum PageLoadProbe {
+    private(set) static var active = false
+    private static var marks: [AppSection: [String: CFAbsoluteTime]] = [:]
+
+    static func start() { active = true }
+
+    static func reset(_ section: AppSection) { marks[section] = [:] }
+
+    static func mark(_ section: AppSection, _ event: String) {
+        guard active else { return }
+        if marks[section]?[event] == nil {
+            marks[section, default: [:]][event] = CFAbsoluteTimeGetCurrent()
+        }
+    }
+
+    static func time(_ section: AppSection, _ event: String) -> CFAbsoluteTime? {
+        marks[section]?[event]
+    }
+
+    static func events(_ section: AppSection) -> [String: CFAbsoluteTime] {
+        marks[section] ?? [:]
     }
 }

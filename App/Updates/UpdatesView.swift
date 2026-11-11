@@ -24,7 +24,9 @@ struct UpdatesView: View {
             }
             if !model.casks.isEmpty { bottomBar }
         }
-        .task { if model.phase == .idle { await model.check() } }
+        // The previous list stays on screen while the check runs, so re-opening the page shows the
+        // previous result and replaces it when Homebrew answers.
+        .task { await model.check() }
         .confirmationDialog(confirmTitle, isPresented: $confirm, titleVisibility: .visible) {
             Button("Update") { Task { await model.update() } }
         } message: {
@@ -75,7 +77,12 @@ struct UpdatesView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(n == 0 ? String(localized: "All Homebrew apps are up to date.") : String(localized: "\(n) apps have updates."))
                 .font(.display(26)).foregroundStyle(Palette.text)
-            if let d = model.lastChecked {
+            if model.phase == .checking && !model.casks.isEmpty {
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text("Checking for updates…").font(.mhCaption).foregroundStyle(Palette.textMuted)
+                }
+            } else if let d = model.lastChecked {
                 Text("Checked \(d, format: .relative(presentation: .named))").font(.mhCaption).foregroundStyle(Palette.textMuted)
             }
         }
@@ -126,6 +133,7 @@ private struct CaskRow: View {
                 Toggle(isOn: Binding(get: { model.selected.contains(cask.token) && model.canUpdate(cask) },
                                      set: { on in if on { model.selected.insert(cask.token) } else { model.selected.remove(cask.token) } })) { EmptyView() }
                     .labelsHidden()
+                    .accessibilityLabel(String(localized: "\(cask.name), \(cask.installedVersion) to \(cask.currentVersion)"))
                     .disabled(!model.canUpdate(cask) || model.phase == .updating)
                 Group {
                     if let icon = model.appIcon(cask) { Image(nsImage: icon).resizable() } else { Image(systemName: "shippingbox").resizable().scaledToFit().foregroundStyle(Palette.textFaint) }

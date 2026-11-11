@@ -22,8 +22,11 @@ struct StartupView: View {
                     Toggle("Show disabled", isOn: $model.showDisabledBackground).toggleStyle(.checkbox)
                 }
                 Spacer()
+                if model.refreshing {
+                    ProgressView().controlSize(.small).help("Updating startup items…")
+                }
                 IconButton(symbol: "arrow.clockwise", help: "Refresh") {
-                    Task { if model.tab == .launchd { await model.load() } else { await model.loadBackground(forceRefresh: true) } }
+                    Task { if model.tab == .launchd { await model.load(forceRefresh: true) } else { await model.loadBackground(forceRefresh: true) } }
                 }
             }
             .padding(.horizontal, 12).padding(.vertical, 10)

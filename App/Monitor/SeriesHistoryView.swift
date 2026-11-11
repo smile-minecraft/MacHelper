@@ -2,6 +2,38 @@ import Charts
 import Storage
 import SwiftUI
 
+/// The sensor list and its charts survive page switches in memory. Reusing a recent read makes
+/// the previous charts appear at once; the selected range is still refreshed in the background.
+@MainActor
+private enum SeriesHistoryCache {
+    struct Key: Hashable {
+        let range: MonitorView.Range
+        let selected: [String]
+    }
+
+    static var available: [AvailableSeries]?
+    static var availableAt: Date?
+    static var samples: [Key: [String: [SeriesSample]]] = [:]
+    static var samplesAt: [Key: Date] = [:]
+    private static var sampleOrder: [Key] = []
+    static let availableMaxAge: TimeInterval = 300
+    static let samplesMaxAge: TimeInterval = 60
+    /// A key is one range plus one sensor selection; toggling sensors can otherwise keep every
+    /// combination alive for the whole session.
+    private static let sampleLimit = 6
+
+    static func store(_ value: [String: [SeriesSample]], for key: Key) {
+        if samples[key] == nil { sampleOrder.append(key) }
+        samples[key] = value
+        samplesAt[key] = Date()
+        while sampleOrder.count > sampleLimit {
+            let old = sampleOrder.removeFirst()
+            samples.removeValue(forKey: old)
+            samplesAt.removeValue(forKey: old)
+        }
+    }
+}
+
 /// Individual sensor temperatures and CPU core-cluster use for the selected range, read from
 /// the shared minute history. The selector is built from the stored series, so a sensor that
 /// stopped reporting stays visible and is marked instead of silently disappearing.
@@ -14,6 +46,7 @@ struct SeriesHistoryView: View {
     @State private var samples: [String: [SeriesSample]] = [:]
     @State private var loaded = false
     @State private var didChooseDefault = false
+    @State private var refreshing = false
 
     /// A sensor that has not written a minute for this long is marked as gone. It stays
     /// selectable because its older history is still useful.
@@ -41,6 +74,7 @@ struct SeriesHistoryView: View {
                 Text("Sensor and core history")
                     .font(.mh(size: 13, weight: .semibold))
                     .foregroundStyle(Palette.text)
+                if refreshing { ProgressView().controlSize(.small).help("Updating sensor history…") }
                 Spacer()
                 if !available.isEmpty { sensorMenu }
             }
@@ -175,18 +209,26 @@ struct SeriesHistoryView: View {
             available = []
             samples = [:]
             loaded = true
+            PageLoadProbe.mark(.monitor, "series")
             return true
         }
         let now = Date()
         let since = now.addingTimeInterval(-range.seconds)
         if refreshList || available.isEmpty {
-            let list = await Task.detached(priority: .userInitiated) {
-                (try? history.availableSeries()) ?? []
-            }.value
-            available = list
-            if !didChooseDefault, !list.isEmpty {
+            if let cached = SeriesHistoryCache.available, let at = SeriesHistoryCache.availableAt,
+               Date().timeIntervalSince(at) < SeriesHistoryCache.availableMaxAge {
+                available = cached
+            } else {
+                let list = await Task.detached(priority: .userInitiated) {
+                    (try? history.availableSeries()) ?? []
+                }.value
+                available = list
+                SeriesHistoryCache.available = list
+                SeriesHistoryCache.availableAt = Date()
+            }
+            if !didChooseDefault, !available.isEmpty {
                 didChooseDefault = true
-                let defaults = Self.defaultSelection(list)
+                let defaults = Self.defaultSelection(available)
                 if defaults != selected {
                     selected = defaults
                     return false
@@ -194,10 +236,27 @@ struct SeriesHistoryView: View {
             }
         }
         let wanted = selected.sorted()
+        let key = SeriesHistoryCache.Key(range: range, selected: wanted)
+        if let cached = SeriesHistoryCache.samples[key] {
+            samples = cached
+            loaded = true
+            PageLoadProbe.mark(.monitor, "series")
+            if range != .live, let at = SeriesHistoryCache.samplesAt[key],
+               Date().timeIntervalSince(at) < SeriesHistoryCache.samplesMaxAge {
+                refreshing = false
+                return true
+            }
+        }
+        refreshing = true
+        defer { refreshing = false }
         samples = await Task.detached(priority: .userInitiated) {
             (try? history.seriesSamples(wanted, since: since, until: now)) ?? [:]
         }.value
+        guard !Task.isCancelled else { return false }
+        SeriesHistoryCache.store(samples, for: key)
         loaded = true
+        PageLoadProbe.mark(.monitor, "series")
+        PageLoadProbe.mark(.monitor, "series-refresh")
         return true
     }
 

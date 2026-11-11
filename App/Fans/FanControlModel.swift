@@ -101,7 +101,7 @@ final class FanControlModel {
             hysteresis = s.hysteresis
             slew = s.maxSlewRPMPerSecond
             onlyIncrease = s.onlyIncrease
-            profile = FanProfile.allCases.first { $0.presetCurve?.points == s.curve.points } ?? .custom
+            profile = FanProfile.matching(s.curve)
             points = s.curve.points
         }
     }

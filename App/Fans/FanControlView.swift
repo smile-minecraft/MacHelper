@@ -13,7 +13,8 @@ struct FanControlView: View {
             if model.helperStatus != .enabled {
                 helperMissing
             } else if let status = model.status, !status.canControl {
-                Label("Fans on this Mac can’t be controlled (\(status.strategy))", systemImage: "fan.slash")
+                Label("Fans on this Mac can’t be controlled by MacHelper.", systemImage: "fan.slash")
+                    .help(status.strategy)
             } else {
                 liveStatus.card()
                 VStack(alignment: .leading, spacing: 14) {
@@ -77,7 +78,11 @@ struct FanControlView: View {
                 }
             }
         } else {
-            ProgressView().controlSize(.small)
+            // A fixed, two-row placeholder roughly the height of the fan rows plus the temperature
+            // line, so the editor below doesn’t visibly jump when the first status arrives.
+            SkeletonRows(count: 2)
+                .frame(height: 50, alignment: .top)
+                .accessibilityLabel("Loading fan status")
         }
     }
 
@@ -98,7 +103,9 @@ struct FanControlView: View {
                         Text("Speed")
                         Slider(value: $model.fixedFraction, in: 0...1)
                         Text(model.rpm(forFraction: model.fixedFraction).map { "\(Int($0)) rpm" } ?? Fmt.percent(model.fixedFraction))
-                            .monospacedDigit().frame(width: 80, alignment: .trailing)
+                            .monospacedDigit()
+                            .fixedSize(horizontal: true, vertical: false)
+                            .frame(minWidth: 80, alignment: .trailing)
                     }
                     Text("A fixed speed needs the app to keep running; \(Int(HelperTiming.heartbeatTimeout)) seconds after the app quits, control returns to the system.")
                         .font(.mhCaption).foregroundStyle(Palette.textMuted)
@@ -121,9 +128,13 @@ struct FanControlView: View {
                 .frame(width: 200)
                 Spacer()
                 Button { model.addPoint() } label: { Image(systemName: "plus") }
-                    .disabled(model.points.count >= 12).help("Add point")
+                    .disabled(model.points.count >= 12)
+                    .help("Add point")
+                    .accessibilityLabel("Add a fan curve point")
                 Button { model.removePoint() } label: { Image(systemName: "minus") }
-                    .disabled(model.points.count <= 2).help("Remove point")
+                    .disabled(model.points.count <= 2)
+                    .help("Remove point")
+                    .accessibilityLabel("Remove a fan curve point")
             }
 
             CurveEditor(points: model.points,
@@ -164,7 +175,12 @@ struct FanControlView: View {
 
     private var footer: some View {
         HStack {
-            if let m = model.message { Text(m).font(.mhCaption).foregroundStyle(Palette.textMuted).lineLimit(2) }
+            if let m = model.message {
+                Text(m).font(.mhCaption).foregroundStyle(Palette.textMuted)
+                    .lineLimit(2)
+                    .help(m)
+                    .textSelection(.enabled)
+            }
             Spacer()
             Button("Return to System Control") { Task { await model.restoreAutomatic() } }
             Button("Apply") { Task { await model.apply() } }

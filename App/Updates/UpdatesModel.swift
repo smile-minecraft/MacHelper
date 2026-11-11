@@ -21,6 +21,12 @@ final class UpdatesModel {
     private(set) var current: String?
     private(set) var progress: (done: Int, total: Int)?
 
+    /// The App bundle this model belongs to and the cask that installs it, never offered as an
+    /// update: Homebrew keeps the version it installed while the app updates itself through
+    /// Sparkle, so the row would read like a downgrade.
+    private let ownAppBundleName = Bundle.main.bundleURL.lastPathComponent
+    private let ownCaskToken = HomebrewUpdates.appCaskToken
+
     @ObservationIgnored static let greedyKey = "updates.includeSelfUpdating"
     var includeSelfUpdating = UserDefaults.standard.bool(forKey: UpdatesModel.greedyKey) {
         didSet {
@@ -40,7 +46,11 @@ final class UpdatesModel {
         guard !brewMissing else { phase = .idle; return }
         phase = .checking
         let greedy = includeSelfUpdating
-        let result = await Task.detached(priority: .userInitiated) { HomebrewUpdates.outdated(greedy: greedy, refresh: refresh) }.value
+        let ownBundles: Set<String> = [ownAppBundleName], ownTokens: Set<String> = [ownCaskToken]
+        let result = await Task.detached(priority: .userInitiated) {
+            HomebrewUpdates.outdated(greedy: greedy, refresh: refresh,
+                                     excludingAppBundleNames: ownBundles, excludingTokens: ownTokens)
+        }.value
         switch result {
         case .success(let list):
             let previous = Set(casks.map(\.token))

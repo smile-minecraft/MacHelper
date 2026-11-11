@@ -29,6 +29,9 @@ struct UninstallView: View {
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
                     TextField("Search Apps", text: $model.search).textFieldStyle(.roundedBorder)
+                    if model.refreshingApps {
+                        ProgressView().controlSize(.small).help("Updating the app list…")
+                    }
                     Picker("", selection: $model.sort) {
                         Text("Name").tag(UninstallModel.Sort.name)
                         Text("Size").tag(UninstallModel.Sort.size)

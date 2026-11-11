@@ -9,11 +9,18 @@ final class UninstallModel {
     enum Tab: String, CaseIterable, Identifiable { case apps, orphans; var id: String { rawValue } }
     enum Sort: String, CaseIterable, Identifiable { case name, size, lastUsed; var id: String { rawValue } }
 
+    /// The app list barely changes while the window is open; reuse a recent scan and refresh
+    /// it in the background after this age. Reading every bundle's size is the expensive part.
+    static let appsMaxAge: TimeInterval = 120
+
     var tab: Tab = .apps
     var sort: Sort = .name
     var search = ""
     private(set) var apps: [InstalledApp] = []
     private(set) var loadingApps = false
+    /// True while the old list stays on screen and a newer one is being read.
+    private(set) var refreshingApps = false
+    @ObservationIgnored private var appsLoadedAt: Date?
     var selectedAppID: InstalledApp.ID? { didSet { Task { await loadPlan() } } }
     private(set) var plan: UninstallPlan?
     private(set) var loadingPlan = false
@@ -41,11 +48,24 @@ final class UninstallModel {
 
     // MARK: Loading
 
-    func loadApps() async {
-        guard !loadingApps else { return }
-        loadingApps = true
+    func loadApps(forceRefresh: Bool = false) async {
+        guard !loadingApps, !refreshingApps else { return }
+        if !forceRefresh, !apps.isEmpty {
+            PageLoadProbe.mark(.uninstall, "cache")
+            PageLoadProbe.mark(.uninstall, "apps")
+            if let at = appsLoadedAt, Date().timeIntervalSince(at) < Self.appsMaxAge { return }
+            refreshingApps = true
+        } else {
+            loadingApps = true
+        }
+        defer {
+            loadingApps = false
+            refreshingApps = false
+        }
         apps = await Task.detached(priority: .userInitiated) { AppUninstaller.installedApps() }.value
-        loadingApps = false
+        appsLoadedAt = Date()
+        PageLoadProbe.mark(.uninstall, "apps")
+        PageLoadProbe.mark(.uninstall, "refresh")
     }
 
     private func loadPlan() async {
@@ -111,7 +131,7 @@ final class UninstallModel {
         guard let app = selectedApp else { return }
         for running in NSRunningApplication.runningApplications(withBundleIdentifier: app.bundleID) { running.terminate() }
         try? await Task.sleep(for: .seconds(2))
-        await loadApps()
+        await loadApps(forceRefresh: true)
         await loadPlan()
     }
 
@@ -162,7 +182,7 @@ final class UninstallModel {
         if !report.items.contains(where: { $0.result == .failed && $0.path == plan.app.path }) {
             selectedAppID = nil
             self.plan = nil
-            await loadApps()
+            await loadApps(forceRefresh: true)
         }
     }
 
@@ -182,6 +202,8 @@ final class UninstallModel {
     }
 
     func icon(for app: InstalledApp) -> NSImage {
+        // NSWorkspace keeps its own icon cache; a second one here would grow with every app
+        // ever scrolled into view.
         NSWorkspace.shared.icon(forFile: app.path)
     }
 }
