@@ -6,7 +6,9 @@ import Testing
 /// The history database is shared by the app and the background recorder, and it will hold
 /// more than one kind of history. These tests pin the shared retention setting, the disk
 /// footprint shown to the user, and the scope of a destructive clear.
-@Suite struct HistoryManagementTests {
+/// The suite runs its tests one at a time so the clear-while-recording test never competes
+/// with another test for a shared thread pool.
+@Suite(.serialized) struct HistoryManagementTests {
     private let minute0 = Date(timeIntervalSince1970: 1_800_000_000)
 
     private func withTempDirectory(_ body: (URL) throws -> Void) throws {
@@ -191,16 +193,22 @@ import Testing
                            at: oldStart.addingTimeInterval(Double(index) * 60), now: now)
             }
 
+            // The clear and the recording run on their own threads. The group is entered
+            // before either thread starts so the wait cannot pass before both have run.
             let failures = FailureBox()
             let group = DispatchGroup()
-            DispatchQueue.global().async(group: group) {
+            group.enter()
+            Thread.detachNewThread {
+                defer { group.leave() }
                 do {
                     try store.clear(.minuteSamples, now: now)
                 } catch {
                     failures.record(error)
                 }
             }
-            DispatchQueue.global().async(group: group) {
+            group.enter()
+            Thread.detachNewThread {
+                defer { group.leave() }
                 for index in 0..<20 {
                     let time = now.addingTimeInterval(Double(60 + index * 60))
                     do {

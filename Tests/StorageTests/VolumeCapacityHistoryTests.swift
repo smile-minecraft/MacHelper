@@ -7,7 +7,9 @@ import Testing
 /// table: it stores only points keyed by the caller's opaque volume identifier, keeps one
 /// point per volume per hour, and never invents points for missing hours or unknown
 /// capacities. The table-creation function is what a later v7 migration will register.
-@Suite struct VolumeCapacityHistoryTests {
+/// The suite runs its tests one at a time so the concurrent-write test never competes
+/// with another test for a shared thread pool.
+@Suite(.serialized) struct VolumeCapacityHistoryTests {
     /// 1_800_000_000 is a whole hour (500_000 hours since 1970).
     private let hour0 = Date(timeIntervalSince1970: 1_800_000_000)
 
@@ -283,9 +285,13 @@ import Testing
                                       since: hour0, until: hour0.addingTimeInterval(3_600)).map(\.free) == [100])
 
             // Two connections writing the same volume and hour at once still leave one point.
+            // Each write gets its own thread and the group is entered before either thread
+            // starts, so the wait cannot pass before both writes have run.
             let failures = FailureBox()
             let group = DispatchGroup()
-            DispatchQueue.global().async(group: group) {
+            group.enter()
+            Thread.detachNewThread {
+                defer { group.leave() }
                 do {
                     try storeA.record(VolumeCapacity(free: 70, total: 1_000), volume: "volume-c",
                                       at: hour0.addingTimeInterval(3_600), now: hour0)
@@ -293,7 +299,9 @@ import Testing
                     failures.record(error)
                 }
             }
-            DispatchQueue.global().async(group: group) {
+            group.enter()
+            Thread.detachNewThread {
+                defer { group.leave() }
                 do {
                     try storeB.record(VolumeCapacity(free: 80, total: 1_000), volume: "volume-c",
                                       at: hour0.addingTimeInterval(3_600), now: hour0)

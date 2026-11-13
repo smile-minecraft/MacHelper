@@ -6,7 +6,9 @@ import Testing
 /// Ordering between a background-recording disable and a capacity write that is already in
 /// flight. Every database and profile lives in a temporary directory; the disk is a fake
 /// reading and the write blocker is a second SQLite connection, not real disk activity.
-@Suite struct VolumeCapacityDisableRaceTests {
+/// The suite runs its tests one at a time so a blocked test never competes with another
+/// test for a shared thread pool.
+@Suite(.serialized) struct VolumeCapacityDisableRaceTests {
     private struct LockProbeError: Error {}
     /// A whole hour (500_000 hours since 1970).
     private let hour0 = Date(timeIntervalSince1970: 1_800_000_000)
@@ -74,13 +76,14 @@ import Testing
     }
 
     /// Holds SQLite's writer lock from a second connection until `releaseBlocker` is
-    /// signalled. This is the same lock the agent's capacity insert waits on.
+    /// signalled. This is the same lock the agent's capacity insert waits on. The blocker
+    /// gets its own thread so a waiting test never starves a bounded thread pool.
     private func holdWriterLock(url: URL,
                                 ready: DispatchSemaphore,
                                 release: DispatchSemaphore,
                                 done: DispatchSemaphore,
                                 errors: ErrorBox) {
-        DispatchQueue.global().async {
+        Thread.detachNewThread {
             do {
                 let blocker = try DatabaseQueue(path: url.path, configuration: self.poolConfiguration())
                 try blocker.writeWithoutTransaction { db in
@@ -148,9 +151,12 @@ import Testing
             #expect(holdsSharedLock, "the in-flight apply must hold the shared profile lock")
 
             // The user disables. The save must not report success before the in-flight write
-            // has finished. Release the blocker from another queue so the save itself is the
+            // has finished. Release the blocker from another thread so the save itself is the
             // call that waits; without the shared lock it would return immediately.
-            DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) { releaseBlocker.signal() }
+            Thread.detachNewThread {
+                Thread.sleep(forTimeInterval: 0.2)
+                releaseBlocker.signal()
+            }
             let saveBegin = Date()
             do {
                 try MonitorAgentProfileStore.save(
@@ -422,7 +428,10 @@ import Testing
             #expect(holdsSharedLock, "the in-flight apply must hold the shared profile lock")
 
             // Release the writer lock after the loop tick has had time to run.
-            DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) { releaseBlocker.signal() }
+            Thread.detachNewThread {
+                Thread.sleep(forTimeInterval: 0.5)
+                releaseBlocker.signal()
+            }
             let begin = Date()
             recorder.tick(now: hour0.addingTimeInterval(11))
             let elapsed = Date().timeIntervalSince(begin)
@@ -504,7 +513,7 @@ import Testing
             let held = DispatchSemaphore(value: 0)
             let release = DispatchSemaphore(value: 0)
             let holderDone = DispatchSemaphore(value: 0)
-            DispatchQueue.global().async {
+            Thread.detachNewThread {
                 defer { holderDone.signal() }
                 do {
                     try MonitorAgentProfileStore.withSharedLock(at: profileURL) {
