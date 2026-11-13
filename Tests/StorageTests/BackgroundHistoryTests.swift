@@ -248,9 +248,13 @@ import Testing
 
     // MARK: Background service state
 
-    private func heartbeat(lastHeartbeatAt: Date, lastSampleAt: Date?, lastError: String? = nil) -> MonitorAgentHeartbeat {
+    private func heartbeat(lastHeartbeatAt: Date, lastSampleAt: Date?,
+                           lastCapacitySampleAt: Date? = nil,
+                           lastError: String? = nil) -> MonitorAgentHeartbeat {
         MonitorAgentHeartbeat(pid: 4242, lastHeartbeatAt: lastHeartbeatAt,
-                              lastSampleAt: lastSampleAt, lastError: lastError)
+                              lastSampleAt: lastSampleAt,
+                              lastCapacitySampleAt: lastCapacitySampleAt,
+                              lastError: lastError)
     }
 
     @Test func stateReflectsServiceAndHeartbeat() {
@@ -289,10 +293,58 @@ import Testing
         #expect(BackgroundRecordingStatus.evaluate(serviceStatus: .enabled, profileEnabled: false,
                                                    enabledModuleCount: 1,
                                                    heartbeat: liveBeat, now: now) == .notEnabled)
-        // All metrics off: there is nothing to record, which must not look like a stopped recorder.
+
+        // Capacity is part of background recording, so no menu bar modules and process
+        // collection off is not "nothing to record". The hourly capacity pass is the signal.
+        let capacityOnly = heartbeat(lastHeartbeatAt: now.addingTimeInterval(-30), lastSampleAt: nil,
+                                     lastCapacitySampleAt: now.addingTimeInterval(-30 * 60))
+        let capacityStale = heartbeat(lastHeartbeatAt: now.addingTimeInterval(-30), lastSampleAt: nil,
+                                      lastCapacitySampleAt: now.addingTimeInterval(-3 * 3_600))
+        let capacityFailed = heartbeat(lastHeartbeatAt: now.addingTimeInterval(-30), lastSampleAt: nil,
+                                       lastCapacitySampleAt: now.addingTimeInterval(-30 * 60),
+                                       lastError: "volume capacity history write failed")
         #expect(BackgroundRecordingStatus.evaluate(serviceStatus: .enabled, profileEnabled: true,
                                                    enabledModuleCount: 0,
-                                                   heartbeat: noSample, now: now) == .nothingToRecord)
+                                                   heartbeat: capacityOnly, now: now) == .running)
+        #expect(BackgroundRecordingStatus.evaluate(serviceStatus: .enabled, profileEnabled: true,
+                                                   enabledModuleCount: 0,
+                                                   heartbeat: capacityStale, now: now) == .stopped)
+        // A stale heartbeat is stopped even when the last capacity pass was fresh.
+        let capacityDead = heartbeat(lastHeartbeatAt: now.addingTimeInterval(-600), lastSampleAt: nil,
+                                     lastCapacitySampleAt: now.addingTimeInterval(-30))
+        #expect(BackgroundRecordingStatus.evaluate(serviceStatus: .enabled, profileEnabled: true,
+                                                   enabledModuleCount: 0,
+                                                   heartbeat: capacityDead, now: now) == .stopped)
+        #expect(BackgroundRecordingStatus.evaluate(serviceStatus: .enabled, profileEnabled: true,
+                                                   enabledModuleCount: 0,
+                                                   heartbeat: capacityFailed, now: now)
+                == .failed(reason: "volume capacity history write failed"))
+        // A fresh heartbeat with no capacity pass yet means the process just started; it must
+        // not be reported as nothing to record or as stopped.
+        #expect(BackgroundRecordingStatus.evaluate(serviceStatus: .enabled, profileEnabled: true,
+                                                   enabledModuleCount: 0,
+                                                   heartbeat: noSample, now: now) == .running)
+    }
+
+    /// Heartbeats written before the capacity field existed must still decode; the app may
+    /// read the file while an older agent is still running.
+    @Test func oldHeartbeatWithoutCapacityFieldStillDecodes() throws {
+        struct LegacyHeartbeat: Codable {
+            var pid: Int32
+            var lastHeartbeatAt: Date
+            var lastSampleAt: Date?
+            var lastError: String?
+        }
+
+        let now = minute0.addingTimeInterval(10_000)
+        let legacy = LegacyHeartbeat(pid: 4242, lastHeartbeatAt: now.addingTimeInterval(-30),
+                                     lastSampleAt: nil, lastError: nil)
+        let decoded = try JSONDecoder().decode(MonitorAgentHeartbeat.self,
+                                               from: JSONEncoder().encode(legacy))
+        #expect(decoded.lastCapacitySampleAt == nil)
+        #expect(BackgroundRecordingStatus.evaluate(serviceStatus: .enabled, profileEnabled: true,
+                                                   enabledModuleCount: 0,
+                                                   heartbeat: decoded, now: now) == .running)
     }
 
     // MARK: Profile

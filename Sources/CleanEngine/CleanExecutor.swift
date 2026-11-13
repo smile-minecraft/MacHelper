@@ -44,6 +44,28 @@ public struct RemovalItem: Sendable {
     }
 }
 
+/// The two removal operations the executor can perform. Production always uses the system Trash
+/// and permanent deletion; tests inject a directory-backed backend so they can exercise the real
+/// executor without touching the user's Trash.
+enum RemovalBackend: Sendable {
+    case system
+    case custom(trash: @Sendable (URL) throws -> Void, delete: @Sendable (URL) throws -> Void)
+
+    func trash(_ url: URL) throws {
+        switch self {
+        case .system: try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+        case .custom(let trash, _): try trash(url)
+        }
+    }
+
+    func delete(_ url: URL) throws {
+        switch self {
+        case .system: try FileManager.default.removeItem(at: url)
+        case .custom(_, let delete): try delete(url)
+        }
+    }
+}
+
 public struct CleanExecutor: Sendable {
     public let safety: PathSafety
     public let log: OperationLog
@@ -53,11 +75,26 @@ public struct CleanExecutor: Sendable {
     /// the Trash (emptying it) are still deleted. Ignored when `permanent` is set.
     public let alwaysTrash: Bool
 
+    let removal: RemovalBackend
+
     public init(safety: PathSafety, log: OperationLog = .shared, permanent: Bool = false, alwaysTrash: Bool = false) {
+        self.init(safety: safety, log: log, permanent: permanent, alwaysTrash: alwaysTrash, removal: .system)
+    }
+
+    /// Test-only entry point. `removal` and `log` have no defaults, so a test that omits either
+    /// fails to compile instead of silently using the system Trash or the shared operations log.
+    static func injected(safety: PathSafety, log: OperationLog, removal: RemovalBackend,
+                         permanent: Bool = false, alwaysTrash: Bool = false) -> CleanExecutor {
+        CleanExecutor(safety: safety, log: log, permanent: permanent, alwaysTrash: alwaysTrash, removal: removal)
+    }
+
+    private init(safety: PathSafety, log: OperationLog, permanent: Bool, alwaysTrash: Bool,
+                 removal: RemovalBackend) {
         self.safety = safety
         self.log = log
         self.permanent = permanent
         self.alwaysTrash = alwaysTrash
+        self.removal = removal
     }
 
     static let trashDirectory = MacHelperPaths.home.appending(path: ".Trash").path
@@ -69,7 +106,6 @@ public struct CleanExecutor: Sendable {
     }
 
     public func execute(_ items: [RemovalItem], dryRun: Bool, command: String) -> CleanReport {
-        let fm = FileManager.default
         var outcomes: [ItemOutcome] = []
         for item in items {
             let action = action(for: item)
@@ -94,8 +130,8 @@ public struct CleanExecutor: Sendable {
             let url = URL(fileURLWithPath: item.path)
             do {
                 switch action {
-                case .trash: try fm.trashItem(at: url, resultingItemURL: nil)
-                case .delete: try fm.removeItem(at: url)
+                case .trash: try removal.trash(url)
+                case .delete: try removal.delete(url)
                 }
                 outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: item.bytes,
                                             result: action == .trash ? .trashed : .deleted, message: nil))

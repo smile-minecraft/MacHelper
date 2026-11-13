@@ -12,10 +12,10 @@ struct UpdatesView: View {
                     PageHeader(section: .updates, subtitle: String(localized: "Apps you installed with Homebrew that have a newer version.")) {
                         Toggle("Include apps that update themselves", isOn: $model.includeSelfUpdating)
                             .toggleStyle(.checkbox).font(.mhCallout)
-                            .disabled(model.phase == .checking || model.phase == .updating)
+                            .disabled(model.phase == .checking || model.phase == .updating || model.isRefreshingIndex)
                             .help("Also list apps such as browsers that normally install their own updates")
                         IconButton(symbol: "arrow.clockwise", help: "Check Again") { Task { await model.check(refresh: true) } }
-                            .disabled(model.phase == .checking || model.phase == .updating)
+                            .disabled(model.phase == .checking || model.phase == .updating || model.isRefreshingIndex)
                     }
                     content
                 }
@@ -50,9 +50,40 @@ struct UpdatesView: View {
             .frame(maxWidth: .infinity).padding(.top, 60)
         } else {
             if let f = model.failure {
-                Text("Homebrew couldn’t check for updates: \(f)").font(.mhCallout).foregroundStyle(Theme.amber).textSelection(.enabled)
+                // The page can stay open for days; keep "last result from …" honest as time passes.
+                TimelineView(.everyMinute) { context in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Homebrew couldn’t check for updates: \(f)")
+                            .font(.mhCallout).foregroundStyle(Theme.amber).textSelection(.enabled)
+                        if let d = model.lastChecked {
+                            Text("Showing the last result from \(relative(d, at: context.date)).")
+                                .font(.mhCaption).foregroundStyle(Palette.textMuted)
+                        }
+                    }
+                }
             }
-            summary
+            if model.lastChecked != nil || model.failure == nil {
+                summary
+            } else if model.showsFreshnessWithoutSummary {
+                TimelineView(.everyMinute) { context in
+                    VStack(alignment: .leading, spacing: 4) {
+                        freshness(at: context.date)
+                    }
+                }
+            }
+            if let notice = model.detailNotice {
+                switch notice {
+                case .detailsFailed(let f):
+                    Text("Homebrew couldn’t read app details: \(f). These apps can only be updated in Terminal.")
+                        .font(.mhCaption).foregroundStyle(Theme.amber).textSelection(.enabled)
+                case .missingDetails(let tokens):
+                    Text("Homebrew didn’t return details for: \(tokens.joined(separator: ", ")). These apps can only be updated in Terminal.")
+                        .font(.mhCaption).foregroundStyle(Theme.amber).textSelection(.enabled)
+                case .notReconfirmedAfterRefresh:
+                    Text("Homebrew’s index may have changed, but the new list couldn’t be read. These are the previous results and can only be updated in Terminal.")
+                        .font(.mhCaption).foregroundStyle(Theme.amber).textSelection(.enabled)
+                }
+            }
             if !model.casks.isEmpty {
                 VStack(spacing: 0) {
                     ForEach(Array(model.casks.enumerated()), id: \.element.id) { i, c in
@@ -73,19 +104,102 @@ struct UpdatesView: View {
     }
 
     @ViewBuilder private var summary: some View {
-        let n = model.casks.count
-        VStack(alignment: .leading, spacing: 4) {
-            Text(n == 0 ? String(localized: "All Homebrew apps are up to date.") : String(localized: "\(n) apps have updates."))
-                .font(.display(26)).foregroundStyle(Palette.text)
-            if model.phase == .checking && !model.casks.isEmpty {
-                HStack(spacing: 6) {
-                    ProgressView().controlSize(.small)
-                    Text("Checking for updates…").font(.mhCaption).foregroundStyle(Palette.textMuted)
-                }
-            } else if let d = model.lastChecked {
-                Text("Checked \(d, format: .relative(presentation: .named))").font(.mhCaption).foregroundStyle(Palette.textMuted)
+        // The page can stay open for days. SwiftUI only re-evaluates a body when state changes, so
+        // the freshness decision and every relative date are recomputed on a minute schedule. The
+        // decision itself is `model.headline(at:)`, shared with the tests.
+        TimelineView(.everyMinute) { context in
+            VStack(alignment: .leading, spacing: 4) {
+                Text(headline(at: context.date)).font(.display(26)).foregroundStyle(Palette.text)
+                freshness(at: context.date)
             }
         }
+    }
+
+    private func headline(at now: Date) -> String {
+        switch model.headline(at: now) {
+        case .notChecked:
+            return String(localized: "Not checked yet.")
+        case .allUpToDate:
+            return String(localized: "All Homebrew apps are up to date.")
+        case .noUpdates(let date):
+            if let date {
+                return String(localized: "No updates in Homebrew’s index from \(relative(date, at: now)).")
+            }
+            return String(localized: "No updates in Homebrew’s index (its age is unknown).")
+        case .updates(let n):
+            return String(localized: "\(n) apps have updates.")
+        }
+    }
+
+    /// Says whether the list is the first result from the existing catalog or the refreshed one.
+    @ViewBuilder private func freshness(at now: Date) -> some View {
+        if model.detailsPending {
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.small)
+                if model.willRefresh {
+                    Text("First result; updating Homebrew’s index…")
+                } else {
+                    Text("First result; checking app details…")
+                }
+            }
+            .font(.mhCaption).foregroundStyle(Palette.textMuted)
+        } else if model.isRefreshingIndex {
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.small)
+                if model.phase == .checking || model.lastChecked == nil {
+                    Text("Updating Homebrew’s index…")
+                } else if let d = model.indexUpdatedAt {
+                    Text("First result; Homebrew’s index is from \(relative(d, at: now)). Updating it now…")
+                } else {
+                    Text("First result. Updating Homebrew’s index…")
+                }
+            }
+            .font(.mhCaption).foregroundStyle(Palette.textMuted)
+        } else if model.phase == .checking && !model.casks.isEmpty {
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.small)
+                Text("Checking for updates…")
+            }
+            .font(.mhCaption).foregroundStyle(Palette.textMuted)
+        } else if model.indexRefreshed {
+            // Show when the index was actually updated. The app can stay open for days, so a fixed
+            // "just now" would keep claiming a freshness the catalog no longer has.
+            if let d = model.indexRefreshedAt {
+                if model.failure != nil && model.lastChecked != nil {
+                    Text("Homebrew’s index was updated \(relative(d, at: now)), but this list is from before that update.")
+                        .font(.mhCaption).foregroundStyle(Palette.textMuted)
+                } else {
+                    Text("Homebrew’s index was updated \(relative(d, at: now)).")
+                        .font(.mhCaption).foregroundStyle(Palette.textMuted)
+                }
+            } else {
+                Text("Homebrew’s index was updated, but its time is unavailable.")
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted)
+            }
+        } else if let d = model.indexUpdatedAt {
+            Text("Homebrew’s repository was last fetched \(relative(d, at: now)).")
+                .font(.mhCaption).foregroundStyle(Palette.textMuted)
+        } else {
+            Text("Homebrew’s index age is unknown.")
+                .font(.mhCaption).foregroundStyle(Palette.textMuted)
+        }
+        // A failed explicit refresh must be visible even while the first list's details are still
+        // being read; otherwise an offline update looks like it succeeded until info finishes.
+        if let f = model.refreshFailure {
+            Text("Couldn’t update Homebrew’s index: \(f)")
+                .font(.mhCaption).foregroundStyle(Theme.amber).textSelection(.enabled)
+        }
+        if let w = model.refreshWarning {
+            Text("Homebrew reported: \(w)")
+                .font(.mhCaption).foregroundStyle(Theme.amber).textSelection(.enabled)
+        }
+        if !model.isRefreshingIndex, let d = model.lastChecked {
+            Text("Checked \(relative(d, at: now))").font(.mhCaption).foregroundStyle(Palette.textMuted)
+        }
+    }
+
+    private func relative(_ date: Date, at now: Date) -> String {
+        UpdatesFreshness.relative(date, to: now)
     }
 
     private var bottomBar: some View {
@@ -117,6 +231,12 @@ struct UpdatesView: View {
             lines.append("")
             lines.append(String(localized: "Open now, will be quit and reopened: \(running.joined(separator: ", ")). Save your work in them first."))
         }
+        if let warning = model.refreshWarning {
+            // A cached fallback is not a failure, but the user must see it before confirming an
+            // update whose versions may come from an older catalog.
+            lines.append("")
+            lines.append(String(localized: "Homebrew reported: \(warning)"))
+        }
         return lines.joined(separator: "\n")
     }
 }
@@ -131,7 +251,7 @@ private struct CaskRow: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 12) {
                 Toggle(isOn: Binding(get: { model.selected.contains(cask.token) && model.canUpdate(cask) },
-                                     set: { on in if on { model.selected.insert(cask.token) } else { model.selected.remove(cask.token) } })) { EmptyView() }
+                                     set: { model.setSelected(cask.token, $0) })) { EmptyView() }
                     .labelsHidden()
                     .accessibilityLabel(String(localized: "\(cask.name), \(cask.installedVersion) to \(cask.currentVersion)"))
                     .disabled(!model.canUpdate(cask) || model.phase == .updating)
@@ -148,6 +268,13 @@ private struct CaskRow: View {
                         Text(verbatim: "\(cask.installedVersion) → \(cask.currentVersion)").font(.mhCaption.monospacedDigit()).foregroundStyle(Palette.textMuted)
                         if cask.autoUpdates { tag(String(localized: "Updates itself")) }
                         if cask.pinned { tag(String(localized: "Pinned")) }
+                        if model.unconfirmed.contains(cask.token) {
+                            tag(model.detailsPending
+                                ? String(localized: "Reading details…")
+                                : model.detailNotice == .notReconfirmedAfterRefresh
+                                    ? String(localized: "Not reconfirmed")
+                                    : String(localized: "Details unavailable"))
+                        }
                         if !model.runningApps(cask).isEmpty { tag(String(localized: "Open")) }
                     }
                 }

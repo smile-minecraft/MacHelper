@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 import Storage
 import SwiftUI
@@ -50,6 +51,10 @@ final class HistoryManagementModel {
             try store.clear(.minuteSamples)
             usage = store.diskUsage()
             message = nil
+            // Only after the delete succeeded: a failed clear keeps the old points visible and
+            // shows its error. The SSD page observes this and invalidates/requeries at once; a
+            // clear from another process is picked up by its low-frequency refresh instead.
+            NotificationCenter.default.post(name: .monitoringHistoryCleared, object: nil)
         } catch {
             message = String(localized: "Couldn’t clear monitoring history: \(error.localizedDescription)")
         }
@@ -158,7 +163,9 @@ struct HistoryManagementSection: View {
             Button("Cancel", role: .cancel) {}
                 .keyboardShortcut(.defaultAction)
         } message: {
-            Text("This permanently deletes all per-minute monitoring history, every metric it contains, and the hourly free-space history. It can’t be undone. Process usage history, sensor and core history, other settings, and the operation history are not affected.")
+            // The dedicated catalog is shared with the SSD page; it names every recorded disk so
+            // the confirmation cannot be read as clearing only the startup volume.
+            Text(verbatim: DiskVolumeSelectionText.clearHistoryMessage.localized())
         }
     }
 

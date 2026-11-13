@@ -27,7 +27,7 @@ struct OptimizeView: View {
             }
             ToolbarItem {
                 Button { showAutoClean = true } label: {
-                    Label(autoClean.config.enabled ? "Auto Clean: On" : "Auto Clean…", systemImage: "clock.arrow.circlepath")
+                    Label(autoClean.config.enabled ? "Auto Clean: On" : "Auto Clean: Off", systemImage: "clock.arrow.circlepath")
                 }
                 .help("Regularly clean low-risk items in the background")
             }
@@ -50,6 +50,9 @@ struct OptimizeView: View {
                     Button("Allow Full Disk Access to see everything") { model.openFullDiskAccessSettings() }
                         .buttonStyle(.link).font(.mhCaption)
                 }
+                AutoCleanEntry(model: autoClean) { showAutoClean = true }
+                    .frame(maxWidth: 440)
+                    .padding(.top, 8)
             }
         }
     }
@@ -534,6 +537,66 @@ struct OptimizeView: View {
             .background(Palette.card)
             .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
         }
+    }
+}
+
+/// The start screen's way into the schedule: a labeled card, so the feature doesn't depend on
+/// finding the toolbar icon. It only opens the existing settings sheet; it never enables the
+/// schedule or runs a clean itself.
+private struct AutoCleanEntry: View {
+    let model: AutoCleanModel
+    let open: () -> Void
+
+    private var isOn: Bool { model.config.enabled }
+
+    var body: some View {
+        Button(action: open) {
+            HStack(spacing: 12) {
+                Image(systemName: "clock.arrow.circlepath")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(isOn ? Theme.mint : Theme.accent)
+                    .frame(width: 34, height: 34)
+                    .background((isOn ? Theme.mint : Theme.accent).opacity(0.12), in: SurfaceShape(cornerRadius: 8))
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 8) {
+                        Text("Auto Clean").font(.mhBody.weight(.semibold)).foregroundStyle(Palette.text)
+                        Pill(text: isOn ? String(localized: "On") : String(localized: "Off"),
+                             color: isOn ? Theme.mint : Palette.textMuted)
+                    }
+                    Text(isOn ? "A schedule is set to clean low-risk items automatically."
+                              : "Set a schedule to clean low-risk items automatically.")
+                        .font(.mhCaption).foregroundStyle(Palette.textMuted)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right").font(.mhCaption.weight(.semibold)).foregroundStyle(Palette.textFaint)
+            }
+            .padding(12)
+            .contentShape(Rectangle())
+            .surface()
+        }
+        .buttonStyle(AutoCleanEntryButtonStyle())
+        .accessibilityLabel(Text("Auto Clean"))
+        .accessibilityValue(Text(isOn ? "On" : "Off"))
+        .accessibilityHint(Text("Opens the Auto Clean schedule settings."))
+        .accessibilityIdentifier("optimize.autoClean.entry")
+    }
+}
+
+/// The card already has its own surface; hover only adds a border, so the card keeps its shape
+/// on every theme and press feedback stays subtle.
+private struct AutoCleanEntryButtonStyle: ButtonStyle {
+    @State private var hover = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .overlay(SurfaceShape(cornerRadius: Theme.cardRadius)
+                .strokeBorder(Theme.accent.opacity(hover ? 0.55 : 0), lineWidth: 1.5))
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
+            .animation(.easeOut(duration: 0.12), value: hover)
+            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+            .onHover { hover = $0 }
     }
 }
 

@@ -1,8 +1,10 @@
 import AppKit
 import Charts
+import Combine
 import HelperProtocol
 import Metrics
 import SMCKit
+import Storage
 import SwiftUI
 
 enum HistoryRange: Int, CaseIterable, Identifiable {
@@ -37,6 +39,9 @@ struct MonitorPanel: View {
     /// false only for offscreen snapshots (ImageRenderer cannot draw ScrollView content).
     var scrollable = true
     @AppStorage("panel.module") private var tab: Tab = .cpu
+    /// Kept above the tab switch so the selected disk survives moving between tabs while the
+    /// panel is open.
+    @State private var diskSelection = DiskCapacitySelectionModel()
 
     enum Tab: String, CaseIterable {
         case cpu, gpu, memory, disk, network
@@ -103,7 +108,7 @@ struct MonitorPanel: View {
         case .cpu: CPUTab(store: store)
         case .gpu: GPUTab(store: store)
         case .memory: MemoryTab(store: store)
-        case .disk: DiskTab(store: store)
+        case .disk: DiskTab(store: store, selection: diskSelection)
         case .network: NetworkTab(store: store)
         }
     }
@@ -398,34 +403,337 @@ private struct MemoryTab: View {
 
 private struct DiskTab: View {
     let store: MonitorStore
+    let selection: DiskCapacitySelectionModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let d = store.disk {
-                let used = d.totalBytes > 0 ? 1 - Double(d.availableBytes) / Double(d.totalBytes) : 0
-                HStack(alignment: .top) {
-                    RingGauge(fraction: used, value: Fmt.percent(used), caption: "Used", color: used > 0.9 ? Theme.rose : Theme.violet,
-                              size: 112, lineWidth: 14)
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(Host.volumeName).font(.mh(size: 15, weight: .semibold)).foregroundStyle(Palette.text).padding(.bottom, 4)
-                        KeyValueRow(label: String(localized: "Free"), value: Fmt.bytes(d.availableBytes), dot: Palette.inset)
-                        KeyValueRow(label: String(localized: "Used"), value: Fmt.bytes(d.totalBytes - d.availableBytes), dot: Theme.violet)
-                        KeyValueRow(label: String(localized: "Capacity"), value: Fmt.bytes(d.totalBytes))
+            volumeSection
+            if selection.isMountedSelection {
+                capacitySection
+                sharingNote
+            }
+            historySection
+            activitySection
+        }
+        .task {
+            // Every appearance refreshes immediately, so points written while another tab was
+            // visible are picked up when this page returns.
+            selection.connect(reader: DiskCapacitySelectionModel.historyReader(for: store.persistentHistory))
+            // Disk Arbitration has no timeout and capacity points arrive hourly, so refresh on
+            // a slow cadence while visible instead of every second. The model also refreshes
+            // the history window on this tick, which notices clears from other processes.
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(60))
+                if Task.isCancelled { break }
+                selection.refreshAll(forceHistory: false)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .monitoringHistoryCleared)) { _ in
+            // Settings posts this only after the delete succeeds. A failed clear keeps the
+            // old points on screen and shows its error instead.
+            selection.historyDidClear()
+        }
+    }
+
+    // MARK: Volume picker and state
+
+    private var volumeSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Text(verbatim: DiskVolumeSelectionText.disk.localized())
+                    .font(.mh(size: 12))
+                    .foregroundStyle(Palette.textMuted)
+                // A `Picker(.menu)` draws its label with the system menu colour, which is nearly
+                // invisible on the dark popover. A `Menu` with a custom label keeps the palette's
+                // text and capsule while the menu itself stays a standard SwiftUI menu.
+                Menu {
+                    // The label keeps the last known name visible when the selected disk
+                    // disappears; the warning below explains why it is no longer in the list.
+                    ForEach(selection.volumes) { option in
+                        Button {
+                            selection.select(option.key)
+                        } label: {
+                            HStack {
+                                if option.key == selection.selectedKey {
+                                    Image(systemName: "checkmark")
+                                }
+                                Text(verbatim: option.pickerTitle())
+                            }
+                        }
                     }
-                    .padding(.leading, 14)
+                } label: {
+                    HStack(spacing: 5) {
+                        Text(verbatim: selectedPickerTitle)
+                            .font(.mh(size: 12, weight: .medium))
+                            .foregroundStyle(Palette.text)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        Image(systemName: "chevron.down")
+                            .font(.mh(size: 8, weight: .bold))
+                            .foregroundStyle(Palette.textMuted)
+                    }
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 4)
+                    .background(Palette.inset, in: SurfaceShape(capsule: true))
+                    .overlay(SurfaceShape(capsule: true).strokeBorder(Palette.stroke, lineWidth: 1))
+                    .contentShape(Capsule())
                 }
-                .padding(.top, 6)
-                HairlineHeader(text: "Activity")
+                .menuStyle(.button)
+                .buttonStyle(.plain)
+                .menuIndicator(.hidden)
+                .disabled(selection.volumes.isEmpty)
+                .accessibilityLabel(Text(verbatim: DiskVolumeSelectionText.accessibilityVolumePicker.localized()))
+                .accessibilityValue(Text(verbatim: selectedPickerTitle))
+                Spacer(minLength: 0)
+                Button {
+                    selection.refreshAll(forceHistory: true)
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.mh(size: 11, weight: .semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Palette.textMuted)
+                .help(DiskVolumeSelectionText.refreshDisks.localized())
+                .accessibilityLabel(Text(verbatim: DiskVolumeSelectionText.refreshDisks.localized()))
+            }
+
+            switch selection.volumesState {
+            case .idle, .loaded:
+                EmptyView()
+            case .loading:
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text(verbatim: DiskVolumeSelectionText.checkingDisks.localized())
+                        .font(.mh(size: 11))
+                        .foregroundStyle(Palette.textMuted)
+                }
+            case .failed(let message):
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(verbatim: String(format: DiskVolumeSelectionText.volumeListError.localized(), message))
+                        .font(.mh(size: 11))
+                        .foregroundStyle(Theme.rose)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button {
+                        selection.refreshAll(forceHistory: true)
+                    } label: {
+                        Text(verbatim: DiskVolumeSelectionText.tryAgain.localized())
+                            .font(.mh(size: 11, weight: .medium))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.accent)
+                }
+            }
+
+            selectionWarning
+        }
+    }
+
+    @ViewBuilder private var selectionWarning: some View {
+        switch selection.selectionState {
+        case .unmounted(let volume):
+            warning(title: .volumeUnmounted,
+                    detail: String(format: DiskVolumeSelectionText.volumeUnmountedDetail.localized(),
+                                   displayName(volume)),
+                    accessibility: .selectedDiskUnavailable)
+        case .unidentifiable:
+            warning(title: .volumeUnidentified,
+                    detail: DiskVolumeSelectionText.volumeUnidentifiedDetail.localized(),
+                    accessibility: .selectedDiskUnavailable)
+        case .available, .none:
+            EmptyView()
+        }
+    }
+
+    private func warning(title: DiskVolumeSelectionText,
+                         detail: String,
+                         accessibility: DiskVolumeSelectionText) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(verbatim: title.localized())
+                .font(.mh(size: 11.5, weight: .medium))
+                .foregroundStyle(Theme.amber)
+            Text(verbatim: detail)
+                .font(.mh(size: 10.5))
+                .foregroundStyle(Palette.textFaint)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Palette.inset, in: SurfaceShape(cornerRadius: 8, style: .continuous))
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(Text(verbatim: accessibility.localized()))
+    }
+
+    // MARK: Capacity
+
+    @ViewBuilder private var capacitySection: some View {
+        if let capacity = selection.capacity {
+            let used = capacity.usedFraction
+            HStack(alignment: .top) {
+                RingGauge(fraction: used, value: Fmt.percent(used), caption: "Used",
+                          color: used > 0.9 ? Theme.rose : Theme.violet, size: 112, lineWidth: 14)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(verbatim: selectedDisplayName)
+                        .font(.mh(size: 15, weight: .semibold))
+                        .foregroundStyle(Palette.text)
+                        .padding(.bottom, 4)
+                        .accessibilityLabel(Text(verbatim: String(format: DiskVolumeSelectionText.selectedDisk.localized(),
+                                                                  selectedDisplayName)))
+                    KeyValueRow(label: String(localized: "Free"), value: Fmt.bytes(capacity.availableBytes), dot: Palette.inset)
+                    KeyValueRow(label: String(localized: "Used"),
+                                value: Fmt.bytes(max(capacity.totalBytes - capacity.availableBytes, 0)),
+                                dot: Theme.violet)
+                    KeyValueRow(label: String(localized: "Capacity"), value: Fmt.bytes(capacity.totalBytes))
+                }
+                .padding(.leading, 14)
+            }
+            .padding(.top, 6)
+        } else {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(verbatim: selectedDisplayName)
+                    .font(.mh(size: 15, weight: .semibold))
+                    .foregroundStyle(Palette.text)
+                Text(verbatim: DiskVolumeSelectionText.capacityUnavailable.localized())
+                    .font(.mh(size: 12, weight: .medium))
+                    .foregroundStyle(Palette.textMuted)
+                Text(verbatim: DiskVolumeSelectionText.capacityUnavailableDetail.localized())
+                    .font(.mh(size: 10.5))
+                    .foregroundStyle(Palette.textFaint)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.top, 6)
+            .accessibilityElement(children: .combine)
+        }
+    }
+
+    @ViewBuilder private var sharingNote: some View {
+        if let sharing = selection.selectedVolume?.capacitySharing,
+           case .sharedContainer = sharing {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: DiskVolumeSelectionText.apfsShared.localized())
+                    .font(.mh(size: 11, weight: .medium))
+                    .foregroundStyle(Theme.amber)
+                Text(verbatim: DiskVolumeSelectionText.apfsSharedDetail.localized())
+                    .font(.mh(size: 10.5))
+                    .foregroundStyle(Palette.textFaint)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Palette.inset, in: SurfaceShape(cornerRadius: 8, style: .continuous))
+        }
+    }
+
+    // MARK: Seven-day capacity history
+
+    @ViewBuilder private var historySection: some View {
+        switch selection.historyState {
+        case .idle:
+            EmptyView()
+        case .loading:
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.small)
+                Text(verbatim: DiskVolumeSelectionText.historyLoading.localized())
+                    .font(.mh(size: 11))
+                    .foregroundStyle(Palette.textMuted)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(Text(verbatim: DiskVolumeSelectionText.historyLoading.localized()))
+        case .loaded:
+            if let volumeID = selection.historyVolumeID {
+                DiskCapacityHistoryChart(points: selection.historyPoints,
+                                         volumeID: volumeID,
+                                         now: selection.historyNow)
+            }
+        case .failed(_, let message):
+            VStack(alignment: .leading, spacing: 4) {
+                Text(verbatim: String(format: DiskVolumeSelectionText.historyError.localized(), message))
+                    .font(.mh(size: 11))
+                    .foregroundStyle(Theme.rose)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button {
+                    selection.retryHistory()
+                } label: {
+                    Text(verbatim: DiskVolumeSelectionText.tryAgain.localized())
+                        .font(.mh(size: 11, weight: .medium))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.accent)
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityHint(Text(verbatim: DiskVolumeSelectionText.historyUnavailable.localized()))
+        case .unavailable(_, let reason):
+            Text(verbatim: reason.text.localized())
+                .font(.mh(size: 10.5))
+                .foregroundStyle(Palette.textFaint)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityHint(Text(verbatim: DiskVolumeSelectionText.historyUnavailable.localized()))
+        }
+        Text(verbatim: DiskVolumeSelectionText.recordingCaption.localized())
+            .font(.mh(size: 10.5))
+            .foregroundStyle(Palette.textFaint)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    // MARK: Whole-machine throughput
+
+    private var activitySection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            DiskSectionHeader(text: .activityAllDisks)
+            Text(verbatim: DiskVolumeSelectionText.activityAllDisksDetail.localized())
+                .font(.mh(size: 10.5))
+                .foregroundStyle(Palette.textFaint)
+                .fixedSize(horizontal: false, vertical: true)
+            if let disk = store.disk {
                 MirroredHistory(up: Series.values(store, .diskRead), down: Series.values(store, .diskWrite),
                                 upColor: Theme.blue, downColor: Theme.rose).equatable().frame(height: 104)
                 VStack(spacing: 0) {
-                    KeyValueRow(label: String(localized: "Read"), value: "\(Fmt.rate(d.readBytesPerSecond))/s", dot: Theme.blue)
-                    KeyValueRow(label: String(localized: "Write"), value: "\(Fmt.rate(d.writeBytesPerSecond))/s", dot: Theme.rose)
+                    KeyValueRow(label: String(localized: "Read"),
+                                value: "\(Fmt.rate(disk.readBytesPerSecond))/s", dot: Theme.blue)
+                    KeyValueRow(label: String(localized: "Write"),
+                                value: "\(Fmt.rate(disk.writeBytesPerSecond))/s", dot: Theme.rose)
                 }
             } else {
                 SkeletonRows(count: 5).padding(.top, 12)
             }
         }
+    }
+
+    // MARK: Names
+
+    private var selectedPickerTitle: String {
+        guard let option = selection.volumes.first(where: { $0.key == selection.selectedKey }) else {
+            return selection.selectedVolume.map(displayName) ?? "–"
+        }
+        return option.pickerTitle()
+    }
+
+    private var selectedDisplayName: String {
+        selection.selectedVolume.map(displayName) ?? "–"
+    }
+
+    private func displayName(_ volume: DiskVolume) -> String {
+        if let name = volume.name, !name.isEmpty { return name }
+        return volume.role.titleText.localized()
+    }
+}
+
+/// A section title whose text lives in the dedicated `DiskVolumeSelection` catalog. The shared
+/// `HairlineHeader` only takes a `LocalizedStringKey`, which would look in `Localizable`.
+private struct DiskSectionHeader: View {
+    let text: DiskVolumeSelectionText
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Rectangle().fill(Palette.hairline).frame(height: 1)
+            Text(verbatim: text.localized())
+                .font(.mh(size: 11, weight: .semibold))
+                .foregroundStyle(Palette.textMuted)
+                .fixedSize()
+            Rectangle().fill(Palette.hairline).frame(height: 1)
+        }
+        .padding(.top, 12)
+        .padding(.bottom, 2)
+        .accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -436,26 +744,34 @@ private struct NetworkTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            // These rates are the whole-machine total from NetworkSampler, which already excludes
+            // virtual interfaces. They are not a per-interface rate. The visible caption keeps the
+            // unit family (bytes per second, all interfaces) distinct from the per-interface
+            // link-speed values below.
             if let n = store.network {
-                HStack {
-                    big(Fmt.rate(n.inBytesPerSecond), String(localized: "Download"), Theme.blue)
-                    Spacer()
-                    big(Fmt.rate(n.outBytesPerSecond), String(localized: "Upload"), Theme.rose)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("All interfaces · bytes per second")
+                        .font(.mh(size: 10.5))
+                        .foregroundStyle(Palette.textFaint)
+                    HStack {
+                        big(Fmt.rate(n.inBytesPerSecond), String(localized: "Download"), Theme.blue)
+                        Spacer()
+                        big(Fmt.rate(n.outBytesPerSecond), String(localized: "Upload"), Theme.rose)
+                    }
                 }
                 .padding(.horizontal, 28).padding(.top, 8)
                 HairlineHeader(text: "Usage history")
+                Text("Last 5 minutes, updated live")
+                    .font(.mh(size: 10.5))
+                    .foregroundStyle(Palette.textFaint)
                 MirroredHistory(up: Series.values(store, .netIn), down: Series.values(store, .netOut)).equatable().frame(height: 112)
-                HairlineHeader(text: "Interface")
-                VStack(spacing: 0) {
-                    let iface = Host.primaryInterface
-                    KeyValueRow(label: String(localized: "Interface"), value: iface?.name ?? "–")
-                    KeyValueRow(label: String(localized: "Local IP"), value: iface?.address ?? "–")
-                    KeyValueRow(label: String(localized: "Status"), value: iface != nil ? String(localized: "Connected") : String(localized: "Offline"),
-                                dot: iface != nil ? Theme.accent : Theme.rose)
-                }
             } else {
                 SkeletonRows(count: 5).padding(.top, 12)
             }
+            // The reviewed section owns its background sampling loop (30 s) and sampler cache
+            // (15 s). It must render even while the first rate sample is still pending, and it
+            // never turns a missing snapshot into an offline or zero-valued interface.
+            NetworkDetailsSection()
         }
     }
 
@@ -551,35 +867,6 @@ extension Host {
     static var loadAverages: (Double, Double, Double) {
         var l = [Double](repeating: 0, count: 3)
         return getloadavg(&l, 3) == 3 ? (l[0], l[1], l[2]) : (0, 0, 0)
-    }
-
-    static let volumeName: String = (try? URL(fileURLWithPath: "/").resourceValues(forKeys: [.volumeNameKey]).volumeName) ?? "Macintosh HD"
-
-    /// First active IPv4 interface (en*), for the network tab.
-    /// Cached for 30 s: the network tab re-renders every second and getifaddrs walks every interface.
-    @MainActor static var primaryInterface: (name: String, address: String)? {
-        if let cached = interfaceCache, Date().timeIntervalSince(cached.at) < 30 { return cached.value }
-        let value = readPrimaryInterface()
-        interfaceCache = (Date(), value)
-        return value
-    }
-    @MainActor private static var interfaceCache: (at: Date, value: (name: String, address: String)?)?
-
-    private static func readPrimaryInterface() -> (name: String, address: String)? {
-        var ifap: UnsafeMutablePointer<ifaddrs>?
-        guard getifaddrs(&ifap) == 0, let first = ifap else { return nil }
-        defer { freeifaddrs(ifap) }
-        var p: UnsafeMutablePointer<ifaddrs>? = first
-        while let cur = p {
-            let ifa = cur.pointee
-            p = ifa.ifa_next
-            let name = String(cString: ifa.ifa_name)
-            guard name.hasPrefix("en"), (Int32(ifa.ifa_flags) & IFF_UP) != 0, let sa = ifa.ifa_addr, sa.pointee.sa_family == UInt8(AF_INET) else { continue }
-            var host = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-            guard getnameinfo(sa, socklen_t(sa.pointee.sa_len), &host, socklen_t(host.count), nil, 0, NI_NUMERICHOST) == 0 else { continue }
-            return (name, String(decoding: host.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self))
-        }
-        return nil
     }
 
     /// Share of logical CPUs that are performance cores (hw.perflevel0 is the fastest level).

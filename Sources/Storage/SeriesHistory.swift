@@ -40,6 +40,25 @@ public struct SeriesSample: Sendable, Equatable, Hashable {
     }
 }
 
+/// One averaged bucket of a series. `time` is the first stored minute in the bucket and
+/// the chart's x position; `lastSampleTime` is the last stored minute the average covers.
+/// A bucket never spans a gap in the stored minutes: a longer gap inside one bucket
+/// becomes two buckets, so a chart can still break the line where the recorder stopped.
+public struct SeriesBucket: Sendable, Equatable, Hashable {
+    public var time: Date
+    public var value: Double
+    public var lastSampleTime: Date
+    /// Stored minutes the average covers, not the number of observations inside them.
+    public var storedMinuteCount: Int
+
+    public init(time: Date, value: Double, lastSampleTime: Date, storedMinuteCount: Int) {
+        self.time = time
+        self.value = value
+        self.lastSampleTime = lastSampleTime
+        self.storedMinuteCount = storedMinuteCount
+    }
+}
+
 /// A series present in the stored history and the last minute it was seen.
 public struct AvailableSeries: Sendable, Equatable, Hashable {
     public var series: String

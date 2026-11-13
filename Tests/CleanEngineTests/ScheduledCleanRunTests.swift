@@ -16,8 +16,8 @@ import Testing
 /// only uses trash actions; it does not prove the entry point filters that way, and it does not
 /// show every low-risk rule is selected by default.
 ///
-/// The first test moves the two matched files it creates into the system Trash and leaves them
-/// there. It gives the executor a per-test log, so the real operations log is untouched.
+/// The first test injects a backend that moves items into a directory inside its temporary tree,
+/// so it exercises the real executor without touching the user's Trash or operations log.
 @Suite struct ScheduledCleanRunTests {
     private func probeRule(_ id: String, _ paths: [String], risk: String = "low", selected: Bool = true) throws -> CleanRule {
         let json: [String: Any] = ["id": id, "title": id, "category": "test", "risk": risk, "paths": paths,
@@ -52,7 +52,10 @@ import Testing
         #expect(plan.selectedCandidates.count == 2, "both cached files matched")
         #expect(plan.selectedCandidates.allSatisfy { $0.path.hasPrefix(t.path + "/cache-target/") })
         let removed = plan.removalItems
-        let executor = CleanExecutor(safety: safety, log: log, permanent: false)
+
+        // The executor's Trash is this test's own directory, so nothing can reach the user's Trash.
+        let testTrash = TestTrashBackend(trashDirectory: t.url.appending(path: "test-trash"))
+        let executor = CleanExecutor.injected(safety: safety, log: log, removal: testTrash.backend)
         let report = executor.execute(removed, dryRun: false, command: "isolated-combination-check")
 
         try #require(report.items.count == 2)
@@ -66,12 +69,22 @@ import Testing
         #expect(t.exists("keep-here/notes.txt"), "unrelated items stay")
         #expect(t.exists("other-folder/unrelated.bin"))
 
+        // Both files really moved into the test's Trash directory, and nothing was deleted.
+        #expect(testTrash.trashedPaths.sorted() == removed.map(\.path).sorted())
+        #expect(testTrash.deletedPaths.isEmpty)
+        #expect(testTrash.trashContents() == ["old-cache.bin", "second-cache.bin"])
+
         // The operations record went to the per-test log, not the shared one.
         let recorded = log.read()
         try #require(recorded.count == 2)
-        #expect(recorded.allSatisfy { $0.command == "isolated-combination-check" })
-        #expect(recorded.allSatisfy { $0.result == "trashed" })
-        #expect(recorded.allSatisfy { $0.path.hasPrefix(t.path + "/cache-target/") })
+        let recordedByPath = Dictionary(uniqueKeysWithValues: recorded.map { ($0.path, $0) })
+        for item in removed {
+            let entry = try #require(recordedByPath[item.path])
+            #expect(entry.command == "isolated-combination-check")
+            #expect(entry.result == "trashed")
+            #expect(entry.bytes == item.bytes)
+            #expect(entry.source == item.source)
+        }
     }
 
     @Test func offConfigAndSystemPathsStayUntouched() throws {

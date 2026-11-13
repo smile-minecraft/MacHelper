@@ -214,6 +214,243 @@ import Testing
         }
     }
 
+    // MARK: Bucketed chart reads
+
+    /// A day or a week of per-minute rows is averaged into buckets before it reaches the
+    /// chart, but the average must not bridge a gap in the stored minutes. These tests use
+    /// the real database and the real chart splitter; none of them re-implements the query.
+    @Test func bucketedSeriesKeepsAShortGapBetweenTwoAdjacentBuckets() throws {
+        try withTempDirectory { dir in
+            let url = dir.appending(path: "history.sqlite")
+            let history = try MetricsHistory(url: url)
+            let sensor = HistorySeries.temperature("PMU tdie1")
+            let bucket = TimeInterval(1800)
+            var rows: [(time: Date, series: String, sum: Double, count: Int)] = []
+            // First 30-minute bucket: 10:00–10:29.
+            for minute in 0..<30 {
+                rows.append((minute0.addingTimeInterval(TimeInterval(minute * 60)), sensor, 50, 1))
+            }
+            // Second bucket: 10:30–10:59, but 10:30–10:32 are missing. The original
+            // per-minute chart breaks at 10:29 → 10:33; the average must not hide that.
+            for minute in 33..<60 {
+                rows.append((minute0.addingTimeInterval(TimeInterval(minute * 60)), sensor, 60, 1))
+            }
+            try insertSeries(url: url, rows)
+
+            let buckets = try history.seriesBuckets(
+                [sensor], since: minute0, until: minute0.addingTimeInterval(3600), bucket: bucket)
+            let points = buckets[sensor] ?? []
+            #expect(points.count == 2)
+            #expect(points.first?.time == minute0)
+            #expect(points.first?.lastSampleTime == minute0.addingTimeInterval(29 * 60))
+            #expect(points.last?.time == minute0.addingTimeInterval(33 * 60))
+            #expect(points.last?.lastSampleTime == minute0.addingTimeInterval(59 * 60))
+            #expect(points.first?.value == 50)
+            #expect(points.last?.value == 60)
+            // Both buckets have data, but the stored minutes are 4 minutes apart, so the
+            // line must break. A split on bucket starts alone would keep one segment.
+            #expect(HistorySegments.split(points).count == 2)
+
+            // The per-minute read the live and one-hour charts use breaks at the same spot.
+            let perMinute = try history.seriesSamples(
+                sensor, since: minute0, until: minute0.addingTimeInterval(3600))
+            #expect(perMinute.count == 57)
+            #expect(HistorySegments.split(perMinute, time: \.time, maxGap: 60).count == 2)
+        }
+    }
+
+    @Test func bucketedSeriesKeepsAGapBetweenTheEdgesOfTwoBuckets() throws {
+        try withTempDirectory { dir in
+            let url = dir.appending(path: "history.sqlite")
+            let history = try MetricsHistory(url: url)
+            let sensor = HistorySeries.temperature("PMU tdie1")
+            // One stored minute at the start of the first bucket and one at the end of the
+            // next; 58 minutes are missing between them.
+            try insertSeries(url: url, [
+                (minute0, sensor, 50, 1),
+                (minute0.addingTimeInterval(59 * 60), sensor, 60, 1),
+            ])
+
+            let buckets = try history.seriesBuckets(
+                [sensor], since: minute0, until: minute0.addingTimeInterval(3600), bucket: 1800)
+            let points = buckets[sensor] ?? []
+            #expect(points.map(\.time) == [minute0, minute0.addingTimeInterval(59 * 60)])
+            #expect(points.map(\.storedMinuteCount) == [1, 1])
+            #expect(HistorySegments.split(points).count == 2)
+
+            let perMinute = try history.seriesSamples(
+                sensor, since: minute0, until: minute0.addingTimeInterval(3600))
+            #expect(HistorySegments.split(perMinute, time: \.time, maxGap: 60).count == 2)
+        }
+    }
+
+    @Test func bucketedSeriesKeepsAGapInsideOneBucket() throws {
+        try withTempDirectory { dir in
+            let url = dir.appending(path: "history.sqlite")
+            let history = try MetricsHistory(url: url)
+            let sensor = HistorySeries.temperature("PMU tdie1")
+            var rows: [(time: Date, series: String, sum: Double, count: Int)] = []
+            for minute in 0..<6 {   // 10:00–10:05
+                rows.append((minute0.addingTimeInterval(TimeInterval(minute * 60)), sensor, 50, 1))
+            }
+            for minute in 20..<30 { // 10:20–10:29, 14 missing minutes
+                rows.append((minute0.addingTimeInterval(TimeInterval(minute * 60)), sensor, 60, 1))
+            }
+            try insertSeries(url: url, rows)
+
+            let buckets = try history.seriesBuckets(
+                [sensor], since: minute0, until: minute0.addingTimeInterval(1800), bucket: 1800)
+            let points = buckets[sensor] ?? []
+            // One bucket would average 10:00–10:29 into a single point and lose the gap;
+            // the read returns the two runs separately, both inside the same bucket.
+            #expect(points.count == 2)
+            #expect(points.map(\.time) == [minute0, minute0.addingTimeInterval(20 * 60)])
+            #expect(points.map(\.lastSampleTime) == [
+                minute0.addingTimeInterval(5 * 60), minute0.addingTimeInterval(29 * 60),
+            ])
+            #expect(points.map(\.storedMinuteCount) == [6, 10])
+            #expect(points.map(\.value) == [50, 60])
+            #expect(HistorySegments.split(points).count == 2)
+        }
+    }
+
+    @Test func bucketedSeriesAveragesWeightedAndKeepsCompleteBucketsWhole() throws {
+        try withTempDirectory { dir in
+            let url = dir.appending(path: "history.sqlite")
+            let history = try MetricsHistory(url: url)
+            let sensor = HistorySeries.temperature("PMU tdie1")
+            let other = HistorySeries.temperature("PMU tdie2")
+            var rows: [(time: Date, series: String, sum: Double, count: Int)] = []
+            for minute in 0..<30 {
+                // Every stored minute holds three observations of the same value.
+                rows.append((minute0.addingTimeInterval(TimeInterval(minute * 60)), sensor,
+                             Double(minute) * 3, 3))
+            }
+            // Two observations of 0.5 and four of 0.75 in the same bucket: the weighted
+            // average is 4/6, not the mean of the two minute averages.
+            rows.append((minute0, other, 1.0, 2))
+            rows.append((minute0.addingTimeInterval(60), other, 3.0, 4))
+            try insertSeries(url: url, rows)
+
+            let buckets = try history.seriesBuckets(
+                [sensor, other], since: minute0, until: minute0.addingTimeInterval(1800), bucket: 1800)
+            let complete = buckets[sensor] ?? []
+            #expect(complete.count == 1)
+            #expect(complete.first?.time == minute0)
+            #expect(complete.first?.lastSampleTime == minute0.addingTimeInterval(29 * 60))
+            #expect(complete.first?.storedMinuteCount == 30)
+            #expect(abs((complete.first?.value ?? 0) - 14.5) < 1e-9)
+            #expect(HistorySegments.split(complete).count == 1)
+
+            let weighted = buckets[other] ?? []
+            #expect(weighted.count == 1)
+            #expect(abs((weighted.first?.value ?? 0) - 4.0 / 6.0) < 1e-9)
+            #expect(weighted.first?.storedMinuteCount == 2)
+            #expect(HistorySegments.split(weighted).count == 1)
+        }
+    }
+
+    @Test func bucketedSeriesLeavesEmptyBucketsAbsent() throws {
+        try withTempDirectory { dir in
+            let url = dir.appending(path: "history.sqlite")
+            let history = try MetricsHistory(url: url)
+            let sensor = HistorySeries.temperature("PMU tdie1")
+            try insertSeries(url: url, [
+                (minute0, sensor, 50, 1),
+                (minute0.addingTimeInterval(3600), sensor, 60, 1),
+            ])
+
+            let buckets = try history.seriesBuckets(
+                [sensor], since: minute0, until: minute0.addingTimeInterval(5400), bucket: 1800)
+            let points = buckets[sensor] ?? []
+            // The middle bucket has no stored minute and is absent, not zero.
+            #expect(points.map(\.time) == [minute0, minute0.addingTimeInterval(3600)])
+            #expect(points.contains { $0.value == 0 } == false)
+            #expect(HistorySegments.split(points).count == 2)
+        }
+    }
+
+    /// The UI smoke seeds seven days through `Tests/UI/MonitorHistorySeed.sql`. Read that
+    /// same file back through the real storage code: a sum that forgot its count would
+    /// show 1–2 °C instead of 48–74 °C and GB processes as MB, and the UI assertions would
+    /// otherwise have nothing real to compare against.
+    @Test func monitorHistorySeedReadsBackWithRealisticRanges() throws {
+        let seed = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appending(path: "UI/MonitorHistorySeed.sql")
+        try withTempDirectory { dir in
+            let url = dir.appending(path: "history.sqlite")
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/sqlite3")
+            process.arguments = [url.path]
+            process.standardInput = try FileHandle(forReadingFrom: seed)
+            try process.run()
+            process.waitUntilExit()
+            #expect(process.terminationStatus == 0)
+
+            let history = try MetricsHistory(url: url)
+            let now = Date()
+            let since = now.addingTimeInterval(-7 * 86_400)
+            let sensors = try history.availableSeries().map(\.series)
+            #expect(sensors.count == 10)
+            let buckets = try history.seriesBuckets(sensors, since: since, until: now, bucket: 1800)
+            for (series, points) in buckets {
+                #expect(!points.isEmpty)
+                if series.hasPrefix("temperature.") {
+                    #expect(points.allSatisfy { $0.value >= 30 && $0.value <= 80 },
+                            "\(series) has an unrealistic temperature: \(points.map(\.value).min() ?? 0)…\(points.map(\.value).max() ?? 0)")
+                } else {
+                    #expect(points.allSatisfy { $0.value >= 0.05 && $0.value <= 0.8 },
+                            "\(series) has an unrealistic percentage: \(points.map(\.value).min() ?? 0)…\(points.map(\.value).max() ?? 0)")
+                }
+            }
+
+            let overview = try history.samples(since: since, bucket: 1800)
+            #expect(overview.contains { ($0.temperature ?? 0) >= 40 && ($0.temperature ?? 0) <= 80 })
+            #expect(overview.contains { ($0.cpu ?? 0) >= 0.05 && ($0.cpu ?? 0) <= 0.8 })
+
+            let processes = try history.processUsage(since: since, until: now)
+            let xcode = processes.byMemory.first { $0.name == "Xcode" }
+            #expect(xcode?.averageMemoryBytes ?? 0 > 4_000_000_000)
+            #expect(xcode?.averageMemoryBytes ?? 0 < 4_200_000_000)
+            let kernel = processes.byMemory.first { $0.name == "kernel_task" }
+            #expect(kernel?.averageMemoryBytes ?? 0 > 2_100_000_000)
+            #expect(kernel?.averageMemoryBytes ?? 0 < 2_300_000_000)
+        }
+    }
+
+    /// The three-argument `seriesSamples` is the published API; a bucket read must be an
+    /// additive method, not a new parameter on this one. A function reference is the case
+    /// that a default argument cannot rescue.
+    @Test func seriesSamplesKeepsItsThreeArgumentSignature() throws {
+        try withTempDirectory { dir in
+            let url = dir.appending(path: "history.sqlite")
+            let history = try MetricsHistory(url: url)
+            let sensor = HistorySeries.temperature("PMU tdie1")
+            try insertSeries(url: url, [
+                (minute0, sensor, 50, 1),
+                (minute0.addingTimeInterval(60), sensor, 60, 1),
+            ])
+
+            let f: ([String], Date, Date) throws -> [String: [SeriesSample]] = history.seriesSamples
+            let viaReference = try f([sensor], minute0, minute0.addingTimeInterval(120))
+            let direct = try history.seriesSamples(
+                [sensor], since: minute0, until: minute0.addingTimeInterval(120))
+            #expect(viaReference[sensor]?.map(\.value) == [50, 60])
+            #expect(viaReference[sensor] == direct[sensor])
+
+            // `until` still defaults to now when the method is called directly.
+            let now = Date()
+            let recent = now.addingTimeInterval(-120)
+            try insertSeries(url: url, [
+                (recent, sensor, 50, 1),
+                (recent.addingTimeInterval(60), sensor, 60, 1),
+            ])
+            let defaultUntil = try history.seriesSamples([sensor], since: now.addingTimeInterval(-180))
+            #expect(defaultUntil[sensor]?.count == 2)
+        }
+    }
+
     // MARK: Retention and clearing
 
     @Test func retentionPruningCoversSeriesWhileCollectionStaysOff() throws {

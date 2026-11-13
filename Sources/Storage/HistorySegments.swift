@@ -21,4 +21,25 @@ public enum HistorySegments {
         if !current.isEmpty { segments.append(current) }
         return segments
     }
+
+    /// Splits averaged buckets into runs that can be drawn as one line. Two buckets stay in
+    /// one run while the next bucket starts within `maxSampleGap` of the previous bucket's
+    /// last stored minute, so a gap in the original minutes survives the averaging even
+    /// when both adjacent buckets still have data.
+    public static func split(_ buckets: [SeriesBucket], maxSampleGap: TimeInterval = 60) -> [[SeriesBucket]] {
+        var segments: [[SeriesBucket]] = []
+        var current: [SeriesBucket] = []
+        var previous: SeriesBucket?
+        for bucket in buckets {
+            if let previous, bucket.time.timeIntervalSince(previous.lastSampleTime) > maxSampleGap,
+               !current.isEmpty {
+                segments.append(current)
+                current = []
+            }
+            current.append(bucket)
+            previous = bucket
+        }
+        if !current.isEmpty { segments.append(current) }
+        return segments
+    }
 }

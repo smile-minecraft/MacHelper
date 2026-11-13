@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 
 /// How the copy of the background recorder service registered with the system looks
@@ -22,7 +23,8 @@ public enum BackgroundRecordingState: Equatable, Sendable {
     case running
     /// Service enabled, but no fresh heartbeat (crashed, throttled by launchd, or not started yet).
     case stopped
-    /// Background recording is on, but every metric is off, so there is nothing to sample.
+    /// Kept for source compatibility. Background recording now always records the hourly
+    /// capacity history, so an enabled profile is never "nothing to record".
     case nothingToRecord
     /// The last heartbeat reports an error, or the service registration is missing.
     case failed(reason: String)
@@ -34,21 +36,32 @@ public struct MonitorAgentHeartbeat: Codable, Equatable, Sendable {
     public var pid: Int32
     public var lastHeartbeatAt: Date
     public var lastSampleAt: Date?
+    /// Last time a per-volume capacity pass was attempted (refreshed again when it applies).
+    /// Optional so a heartbeat written by an earlier version decodes unchanged.
+    public var lastCapacitySampleAt: Date?
     public var lastError: String?
 
-    public init(pid: Int32, lastHeartbeatAt: Date, lastSampleAt: Date? = nil, lastError: String? = nil) {
+    public init(pid: Int32, lastHeartbeatAt: Date, lastSampleAt: Date? = nil,
+                lastCapacitySampleAt: Date? = nil, lastError: String? = nil) {
         self.pid = pid
         self.lastHeartbeatAt = lastHeartbeatAt
         self.lastSampleAt = lastSampleAt
+        self.lastCapacitySampleAt = lastCapacitySampleAt
         self.lastError = lastError
     }
 }
 
-/// Decides what the UI shows. With every metric and process collection off there is nothing
-/// to record, so the service is reported as `.nothingToRecord` instead of looking broken. `running` requires
-/// both a heartbeat and a sample no older than the thresholds below; a service that
-/// heartbeats but never samples is `.stopped`, not "Recording".
+/// Decides what the UI shows. Background recording always includes the hourly capacity
+/// history, so an enabled profile has something to record even with every menu bar metric and
+/// process collection off. `running` requires a fresh heartbeat plus the freshness signal that
+/// belongs to the enabled work: per-minute samples for modules/processes, or the hourly
+/// capacity pass when only capacity is recorded. A recorded error wins over both, so a
+/// capacity write failure cannot hide behind "nothing to record".
 public enum BackgroundRecordingStatus {
+    /// A capacity pass runs once an hour, so its freshness window is wider than a minute
+    /// sample's. Two hours allows one missed pass without briefly showing "stopped".
+    public static let capacityFreshWithin: TimeInterval = 2 * 3_600
+
     public static func evaluate(serviceStatus: BackgroundServiceStatus,
                                 profileEnabled: Bool,
                                 enabledModuleCount: Int,
@@ -61,14 +74,24 @@ public enum BackgroundRecordingStatus {
         case .notRegistered: return .failed(reason: "service not registered")
         case .notFound: return .failed(reason: "service not found")
         case .enabled:
-            if enabledModuleCount == 0 && !processCollectionEnabled { return .nothingToRecord }
             guard let beat = heartbeat else { return .stopped }
             if let error = beat.lastError, !error.isEmpty { return .failed(reason: error) }
             let freshWithin: TimeInterval = 120
-            let sampleFreshWithin: TimeInterval = 180
             let beatFresh = now.timeIntervalSince(beat.lastHeartbeatAt) <= freshWithin
+            guard beatFresh else { return .stopped }
+
+            if enabledModuleCount == 0 && !processCollectionEnabled {
+                // Capacity-only recording. A nil value means the process just started and the
+                // first hourly pass has not finished yet; the fresh heartbeat covers that gap.
+                let capacityFresh = beat.lastCapacitySampleAt.map {
+                    now.timeIntervalSince($0) <= capacityFreshWithin
+                } ?? true
+                return capacityFresh ? .running : .stopped
+            }
+
+            let sampleFreshWithin: TimeInterval = 180
             let sampled = beat.lastSampleAt.map { now.timeIntervalSince($0) <= sampleFreshWithin } ?? false
-            return beatFresh && sampled ? .running : .stopped
+            return sampled ? .running : .stopped
         }
     }
 }
@@ -92,10 +115,69 @@ public struct MonitorAgentProfile: Codable, Equatable, Sendable {
     public var backgroundRecordingEnabled: Bool
     /// Modules the recorder samples, in the order the app wrote them.
     public var modules: [ModulePlan]
+    /// Identifies one enabled recording session. A capacity sample started under an older
+    /// generation is discarded, even when the user disables and re-enables before the sample
+    /// finishes. Optional so a profile written by an earlier app still decodes.
+    public var capacityGeneration: String?
 
-    public init(backgroundRecordingEnabled: Bool, modules: [ModulePlan]) {
+    public init(backgroundRecordingEnabled: Bool, modules: [ModulePlan],
+                capacityGeneration: String? = nil) {
         self.backgroundRecordingEnabled = backgroundRecordingEnabled
         self.modules = modules
+        self.capacityGeneration = capacityGeneration
+    }
+}
+
+/// Failures from the profile lock. The lock makes a profile change and the capacity write
+/// that reads it one ordered operation across the app and the background recorder.
+public enum MonitorAgentProfileStoreError: Error, LocalizedError, Equatable {
+    /// The sidecar lock file could not be opened or locked.
+    case lockUnavailable(path: String, code: Int32)
+    /// Another process kept the lock longer than the caller allowed.
+    case lockTimeout(path: String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .lockUnavailable(let path, let code):
+            "Couldn’t lock \(path) for the background recording profile (errno \(code))."
+        case .lockTimeout(let path):
+            "Timed out waiting for \(path) to finish a background recording write."
+        }
+    }
+}
+
+/// Advisory lock shared by the app's profile writer and the agent's capacity writer.
+///
+/// A capacity result is written while holding the shared lock, and a profile change is
+/// written while holding the exclusive lock. A disable therefore cannot return while a
+/// capacity write that already read the old profile is still in flight: the writer holds the
+/// shared lock through the SQLite commit, and the profile save waits for it. A profile save
+/// that starts first makes the next capacity write read the new generation and discard its
+/// result. The lock is released by the system if a process crashes.
+enum MonitorAgentProfileLock {
+    static func withLock<T>(at profileURL: URL, exclusive: Bool,
+                            timeout: TimeInterval, _ body: () throws -> T) throws -> T {
+        let path = profileURL.path + ".lock"
+        let descriptor = open(path, O_CREAT | O_RDWR | O_CLOEXEC, 0o600)
+        guard descriptor >= 0 else {
+            throw MonitorAgentProfileStoreError.lockUnavailable(path: path, code: errno)
+        }
+        defer { close(descriptor) }
+        let operation = (exclusive ? LOCK_EX : LOCK_SH) | LOCK_NB
+        let deadline = Date().addingTimeInterval(timeout)
+        while flock(descriptor, operation) != 0 {
+            if errno == EINTR { continue }
+            if errno == EWOULDBLOCK || errno == EAGAIN {
+                if Date() >= deadline {
+                    throw MonitorAgentProfileStoreError.lockTimeout(path: path)
+                }
+                Thread.sleep(forTimeInterval: 0.01)
+                continue
+            }
+            throw MonitorAgentProfileStoreError.lockUnavailable(path: path, code: errno)
+        }
+        defer { _ = flock(descriptor, LOCK_UN) }
+        return try body()
     }
 }
 
@@ -113,8 +195,43 @@ public enum MonitorAgentProfileStore {
     }
 
     public static func save(_ profile: MonitorAgentProfile, to url: URL) throws {
+        try save(profile, to: url, timeout: 2)
+    }
+
+    /// `save` with an explicit lock timeout. The public call uses two seconds so a profile
+    /// change cannot hang the app indefinitely when a capacity write is stuck in SQLite. On
+    /// timeout nothing is written: the old profile stays in place and the caller reports the
+    /// failure, so a disable is never mistaken for a completed one. Tests use a short timeout
+    /// to prove the failure is bounded.
+    static func save(_ profile: MonitorAgentProfile, to url: URL,
+                     timeout: TimeInterval) throws {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try JSONEncoder().encode(profile).write(to: url, options: .atomic)
+        try withExclusiveLock(at: url, timeout: timeout) {
+            try JSONEncoder().encode(profile).write(to: url, options: .atomic)
+        }
+    }
+
+    /// Runs `body` while holding the shared sidecar lock. The agent wraps the capacity
+    /// write in this lock so a profile save cannot slip between its profile read and its
+    /// SQLite commit.
+    static func withSharedLock<T>(at url: URL, timeout: TimeInterval = 2,
+                                  _ body: () throws -> T) throws -> T {
+        try MonitorAgentProfileLock.withLock(at: url, exclusive: false, timeout: timeout, body)
+    }
+
+    /// Runs `body` while holding the exclusive sidecar lock. Used by the profile writer and
+    /// by tests that need to observe whether a capacity write is in flight.
+    static func withExclusiveLock<T>(at url: URL, timeout: TimeInterval = 2,
+                                     _ body: () throws -> T) throws -> T {
+        try MonitorAgentProfileLock.withLock(at: url, exclusive: true, timeout: timeout, body)
+    }
+
+    /// The generation a capacity pass must belong to, or nil when background recording is
+    /// off or the profile cannot be read. A profile from an earlier app has no generation;
+    /// its enabled state is still honoured under the stable "legacy" token.
+    static func capacitySession(from url: URL) -> String? {
+        guard let profile = load(from: url), profile.backgroundRecordingEnabled else { return nil }
+        return profile.capacityGeneration ?? "legacy"
     }
 }
 
@@ -144,6 +261,18 @@ public struct SeriesCollection {
     }
 }
 
+/// Per-volume capacity sampling supplied by the process that owns the disk sampler. The
+/// recorder stores one point per volume per hour and is independent of the module plan, so
+/// turning every menu bar module off does not stop capacity history while background
+/// recording is enabled.
+public struct VolumeCapacityCollection: Sendable {
+    public let sample: @Sendable () -> [VolumeCapacityReading]
+
+    public init(sample: @escaping @Sendable () -> [VolumeCapacityReading]) {
+        self.sample = sample
+    }
+}
+
 /// Samples the enabled modules and, when their shared switch is on, process usage and
 /// individual series into per-minute history and keeps the heartbeat fresh. The samplers
 /// are supplied by the process that owns them, so the loop can be exercised with a
@@ -165,6 +294,7 @@ public struct MonitorAgentRecorder {
     private let sampler: Sampler
     private let processCollection: ProcessCollection?
     private let seriesCollection: SeriesCollection?
+    private var volumeCapacityRecorder: VolumeCapacityRecorder?
 
     private var accumulator = MinuteAccumulator()
     private var processAccumulator = ProcessMinuteAccumulator()
@@ -182,7 +312,7 @@ public struct MonitorAgentRecorder {
     private var writeErrors: [WriteKind: String] = [:]
 
     private enum WriteKind: Int, Comparable {
-        case metrics, series, process
+        case metrics, series, process, capacity
         static func < (a: Self, b: Self) -> Bool { a.rawValue < b.rawValue }
     }
 
@@ -191,13 +321,37 @@ public struct MonitorAgentRecorder {
                 history: MetricsHistory,
                 sampler: @escaping Sampler,
                 processCollection: ProcessCollection? = nil,
-                seriesCollection: SeriesCollection? = nil) {
+                seriesCollection: SeriesCollection? = nil,
+                volumeCapacity: VolumeCapacityCollection? = nil) {
         self.profileURL = profileURL
         self.heartbeatURL = heartbeatURL
         self.history = history
         self.sampler = sampler
         self.processCollection = processCollection
         self.seriesCollection = seriesCollection
+        if let volumeCapacity {
+            let capacityHistory = VolumeCapacityHistory(history: history)
+            volumeCapacityRecorder = VolumeCapacityRecorder(
+                history: capacityHistory,
+                sampler: volumeCapacity.sample,
+                // The profile file is the authority, not the five-second cache above: a
+                // result that finishes after the user disables background recording must be
+                // discarded even when the next profile reload has not happened yet.
+                session: { MonitorAgentProfileStore.capacitySession(from: profileURL) },
+                apply: { readings, sampledAt, now, session in
+                    // Hold the shared lock across the profile read and the SQLite commit.
+                    // A profile save (enable, disable, or a new generation) takes the
+                    // exclusive lock, so it cannot slip between the check and the write.
+                    try MonitorAgentProfileStore.withSharedLock(at: profileURL) {
+                        guard let current = MonitorAgentProfileStore.capacitySession(from: profileURL),
+                              current == session else {
+                            return .discarded
+                        }
+                        let inserted = try capacityHistory.record(readings, at: sampledAt, now: now)
+                        return .applied(inserted: inserted, readingCount: readings.count)
+                    }
+                })
+        }
         heartbeat = MonitorAgentHeartbeat(pid: ProcessInfo.processInfo.processIdentifier,
                                           lastHeartbeatAt: Date())
     }
@@ -219,6 +373,9 @@ public struct MonitorAgentRecorder {
                     accumulator = MinuteAccumulator()
                     processAccumulator = ProcessMinuteAccumulator()
                     seriesAccumulator = SeriesMinuteAccumulator()
+                    // Drop any capacity sample that started while recording was enabled; its
+                    // result must not be written after the user turned background recording off.
+                    volumeCapacityRecorder?.cancel()
                 }
             } else {
                 profileEnabled = false
@@ -227,6 +384,7 @@ public struct MonitorAgentRecorder {
                 accumulator = MinuteAccumulator()
                 processAccumulator = ProcessMinuteAccumulator()
                 seriesAccumulator = SeriesMinuteAccumulator()
+                volumeCapacityRecorder?.cancel()
                 profileError = "monitor profile not found or unreadable"
             }
         }
@@ -291,6 +449,28 @@ public struct MonitorAgentRecorder {
             } else {
                 // Turning collection off ends the open minute without inventing or padding it.
                 processAccumulator = ProcessMinuteAccumulator()
+            }
+        }
+
+        // Per-volume capacity history follows the background recording profile, not the
+        // module plan: an enabled profile keeps recording it even when every menu bar module
+        // is off. The blocking disk sampler runs on its own worker; this tick only starts a
+        // pass and polls for a result, so a stuck Disk Arbitration call cannot stop the loop.
+        if profileEnabled, volumeCapacityRecorder != nil {
+            do {
+                if let outcome = try volumeCapacityRecorder?.tick(now: now) {
+                    // Record the attempt as soon as it starts, so a stuck sampler still has a
+                    // fresh-looking status only for the bounded capacity window.
+                    if outcome.didStart || outcome.didSample {
+                        heartbeat.lastCapacitySampleAt = now
+                    }
+                    if outcome.hourCompleted {
+                        writeErrors[.capacity] = nil
+                    }
+                }
+            } catch let writeError {
+                writeErrors[.capacity] = "volume capacity history write failed: \(writeError.localizedDescription)"
+                writeHeartbeat(now: now, profileError: profileError)
             }
         }
 

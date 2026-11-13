@@ -216,6 +216,7 @@ final class MonitorStore {
     @ObservationIgnored private var processTask: Task<Void, Never>?
     @ObservationIgnored private var processHistoryTask: Task<Void, Never>?
     @ObservationIgnored private var seriesSwitchTask: Task<Void, Never>?
+    @ObservationIgnored private var volumeCapacityTask: Task<Void, Never>?
     @ObservationIgnored private var seriesMinute = SeriesMinuteAccumulator()
     @ObservationIgnored private var seriesCollectionEnabled = false
 
@@ -234,6 +235,7 @@ final class MonitorStore {
         observeSettings()
         startProcessHistoryCollection()
         startSeriesCollection()
+        startVolumeCapacityCollection()
     }
 
     /// Hottest CPU-die sensor, the number shown for "temperature".
@@ -360,6 +362,35 @@ final class MonitorStore {
         guard enabled != seriesCollectionEnabled else { return }
         seriesCollectionEnabled = enabled
         if !enabled { seriesMinute = SeriesMinuteAccumulator() }
+    }
+
+    /// Per-volume capacity history is recorded whether or not any menu bar module is on: the
+    /// recorder is not part of the module plan. Sampling reads mounted-volume metadata and
+    /// asks Disk Arbitration, so it runs off the main actor and at most once an hour; the
+    /// recorder itself skips every tick in an hour that already has its point. A volume
+    /// without both stable identifiers or without a capacity reading is skipped, never
+    /// stored as zero and never merged into another volume's row.
+    private func startVolumeCapacityCollection() {
+        guard let db = persistentHistory else { return }
+        volumeCapacityTask = Task.detached(priority: .utility) {
+            var recorder = VolumeCapacityRecorder(
+                history: VolumeCapacityHistory(history: db),
+                sampler: {
+                    DiskVolumeSampler().sample().compactMap {
+                        VolumeCapacityReading(volumeID: $0.persistentID?.rawValue,
+                                              totalBytes: $0.totalBytes,
+                                              availableBytes: $0.availableBytes)
+                    }
+                })
+            while !Task.isCancelled {
+                do {
+                    try recorder.tick()
+                } catch {
+                    NSLog("MacHelper volume capacity history write failed: %@", error.localizedDescription)
+                }
+                try? await Task.sleep(for: .seconds(VolumeCapacityRecorder.retryInterval))
+            }
+        }
     }
 
     private nonisolated static func processReadings(_ snapshot: ProcessSnapshot) -> ProcessUsageReadings {

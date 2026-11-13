@@ -34,6 +34,9 @@ final class BackgroundRecordingModel {
     /// only that failure and never an approval or registration message.
     @ObservationIgnored private var saveErrorMessage: String?
     @ObservationIgnored private var historyStore: HistoryStore?
+    /// Names the enabled recording session written into the profile. A new value on every
+    /// enable or disable makes a capacity sample from before the change obsolete.
+    @ObservationIgnored private var capacityGeneration: String
 
     init(settings: MonitorSettingsStore,
          availableModules: Set<MonitorModule>,
@@ -50,6 +53,7 @@ final class BackgroundRecordingModel {
         // re-publish a fresh snapshot because sampling settings may have changed while away.
         let profile = MonitorAgentProfileStore.load(from: profileURL)
         enabledIntent = profile?.backgroundRecordingEnabled ?? false
+        capacityGeneration = profile?.capacityGeneration ?? UUID().uuidString
         if enabledIntent { writeProfileSnapshot() }
         if profile?.backgroundRecordingEnabled == false,
            agent.status == .enabled || agent.status == .requiresApproval {
@@ -95,10 +99,16 @@ final class BackgroundRecordingModel {
     /// User-initiated enable. Registers the agent (or reports that Login Items approval is needed).
     func enable() {
         enabledIntent = true
+        capacityGeneration = UUID().uuidString
         // The agent reads the profile, so registering it without a readable snapshot would
         // start a recorder with the wrong settings (or none). Surface the failure and stay off.
         guard writeProfileSnapshot() else {
             enabledIntent = false
+            // The failed write left the old profile on disk; keep its generation so a later
+            // settings sync does not invalidate an in-flight sample for no reason.
+            if let profile = MonitorAgentProfileStore.load(from: profileURL) {
+                capacityGeneration = profile.capacityGeneration ?? capacityGeneration
+            }
             refresh()
             return
         }
@@ -110,7 +120,13 @@ final class BackgroundRecordingModel {
                 message = Self.approvalMessage
             } else {
                 enabledIntent = false
-                writeProfileSnapshot()
+                if !writeProfileSnapshot() {
+                    // The first write already enabled the profile. If the compensating
+                    // write fails (for example the agent held the profile lock past the
+                    // timeout), keep the UI on instead of claiming the recorder is off
+                    // while the agent still reads an enabled profile.
+                    enabledIntent = true
+                }
                 message = String(localized: "Couldn’t set up background recording: \(error.localizedDescription)")
             }
         }
@@ -120,18 +136,31 @@ final class BackgroundRecordingModel {
     /// User-initiated disable. Unregisters the agent; the app keeps recording while it runs.
     func disable() {
         enabledIntent = false
-        // Stopping the service is the point of this action, so unregister even if the profile
-        // could not be rewritten; the save failure stays visible in `message`.
-        let profileSaved = writeProfileSnapshot()
+        capacityGeneration = UUID().uuidString
+        // The profile write waits for a capacity write that already read the old profile, so
+        // the disable is not reported complete while an old sample can still land. If the
+        // write fails, the profile still says enabled: keep the previous state instead of
+        // stopping the service while the recorder is still allowed to write.
+        guard writeProfileSnapshot() else {
+            enabledIntent = true
+            // The failed write left the enabled profile on disk; keep its generation so the
+            // agent's in-flight sample is still recognized as the current session.
+            if let profile = MonitorAgentProfileStore.load(from: profileURL) {
+                capacityGeneration = profile.capacityGeneration ?? capacityGeneration
+            }
+            refresh()
+            return
+        }
         Task {
             do {
                 if agent.status == .enabled || agent.status == .requiresApproval {
                     try await agent.unregister()
                 }
-                if profileSaved { message = nil }
+                message = nil
             } catch {
-                enabledIntent = true
-                writeProfileSnapshot()
+                // The profile is already disabled, so the recorder stops writing even though
+                // the service registration could not be removed. Keep the user's intent and
+                // surface the cleanup failure; the next launch retries the unregister.
                 message = String(localized: "Couldn’t stop background recording: \(error.localizedDescription)")
             }
             refresh()
@@ -225,7 +254,8 @@ final class BackgroundRecordingModel {
     @discardableResult
     private func writeProfileSnapshot() -> Bool {
         let profile = MonitorAgentProfile(backgroundRecordingEnabled: enabledIntent,
-                                          modules: enabledModulePlans())
+                                          modules: enabledModulePlans(),
+                                          capacityGeneration: capacityGeneration)
         do {
             try MonitorAgentProfileStore.save(profile, to: profileURL)
             if message == saveErrorMessage { message = nil }

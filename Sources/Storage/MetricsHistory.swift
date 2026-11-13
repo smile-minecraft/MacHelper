@@ -1,5 +1,45 @@
+import Darwin
 import Foundation
 import GRDB
+
+/// Errors from opening the shared history database.
+public enum HistoryDatabaseError: Error, LocalizedError, Equatable {
+    /// The cross-process migration lock file could not be opened or locked.
+    case migrationLockUnavailable(path: String, code: Int32)
+
+    public var errorDescription: String? {
+        switch self {
+        case .migrationLockUnavailable(let path, let code):
+            "Couldn’t lock \(path) for the history migration (errno \(code))."
+        }
+    }
+}
+
+/// Serializes schema migration between the app and the background recorder.
+///
+/// GRDB's `DatabaseMigrator` checks which migrations are applied and then records them
+/// without one cross-process transaction, so two processes that open a brand-new database
+/// at the same time can both try to create the same table. A `busyMode` timeout does not
+/// help: the migrators are not waiting on each other's SQLite lock, they are racing between
+/// the check and the write. An advisory `flock` on a sidecar file makes the whole migrate
+/// step run in one process at a time; the next process then finds the schema already
+/// migrated. The lock is released by the system if a process crashes while holding it.
+enum HistoryMigrationLock {
+    static func withLock<T>(at url: URL, _ body: () throws -> T) throws -> T {
+        let path = url.path + ".migration.lock"
+        let descriptor = open(path, O_CREAT | O_RDWR | O_CLOEXEC, 0o600)
+        guard descriptor >= 0 else {
+            throw HistoryDatabaseError.migrationLockUnavailable(path: path, code: errno)
+        }
+        defer { close(descriptor) }
+        while flock(descriptor, LOCK_EX) != 0 {
+            if errno == EINTR { continue }
+            throw HistoryDatabaseError.migrationLockUnavailable(path: path, code: errno)
+        }
+        defer { _ = flock(descriptor, LOCK_UN) }
+        return try body()
+    }
+}
 
 /// One minute of averaged readings. Nil where the metric isn't available or wasn't sampled.
 public struct MetricSample: Codable, Sendable, Hashable, FetchableRecord, PersistableRecord {
@@ -64,10 +104,14 @@ public final class MetricsHistory: Sendable {
         if !readOnly {
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         }
-        let pool = try DatabasePool(path: url.path, configuration: config)
+        let pool: DatabasePool
+        if readOnly {
+            pool = try DatabasePool(path: url.path, configuration: config)
+        } else {
+            pool = try Self.openMigratedPool(at: url, configuration: config)
+        }
         db = pool
         if !readOnly {
-            try Self.migrator.migrate(pool)
             try pool.write { db in
                 try db.execute(sql: "INSERT OR IGNORE INTO history_setting (key, value) VALUES ('retentionSeconds', ?)",
                                arguments: [String(Int(retention))])
@@ -84,6 +128,21 @@ public final class MetricsHistory: Sendable {
         try queue.write { db in
             try db.execute(sql: "INSERT OR IGNORE INTO history_setting (key, value) VALUES ('retentionSeconds', ?)",
                            arguments: [String(Int(retention))])
+        }
+    }
+
+    /// Opens a writable pool and runs the published migrations while holding the
+    /// cross-process lock. Both the app and the background recorder call this when they
+    /// open the database, so the first launch after an update cannot race the other process.
+    ///
+    /// The lock covers the pool's own `journal_mode = WAL` step too: two processes switching
+    /// a brand-new file to WAL at the same moment can fail with `database is locked` before
+    /// the migrator is reached, and SQLite's busy timeout does not wait for that step.
+    static func openMigratedPool(at url: URL, configuration: Configuration) throws -> DatabasePool {
+        try HistoryMigrationLock.withLock(at: url) {
+            let pool = try DatabasePool(path: url.path, configuration: configuration)
+            try migrator.migrate(pool)
+            return pool
         }
     }
 
@@ -150,6 +209,11 @@ public final class MetricsHistory: Sendable {
                 t.column("free", .double).notNull()
                 t.column("total", .double).notNull()
             }
+        }
+        m.registerMigration("v7") { db in
+            // Per-volume hourly capacity. The v6 disk_space rows stay untouched: they carry
+            // no volume identity, so they are never reassigned to one of the new volumes.
+            try VolumeCapacityHistory.createTable(db)
         }
         return m
     }
@@ -386,6 +450,59 @@ public final class MetricsHistory: Sendable {
                 ORDER BY series, time
                 """, arguments: arguments) {
                 result[row["series"], default: []].append(SeriesSample(time: row["time"], value: row["value"]))
+            }
+            return result
+        }
+    }
+
+    /// `seriesSamples` for several series, averaged into `bucket`-second buckets and keyed
+    /// by series. The rows are grouped by bucket *and* by a run of consecutive stored
+    /// minutes, so a gap in the underlying minutes is never averaged away: a gap inside one
+    /// bucket becomes two buckets, and `lastSampleTime` records where each bucket's data
+    /// really ends. A bucket with no stored minute is absent, never zero.
+    public func seriesBuckets(_ series: [String], since: Date, until: Date = Date(),
+                              bucket: TimeInterval = 60) throws -> [String: [SeriesBucket]] {
+        guard !series.isEmpty else { return [:] }
+        let seconds = max(Int(bucket), 60)
+        return try db.read { db in
+            let placeholders = Array(repeating: "?", count: series.count).joined(separator: ", ")
+            var arguments = StatementArguments(series)
+            arguments += [since, until, seconds]
+            var result: [String: [SeriesBucket]] = [:]
+            // Minutes are stored one per minute. A jump larger than 60 s is a recording
+            // gap, not a bucket boundary, so it starts a new run before the bucket average.
+            for row in try Row.fetchAll(db, sql: """
+                WITH ordered AS (
+                    SELECT series, time, value_sum, value_count,
+                           LAG(time) OVER (PARTITION BY series ORDER BY time) AS previous_time
+                    FROM series_sample
+                    WHERE series IN (\(placeholders)) AND time >= ? AND time < ?
+                ),
+                marked AS (
+                    SELECT series, time, value_sum, value_count,
+                           CASE WHEN previous_time IS NULL
+                                     OR CAST(strftime('%s', time) AS INTEGER)
+                                        - CAST(strftime('%s', previous_time) AS INTEGER) > 60
+                                THEN 1 ELSE 0 END AS new_run
+                    FROM ordered
+                ),
+                runs AS (
+                    SELECT series, time, value_sum, value_count,
+                           SUM(new_run) OVER (PARTITION BY series ORDER BY time) AS run_id
+                    FROM marked
+                )
+                SELECT series,
+                       MIN(time) AS time,
+                       SUM(value_sum) / SUM(value_count) AS value,
+                       MAX(time) AS lastSampleTime,
+                       COUNT(*) AS storedMinuteCount
+                FROM runs
+                GROUP BY series, CAST(strftime('%s', time) AS INTEGER) / ?, run_id
+                ORDER BY series, time
+                """, arguments: arguments) {
+                result[row["series"], default: []].append(SeriesBucket(
+                    time: row["time"], value: row["value"],
+                    lastSampleTime: row["lastSampleTime"], storedMinuteCount: row["storedMinuteCount"]))
             }
             return result
         }

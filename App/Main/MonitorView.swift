@@ -61,10 +61,15 @@ struct MonitorView: View {
     }
 
     @ViewBuilder private var content: some View {
+        let _ = MonitorProbe.logContent("range=\(range.rawValue) chart=\(chartRange.rawValue) samples=\(samples.count)")
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    ChipBar(items: Range.allCases.map { ($0, $0.title) }, selection: $range)
+                    ChipBar(items: Range.allCases.map { ($0, $0.title) },
+                            selection: Binding(get: { range }, set: { newValue in
+                                MonitorProbe.log("range-set", newValue.rawValue)
+                                range = newValue
+                            }))
                     Toggle("Fill under line", isOn: $fill)
                         .toggleStyle(.checkbox)
                         .font(.mhCaption)
@@ -101,13 +106,23 @@ struct MonitorView: View {
         }
         .task(id: range) {
             let r = range
-            guard r != .live, let db = store.persistentHistory else { shownRange = r; return }
+            let started = CFAbsoluteTimeGetCurrent()
+            MonitorProbe.log("history-load-start", r.rawValue)
+            guard r != .live, let db = store.persistentHistory else {
+                shownRange = r
+                MonitorProbe.log("history-load-done", "\(r.rawValue) 0 points \(Int((CFAbsoluteTimeGetCurrent() - started) * 1000)) ms")
+                return
+            }
             let loaded = (try? await Task.detached { try db.samples(since: Date().addingTimeInterval(-r.seconds), bucket: r.bucket) }.value) ?? []
             guard !Task.isCancelled else { return }
             samples = loaded
             shownRange = r
+            MonitorProbe.log("history-load-done", "\(r.rawValue) \(loaded.count) points \(Int((CFAbsoluteTimeGetCurrent() - started) * 1000)) ms")
         }
-        .onAppear { store.watchProcesses(true) }
+        .onAppear {
+            MonitorProbe.start()
+            store.watchProcesses(true)
+        }
         .onDisappear { store.watchProcesses(false) }
     }
 
@@ -128,8 +143,10 @@ struct MonitorView: View {
         }
     }
 
-    /// What the charts draw: the selected range once loaded, the previous one until then.
-    private var chartRange: Range { shownRange ?? range }
+    /// What the charts draw: the selected range once its data is on screen. Live data is
+    /// already in memory, so it is drawn at once; a history range keeps the previous
+    /// range's charts until its query finishes.
+    private var chartRange: Range { range == .live ? .live : (shownRange ?? range) }
 
     private func points(_ live: SeriesKey, _ stored: KeyPath<MetricSample, Double?>) -> [ChartPoint] {
         if chartRange == .live {
@@ -257,5 +274,64 @@ private struct ThresholdYScale: ViewModifier {
         } else {
             content.chartYScale(domain: .automatic(includesZero: true))
         }
+    }
+}
+
+/// Debug aid for `--monitor-probe` (or `monitor.probe` in the defaults): logs the range
+/// switch timeline and any main-thread stretch over 100 ms, so the native switch can be
+/// measured without Instruments. Inert otherwise.
+@MainActor
+enum MonitorProbe {
+    /// The launch argument is for a hand-run probe; the defaults key lets the native UI
+    /// smoke enable the same log in an isolated temporary home without extra argv.
+    static let active = CommandLine.arguments.contains("--monitor-probe")
+        || UserDefaults.standard.bool(forKey: "monitor.probe")
+    /// Test-only: the UI smoke can widen the window in which a replaced query is still
+    /// running, so the cancellation path is reproducible instead of a race. Zero unless
+    /// the probe is on.
+    static var queryDelayMilliseconds: Int {
+        guard active else { return 0 }
+        return UserDefaults.standard.integer(forKey: "monitor.seriesQueryDelayMs")
+    }
+    private static var started = false
+    private static var lastContentKey: String?
+    nonisolated(unsafe) private static var busyStart: CFAbsoluteTime?
+
+    static func log(_ event: String, _ detail: @autoclosure () -> String = "") {
+        guard active else { return }
+        NSLog("MHPROBE %.3f %@ %@", CFAbsoluteTimeGetCurrent(), event, detail())
+    }
+
+    /// The live page re-evaluates on every sample; log only when the drawn range or its
+    /// sample count changes, so the probe log stays a switch timeline. The key is built
+    /// lazily, so an inactive probe adds no string work to a sample.
+    static func logContent(_ key: @autoclosure () -> String) {
+        guard active else { return }
+        let key = key()
+        guard key != lastContentKey else { return }
+        lastContentKey = key
+        log("content", key)
+    }
+
+    static func start() {
+        guard active, !started else { return }
+        started = true
+        let observer = CFRunLoopObserverCreateWithHandler(
+            kCFAllocatorDefault,
+            CFRunLoopActivity.afterWaiting.rawValue | CFRunLoopActivity.beforeWaiting.rawValue,
+            true, 0
+        ) { _, activity in
+            MainActor.assumeIsolated {
+                if activity == .afterWaiting {
+                    busyStart = CFAbsoluteTimeGetCurrent()
+                } else if activity == .beforeWaiting, let start = busyStart {
+                    busyStart = nil
+                    let ms = (CFAbsoluteTimeGetCurrent() - start) * 1000
+                    if ms >= 100 { log("main-busy", String(format: "%.1f ms", ms)) }
+                }
+            }
+        }
+        CFRunLoopAddObserver(CFRunLoopGetMain(), observer, .commonModes)
+        log("probe-start")
     }
 }

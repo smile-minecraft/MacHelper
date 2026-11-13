@@ -1,5 +1,6 @@
 import ArgumentParser
 import Foundation
+import Metrics
 import Storage
 
 struct MonitorCommand: ParsableCommand {
@@ -56,6 +57,7 @@ struct MonitorCommand: ParsableCommand {
             // The collection switch lives in the shared database; read it once per process
             // sample so a toggle in the app reaches a running agent without a restart.
             let store = try? HistoryStore(readOnly: true)
+            let volumeSampler = DiskVolumeSampler()
             var recorder = MonitorAgentRecorder(
                 history: history,
                 sampler: hardware.sample,
@@ -68,7 +70,14 @@ struct MonitorCommand: ParsableCommand {
                     SeriesCollection(
                         sample: hardware.sampleSeries,
                         isEnabled: { (try? store.isSeriesCollectionEnabled()) ?? false })
-                })
+                },
+                volumeCapacity: VolumeCapacityCollection(sample: {
+                    volumeSampler.sample().compactMap {
+                        VolumeCapacityReading(volumeID: $0.persistentID?.rawValue,
+                                              totalBytes: $0.totalBytes,
+                                              availableBytes: $0.availableBytes)
+                    }
+                }))
             recorder.run()
             return
         }

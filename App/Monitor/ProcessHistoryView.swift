@@ -68,7 +68,8 @@ struct ProcessHistoryView: View {
                 let now = Date()
                 let since = now.addingTimeInterval(-range.seconds)
                 refreshing = true
-                defer { refreshing = false }
+                // A cancelled task must not clear the spinner of the task that replaced it.
+                defer { if !Task.isCancelled { refreshing = false } }
                 do {
                     let loaded = try await Task.detached { try history.processUsage(since: since, until: now) }.value
                     guard !Task.isCancelled else { return }
@@ -78,6 +79,7 @@ struct ProcessHistoryView: View {
                     PageLoadProbe.mark(.monitor, "processes")
                     PageLoadProbe.mark(.monitor, "processes-refresh")
                 } catch {
+                    guard !Task.isCancelled else { return }
                     errorMessage = String(localized: "Couldn’t read process history: \(error.localizedDescription)")
                 }
                 // A minute is only written when it closes; refresh the live window while it

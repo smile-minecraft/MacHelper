@@ -4,7 +4,8 @@ import GRDB
 /// A kind of history that can be managed or cleared as a whole. Later kinds add their
 /// tables to the same clear operation without changing how the interface is used.
 public enum HistoryKind: String, CaseIterable, Sendable {
-    /// The per-minute samples behind the history charts.
+    /// The per-minute samples behind the history charts, together with the hourly disk-space
+    /// and per-volume capacity points that share the same clear action.
     case minuteSamples
     /// The per-minute process rankings, kept only for names that made a top ten.
     case processSamples
@@ -79,10 +80,14 @@ public struct HistoryStore: Sendable {
         if !readOnly {
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         }
-        let pool = try DatabasePool(path: url.path, configuration: config)
+        let pool: DatabasePool
+        if readOnly {
+            pool = try DatabasePool(path: url.path, configuration: config)
+        } else {
+            pool = try MetricsHistory.openMigratedPool(at: url, configuration: config)
+        }
         self.pool = pool
         if !readOnly {
-            try MetricsHistory.migrator.migrate(pool)
             try pool.write { db in
                 try db.execute(sql: "INSERT OR IGNORE INTO history_setting (key, value) VALUES ('retentionSeconds', ?)",
                                arguments: [String(Int(HistoryRetention.default.seconds))])
@@ -178,6 +183,7 @@ public struct HistoryStore: Sendable {
                 try db.execute(sql: "DELETE FROM sample")
                 try db.execute(sql: "DELETE FROM sample_accumulator")
                 try db.execute(sql: "DELETE FROM disk_space")
+                try db.execute(sql: "DELETE FROM volume_capacity")
             case .processSamples:
                 try db.execute(sql: "DELETE FROM process_sample")
                 try db.execute(sql: "DELETE FROM process_sample_minute")

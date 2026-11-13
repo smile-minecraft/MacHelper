@@ -1,0 +1,8 @@
+{
+  "name": "swift-toolchain-verification",
+  "private": true,
+  "description": "用 bun 當啟動器，讓受限驗證伺服器能以完整 Xcode 工具鏈跑獨立的 Swift 測試。",
+  "scripts": {
+    "test": "bash run.sh"
+  }
+}
