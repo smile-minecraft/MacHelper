@@ -5,11 +5,31 @@ import SMCKit
 // Read-only hardware probe. Validates the SMC / IOHID / IOReport stack on the current machine.
 // Usage: mhprobe            summary
 //        mhprobe keys [P]   dump all SMC keys (optionally only those starting with P)
+//        mhprobe net        Wi-Fi link and per-app traffic (two nettop snapshots, ~10 s)
 
 let args = CommandLine.arguments.dropFirst()
 
 func pct(_ v: Double?) -> String { v.map { String(format: "%5.1f%%", $0 * 100) } ?? "  n/a" }
 func gb(_ b: UInt64) -> String { String(format: "%.2f GB", Double(b) / 1_073_741_824) }
+
+if args.first == "net" {
+    if let w = WiFiSampler.sample() {
+        print("Wi-Fi:     \(w.interfaceName) on=\(w.isPoweredOn) ssid=\(w.ssid ?? "(hidden)") rssi=\(w.rssi.map(String.init) ?? "-") " +
+              "noise=\(w.noise.map(String.init) ?? "-") rate=\(w.transmitRateMbps.map { "\($0)" } ?? "-") \(w.standard?.title ?? "")")
+    } else {
+        print("Wi-Fi:     none")
+    }
+    let sampler = ProcessNetworkSampler()
+    _ = sampler.sample()
+    if let s = sampler.sample() {
+        print("Traffic (rates=\(s.hasRates)):")
+        for i in s.items.prefix(12) {
+            print(String(format: "  %-28@ ↓ %8.1f KB/s  ↑ %8.1f KB/s  procs %d", i.name,
+                         (i.inBytesPerSecond ?? 0) / 1024, (i.outBytesPerSecond ?? 0) / 1024, i.processCount))
+        }
+    }
+    exit(0)
+}
 
 let smc: SMC
 do { smc = try SMC() } catch {

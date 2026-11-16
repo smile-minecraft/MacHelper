@@ -80,6 +80,8 @@ enum ModuleSample: Sendable {
 
 enum SeriesKey: String, CaseIterable, Sendable {
     case cpu, cpuP, cpuE, gpu, memory, diskRead, diskWrite, netIn, netOut, battery, temperature, fan, power
+    /// Live-only parts of the power reading, for the power page's chart.
+    case cpuPower, gpuPower
 
     /// Column in the persistent minute history, if the series is kept there.
     var historyColumn: String? {
@@ -95,7 +97,7 @@ enum SeriesKey: String, CaseIterable, Sendable {
         case .temperature: "temperature"
         case .fan: "fan"
         case .power: "power"
-        case .cpuP, .cpuE: nil
+        case .cpuP, .cpuE, .cpuPower, .gpuPower: nil
         }
     }
 }
@@ -478,6 +480,8 @@ final class MonitorStore {
         case .power(let r):
             power = r
             recordHistory(MonitorHistorySample.power(r), now)
+            if let w = r.cpuWatts { record(.cpuPower, w, now) }
+            if let w = r.gpuWatts { record(.gpuPower, w, now) }
         }
         scheduleMenuBarCacheRefresh()
     }

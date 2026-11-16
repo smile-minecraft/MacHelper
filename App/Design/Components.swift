@@ -6,6 +6,8 @@ struct TabStrip<Value: Hashable>: View {
     let items: [(Value, LocalizedStringKey)]
     var icons: [Value: String] = [:]
     @Binding var selection: Value
+    /// Icon above a smaller label, so more tabs fit in a narrow strip.
+    var stacked = false
     @Namespace private var ns
 
     var body: some View {
@@ -13,14 +15,16 @@ struct TabStrip<Value: Hashable>: View {
             ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                 let selected = item.0 == selection
                 Button { selection = item.0 } label: {
-                    HStack(spacing: 5) {
-                        if let icon = icons[item.0] { PixelIcon(name: icon, size: 14) }
+                    let layout = stacked ? AnyLayout(VStackLayout(spacing: 3)) : AnyLayout(HStackLayout(spacing: 5))
+                    layout {
+                        if let icon = icons[item.0] { PixelIcon(name: icon, size: stacked ? 16 : 14) }
                         Text(item.1)
-                            .font(.mh(size: 13, weight: selected ? .semibold : .medium))
+                            .font(.mh(size: stacked ? 11 : 13, weight: selected ? .semibold : .medium))
                             .foregroundStyle(selected ? Palette.text : Palette.textMuted)
+                            .lineLimit(1).minimumScaleFactor(0.8)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, stacked ? 6 : 8)
                     .background {
                         if selected {
                             SurfaceShape(cornerRadius: 7, style: .continuous).fill(Palette.raised)

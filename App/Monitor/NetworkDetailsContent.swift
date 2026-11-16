@@ -403,7 +403,6 @@ struct NetworkDetailsContent: View {
                 primaries(display)
             }
             interfaces(display)
-            notes(display)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .contain)
@@ -442,22 +441,6 @@ struct NetworkDetailsContent: View {
                 ForEach(interfaces) { interfaceCard($0) }
             }
         }
-    }
-
-    private func notes(_ display: NetworkDetailsDisplay) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(NetworkDetailsText.primaryFootnote.localized())
-                .font(.mh(size: labelSize))
-                .foregroundStyle(Palette.textFaint)
-                .fixedSize(horizontal: false, vertical: true)
-            if display.hasTunnel {
-                Text(NetworkDetailsText.tunnelFootnote.localized())
-                    .font(.mh(size: labelSize))
-                    .foregroundStyle(Palette.textFaint)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(.top, 2)
     }
 
     private func interfaceCard(_ interface: NetworkDetailsDisplay.Interface) -> some View {

@@ -44,7 +44,7 @@ struct MonitorPanel: View {
     @State private var diskSelection = DiskCapacitySelectionModel()
 
     enum Tab: String, CaseIterable {
-        case cpu, gpu, memory, disk, network
+        case cpu, gpu, memory, disk, network, power
 
         var icon: String {
             switch self {
@@ -53,16 +53,40 @@ struct MonitorPanel: View {
             case .memory: "px.memory"
             case .disk: "px.ssd"
             case .network: "px.network"
+            case .power: "px.power"
+            }
+        }
+
+        var title: LocalizedStringKey {
+            switch self {
+            case .cpu: "CPU"
+            case .gpu: "GPU"
+            case .memory: "Memory"
+            case .disk: "SSD"
+            case .network: "Network"
+            case .power: "Power"
+            }
+        }
+
+        /// The power page (power plus fans) exists only on a Mac that has one of them.
+        func isAvailable(_ store: MonitorStore) -> Bool {
+            switch self {
+            case .power: !store.availableModules.isDisjoint(with: [.power, .fan])
+            default: true
             }
         }
     }
 
+    private var tabs: [Tab] { Tab.allCases.filter { $0.isAvailable(store) } }
+    /// A stored page this Mac does not have (settings moved from another Mac) shows CPU instead.
+    private var shownTab: Tab { tabs.contains(tab) ? tab : .cpu }
+
     var body: some View {
         VStack(spacing: 0) {
             header
-            TabStrip(items: [(.cpu, "CPU"), (.gpu, "GPU"), (.memory, "Memory"), (.disk, "SSD"), (.network, "Network")],
+            TabStrip(items: tabs.map { ($0, $0.title) },
                      icons: Dictionary(uniqueKeysWithValues: Tab.allCases.map { ($0, $0.icon) }),
-                     selection: $tab)
+                     selection: $tab, stacked: tabs.count > 5)
                 .padding(.horizontal, 18)
                 .padding(.bottom, 12)
             Group {
@@ -104,12 +128,13 @@ struct MonitorPanel: View {
     }
 
     @ViewBuilder private var content: some View {
-        switch tab {
+        switch shownTab {
         case .cpu: CPUTab(store: store)
         case .gpu: GPUTab(store: store)
         case .memory: MemoryTab(store: store)
         case .disk: DiskTab(store: store, selection: diskSelection)
-        case .network: NetworkTab(store: store)
+        case .network: PanelNetworkTab(store: store)
+        case .power: PanelPowerTab(store: store, openFanControl: actions.openFanControl)
         }
     }
 
@@ -410,7 +435,6 @@ private struct DiskTab: View {
             volumeSection
             if selection.isMountedSelection {
                 capacitySection
-                sharingNote
             }
             historySection
             activitySection
@@ -605,24 +629,6 @@ private struct DiskTab: View {
         }
     }
 
-    @ViewBuilder private var sharingNote: some View {
-        if let sharing = selection.selectedVolume?.capacitySharing,
-           case .sharedContainer = sharing {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: DiskVolumeSelectionText.apfsShared.localized())
-                    .font(.mh(size: 11, weight: .medium))
-                    .foregroundStyle(Theme.amber)
-                Text(verbatim: DiskVolumeSelectionText.apfsSharedDetail.localized())
-                    .font(.mh(size: 10.5))
-                    .foregroundStyle(Palette.textFaint)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(10)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Palette.inset, in: SurfaceShape(cornerRadius: 8, style: .continuous))
-        }
-    }
-
     // MARK: Seven-day capacity history
 
     @ViewBuilder private var historySection: some View {
@@ -668,10 +674,6 @@ private struct DiskTab: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityHint(Text(verbatim: DiskVolumeSelectionText.historyUnavailable.localized()))
         }
-        Text(verbatim: DiskVolumeSelectionText.recordingCaption.localized())
-            .font(.mh(size: 10.5))
-            .foregroundStyle(Palette.textFaint)
-            .fixedSize(horizontal: false, vertical: true)
     }
 
     // MARK: Whole-machine throughput
@@ -679,10 +681,6 @@ private struct DiskTab: View {
     private var activitySection: some View {
         VStack(alignment: .leading, spacing: 6) {
             DiskSectionHeader(text: .activityAllDisks)
-            Text(verbatim: DiskVolumeSelectionText.activityAllDisksDetail.localized())
-                .font(.mh(size: 10.5))
-                .foregroundStyle(Palette.textFaint)
-                .fixedSize(horizontal: false, vertical: true)
             if let disk = store.disk {
                 MirroredHistory(up: Series.values(store, .diskRead), down: Series.values(store, .diskWrite),
                                 upColor: Theme.blue, downColor: Theme.rose).equatable().frame(height: 104)
@@ -734,55 +732,6 @@ private struct DiskSectionHeader: View {
         .padding(.top, 12)
         .padding(.bottom, 2)
         .accessibilityAddTraits(.isHeader)
-    }
-}
-
-// MARK: - Network
-
-private struct NetworkTab: View {
-    let store: MonitorStore
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // These rates are the whole-machine total from NetworkSampler, which already excludes
-            // virtual interfaces. They are not a per-interface rate. The visible caption keeps the
-            // unit family (bytes per second, all interfaces) distinct from the per-interface
-            // link-speed values below.
-            if let n = store.network {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("All interfaces · bytes per second")
-                        .font(.mh(size: 10.5))
-                        .foregroundStyle(Palette.textFaint)
-                    HStack {
-                        big(Fmt.rate(n.inBytesPerSecond), String(localized: "Download"), Theme.blue)
-                        Spacer()
-                        big(Fmt.rate(n.outBytesPerSecond), String(localized: "Upload"), Theme.rose)
-                    }
-                }
-                .padding(.horizontal, 28).padding(.top, 8)
-                HairlineHeader(text: "Usage history")
-                Text("Last 5 minutes, updated live")
-                    .font(.mh(size: 10.5))
-                    .foregroundStyle(Palette.textFaint)
-                MirroredHistory(up: Series.values(store, .netIn), down: Series.values(store, .netOut)).equatable().frame(height: 112)
-            } else {
-                SkeletonRows(count: 5).padding(.top, 12)
-            }
-            // The reviewed section owns its background sampling loop (30 s) and sampler cache
-            // (15 s). It must render even while the first rate sample is still pending, and it
-            // never turns a missing snapshot into an offline or zero-valued interface.
-            NetworkDetailsSection()
-        }
-    }
-
-    private func big(_ value: String, _ label: String, _ color: Color) -> some View {
-        VStack(spacing: 3) {
-            Text("\(value)/s").font(.display(30, weight: .bold).monospacedDigit()).foregroundStyle(Palette.text)
-            HStack(spacing: 5) {
-                SurfaceShape(cornerRadius: 2).fill(color).frame(width: 8, height: 8)
-                Text(label).font(.mh(size: 11)).foregroundStyle(Palette.textMuted)
-            }
-        }
     }
 }
 

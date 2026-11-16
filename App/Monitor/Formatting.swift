@@ -71,3 +71,39 @@ extension Fmt {
         }
     }
 }
+
+extension Fmt {
+    /// Readable byte rate for the panel pages: "961 B/s", "12.4 MB/s".
+    static func rateLong(_ bytesPerSecond: Double?) -> String {
+        guard let b = bytesPerSecond else { return "–" }
+        return byteAmount(b) + "/s"
+    }
+
+    /// "961 B", "12.4 MB", "2.6 GB" (decimal-free under 1 KB, one decimal below 100).
+    static func byteAmount(_ bytes: Double) -> String {
+        let units = ["B", "KB", "MB", "GB", "TB"]
+        var value = max(bytes, 0)
+        var i = 0
+        while value >= 1000, i < units.count - 1 {
+            value /= 1024
+            i += 1
+        }
+        let digits = i == 0 || value >= 100 ? String(format: "%.0f", value) : String(format: "%.1f", value)
+        return "\(digits) \(units[i])"
+    }
+
+    /// "19.8 W" with a space, for the power page's large numbers.
+    static func wattsLong(_ w: Double?) -> String {
+        guard let w else { return String(localized: "n/a") }
+        return w < 100 ? String(format: "%.1f W", w) : String(format: "%.0f W", w)
+    }
+
+    static func celsiusLong(_ c: Double?) -> String {
+        guard let c else { return String(localized: "n/a") }
+        return String(format: "%.1f °C", c)
+    }
+
+    static func share(_ f: Double) -> String {
+        String(format: "%.1f%%", max(f, 0) * 100)
+    }
+}
