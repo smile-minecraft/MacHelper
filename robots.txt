@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://smile-minecraft.github.io/MacHelper/sitemap.xml
