@@ -2,7 +2,7 @@ import Foundation
 import Observation
 
 enum MonitorModule: String, Codable, CaseIterable, Identifiable, Sendable {
-    case cpu, gpu, memory, disk, network, battery, temperature, fan, power
+    case cpu, gpu, memory, disk, network, battery, accessories, temperature, fan, power
     var id: String { rawValue }
 
     var title: String {
@@ -13,6 +13,7 @@ enum MonitorModule: String, Codable, CaseIterable, Identifiable, Sendable {
         case .disk: String(localized: "Disk")
         case .network: String(localized: "Network")
         case .battery: String(localized: "Battery")
+        case .accessories: String(localized: "Accessories")
         case .temperature: String(localized: "Temperature")
         case .fan: String(localized: "Fans")
         case .power: String(localized: "Power")
@@ -28,6 +29,7 @@ enum MonitorModule: String, Codable, CaseIterable, Identifiable, Sendable {
         case .disk: "SSD"
         case .network: "NET"
         case .battery: "BAT"
+        case .accessories: "ACC"
         case .temperature: "TMP"
         case .fan: "FAN"
         case .power: "PWR"
@@ -41,6 +43,7 @@ enum MonitorModule: String, Codable, CaseIterable, Identifiable, Sendable {
         case .fan, .power: [.text, .sparkline, .columns]
         case .temperature: [.text, .sparkline, .columns, .heat]
         case .disk: [.text, .bar, .ring, .blocks, .heat]
+        case .accessories: [.text, .sparkline, .bar, .ring, .blocks, .columns]
         default: MenuBarStyle.allCases.filter { $0 != .dual }
         }
     }
@@ -48,6 +51,7 @@ enum MonitorModule: String, Codable, CaseIterable, Identifiable, Sendable {
     var defaultInterval: Double {
         switch self {
         case .disk, .battery: 5
+        case .accessories: 30
         case .temperature, .fan, .power: 2
         default: 1
         }
@@ -112,21 +116,112 @@ struct MonitorConfiguration: Codable, Hashable, Sendable {
     var modules: [MonitorModule: ModuleConfig]
     /// Two-line labels: name above value. Saves menu bar width when showing several metrics.
     var compact: Bool
+    /// Page order in the menu bar panel. All pages are listed; the panel draws the ones that
+    /// are not hidden and whose hardware is present.
+    var panelPageOrder: [PanelPage]
+    /// Pages the user switched off in Settings → Menu Bar.
+    var hiddenPanelPages: Set<PanelPage>
 
     func config(_ m: MonitorModule) -> ModuleConfig {
         modules[m] ?? ModuleConfig(enabled: false, inMenuBar: false, style: .text, interval: m.defaultInterval)
     }
 
+    /// Order with duplicates removed (first occurrence wins, so the user's sequence is kept),
+    /// any missing pages appended at the end, and only known hidden pages kept. Hiding every
+    /// page is repaired by unhiding the last page in `order`, so at least one stays visible.
+    func normalized() -> MonitorConfiguration {
+        var seen = Set<PanelPage>()
+        var order: [PanelPage] = []
+        for page in panelPageOrder where seen.insert(page).inserted {
+            order.append(page)
+        }
+        for page in PanelPage.allCases where !seen.contains(page) {
+            order.append(page)
+        }
+        var hidden = hiddenPanelPages.intersection(PanelPage.allCases)
+        if hidden.isSuperset(of: order) {
+            hidden.remove(order.last ?? .cpu)
+        }
+        return MonitorConfiguration(modules: modules, compact: compact,
+                                    panelPageOrder: order, hiddenPanelPages: hidden)
+    }
+
+    var panelLayout: PanelLayout {
+        PanelLayout(order: panelPageOrder, hidden: hiddenPanelPages)
+    }
+
+    /// Fills modules an older version did not store with their defaults. Old JSON predates new
+    /// modules, and `config(_:)` reports a missing module as disabled, so every upgrade path
+    /// must fill them or a newly added module such as `accessories` would silently turn off.
+    func withMissingModulesFilled() -> MonitorConfiguration {
+        var modules = modules
+        var changed = false
+        for module in MonitorModule.allCases where modules[module] == nil {
+            modules[module] = MonitorConfiguration.default.config(module)
+            changed = true
+        }
+        guard changed else { return self }
+        return MonitorConfiguration(modules: modules, compact: compact,
+                                    panelPageOrder: panelPageOrder,
+                                    hiddenPanelPages: hiddenPanelPages)
+    }
+
+    /// Decodes stored or backup JSON from any version, filling modules that older versions did
+    /// not store and normalizing the panel layout. Both the store load path and the backup
+    /// snapshot path go through this so old installations upgrade the same way either way.
+    static func upgraded(from data: Data) -> MonitorConfiguration? {
+        guard let decoded = try? JSONDecoder().decode(MonitorConfiguration.self, from: data) else {
+            return nil
+        }
+        return decoded.withMissingModulesFilled().normalized()
+    }
+
     static let `default`: MonitorConfiguration = {
         var modules: [MonitorModule: ModuleConfig] = [:]
         for m in MonitorModule.allCases {
-            let on: Set<MonitorModule> = [.cpu, .memory, .network, .temperature, .fan, .disk, .gpu, .power, .battery]
+            let on: Set<MonitorModule> = [.cpu, .memory, .network, .temperature, .fan, .disk, .gpu, .power, .battery, .accessories]
             let bar: Set<MonitorModule> = [.cpu, .memory, .temperature]
             modules[m] = ModuleConfig(enabled: on.contains(m), inMenuBar: bar.contains(m),
                                       style: m == .cpu ? .sparkline : .text, interval: m.defaultInterval)
         }
-        return MonitorConfiguration(modules: modules, compact: true)
+        return MonitorConfiguration(modules: modules, compact: true,
+                                    panelPageOrder: PanelPage.allCases, hiddenPanelPages: [])
     }()
+}
+
+/// Old stored JSON may not have `compact` or the panel fields, and its panel lists may contain
+/// pages this version does not know. Absent fields fall back to the defaults so upgrading never
+/// drops the whole configuration.
+extension MonitorConfiguration {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        modules = try container.decode([MonitorModule: ModuleConfig].self, forKey: .modules)
+        compact = try container.decodeIfPresent(Bool.self, forKey: .compact) ?? true
+        panelPageOrder = container.decodeFlexiblePages(forKey: .panelPageOrder) ?? PanelPage.allCases
+        hiddenPanelPages = Set(container.decodeFlexiblePages(forKey: .hiddenPanelPages) ?? [])
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(modules, forKey: .modules)
+        try container.encode(compact, forKey: .compact)
+        try container.encode(panelPageOrder, forKey: .panelPageOrder)
+        // Sets have no stable order, so emit hidden pages filtered by allCases to keep the JSON stable.
+        try container.encode(PanelPage.allCases.filter { hiddenPanelPages.contains($0) },
+                             forKey: .hiddenPanelPages)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case modules, compact, panelPageOrder, hiddenPanelPages
+    }
+}
+
+private extension KeyedDecodingContainer {
+    /// Decodes an array of page raw values, silently dropping ones this version does not know.
+    func decodeFlexiblePages(forKey key: Key) -> [PanelPage]? {
+        guard let raw = try? decodeIfPresent([String].self, forKey: key) else { return nil }
+        return raw.compactMap(PanelPage.init(rawValue:))
+    }
 }
 
 /// Persists the configuration in UserDefaults (per-user preference, not shared data).
@@ -140,12 +235,7 @@ final class MonitorSettingsStore {
     }
 
     init() {
-        if let data = UserDefaults.standard.data(forKey: Self.key),
-           let saved = try? JSONDecoder().decode(MonitorConfiguration.self, from: data) {
-            configuration = saved
-        } else {
-            configuration = .default
-        }
+        configuration = Self.load()
     }
 
     subscript(module: MonitorModule) -> ModuleConfig {
@@ -155,12 +245,18 @@ final class MonitorSettingsStore {
 
     /// Re-reads the stored configuration after settings are imported.
     func reload() {
-        if let data = UserDefaults.standard.data(forKey: Self.key),
-           let saved = try? JSONDecoder().decode(MonitorConfiguration.self, from: data) {
-            configuration = saved
-        } else {
-            configuration = .default
+        configuration = Self.load()
+    }
+
+    /// Decodes the stored configuration, going through the shared upgrade path: modules that
+    /// older versions did not have are filled with their defaults and the panel layout is
+    /// normalized.
+    private static func load() -> MonitorConfiguration {
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let saved = MonitorConfiguration.upgraded(from: data) else {
+            return .default
         }
+        return saved
     }
 
     private func save() {

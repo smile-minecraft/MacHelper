@@ -65,6 +65,14 @@ enum StatusRules {
         guard let f else { return nil }
         return f >= 0.85 ? .critical : (f >= 0.6 ? .attention : .good)
     }
+
+    /// 0...1 的電池電量：10% 以下 critical、20% 以下 attention。
+    static func battery(_ charge: Double?) -> StatusLevel? {
+        guard let charge else { return nil }
+        if charge <= 0.1 { return .critical }
+        if charge <= 0.2 { return .attention }
+        return .good
+    }
 }
 
 @MainActor

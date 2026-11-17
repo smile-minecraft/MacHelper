@@ -11,16 +11,19 @@ import Testing
 /// Exercises the real menu-bar SSD and network page sources in an isolated package.
 ///
 /// The views under test are the production files: all of `MonitorPanel.swift` is compiled, with
-/// `DiskTab`/`DiskSectionHeader`/`NetworkTab` moved to a generated file as the byte-identical
-/// declarations (only `private` removed) so this test can construct them. Rendering uses two
-/// generated variants that differ only where the system boundary is: `DiskTabRender` drops the
-/// `.task`/`.onReceive` modifiers because ImageRenderer can run them in-process, and
-/// `NetworkTabRender` replaces the live `NetworkDetailsSection()` with a boundary view. The real
-/// production bodies are still built and type-checked. The store, design system, helper client
-/// and Storage surface are stand-ins; the test fills them with synthetic volumes, points and
-/// readings and creates its own in-memory GRDB database. Nothing here starts the app, the helper,
-/// the menu bar, a background recorder, Disk Arbitration, a network read or a user preference
-/// lookup.
+/// `DiskTab`/`DiskSectionHeader`/`BatteryTab` moved to a generated file as the byte-identical
+/// declarations (only `private` removed) so this test can construct them. The production network
+/// page (`PanelNetworkTab.swift` and its chart/model files) is compiled unchanged. Rendering uses
+/// two generated variants that differ only where the system boundary is: `DiskTabRender` drops the
+/// `.task`/`.onReceive` modifiers and `PanelNetworkTabRender` drops `.onAppear`/`.onDisappear`/
+/// `.task`, because ImageRenderer can run lifecycle modifiers in-process and those would start
+/// live samplers. The real production bodies are still built and type-checked. The store, design
+/// system, helper client and Storage surface are stand-ins; the test fills them with synthetic
+/// volumes, points and readings and creates its own in-memory GRDB database. Nothing here starts
+/// the app, the helper, the menu bar, a background recorder, Disk Arbitration, IORegistry,
+/// system_profiler, a network read or a user preference lookup outside the scratch
+/// `panel.module` key in the test process's own defaults domain, which the strip-selection
+/// tests write and restore.
 @Suite(.serialized)
 @MainActor
 struct MonitorPanelIntegrationTests {
@@ -61,9 +64,10 @@ struct MonitorPanelIntegrationTests {
         return history
     }
 
-    /// The store stand-in only carries what the two pages read. The live series use recent
+    /// The store stand-in only carries what the pages read. The live series use recent
     /// timestamps because the production `Series.values` windows them against the wall clock;
-    /// the values themselves are synthetic.
+    /// the values themselves are synthetic. The battery page fixture has an internal battery and
+    /// two accessories, one of which reports left/right/case components.
     private func makeStore(history: MetricsHistory?) -> MonitorStore {
         let store = MonitorStore()
         store.disk = DiskReading(readBytesPerSecond: 12_000_000,
@@ -71,6 +75,24 @@ struct MonitorPanelIntegrationTests {
                                  availableBytes: 400 * gigabyte,
                                  totalBytes: 1_000 * gigabyte)
         store.network = NetworkReading(inBytesPerSecond: 8_500_000, outBytesPerSecond: 1_250_000)
+        store.battery = BatteryReading(charge: 0.64,
+                                       isCharging: false,
+                                       externalPower: true,
+                                       watts: -5,
+                                       cycleCount: 123,
+                                       health: 0.91,
+                                       celsius: 31)
+        store.accessories = [
+            AccessoryBatteryReading(id: "keyboard-1", name: "Magic Keyboard", kind: .keyboard,
+                                    charge: 0.82, components: [], isCharging: false),
+            AccessoryBatteryReading(id: "airpods-1", name: "AirPods Pro", kind: .headphones,
+                                    charge: 0.55,
+                                    components: [.init(id: .left, charge: 0.57),
+                                                 .init(id: .right, charge: 0.53),
+                                                 .init(id: .chargingCase, charge: 0.64)],
+                                    isCharging: true),
+        ]
+        store.availableModules = [.battery, .accessories]
 
         let liveNow = Date()
         func series(_ base: Double) -> [ChartPoint] {
@@ -84,6 +106,10 @@ struct MonitorPanelIntegrationTests {
             .diskWrite: series(500_000),
             .netIn: series(2_000_000),
             .netOut: series(300_000),
+            .battery: (0..<20).map { index in
+                ChartPoint(date: liveNow.addingTimeInterval(-Double(index) * 5),
+                           value: 0.64 + Double(index) * 0.001)
+            },
         ])
         store.persistentHistory = history
         return store
@@ -211,12 +237,12 @@ struct MonitorPanelIntegrationTests {
         let store = makeStore(history: nil)
         let snapshot = makeSnapshot(at: Date())
 
-        // The real production body builds with the fake store. It constructs the real
-        // `NetworkDetailsSection` (whose sampler only reads on appear) but does not host it, so
-        // no interface is read. The render variant below replaces exactly that one call.
-        _ = NetworkTab(store: store).body
+        // The real production body builds with the fake store. Its samplers only start in
+        // `.onAppear`, which is not run here because the body is only built, not hosted. The
+        // render variant below drops that lifecycle block so ImageRenderer stays offline.
+        _ = PanelNetworkTab(store: store).body
 
-        let image = try render(NetworkTabRender(store: store))
+        let image = try render(PanelNetworkTabRender(store: store))
         #expect(image.pixelsWide == 420)
         #expect(image.pixelsHigh > 0)
         #expect(greenPixelCount(image) > 0, "the download rate and mirrored chart used the fake readings")
@@ -227,6 +253,105 @@ struct MonitorPanelIntegrationTests {
         #expect(contentImage.pixelsHigh > 0)
         #expect(nonWhitePixelCount(contentImage) > 0, "the real network content drew the synthetic snapshot")
         #expect(greenPixelCount(contentImage) > 0, "the synthetic Wi-Fi interface and primary pill were drawn")
+    }
+
+    // MARK: - Battery page
+
+    @Test func batteryTabIsAvailableWhenTheMacHasABatteryOrAnAccessory() {
+        let withBattery = makeStore(history: nil)
+        #expect(PanelPage.battery.isAvailable(in: withBattery.availableModules,
+                                              hasAccessories: !withBattery.accessories.isEmpty))
+
+        let empty = MonitorStore()
+        #expect(!PanelPage.battery.isAvailable(in: empty.availableModules,
+                                                hasAccessories: !empty.accessories.isEmpty))
+
+        // The accessories module on its own does not light the page up; a connected accessory
+        // with a reading is required.
+        let moduleOnly = MonitorStore()
+        moduleOnly.availableModules = [.accessories]
+        #expect(!PanelPage.battery.isAvailable(in: moduleOnly.availableModules,
+                                                hasAccessories: !moduleOnly.accessories.isEmpty))
+
+        let accessoryOnly = MonitorStore()
+        accessoryOnly.availableModules = [.accessories]
+        accessoryOnly.accessories = [
+            AccessoryBatteryReading(id: "keyboard-1", name: "Magic Keyboard", kind: .keyboard, charge: 0.82),
+        ]
+        #expect(PanelPage.battery.isAvailable(in: accessoryOnly.availableModules,
+                                               hasAccessories: !accessoryOnly.accessories.isEmpty))
+    }
+
+    @Test func batteryTabRendersTheInternalBatteryAndAccessoryRows() throws {
+        let store = makeStore(history: nil)
+        let image = try render(BatteryTab(store: store))
+        #expect(image.pixelsWide == 420)
+        #expect(image.pixelsHigh > 0)
+        #expect(nonWhitePixelCount(image) > 0, "the battery gauge and accessory rows drew synthetic readings")
+    }
+
+    // MARK: - Panel layout
+
+    @Test func panelLayoutShowsTheDefaultOrderWhenNothingIsHiddenOrUnavailable() {
+        let layout = PanelLayout(order: PanelPage.allCases, hidden: [])
+        #expect(layout.visiblePages { _ in true } == PanelPage.allCases)
+    }
+
+    @Test func panelLayoutKeepsTheUserOrderAndDropsHiddenPages() {
+        let customOrder = [PanelPage.network, .cpu, .disk, .memory, .gpu, .power, .battery]
+        let layout = PanelLayout(order: customOrder, hidden: [.disk])
+        #expect(layout.visiblePages { _ in true } == [.network, .cpu, .memory, .gpu, .power, .battery])
+    }
+
+    @Test func panelLayoutHidesTheBatteryPageUntilABatteryOrAccessoryAppears() {
+        let layout = PanelLayout(order: PanelPage.allCases, hidden: [])
+
+        let noBatteryNoAccessory = layout.visiblePages {
+            $0.isAvailable(in: [], hasAccessories: false)
+        }
+        #expect(!noBatteryNoAccessory.contains(.battery))
+
+        let moduleOnlyNoReading = layout.visiblePages {
+            $0.isAvailable(in: [.accessories], hasAccessories: false)
+        }
+        #expect(!moduleOnlyNoReading.contains(.battery))
+
+        let connectedAccessory = layout.visiblePages {
+            $0.isAvailable(in: [.accessories], hasAccessories: true)
+        }
+        #expect(connectedAccessory.contains(.battery))
+
+        let internalBattery = layout.visiblePages {
+            $0.isAvailable(in: [.battery], hasAccessories: false)
+        }
+        #expect(internalBattery.contains(.battery))
+    }
+
+    @Test func panelLayoutHidesThePowerPageWithoutPowerOrFanSensors() {
+        let layout = PanelLayout(order: PanelPage.allCases, hidden: [])
+
+        let noPowerHardware = layout.visiblePages {
+            $0.isAvailable(in: [.cpu], hasAccessories: false)
+        }
+        #expect(!noPowerHardware.contains(.power))
+
+        let fanPresent = layout.visiblePages {
+            $0.isAvailable(in: [.fan], hasAccessories: false)
+        }
+        #expect(fanPresent.contains(.power))
+
+        let powerSensorPresent = layout.visiblePages {
+            $0.isAvailable(in: [.power], hasAccessories: false)
+        }
+        #expect(powerSensorPresent.contains(.power))
+    }
+
+    @Test func panelLayoutYieldsNoPagesWhenEverythingIsHiddenOrUnavailable() {
+        let allHidden = PanelLayout(order: PanelPage.allCases, hidden: Set(PanelPage.allCases))
+        #expect(allHidden.visiblePages { _ in true }.isEmpty)
+
+        let allUnavailable = PanelLayout(order: PanelPage.allCases, hidden: [])
+        #expect(allUnavailable.visiblePages { _ in false }.isEmpty)
     }
 
     // MARK: - Settings section
@@ -255,6 +380,88 @@ struct MonitorPanelIntegrationTests {
             quit: {}))
         #expect(panel.scrollable)
         #expect(store.watchCalls.isEmpty, "constructing the value must not run onAppear")
+    }
+
+    // MARK: - Tab strip selection
+
+    @Test func tabStripReceivesTheFirstVisiblePageWhenTheStoredPageIsHidden() {
+        withStoredPage(PanelPage.battery.rawValue) {
+            let store = makeStore(history: nil)
+            store.settings.configuration = MonitorConfiguration(panelPageOrder: PanelPage.allCases,
+                                                                hiddenPanelPages: [.battery])
+            TabStripSelectionRecorder.reset()
+            _ = buildPanel(store).body
+            // The stored page is hidden, so both the strip and the content must resolve to cpu.
+            #expect(TabStripSelectionRecorder.resolvedSelection == PanelPage.cpu.rawValue)
+            #expect(TabStripSelectionRecorder.itemRawValues == ["cpu", "gpu", "memory", "disk", "network"])
+        }
+    }
+
+    @Test func tabStripReceivesTheFirstVisiblePageWhenTheStoredPageIsUnavailable() {
+        withStoredPage(PanelPage.power.rawValue) {
+            let store = makeStore(history: nil)
+            TabStripSelectionRecorder.reset()
+            _ = buildPanel(store).body
+            // No power or fan hardware: power is unavailable, so storage falls back to cpu.
+            #expect(TabStripSelectionRecorder.resolvedSelection == PanelPage.cpu.rawValue)
+            #expect(TabStripSelectionRecorder.itemRawValues == ["cpu", "gpu", "memory", "disk", "network", "battery"])
+        }
+    }
+
+    @Test func tabStripReceivesTheStoredPageWhileItRemainsVisible() {
+        withStoredPage(PanelPage.battery.rawValue) {
+            let store = makeStore(history: nil)
+            TabStripSelectionRecorder.reset()
+            _ = buildPanel(store).body
+            #expect(TabStripSelectionRecorder.resolvedSelection == PanelPage.battery.rawValue)
+            #expect(TabStripSelectionRecorder.itemRawValues == ["cpu", "gpu", "memory", "disk", "network", "battery"])
+        }
+    }
+
+    @Test func panelShowsTheEmptyStateAndNoStripWhenEveryPageIsHidden() throws {
+        try withStoredPage(nil) {
+            let store = makeStore(history: nil)
+            store.settings.configuration = MonitorConfiguration(panelPageOrder: PanelPage.allCases,
+                                                                hiddenPanelPages: Set(PanelPage.allCases))
+            TabStripSelectionRecorder.reset()
+            let panel = buildPanel(store)
+            _ = panel.body
+            #expect(TabStripSelectionRecorder.resolvedSelection == nil,
+                    "the strip must not appear when no page can show")
+            let image = try render(panel.body)
+            #expect(nonWhitePixelCount(image) > 0, "the empty state drew its symbol and title")
+        }
+    }
+
+    private func withStoredPage(_ raw: String?, run: () throws -> Void) rethrows {
+        let previous = UserDefaults.standard.string(forKey: "panel.module")
+        if let raw {
+            UserDefaults.standard.set(raw, forKey: "panel.module")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "panel.module")
+        }
+        defer {
+            if let previous {
+                UserDefaults.standard.set(previous, forKey: "panel.module")
+            } else {
+                UserDefaults.standard.removeObject(forKey: "panel.module")
+            }
+        }
+        try run()
+    }
+
+    private func buildPanel(_ store: MonitorStore) -> MonitorPanel {
+        MonitorPanel(store: store, actions: PanelActions(
+            openSettings: {},
+            openDiagnostics: {},
+            openFanControl: {},
+            openDiskAnalysis: {},
+            openOptimize: {},
+            openUninstall: {},
+            openStartup: {},
+            openHistory: {},
+            openMain: {},
+            quit: {}))
     }
 
     // MARK: - Helpers

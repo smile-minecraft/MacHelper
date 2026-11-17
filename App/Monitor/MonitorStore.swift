@@ -12,6 +12,7 @@ final class MetricSources: @unchecked Sendable {
     let hid = HIDTemperatureSensors()
     let network = NetworkSampler()
     let disk = DiskSampler()
+    let accessories = AccessoryBatterySampler()
     let fans: FanDriver?
     private let keyLock = NSLock()
     private var discoveredKeys: [FourCC]?
@@ -40,6 +41,8 @@ final class MetricSources: @unchecked Sendable {
     func isAvailable(_ m: MonitorModule) -> Bool {
         switch m {
         case .battery: BatterySampler.sample() != nil
+        // 配件可能之後才連線，而且探測會跑慢的 system_profiler，所以不在啟動時判斷可用性。
+        case .accessories: true
         case .fan: (fans?.strategy.fanCount ?? 0) > 0
         case .power: power != nil || smc?.keyExists("PSTR") == true
         case .temperature: hid != nil || !smcTemperatureKeys.isEmpty
@@ -55,6 +58,7 @@ final class MetricSources: @unchecked Sendable {
         case .disk: return disk.sample().map(ModuleSample.disk)
         case .network: return network.sample().map(ModuleSample.network)
         case .battery: return BatterySampler.sample().map(ModuleSample.battery)
+        case .accessories: return .accessories(accessories.sample())
         case .fan: return fans.map { .fan($0.readFans()) }
         case .power: return power?.sample().map(ModuleSample.power)
         case .temperature:
@@ -73,13 +77,14 @@ enum ModuleSample: Sendable {
     case disk(DiskReading)
     case network(NetworkReading)
     case battery(BatteryReading)
+    case accessories([AccessoryBatteryReading])
     case temperature([TemperatureReading])
     case fan([FanReading])
     case power(PowerReading)
 }
 
 enum SeriesKey: String, CaseIterable, Sendable {
-    case cpu, cpuP, cpuE, gpu, memory, diskRead, diskWrite, netIn, netOut, battery, temperature, fan, power
+    case cpu, cpuP, cpuE, gpu, memory, diskRead, diskWrite, netIn, netOut, battery, accessory, temperature, fan, power
     /// Live-only parts of the power reading, for the power page's chart.
     case cpuPower, gpuPower
 
@@ -97,7 +102,7 @@ enum SeriesKey: String, CaseIterable, Sendable {
         case .temperature: "temperature"
         case .fan: "fan"
         case .power: "power"
-        case .cpuP, .cpuE, .cpuPower, .gpuPower: nil
+        case .cpuP, .cpuE, .cpuPower, .gpuPower, .accessory: nil
         }
     }
 }
@@ -183,6 +188,7 @@ final class MonitorStore {
     private(set) var disk: DiskReading?
     private(set) var network: NetworkReading?
     private(set) var battery: BatteryReading?
+    private(set) var accessories: [AccessoryBatteryReading] = []
     private(set) var temperatures: [TemperatureReading] = []
     private(set) var fans: [FanReading] = []
     private(set) var power: PowerReading?
@@ -469,6 +475,9 @@ final class MonitorStore {
         case .battery(let r):
             battery = r
             recordHistory(MonitorHistorySample.battery(r), now)
+        case .accessories(let r):
+            accessories = r
+            if let low = r.map(\.charge).min() { record(.accessory, low, now) }
         case .temperature(let r):
             temperatures = r
             alerts.check(cpuCelsius: cpuCelsius, memory: nil, disk: nil)
