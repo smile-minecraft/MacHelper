@@ -106,7 +106,7 @@ public struct PathSafety: Sendable {
 
     /// Only the absolute /var and /tmp alias prefixes are rewritten; anything else passes through
     /// untouched. Use this for user-supplied exclusion patterns, where URL standardization is not
-    /// an option: it would prefix a relative glob (e.g. `*/cardiary-host-*`) with the process's
+    /// an option: it would prefix a relative glob (e.g. `*/some-tool-*`) with the process's
     /// working directory and break the pattern.
     static func normalizeAlias(_ pattern: String) -> String {
         if pattern.hasPrefix("/var/") { return "/private/var/" + pattern.dropFirst("/var/".count) }

@@ -40146,36 +40146,36 @@
         }
       }
     },
-    "Items are deleted directly and free space immediately: caches, logs, and (if enabled) expired temporary files. Unknown or in-use items are never touched.": {
+    "Items are deleted directly and free space immediately: caches, logs, and (if enabled) expired temporary files. In-use items and items managed by the system are never touched.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los elementos se eliminan directamente y liberan espacio de inmediato: cachés, registros y, si está activado, archivos temporales caducados. Los elementos desconocidos o en uso nunca se tocan."
+            "value": "Los elementos se eliminan directamente y liberan espacio de inmediato: cachés, registros y, si está activado, archivos temporales caducados. Los elementos en uso y los que gestiona el sistema nunca se tocan."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "項目は即座に直接削除され、その場で空き領域が増えます: キャッシュ、ログ、(有効にしている場合) 期限切れの一時ファイル。不明な項目や使用中の項目には一切手を付けません。"
+            "value": "項目は即座に直接削除され、その場で空き領域が増えます: キャッシュ、ログ、(有効にしている場合) 期限切れの一時ファイル。使用中の項目とシステム管理の項目には一切手を付けません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "항목은 즉시 직접 삭제되어 바로 공간을 확보합니다: 캐시, 로그, (활성화된 경우) 만료된 임시 파일. 알 수 없거나 사용 중인 항목은 절대 건드리지 않습니다."
+            "value": "항목은 즉시 직접 삭제되어 바로 공간을 확보합니다: 캐시, 로그, (활성화된 경우) 만료된 임시 파일. 사용 중인 항목과 시스템이 관리하는 항목은 절대 건드리지 않습니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "项目会立即直接删除并释放空间：缓存、日志和（启用时）过期的临时文件。未知项或使用中的项不会被动。"
+            "value": "项目会立即直接删除并释放空间：缓存、日志和（启用时）过期的临时文件。使用中的项目和由系统管理的项目不会被动。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "項目會立即直接刪除並釋放空間：快取、日誌和（啟用時）過期的暫存檔案。未知項或使用中的項目不會被動。"
+            "value": "項目會立即直接刪除並釋放空間：快取、日誌和（啟用時）過期的暫存檔案。使用中的項目和由系統管理的項目不會被動。"
           }
         }
       }

@@ -241,7 +241,7 @@ public enum ExpiredTempClean {
             // Entries can be recorded through the CLI with the /var/folders/... alias, while
             // candidates here are normalized to /private/var/folders/...; rewrite only that alias
             // prefix per entry. Full URL normalization is not an option: it would prefix a
-            // relative glob (e.g. `*/cardiary-host-*`) with the working directory.
+            // relative glob (e.g. `*/some-tool-*`) with the working directory.
             let patterns = (options.whitelist ?? PathSafety.loadWhitelist()).map(PathSafety.normalizeAlias)
             let safety = PathSafety(protectedPaths: [], whitelist: patterns,
                                     allowedRoots: [rootPath], minimumDepth: 1)

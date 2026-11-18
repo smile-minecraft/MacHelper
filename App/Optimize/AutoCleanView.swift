@@ -26,7 +26,7 @@ struct AutoCleanView: View {
                     Toggle("Move to the Trash instead of deleting", isOn: $model.trashInstead)
                     Text(model.trashInstead
                          ? "Cleaned items go to the Trash; the space is freed once you empty it."
-                         : "Items are deleted directly and free space immediately: caches, logs, and (if enabled) expired temporary files. Unknown or in-use items are never touched.")
+                         : "Items are deleted directly and free space immediately: caches, logs, and (if enabled) expired temporary files. In-use items and items managed by the system are never touched.")
                         .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
                 if let scheduleError = model.scheduleMigrationError {
