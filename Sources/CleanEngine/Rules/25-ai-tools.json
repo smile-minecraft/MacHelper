@@ -65,12 +65,11 @@
     {
       "id": "ai.claude-cache",
       "title": "Claude Code caches",
-      "description": "Shell snapshots, paste cache, telemetry and other caches from the Claude Code agent. Rebuilt as you use it; projects and settings are kept.",
+      "description": "Shell snapshots, telemetry and other caches from the Claude Code agent. Rebuilt as you use it; projects and settings are kept.",
       "category": "ai",
       "risk": "low",
       "paths": [
         "~/.claude/shell-snapshots/*",
-        "~/.claude/paste-cache/*",
         "~/.claude/cache/*",
         "~/.claude/telemetry/*"
       ],
@@ -143,28 +142,14 @@
     {
       "id": "ai.codex-sessions",
       "title": "Codex old sessions",
-      "description": "Session records from months you used Codex more than a month ago. The current month's sessions and settings are kept.",
+      "description": "Session files older than 30 days, grouped by year, month and day, plus the archived sessions list. Recent sessions and settings are kept.",
       "category": "ai",
       "risk": "medium",
       "paths": [
-        "~/.codex/sessions/*/*",
+        "~/.codex/sessions/*/*/*/*.jsonl",
         "~/.codex/archived_sessions/*"
       ],
       "minAgeDays": 30,
-      "skipIfProcessRunning": [
-        "codex"
-      ],
-      "selectedByDefault": false
-    },
-    {
-      "id": "ai.codex-thread-history",
-      "title": "Codex thread history database",
-      "description": "The database holding Codex conversation history, which can grow very large. Deleting it removes old conversation history; the agent rebuilds the file.",
-      "category": "ai",
-      "risk": "high",
-      "paths": [
-        "~/.codex/thread_history_*.sqlite*"
-      ],
       "skipIfProcessRunning": [
         "codex"
       ],
@@ -182,6 +167,11 @@
       "minAgeDays": 7,
       "skipIfProcessRunning": [
         "opencode"
+      ],
+      "skipIfRunning": [
+        "ai.opencode.desktop",
+        "ai.opencode.desktop.beta",
+        "ai.opencode.desktop.dev"
       ]
     },
     {
@@ -197,64 +187,11 @@
       "skipIfProcessRunning": [
         "opencode"
       ],
-      "selectedByDefault": false
-    },
-    {
-      "id": "ai.opencode-snapshot",
-      "title": "OpenCode old file snapshots",
-      "description": "Copies of files OpenCode kept so changes can be undone, from sessions older than a month. Your own files are kept.",
-      "category": "ai",
-      "risk": "medium",
-      "paths": [
-        "~/.local/share/opencode/snapshot/*"
-      ],
-      "minAgeDays": 30,
-      "skipIfProcessRunning": [
-        "opencode"
-      ],
-      "selectedByDefault": false
-    },
-    {
-      "id": "ai.opencode-db",
-      "title": "OpenCode session database",
-      "description": "The database holding OpenCode sessions and history, which can grow very large. Deleting it removes old session history; the agent rebuilds the file.",
-      "category": "ai",
-      "risk": "high",
-      "paths": [
-        "~/.local/share/opencode/opencode.db*"
-      ],
-      "skipIfProcessRunning": [
-        "opencode"
-      ],
-      "selectedByDefault": false
-    },
-    {
-      "id": "ai.pi-sessions",
-      "title": "Pi old sessions",
-      "description": "Session transcripts from projects you worked on with the Pi agent more than a month ago. Settings and installed extensions are kept.",
-      "category": "ai",
-      "risk": "medium",
-      "paths": [
-        "~/.pi/agent/sessions/*/*"
-      ],
-      "minAgeDays": 30,
-      "skipIfProcessRunning": [
-        "pi"
-      ],
-      "selectedByDefault": false
-    },
-    {
-      "id": "ai.pi-logs",
-      "title": "Pi daemon logs",
-      "description": "Log files of the Pi agent's background service older than a week. Sessions and settings are kept.",
-      "category": "ai",
-      "risk": "low",
-      "paths": [
-        "~/.pi/agent/cron/*.log"
-      ],
-      "minAgeDays": 7,
-      "skipIfProcessRunning": [
-        "pi"
+      "selectedByDefault": false,
+      "skipIfRunning": [
+        "ai.opencode.desktop",
+        "ai.opencode.desktop.beta",
+        "ai.opencode.desktop.dev"
       ]
     }
   ]

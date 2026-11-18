@@ -60,12 +60,13 @@ public struct CleanScanner: Sendable {
         var results: [RuleResult] = []
 
         let running = Self.runningBundleIDs()
-        let processes = rules.contains { !$0.skipIfProcessRunning.isEmpty } ? Self.runningProcessNames() : []
+        let processes = rules.contains { !$0.skipIfProcessRunning.isEmpty }
+            ? Set(Self.runningProcessNames().map { $0.lowercased() }) : []
         for (index, rule) in rules.enumerated() {
             if shouldStop() { break }
             progress(index, rules.count)
             let busy = rule.skipIfRunning.first(where: running.contains)
-                ?? rule.skipIfProcessRunning.first { processes.contains(String($0.prefix(Self.processNameLength))) }
+                ?? rule.skipIfProcessRunning.first { processes.contains(String($0.prefix(Self.processNameLength)).lowercased()) }
             if let app = busy {
                 // Reserve the rule's paths so a broader rule (e.g. all of ~/Library/Caches) cannot take them.
                 claimed += rule.paths.flatMap(expandGlob).map(PathSafety.normalize)
@@ -144,6 +145,7 @@ public struct CleanScanner: Sendable {
     static let processNameLength = 32
 
     /// Executable names of this user's processes (others are not visible without root anyway).
+    /// Returned as proc_name produced them; call sites compare case-insensitively.
     static func runningProcessNames() -> Set<String> {
         let capacity = proc_listallpids(nil, 0) + 64
         guard capacity > 64 else { return [] }

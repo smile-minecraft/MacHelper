@@ -36,11 +36,19 @@ public struct RemovalItem: Sendable {
     public let source: String
     public let bytes: UInt64
     public let action: CleanAction
-    public init(path: String, source: String, bytes: UInt64, action: CleanAction) {
+    /// Bundle identifiers that must not be running for this item to be removed.
+    public let skipIfRunning: [String]
+    /// Executable names that must not be running for this item to be removed. Matched against the
+    /// first 32 characters of the name, case-insensitively.
+    public let skipIfProcessRunning: [String]
+    public init(path: String, source: String, bytes: UInt64, action: CleanAction,
+                skipIfRunning: [String] = [], skipIfProcessRunning: [String] = []) {
         self.path = path
         self.source = source
         self.bytes = bytes
         self.action = action
+        self.skipIfRunning = skipIfRunning
+        self.skipIfProcessRunning = skipIfProcessRunning
     }
 }
 
@@ -105,10 +113,26 @@ public struct CleanExecutor: Sendable {
         return item.action
     }
 
+    /// Re-checks right before removal, so an agent that started after the scan stops the removal.
+    private func busyMarker(for item: RemovalItem, bundleIDs: Set<String>, processes: Set<String>) -> String? {
+        item.skipIfRunning.first { bundleIDs.contains($0) }
+            ?? item.skipIfProcessRunning.first { processes.contains(String($0.prefix(CleanScanner.processNameLength)).lowercased()) }
+    }
+
     public func execute(_ items: [RemovalItem], dryRun: Bool, command: String) -> CleanReport {
         var outcomes: [ItemOutcome] = []
+        let anyGuards = items.contains { !$0.skipIfRunning.isEmpty || !$0.skipIfProcessRunning.isEmpty }
+        let guardBundleIDs = anyGuards ? CleanScanner.runningBundleIDs() : []
+        let guardProcesses = items.contains { !$0.skipIfProcessRunning.isEmpty }
+            ? Set(CleanScanner.runningProcessNames().map { $0.lowercased() }) : []
         for item in items {
             let action = action(for: item)
+            // Re-check the agent's guard right before removal: it may have started after the scan.
+            if let busy = busyMarker(for: item, bundleIDs: guardBundleIDs, processes: guardProcesses) {
+                outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
+                                            message: "guard: \(busy) is running"))
+                continue
+            }
             // Re-check right before removal: the tree may have changed since the preview.
             let verdict = safety.check(item.path)
             guard verdict == .allowed else {
@@ -149,7 +173,8 @@ extension CleanPlan {
     public var removalItems: [RemovalItem] {
         results.flatMap { r in
             r.candidates.filter(\.selected).map {
-                RemovalItem(path: $0.path, source: r.rule.id, bytes: $0.size, action: r.rule.action)
+                RemovalItem(path: $0.path, source: r.rule.id, bytes: $0.size, action: r.rule.action,
+                            skipIfRunning: r.rule.skipIfRunning, skipIfProcessRunning: r.rule.skipIfProcessRunning)
             }
         }
     }
