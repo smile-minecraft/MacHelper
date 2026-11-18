@@ -41,14 +41,18 @@ public struct RemovalItem: Sendable {
     /// Executable names that must not be running for this item to be removed. Matched against the
     /// first 32 characters of the name, case-insensitively.
     public let skipIfProcessRunning: [String]
+    /// The rule's age condition, re-checked at removal time: a file modified since the preview
+    /// (a resumed session appending to it, for example) is left in place. 0 means no condition.
+    public let minAgeDays: Int
     public init(path: String, source: String, bytes: UInt64, action: CleanAction,
-                skipIfRunning: [String] = [], skipIfProcessRunning: [String] = []) {
+                skipIfRunning: [String] = [], skipIfProcessRunning: [String] = [], minAgeDays: Int = 0) {
         self.path = path
         self.source = source
         self.bytes = bytes
         self.action = action
         self.skipIfRunning = skipIfRunning
         self.skipIfProcessRunning = skipIfProcessRunning
+        self.minAgeDays = minAgeDays
     }
 }
 
@@ -114,21 +118,28 @@ public struct CleanExecutor: Sendable {
     }
 
     /// Re-checks right before removal, so an agent that started after the scan stops the removal.
-    private func busyMarker(for item: RemovalItem, bundleIDs: Set<String>, processes: Set<String>) -> String? {
-        item.skipIfRunning.first { bundleIDs.contains($0) }
-            ?? item.skipIfProcessRunning.first { processes.contains(String($0.prefix(CleanScanner.processNameLength)).lowercased()) }
+    /// Queried fresh for every guarded item: an agent that started while earlier items of the same
+    /// batch were being removed is caught too. Unguarded items (uninstall leftovers, the Trash…)
+    /// skip the query entirely.
+    private func busyMarker(for item: RemovalItem) -> String? {
+        if !item.skipIfRunning.isEmpty,
+           let app = item.skipIfRunning.first(where: CleanScanner.runningBundleIDs().contains) { return app }
+        if !item.skipIfProcessRunning.isEmpty {
+            let running = Set(CleanScanner.runningProcessNames().map { $0.lowercased() })
+            return item.skipIfProcessRunning.first {
+                running.contains(String($0.prefix(CleanScanner.processNameLength)).lowercased())
+            }
+        }
+        return nil
     }
 
     public func execute(_ items: [RemovalItem], dryRun: Bool, command: String) -> CleanReport {
         var outcomes: [ItemOutcome] = []
-        let anyGuards = items.contains { !$0.skipIfRunning.isEmpty || !$0.skipIfProcessRunning.isEmpty }
-        let guardBundleIDs = anyGuards ? CleanScanner.runningBundleIDs() : []
-        let guardProcesses = items.contains { !$0.skipIfProcessRunning.isEmpty }
-            ? Set(CleanScanner.runningProcessNames().map { $0.lowercased() }) : []
         for item in items {
             let action = action(for: item)
-            // Re-check the agent's guard right before removal: it may have started after the scan.
-            if let busy = busyMarker(for: item, bundleIDs: guardBundleIDs, processes: guardProcesses) {
+            // Re-check the agent's guard right before removal: it may have started after the scan
+            // or while this batch was already running.
+            if let busy = busyMarker(for: item) {
                 outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
                                             message: "guard: \(busy) is running"))
                 continue
@@ -145,6 +156,16 @@ public struct CleanExecutor: Sendable {
                 outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
                                             message: "no longer exists"))
                 continue
+            }
+            // Re-check the rule's age condition: a file modified since the preview (a resumed
+            // session appending to it) is live data again, whatever the preview said.
+            if item.minAgeDays > 0 {
+                let modified = Date(timeIntervalSince1970: TimeInterval(st.st_mtimespec.tv_sec))
+                if Date().timeIntervalSince(modified) < TimeInterval(item.minAgeDays) * 86_400 {
+                    outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
+                                                message: "age: modified since the preview"))
+                    continue
+                }
             }
             if dryRun {
                 outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: item.bytes,
@@ -174,7 +195,8 @@ extension CleanPlan {
         results.flatMap { r in
             r.candidates.filter(\.selected).map {
                 RemovalItem(path: $0.path, source: r.rule.id, bytes: $0.size, action: r.rule.action,
-                            skipIfRunning: r.rule.skipIfRunning, skipIfProcessRunning: r.rule.skipIfProcessRunning)
+                            skipIfRunning: r.rule.skipIfRunning, skipIfProcessRunning: r.rule.skipIfProcessRunning,
+                            minAgeDays: r.rule.minAgeDays)
             }
         }
     }

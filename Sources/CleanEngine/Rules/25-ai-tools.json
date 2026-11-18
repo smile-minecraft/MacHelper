@@ -97,12 +97,11 @@
     {
       "id": "ai.codex-cache",
       "title": "Codex caches",
-      "description": "Downloaded caches and plugin downloads from the Codex agent, rebuilt on the next run. The agent itself and its settings are kept.",
+      "description": "Downloaded caches from the Codex agent, rebuilt on the next run. The agent itself, its installed plugins and its settings are kept.",
       "category": "ai",
       "risk": "low",
       "paths": [
-        "~/.codex/cache/*",
-        "~/.codex/plugins/cache/*"
+        "~/.codex/cache/*"
       ],
       "minAgeDays": 7,
       "skipIfProcessRunning": [

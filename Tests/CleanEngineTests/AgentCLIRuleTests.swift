@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 import Testing
 @testable import CleanEngine
@@ -100,6 +101,40 @@ import Testing
         #expect(sessions == ["rollout-a.jsonl", "rollout-b.jsonl"], "only session files, nothing else")
     }
 
+    @Test func installedCodexPluginsAreNeverCleaned() throws {
+        let t = try TempDir()
+        // ~/.codex/plugins/cache is the root Codex installs plugins into, not a rebuildable
+        // download cache: an old plugin tree must never show up as a candidate.
+        try t.file(".codex/plugins/cache/old-plugin/plugin.json", bytes: 4_096, ageDays: 90)
+        try t.file(".codex/plugins/cache/old-plugin/payload/agent.bin", bytes: 40_000, ageDays: 90)
+        try t.file(".codex/cache/stale.bin", bytes: 4_096, ageDays: 10)
+        let pluginFile = t.path + "/.codex/plugins/cache/old-plugin/plugin.json"
+        let pluginRoot = t.path + "/.codex/plugins"
+
+        // No rule at all may match the installed-plugin tree.
+        for r in try RuleSet.load(includeUserRules: false) {
+            for pattern in r.paths.map({ $0.replacingOccurrences(of: "~", with: t.path) }) {
+                #expect(fnmatch(pattern, pluginFile, 0) != 0, "\(r.id): \(pattern) must not match installed plugins")
+            }
+        }
+
+        // And the default clean (low risk, preselected) over a synthetic home keeps the whole
+        // plugin tree out of its candidates while still offering the rebuildable cache.
+        let defaults = try RuleSet.load(includeUserRules: false).filter { $0.risk == .low && $0.selectedByDefault }
+            .map { rule -> CleanRule in
+                var copy = rule
+                copy.paths = rule.paths.map { $0.replacingOccurrences(of: "~", with: t.path) }
+                copy.skipIfRunning = []
+                copy.skipIfProcessRunning = []
+                return copy
+            }
+        let candidates = CleanScanner(rules: defaults, safety: safety(t)).scan().results.flatMap(\.candidates)
+        #expect(!candidates.contains { $0.path.hasPrefix(pluginRoot) },
+                "the installed plugin tree must never be a candidate")
+        #expect(candidates.contains { $0.path.hasSuffix("/.codex/cache/stale.bin") },
+                "the rebuildable cache is still offered")
+    }
+
     @Test func codexSessionHistoryIsScannedFileByFileAndNeverPreselected() throws {
         let t = try TempDir()
         // The directory dates are all old; only the files' own mtimes separate finished sessions
@@ -121,6 +156,37 @@ import Testing
                 "a session appended today inside an old month must not be offered: \(resumed), \(current)")
         #expect(result.candidates.allSatisfy { !$0.selected }, "session history is never preselected")
         #expect(plan.removalItems.isEmpty, "unselected candidates never reach the executor")
+    }
+
+    @Test func fileChangedAfterThePreviewIsNotRemoved() throws {
+        let t = try TempDir()
+        let resumed = try t.file(".codex/tmp/resumed.bin", bytes: 4_096, ageDays: 10)
+        let finished = try t.file(".codex/tmp/finished.bin", bytes: 4_096, ageDays: 10)
+
+        let rule = try syntheticRule("ai.codex-temp", home: t)   // minAgeDays 7
+        let items = CleanScanner(rules: [rule], safety: safety(t)).scan().removalItems
+        try #require(items.count == 2)
+        #expect(items.allSatisfy { $0.minAgeDays == 7 }, "the plan carries the rule's age condition")
+
+        // The session is resumed after the preview: its file is appended to today.
+        try t.setAge(".codex/tmp/resumed.bin", days: 0)
+
+        let backend = TestTrashBackend(trashDirectory: t.url.appending(path: "test-trash"))
+        let log = OperationLog(url: t.url.appending(path: "operations.jsonl"))
+        let report = CleanExecutor.injected(safety: safety(t), log: log, removal: backend.backend)
+            .execute(items, dryRun: false, command: "test")
+        let byPath = Dictionary(uniqueKeysWithValues: report.items.map { ($0.path, $0) })
+
+        #expect(byPath[resumed]?.result == .skipped)
+        #expect(byPath[resumed]?.message == "age: modified since the preview")
+        #expect(byPath[finished]?.result == .deleted)
+        #expect(t.exists(".codex/tmp/resumed.bin"), "the resumed session's file stays")
+        #expect(!t.exists(".codex/tmp/finished.bin"))
+        #expect(backend.deletedPaths == [finished])
+
+        // Items without an age condition (uninstall leftovers, the Trash) keep the old behavior.
+        let plain = RemovalItem(path: finished, source: "other", bytes: 1, action: .delete)
+        #expect(plain.minAgeDays == 0)
     }
 
     @Test func processAppearingAfterTheScanStopsTheRemoval() throws {
@@ -180,6 +246,38 @@ import Testing
         #expect(backend.deletedPaths == [file])
     }
 
+    @Test func agentStartingMidBatchStopsTheRemainingItems() throws {
+        let t = try TempDir()
+        let first = try t.file(".codex/tmp/first.bin", bytes: 8_192, ageDays: 10)   // largest, removed first
+        let second = try t.file(".codex/tmp/second.bin", bytes: 4_096, ageDays: 10)
+
+        let guardName = "mhguard" + UUID().uuidString.prefix(8).lowercased()
+        var rule = try syntheticRule("ai.codex-temp", home: t)
+        rule.skipIfProcessRunning = [guardName.uppercased()]
+        let items = CleanScanner(rules: [rule], safety: safety(t)).scan().removalItems
+        try #require(items.count == 2)
+        #expect(items.map(\.path) == [first, second])
+
+        let binDir = t.url.appending(path: "procbin")
+        try FileManager.default.createDirectory(at: binDir, withIntermediateDirectories: true)
+        let exe = binDir.appending(path: guardName)
+        try FileManager.default.copyItem(at: URL(fileURLWithPath: "/bin/sleep"), to: exe)
+
+        // The agent starts while the batch is already running: during the first item's removal.
+        let backend = MidBatchAgentBackend(agentExecutable: exe, launchOnFirstDeleteOf: first)
+        defer { backend.agentProcess?.terminate() }
+        let log = OperationLog(url: t.url.appending(path: "operations.jsonl"))
+        let report = CleanExecutor.injected(safety: safety(t), log: log, removal: backend.backend)
+            .execute(items, dryRun: false, command: "test")
+
+        #expect(report.items.map(\.result) == [.deleted, .skipped])
+        #expect(report.items[1].message == "guard: \(guardName.uppercased()) is running")
+        #expect(!t.exists(".codex/tmp/first.bin"))
+        #expect(t.exists(".codex/tmp/second.bin"),
+                "the second item is spared: its guard check is fresh, not a snapshot from batch start")
+        #expect(backend.deletions == [first])
+    }
+
     @Test func guardNamesMatchCaseInsensitively() throws {
         let t = try TempDir()
         try t.file("cache/pkg/a.bin", bytes: 20_000)
@@ -224,6 +322,57 @@ import Testing
                 #expect(table.strings["rule.\(id).\(suffix)"] == nil, "rule.\(id).\(suffix) is orphaned")
             }
         }
+    }
+}
+
+/// A removal backend for the mid-batch test: it removes files like the real one and, while the
+/// batch is already running, starts the synthetic agent process during the first item's removal —
+/// the moment a real agent would start while a clean is executing.
+final class MidBatchAgentBackend: @unchecked Sendable {
+    let agentExecutable: URL
+    let launchOnFirstDeleteOf: String
+    private let lock = NSLock()
+    private var launchedAgent: Process?
+    private var deleted: [String] = []
+
+    init(agentExecutable: URL, launchOnFirstDeleteOf: String) {
+        self.agentExecutable = agentExecutable
+        self.launchOnFirstDeleteOf = launchOnFirstDeleteOf
+    }
+
+    var backend: RemovalBackend {
+        .custom(trash: { _ in throw CocoaError(.featureUnsupported) }, delete: { try self.remove($0) })
+    }
+
+    var deletions: [String] { locked { deleted } }
+    var agentProcess: Process? { locked { launchedAgent } }
+
+    private func remove(_ url: URL) throws {
+        try FileManager.default.removeItem(at: url)
+        let launch = locked {
+            deleted.append(url.path)
+            return url.path == launchOnFirstDeleteOf && launchedAgent == nil
+        }
+        if launch { try launchAgentAndWaitUntilVisible() }
+    }
+
+    private func launchAgentAndWaitUntilVisible() throws {
+        let agent = Process()
+        agent.executableURL = agentExecutable
+        agent.arguments = ["60"]
+        try agent.run()
+        locked { launchedAgent = agent }
+        let name = agentExecutable.lastPathComponent
+        let deadline = Date().addingTimeInterval(5)
+        while Date() < deadline && !CleanScanner.runningProcessNames().contains(name) {
+            Thread.sleep(forTimeInterval: 0.05)
+        }
+    }
+
+    private func locked<T>(_ body: () -> T) -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return body()
     }
 }
 

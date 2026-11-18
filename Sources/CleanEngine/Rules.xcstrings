@@ -400,37 +400,37 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Downloaded caches and plugin downloads from the Codex agent, rebuilt on the next run. The agent itself and its settings are kept."
+            "value": "Downloaded caches from the Codex agent, rebuilt on the next run. The agent itself, its installed plugins and its settings are kept."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cachés descargadas y descargas de complementos del agente Codex, que se vuelven a descargar en la siguiente ejecución. El agente y su configuración se conservan."
+            "value": "Cachés descargadas del agente Codex, que se vuelven a descargar en la siguiente ejecución. El agente, sus complementos instalados y su configuración se conservan."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Codex エージェントがダウンロードしたキャッシュとプラグインのダウンロード。次回実行時に再構築されます。エージェント本体と設定は保持されます。"
+            "value": "Codex エージェントがダウンロードしたキャッシュ。次回実行時に再構築されます。エージェント本体、インストール済みプラグイン、設定は保持されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Codex 에이전트가 내려받은 캐시와 플러그인 다운로드. 다음 실행 시 다시 만들어집니다. 에이전트 자체와 설정은 유지됩니다."
+            "value": "Codex 에이전트가 내려받은 캐시. 다음 실행 시 다시 만들어집니다. 에이전트 자체, 설치된 플러그인, 설정은 유지됩니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Codex 智能体下载的缓存与插件下载文件，下次运行时会重新下载。智能体本身与设置均会保留。"
+            "value": "Codex 智能体下载的缓存，下次运行时会重新下载。智能体本身、已安装的外挂与设置均会保留。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "Codex 代理下載的快取與外掛下載檔，下次執行時會重新下載。代理本體與設定都會保留。"
+            "value": "Codex 代理下載的快取，下次執行時會重新下載。代理本體、已安裝的外掛與設定都會保留。"
           }
         }
       }

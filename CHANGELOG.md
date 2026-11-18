@@ -8,9 +8,10 @@ Each release's notes on GitHub come from its section here (`scripts/release.sh`)
 Clean adds rules for Claude Code, Codex and OpenCode. Their low-risk files — caches, logs older
 than a week and temporary files — are cleaned by default. Session history from each agent — Claude
 Code transcripts, Codex sessions, OpenCode tool output — is only offered, never preselected, and
-moves to the Trash after a month. The rules do not touch any agent’s own program, settings or
-credentials; every agent rule pauses while the agent itself is running, and that check happens
-again right before anything is removed. The rule text is translated into all six languages.
+moves to the Trash after a month. The rules do not touch any agent’s own program, installed
+plugins, settings or credentials. Every agent rule pauses while the agent itself is running —
+checked freshly before each removal — and a file that changed after the preview, by a resumed
+session for example, is left in place. The rule text is translated into all six languages.
 
 ## [0.3.5]
 
