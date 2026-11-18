@@ -61,6 +61,201 @@
       "skipIfRunning": [
         "ai.elementlabs.lmstudio"
       ]
+    },
+    {
+      "id": "ai.claude-cache",
+      "title": "Claude Code caches",
+      "description": "Shell snapshots, paste cache, telemetry and other caches from the Claude Code agent. Rebuilt as you use it; projects and settings are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.claude/shell-snapshots/*",
+        "~/.claude/paste-cache/*",
+        "~/.claude/cache/*",
+        "~/.claude/telemetry/*"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "claude"
+      ]
+    },
+    {
+      "id": "ai.claude-transcripts",
+      "title": "Claude Code old transcripts",
+      "description": "Session transcripts from projects you worked on more than a month ago. Recent sessions and settings are kept.",
+      "category": "ai",
+      "risk": "medium",
+      "paths": [
+        "~/.claude/projects/*/*.jsonl",
+        "~/.claude/transcripts/*"
+      ],
+      "minAgeDays": 30,
+      "skipIfProcessRunning": [
+        "claude"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "ai.codex-cache",
+      "title": "Codex caches",
+      "description": "Downloaded caches and plugin downloads from the Codex agent, rebuilt on the next run. The agent itself and its settings are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.codex/cache/*",
+        "~/.codex/plugins/cache/*"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "codex"
+      ]
+    },
+    {
+      "id": "ai.codex-logs",
+      "title": "Codex log database",
+      "description": "Log databases the Codex agent rebuilds on the next run. Session history and settings are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.codex/logs_*.sqlite*",
+        "~/.codex/sqlite/logs_*.sqlite*"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "codex"
+      ]
+    },
+    {
+      "id": "ai.codex-temp",
+      "title": "Codex temporary files",
+      "description": "Shell snapshots and temporary files left by the Codex agent more than a week ago.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.codex/shell_snapshots/*",
+        "~/.codex/tmp/*"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "codex"
+      ]
+    },
+    {
+      "id": "ai.codex-sessions",
+      "title": "Codex old sessions",
+      "description": "Session records from months you used Codex more than a month ago. The current month's sessions and settings are kept.",
+      "category": "ai",
+      "risk": "medium",
+      "paths": [
+        "~/.codex/sessions/*/*",
+        "~/.codex/archived_sessions/*"
+      ],
+      "minAgeDays": 30,
+      "skipIfProcessRunning": [
+        "codex"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "ai.codex-thread-history",
+      "title": "Codex thread history database",
+      "description": "The database holding Codex conversation history, which can grow very large. Deleting it removes old conversation history; the agent rebuilds the file.",
+      "category": "ai",
+      "risk": "high",
+      "paths": [
+        "~/.codex/thread_history_*.sqlite*"
+      ],
+      "skipIfProcessRunning": [
+        "codex"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "ai.opencode-log",
+      "title": "OpenCode server log",
+      "description": "The OpenCode agent's log files older than a week. Sessions and settings are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.local/share/opencode/log/*"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "opencode"
+      ]
+    },
+    {
+      "id": "ai.opencode-tool-output",
+      "title": "OpenCode old tool output",
+      "description": "Saved copies of tool output from OpenCode sessions older than a month. Sessions and settings are kept.",
+      "category": "ai",
+      "risk": "medium",
+      "paths": [
+        "~/.local/share/opencode/tool-output/*"
+      ],
+      "minAgeDays": 30,
+      "skipIfProcessRunning": [
+        "opencode"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "ai.opencode-snapshot",
+      "title": "OpenCode old file snapshots",
+      "description": "Copies of files OpenCode kept so changes can be undone, from sessions older than a month. Your own files are kept.",
+      "category": "ai",
+      "risk": "medium",
+      "paths": [
+        "~/.local/share/opencode/snapshot/*"
+      ],
+      "minAgeDays": 30,
+      "skipIfProcessRunning": [
+        "opencode"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "ai.opencode-db",
+      "title": "OpenCode session database",
+      "description": "The database holding OpenCode sessions and history, which can grow very large. Deleting it removes old session history; the agent rebuilds the file.",
+      "category": "ai",
+      "risk": "high",
+      "paths": [
+        "~/.local/share/opencode/opencode.db*"
+      ],
+      "skipIfProcessRunning": [
+        "opencode"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "ai.pi-sessions",
+      "title": "Pi old sessions",
+      "description": "Session transcripts from projects you worked on with the Pi agent more than a month ago. Settings and installed extensions are kept.",
+      "category": "ai",
+      "risk": "medium",
+      "paths": [
+        "~/.pi/agent/sessions/*/*"
+      ],
+      "minAgeDays": 30,
+      "skipIfProcessRunning": [
+        "pi"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "ai.pi-logs",
+      "title": "Pi daemon logs",
+      "description": "Log files of the Pi agent's background service older than a week. Sessions and settings are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.pi/agent/cron/*.log"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "pi"
+      ]
     }
   ]
 }

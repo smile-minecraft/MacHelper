@@ -3,6 +3,17 @@
 Each release's notes on GitHub come from its section here (`scripts/release.sh`). Add changes under
 **Unreleased** as they land, then rename it to the version before releasing.
 
+## [Unreleased]
+
+Coding agents keep large databases and piles of temporary files on your Mac, and Clean now knows
+what to do with them. Rules for Claude Code, Codex, OpenCode and Pi join the AI Tools category, in
+three groups: their caches, logs and temporary files are low risk and cleaned by default once they
+are a week old; their session transcripts, file snapshots and tool output are only offered, never
+preselected, and go to the Trash after a month; and the two databases that grow the most — Codex's
+conversation history and OpenCode's session database — are marked high risk and always ask first.
+Every rule pauses while its agent is running, and none of them touches the agents' own programs,
+settings or credentials. New text is translated into all six languages.
+
 ## [0.3.5]
 
 The menu bar Network page is rebuilt around the numbers that matter, and a new Power page shows

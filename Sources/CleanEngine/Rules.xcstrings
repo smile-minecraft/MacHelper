@@ -230,6 +230,580 @@
         }
       }
     },
+    "rule.ai.claude-cache.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shell snapshots, paste cache, telemetry and other caches from the Claude Code agent. Rebuilt as you use it; projects and settings are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instantáneas de shell, caché de pegado, telemetría y otras cachés del agente Claude Code. Se reconstruyen al usarlo; los proyectos y la configuración se conservan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code エージェントが作成したシェルスナップショット、貼り付けキャッシュ、テレメトリなどのキャッシュ。使用中に再構築されます。プロジェクトと設定は保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code 에이전트가 만든 셸 스냅샷, 붙여넣기 캐시, 텔레메트리 등의 캐시. 사용하면서 다시 만들어집니다. 프로젝트와 설정은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code 智能体的 shell 快照、粘贴缓存和遥测数据等缓存。使用时会自动重建；项目与设置均会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code 代理產生的 shell 快照、貼上快取與遙測資料等快取。使用時會自動重建；專案與設定都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.claude-cache.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code caches"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés de Claude Code"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code 快取"
+          }
+        }
+      }
+    },
+    "rule.ai.claude-transcripts.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session transcripts from projects you worked on more than a month ago. Recent sessions and settings are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcripciones de sesiones de proyectos en los que trabajaste hace más de un mes. Las sesiones recientes y la configuración se conservan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 か月以上前に作業したプロジェクトの会話ログ。最近の会話と設定は保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 달 넘게 지난 프로젝트의 대화 기록. 최근 대화와 설정은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一个多月前项目的对话记录。近期的对话与设置均会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一個多月前專案的對話記錄。近期的對話與設定都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.claude-transcripts.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code old transcripts"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcripciones antiguas de Claude Code"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code の古い会話ログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code 오래된 대화 기록"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code 旧对话记录"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude Code 舊對話記錄"
+          }
+        }
+      }
+    },
+    "rule.ai.codex-cache.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloaded caches and plugin downloads from the Codex agent, rebuilt on the next run. The agent itself and its settings are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés descargadas y descargas de complementos del agente Codex, que se vuelven a descargar en la siguiente ejecución. El agente y su configuración se conservan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex エージェントがダウンロードしたキャッシュとプラグインのダウンロード。次回実行時に再構築されます。エージェント本体と設定は保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 에이전트가 내려받은 캐시와 플러그인 다운로드. 다음 실행 시 다시 만들어집니다. 에이전트 자체와 설정은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 智能体下载的缓存与插件下载文件，下次运行时会重新下载。智能体本身与设置均会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 代理下載的快取與外掛下載檔，下次執行時會重新下載。代理本體與設定都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.codex-cache.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex caches"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés de Codex"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex のキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 快取"
+          }
+        }
+      }
+    },
+    "rule.ai.codex-logs.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log databases the Codex agent rebuilds on the next run. Session history and settings are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bases de datos de registros que el agente Codex vuelve a crear en la siguiente ejecución. El historial de sesiones y la configuración se conservan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex エージェントが次回実行時に再構築するログデータベース。セッション履歴と設定は保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 에이전트가 다음 실행 시 다시 만드는 로그 데이터베이스. 세션 기록과 설정은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 智能体下次运行时会重建的日志数据库。会话历史与设置均会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 代理下次執行時會重建的記錄資料庫。對話歷史與設定都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.codex-logs.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex log database"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base de datos de registros de Codex"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex のログデータベース"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 로그 데이터베이스"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 日志数据库"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 記錄資料庫"
+          }
+        }
+      }
+    },
+    "rule.ai.codex-sessions.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session records from months you used Codex more than a month ago. The current month's sessions and settings are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros de sesiones de los meses en que usaste Codex hace más de un mes. Las sesiones del mes actual y la configuración se conservan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 か月以上前に Codex を使った月のセッション記録。当月のセッションと設定は保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 달 넘게 지난 달의 Codex 세션 기록. 이번 달 세션과 설정은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一个多月前使用 Codex 的月份的会话记录。当月的会话与设置均会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一個多月前使用 Codex 的月份留下的對話記錄。當月份的對話與設定都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.codex-sessions.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex old sessions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesiones antiguas de Codex"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex の古いセッション"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 오래된 세션"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 旧会话"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 舊對話記錄"
+          }
+        }
+      }
+    },
+    "rule.ai.codex-temp.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shell snapshots and temporary files left by the Codex agent more than a week ago."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instantáneas de shell y archivos temporales que el agente Codex dejó hace más de una semana."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex エージェントが 1 週間以上前に残したシェルスナップショットと一時ファイル。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 에이전트가 일주일 넘게 남겨둔 셸 스냅샷과 임시 파일."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 智能体一周以上前留下的 shell 快照与临时文件。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 代理一週前以上留下的 shell 快照與暫存檔。"
+          }
+        }
+      }
+    },
+    "rule.ai.codex-temp.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex temporary files"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos temporales de Codex"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex の一時ファイル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 임시 파일"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 临时文件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 暫存檔"
+          }
+        }
+      }
+    },
+    "rule.ai.codex-thread-history.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The database holding Codex conversation history, which can grow very large. Deleting it removes old conversation history; the agent rebuilds the file."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La base de datos que guarda el historial de conversaciones de Codex, que puede crecer mucho. Al eliminarla se pierde el historial antiguo; el agente vuelve a crear el archivo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex の会話履歴を保存するデータベース。非常に大きくなることがあります。削除すると古い会話履歴は失われ、エージェントがファイルを再構築します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 대화 기록을 저장하는 데이터베이스로 매우 커질 수 있습니다. 삭제하면 오래된 대화 기록이 사라지며, 에이전트가 파일을 다시 만듭니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储 Codex 对话历史的数据库，可能会变得非常大。删除会移除旧的对话历史；智能体会重建该文件。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儲存 Codex 對話歷史的資料庫，可能會變得非常大。刪除會移除舊的對話歷史；代理會重建檔案。"
+          }
+        }
+      }
+    },
+    "rule.ai.codex-thread-history.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex thread history database"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base de datos del historial de conversaciones de Codex"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex のスレッド履歴データベース"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 대화 기록 데이터베이스"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 对话历史数据库"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 對話歷史資料庫"
+          }
+        }
+      }
+    },
     "rule.ai.lmstudio-cache.description": {
       "extractionState": "manual",
       "localizations": {
@@ -636,6 +1210,498 @@
           "stringUnit": {
             "state": "translated",
             "value": "oMLX 舊記錄檔"
+          }
+        }
+      }
+    },
+    "rule.ai.opencode-db.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The database holding OpenCode sessions and history, which can grow very large. Deleting it removes old session history; the agent rebuilds the file."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La base de datos que guarda las sesiones y el historial de OpenCode, que puede crecer mucho. Al eliminarla se pierde el historial antiguo de sesiones; el agente vuelve a crear el archivo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode のセッションと履歴を保存するデータベース。非常に大きくなることがあります。削除すると古いセッション履歴は失われ、エージェントがファイルを再構築します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 세션과 기록을 저장하는 데이터베이스로 매우 커질 수 있습니다. 삭제하면 오래된 세션 기록이 사라지며, 에이전트가 파일을 다시 만듭니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储 OpenCode 会话与历史的数据库，可能会变得非常大。删除会移除旧的会话历史；智能体会重建该文件。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儲存 OpenCode 對話與歷史的資料庫，可能會變得非常大。刪除會移除舊的對話歷史；代理會重建檔案。"
+          }
+        }
+      }
+    },
+    "rule.ai.opencode-db.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode session database"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base de datos de sesiones de OpenCode"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode のセッションデータベース"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 세션 데이터베이스"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 会话数据库"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 對話資料庫"
+          }
+        }
+      }
+    },
+    "rule.ai.opencode-log.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The OpenCode agent's log files older than a week. Sessions and settings are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos de registro del agente OpenCode con más de una semana. Las sesiones y la configuración se conservan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode エージェントの 1 週間以上前のログファイル。セッションと設定は保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 에이전트의 일주일 넘은 로그 파일. 세션과 설정은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 智能体一周以上的日志文件。会话与设置均会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 代理一週前以上的日誌檔。對話與設定都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.opencode-log.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode server log"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registro del servidor de OpenCode"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode のログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 로그"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 日志"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 日誌"
+          }
+        }
+      }
+    },
+    "rule.ai.opencode-snapshot.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copies of files OpenCode kept so changes can be undone, from sessions older than a month. Your own files are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copias de archivos que OpenCode guardó para poder deshacer cambios, de sesiones de hace más de un mes. Tus propios archivos se conservan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "変更を元に戻せるように OpenCode が保存したファイルのコピーで、1 か月以上前のセッションによるもの。あなたのファイルは保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "변경을 되돌릴 수 있도록 OpenCode 가 저장한 파일 복사본으로, 한 달 넘게 지난 세션의 것입니다. 사용자의 파일은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 为了让修改可以撤销而保存的文件副本，来自一个多月前的会话。你自己的文件均会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 為了讓修改可以還原而保存的檔案副本，來自一個多月前的對話。你自己的檔案都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.opencode-snapshot.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode old file snapshots"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instantáneas de archivos antiguas de OpenCode"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode の古いファイルスナップショット"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 오래된 파일 스냅샷"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 旧文件快照"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 舊檔案快照"
+          }
+        }
+      }
+    },
+    "rule.ai.opencode-tool-output.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved copies of tool output from OpenCode sessions older than a month. Sessions and settings are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copias de la salida de herramientas guardadas de sesiones de OpenCode de hace más de un mes. Las sesiones y la configuración se conservan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 か月以上前の OpenCode セッションで保存されたツール出力のコピー。セッションと設定は保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 달 넘게 지난 OpenCode 세션에서 저장한 도구 출력 복사본. 세션과 설정은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一个多月前 OpenCode 会话保存的工具输出副本。会话与设置均会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一個多月前 OpenCode 對話保存的工具輸出副本。對話與設定都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.opencode-tool-output.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode old tool output"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salida de herramientas antigua de OpenCode"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode の古いツール出力"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 오래된 도구 출력"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 旧工具输出"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenCode 舊工具輸出"
+          }
+        }
+      }
+    },
+    "rule.ai.pi-logs.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log files of the Pi agent's background service older than a week. Sessions and settings are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos de registro del servicio en segundo plano del agente Pi con más de una semana. Las sesiones y la configuración se conservan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi エージェントのバックグラウンドサービスの 1 週間以上前のログファイル。セッションと設定は保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi 에이전트 백그라운드 서비스의 일주일 넘은 로그 파일. 세션과 설정은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi 智能体后台服务一周以上的日志文件。会话与设置均会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi 代理背景服務一週前以上的日誌檔。對話與設定都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.pi-logs.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi daemon logs"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros del servicio en segundo plano de Pi"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi のバックグラウンドサービスログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi 백그라운드 서비스 로그"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi 后台服务日志"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi 背景服務日誌"
+          }
+        }
+      }
+    },
+    "rule.ai.pi-sessions.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session transcripts from projects you worked on with the Pi agent more than a month ago. Settings and installed extensions are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcripciones de sesiones de proyectos en los que trabajaste con el agente Pi hace más de un mes. La configuración y las extensiones instaladas se conservan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 か月以上前に Pi エージェントで作業したプロジェクトの会話ログ。設定とインストール済み拡張機能は保持されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 달 넘게 전 Pi 에이전트로 작업한 프로젝트의 대화 기록. 설정과 설치된 확장 기능은 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一个多月前使用 Pi 智能体的项目会话记录。设置与已安装的扩展均会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一個多月前使用 Pi 代理的專案對話記錄。設定與已安裝的擴充套件都會保留。"
+          }
+        }
+      }
+    },
+    "rule.ai.pi-sessions.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi old sessions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesiones antiguas de Pi"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi の古いセッション"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi 오래된 세션"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi 旧会话"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pi 舊對話記錄"
           }
         }
       }
