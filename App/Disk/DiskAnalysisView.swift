@@ -199,14 +199,45 @@ struct DiskAnalysisView: View {
     }
 
     private var largestFilters: some View {
-        HStack {
-            Picker("Kind", selection: $model.kindFilter) {
-                Text("All kinds").tag(FileKind?.none)
-                ForEach(FileKind.allCases) { Text($0.title).tag(FileKind?.some($0)) }
+        VStack(spacing: 6) {
+            HStack(spacing: 8) {
+                HStack(spacing: 6) {
+                    Image(systemName: "magnifyingglass").foregroundStyle(Palette.textFaint)
+                    TextField("Search names and paths", text: $model.searchText)
+                        .textFieldStyle(.plain)
+                        .lineLimit(1)
+                    if !model.searchText.isEmpty {
+                        Button { model.searchText = "" } label: { Image(systemName: "xmark.circle.fill") }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Palette.textFaint)
+                            .accessibilityLabel("Clear search")
+                    }
+                }
+                .padding(.horizontal, 8).padding(.vertical, 5)
+                .background(Palette.card, in: SurfaceShape(cornerRadius: 6))
+                Picker("Size", selection: $model.minFileBytes) {
+                    Text("Any size").tag(UInt64(0))
+                    Text("Over 10 MB").tag(UInt64(10_000_000))
+                    Text("Over 100 MB").tag(UInt64(100_000_000))
+                    Text("Over 1 GB").tag(UInt64(1_000_000_000))
+                }
+                .labelsHidden()
+                .fixedSize()
             }
-            Picker("Modified", selection: $model.olderThanDays) {
-                Text("Any time").tag(Int?.none)
-                ForEach([30, 90, 365, 730], id: \.self) { d in Text("Unchanged for \(d) days").tag(Int?.some(d)) }
+            HStack {
+                Picker("Kind", selection: $model.kindFilter) {
+                    Text("All kinds").tag(FileKind?.none)
+                    ForEach(FileKind.allCases) { Text($0.title).tag(FileKind?.some($0)) }
+                }
+                Picker("Modified", selection: $model.olderThanDays) {
+                    Text("Any time").tag(Int?.none)
+                    ForEach([30, 90, 365, 730], id: \.self) { d in Text("Unchanged for \(d) days").tag(Int?.some(d)) }
+                }
+                Spacer(minLength: 0)
+                if model.isFileFilterActive {
+                    Button("Clear Filters") { model.clearFileFilters() }
+                        .buttonStyle(.link)
+                }
             }
         }
         .labelsHidden()
