@@ -436,6 +436,9 @@ private struct DiskTab: View {
             }
             historySection
             activitySection
+            // DiskIOSection owns its sampler and `.task`; it stops sampling when the page goes
+            // away.
+            DiskIOSection()
         }
         .task {
             // Every appearance refreshes immediately, so points written while another tab was

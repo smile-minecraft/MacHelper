@@ -14,8 +14,7 @@ public struct ProcessUsage: Sendable, Hashable, Codable, Identifiable {
 
     /// The .app bundle the executable lives in, if any.
     public var appPath: String? {
-        guard let path, let r = path.range(of: ".app/") else { return nil }
-        return String(path[..<r.lowerBound]) + ".app"
+        path.flatMap(ProcessGrouping.outermostApp)
     }
 }
 

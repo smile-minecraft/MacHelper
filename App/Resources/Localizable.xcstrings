@@ -545,6 +545,40 @@
         }
       }
     },
+    "%lld processes couldn't be read (other users or system) and are not included.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld procesos no se pudieron leer (otros usuarios o el sistema) y no están incluidos."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 個のプロセスを読み取れなかったため（他のユーザーまたはシステム）、含まれていません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld개의 프로세스를 읽을 수 없어(다른 사용자 또는 시스템) 포함되지 않았습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 个进程无法读取（其他用户或系统），未列入。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 個程序無法讀取（其他使用者或系統），未列入。"
+          }
+        }
+      }
+    },
     "%lld rpm/s": {
       "localizations": {
         "es": {
@@ -4043,6 +4077,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "磁碟分析"
+          }
+        }
+      }
+    },
+    "Disk I/O by app": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I/O de disco por app"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリ別ディスク I/O"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱별 디스크 I/O"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按 App 显示的磁盘 I/O"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依 App 顯示的磁碟 I/O"
           }
         }
       }
@@ -8161,6 +8229,40 @@
         }
       }
     },
+    "No app read from or wrote to disk in the last few seconds.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguna app leyó o escribió en disco en los últimos segundos."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直近数秒間、ディスクを読み書きしたアプリはありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최근 몇 초 동안 디스크를 읽거나 쓴 앱이 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近几秒没有 App 读写磁盘。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近幾秒沒有 App 讀寫磁碟。"
+          }
+        }
+      }
+    },
     "No data yet": {
       "localizations": {
         "es": {
@@ -9653,6 +9755,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "程序"
+          }
+        }
+      }
+    },
+    "Process I/O, not disk throughput": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I/O de proceso, no rendimiento de disco"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プロセス I/O（実際のディスクスループットではありません）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "프로세스 I/O(실제 디스크 처리량이 아님)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "进程 I/O，不是实体磁盘吞吐量"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "程序 I/O，不是實體磁碟吞吐量"
           }
         }
       }
