@@ -39295,6 +39295,448 @@
           }
         }
       }
+    },
+    "Local snapshots share space with the volume; macOS manages them, and this app does not delete them.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las instantáneas locales comparten espacio con el volumen; las gestiona macOS y esta app no las elimina."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ローカルスナップショットはボリュームと領域を共有し、macOS が管理します。このアプリは削除しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로컬 스냅샷은 볼륨과 공간을 공유하며 macOS가 관리합니다. 이 앱은 삭제하지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地快照和宗卷共用空间，由 macOS 管理，这个 App 不会删除它们。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本機快照和卷宗共用空間，由 macOS 管理，這個 App 不會刪除它們。"
+          }
+        }
+      }
+    },
+    "No local snapshots": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay instantáneas locales"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ローカルスナップショットはありません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로컬 스냅샷 없음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有本地快照"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有本機快照"
+          }
+        }
+      }
+    },
+    "Snapshot list unavailable: %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo obtener la lista de instantáneas: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スナップショット一覧を取得できません：%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스냅샷 목록을 가져올 수 없습니다: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法获取快照列表：%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法取得快照清單：%@"
+          }
+        }
+      }
+    },
+    "Some folders could not be read, so %@ of the volume's %@ in use is not accounted for. That gap is not space you can clean.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron leer algunas carpetas, así que %@ de los %@ en uso no están contabilizados. Esa diferencia no es espacio que puedas liberar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "読み取れないフォルダーがあり、%@ が計算に入っていません（ボリュームの使用中は %@）。この差は削除できる容量ではありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "읽을 수 없는 폴더가 있어 %@이(가) 계산되지 않았습니다(볼륨 사용량 %@). 이 차이는 정리할 수 있는 공간이 아닙니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有些文件夹无法读取，所以有 %@ 没有算到（宗卷使用中的空间共 %@）。这段差额不是可以清理的空间。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有些資料夾無法讀取，所以有 %@ 沒有算到（卷宗使用中的空間共 %@）。這段差額不是可以清理的空間。"
+          }
+        }
+      }
+    },
+    "Taken %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creadas el %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作成日時 %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "생성 시각 %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建时间 %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "建立時間 %@"
+          }
+        }
+      }
+    },
+    "The scan and the disk figures belong to different volumes, so they can't be compared.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis y los datos del disco pertenecen a volúmenes distintos, así que no se pueden comparar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スキャンとディスクの数値は別のボリュームのものなので、比較できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스캔과 디스크 수치가 서로 다른 볼륨에 속해 비교할 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描和磁盘数字属于不同的宗卷，所以不能相比。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描和磁碟數字屬於不同的卷宗，所以不能相比。"
+          }
+        }
+      }
+    },
+    "The scan counted %@ more than the volume reports; files changed while it ran or blocks are shared.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis contó %@ más de lo que informa el volumen; los archivos cambiaron durante el análisis o se comparten bloques."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スキャン結果はボリュームの報告より %@ 多くなっています。スキャン中にファイルが変わったか、ブロックが共有されています。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스캔 결과가 볼륨 보고보다 %@ 많습니다. 스캔 중 파일이 바뀌었거나 블록이 공유되어 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描结果比宗卷报告的多 %@；可能是扫描期间文件有变动，或是区块共用。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描結果比卷宗回報的多 %@；可能是掃描期間檔案有變動，或是區塊共用。"
+          }
+        }
+      }
+    },
+    "The scan covered a folder inside this volume, not the whole volume, so %@ can't be compared with the %@ the volume reports.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis cubrió una carpeta dentro del volumen, no el volumen completo, así que %@ no se puede comparar con los %@ que informa el volumen."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このスキャンはボリューム内のフォルダーだけで、ボリューム全体ではありません。そのため %@ はボリュームが報告する %@ と比較できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 스캔은 볼륨 안의 폴더만 포함하며 볼륨 전체가 아니므로 %@을(를) 볼륨이 보고하는 %@과(와) 비교할 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这次扫描只涵盖宗卷里的一个文件夹，不是整个宗卷，所以 %@ 不能和宗卷报告的 %@ 相比。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這次掃描只涵蓋卷宗裡的一個資料夾，不是整個卷宗，所以 %@ 不能和卷宗回報的 %@ 相比。"
+          }
+        }
+      }
+    },
+    "The scan covered this volume and measured %@ of %@ in use.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis cubrió todo el volumen y midió %@ de los %@ en uso."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このボリューム全体をスキャンし、%@ を測定しました。ボリュームの使用中は %@ です。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 볼륨 전체를 스캔해 %@을(를) 측정했습니다. 볼륨 사용량은 %@입니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这次扫描涵盖整个宗卷，测量到 %@，宗卷使用中的空间共 %@。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這次掃描涵蓋整個卷宗，量測到 %@，卷宗使用中的空間共 %@。"
+          }
+        }
+      }
+    },
+    "The scan covered this volume: %@ of %@ in use was measured. The remaining %@ is system data or space shared with other volumes, and is not space you can clean.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis cubrió todo el volumen: se midieron %@ de los %@ en uso. El resto, %@, son datos del sistema o espacio compartido con otros volúmenes, y no es espacio que puedas liberar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このボリューム全体をスキャンし、%@ を測定しました。ボリュームの使用中は %@ です。残りの %@ はシステムデータか他のボリュームと共有する領域で、削除できる容量ではありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 볼륨 전체를 스캔해 %@을(를) 측정했습니다. 볼륨 사용량은 %@입니다. 나머지 %@은(는) 시스템 데이터이거나 다른 볼륨과 공유하는 공간이라 정리할 수 있는 공간이 아닙니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这次扫描涵盖整个宗卷：已测量 %@，宗卷使用中的空间共 %@。其余 %@ 是系统数据或与其他宗卷共用的空间，不是可以清理的空间。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這次掃描涵蓋整個卷宗：已量測 %@，卷宗使用中的空間共 %@。其餘 %@ 是系統資料或與其他卷宗共用的空間，不是可以清理的空間。"
+          }
+        }
+      }
+    },
+    "The scan stopped before it finished, so its total can't be compared with the volume.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis se detuvo antes de terminar, así que su total no se puede comparar con el volumen."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スキャンが完了する前に停止したため、その合計はボリュームと比較できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스캔이 끝나기 전에 중지되어 합계를 볼륨과 비교할 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描还没完成就停止了，所以它的总量不能和宗卷相比。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描還沒完成就停止了，所以它的總量不能和卷宗相比。"
+          }
+        }
+      }
+    },
+    "The volume's capacity couldn't be read, so the scan total can't be compared with it.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo leer la capacidad del volumen, así que el total del análisis no se puede comparar con él."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボリュームの容量を読み取れなかったため、スキャンの合計と比較できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "볼륨 용량을 읽을 수 없어 스캔 합계와 비교할 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "读不到宗卷的容量，所以扫描总量不能和它相比。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讀不到卷宗的容量，所以掃描總量不能和它相比。"
+          }
+        }
+      }
+    },
+    "These disk figures were read after the saved scan, so they can't be compared with its result.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estos datos del disco se leyeron después del análisis guardado, así que no se pueden comparar con su resultado."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このディスクの数値は保存されたスキャンの後に読み取ったため、その結果とは比較できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 디스크 수치는 저장된 스캔 이후에 읽었으므로 그 결과와 비교할 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些磁盘数字是在保存的扫描之后读取的，所以不能和那次结果相比。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這些磁碟數字是在儲存的掃描之後才讀取的，所以不能和那次結果相比。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
