@@ -31,33 +31,48 @@ struct VolumeSummary {
     let available: Int64
     /// Free space including purgeable (what Finder shows).
     let availableForImportant: Int64
-    let localSnapshots: Int
+    /// `volumeUUIDString`; nil when the volume has none. Used to decide whether a scan and these
+    /// figures describe the same volume.
+    let identifier: String?
+    /// Mount point from `statfs`, e.g. "/" or "/System/Volumes/Data".
+    let mountPath: String?
+    let snapshots: LocalSnapshots
 
     var used: Int64 { total - available }
-    /// Space macOS can reclaim on demand (mostly Time Machine local snapshots and caches).
+    /// Space macOS can reclaim on demand (mostly Time Machine local caches and system caches).
     var purgeable: Int64 { max(availableForImportant - available, 0) }
 
+    var spaceVolume: SpaceAccounting.Volume? {
+        guard let identifier else { return nil }
+        return SpaceAccounting.Volume(identifier: identifier, total: total, available: available,
+                                      availableForImportantUsage: availableForImportant)
+    }
+
     static func load(for url: URL) -> VolumeSummary? {
-        guard let v = try? url.resourceValues(forKeys: [.volumeTotalCapacityKey, .volumeAvailableCapacityKey,
-                                                        .volumeAvailableCapacityForImportantUsageKey]),
+        // Read through a new URL object every time. FileManager keeps the capacity it read on a
+        // URL value, so a long-lived URL would keep reporting the free space from when it was
+        // created and the figures would never rise after cleaning.
+        let fresh = URL(fileURLWithPath: url.path)
+        guard let v = try? fresh.resourceValues(forKeys: [.volumeTotalCapacityKey, .volumeAvailableCapacityKey,
+                                                          .volumeAvailableCapacityForImportantUsageKey,
+                                                          .volumeUUIDStringKey]),
               let total = v.volumeTotalCapacity, let avail = v.volumeAvailableCapacity
         else { return nil }
         return VolumeSummary(total: Int64(total), available: Int64(avail),
                              availableForImportant: v.volumeAvailableCapacityForImportantUsage ?? Int64(avail),
-                             localSnapshots: countSnapshots(url))
+                             identifier: v.volumeUUIDString,
+                             mountPath: mountPath(of: fresh),
+                             snapshots: LocalSnapshots.query(for: fresh))
     }
 
-    private static func countSnapshots(_ url: URL) -> Int {
-        let p = Process()
-        p.executableURL = URL(fileURLWithPath: "/usr/bin/tmutil")
-        p.arguments = ["listlocalsnapshots", url.path]
-        let pipe = Pipe()
-        p.standardOutput = pipe
-        p.standardError = FileHandle.nullDevice
-        guard (try? p.run()) != nil else { return 0 }
-        let text = String(decoding: pipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
-        p.waitUntilExit()
-        return text.split(separator: "\n").filter { $0.contains("com.apple") }.count
+    /// The volume's mount point. Comparing it with a scan root's canonical path tells whether the
+    /// scan covered that whole volume.
+    static func mountPath(of url: URL) -> String? {
+        var info = statfs()
+        guard statfs(url.path, &info) == 0 else { return nil }
+        return withUnsafePointer(to: &info.f_mntonname) {
+            $0.withMemoryRebound(to: CChar.self, capacity: Int(MAXPATHLEN)) { String(cString: $0) }
+        }
     }
 }
 
@@ -106,6 +121,12 @@ final class DiskAnalysisModel {
     private(set) var volume: VolumeSummary?
     /// When the tree on screen came from a saved scan, the time that scan was taken. Nil for a live scan.
     private(set) var restoredAt: Date?
+    /// Volume the current live scan ran on, and whether its root was that volume's mount point.
+    /// Kept beside the scan result so the summary can say why its total is or isn't comparable.
+    private(set) var scanVolumeIdentifier: String?
+    private(set) var scanCoversVolume = false
+    /// False when the live scan was stopped before it finished.
+    private(set) var scanIsComplete = false
     /// Bumped whenever the tree changes, so charts rebuild their layout.
     private(set) var revision = 0
     var hover: HoverInfo?
@@ -126,9 +147,12 @@ final class DiskAnalysisModel {
     /// Why the duplicate list is empty or incomplete: cloud-only files skipped, unreadable files,
     /// or the search not running at all.
     private(set) var duplicatesMessage: String?
-    // Filters for the largest-files list.
+    // Filters for the largest-files list; the charts use the same conditions to point out matches.
     var kindFilter: FileKind?
     var olderThanDays: Int?
+    var searchText: String = ""
+    /// Minimum allocated size for a file to match; 0 = any size.
+    var minFileBytes: UInt64 = 0
     var lastMessage: String?
     var previewURL: URL?
 
@@ -148,12 +172,16 @@ final class DiskAnalysisModel {
         let insights: SpaceInsights?
     }
     @ObservationIgnored private var treeCache: [String: CachedTree] = [:]
+    @ObservationIgnored private let fileFilterCache = FileFilterCache()
     private struct CachedVolume {
         let summary: VolumeSummary
         let at: Date
     }
     @ObservationIgnored private var volumeCache: [String: CachedVolume] = [:]
     @ObservationIgnored private var volumeOrder: [String] = []
+    /// Distinguishes volume reads so a slow, older read can't replace a newer one (the scan
+    /// completion reads the volume again and must win over the read taken when the scan started).
+    @ObservationIgnored private var volumeReadGeneration = 0
     /// The volume figures are cheap to read but `tmutil` starts a process; reuse a recent read.
     static let volumeMaxAge: TimeInterval = 60
     /// Only a handful of mounted volumes are shown at once; this also keeps a removable
@@ -177,6 +205,21 @@ final class DiskAnalysisModel {
     var isShowingSavedScan: Bool {
         guard let root else { return false }
         return !ScanCacheSafety.isLiveScan(root)
+    }
+
+    /// What the screen may say about the scan's total against the volume's usage.
+    var spaceAccounting: SpaceAccounting {
+        guard let root else { return .evaluate(scan: nil, volume: volume?.spaceVolume) }
+        let isLive = restoredAt == nil
+        let scan = SpaceAccounting.Scan(
+            rootPath: root.path,
+            volumeIdentifier: isLive ? scanVolumeIdentifier : nil,
+            coversVolume: isLive && scanCoversVolume,
+            bytes: root.size,
+            limits: SpaceAccounting.Limits(progress: progress),
+            isLive: isLive,
+            isComplete: isLive ? scanIsComplete : true)
+        return .evaluate(scan: scan, volume: volume?.spaceVolume)
     }
 
     // MARK: Saved scans
@@ -250,6 +293,9 @@ final class DiskAnalysisModel {
 
     private func applySavedScan(_ cached: CachedTree) {
         setInsights(cached.insights, root: cached.tree)
+        scanVolumeIdentifier = nil
+        scanCoversVolume = false
+        scanIsComplete = true
         root = cached.tree
         focus = cached.tree
         progress = cached.progress
@@ -284,22 +330,24 @@ final class DiskAnalysisModel {
         DiskScanner.canonicalPath(url)
     }
 
-    private func loadVolume() {
+    private func loadVolume(force: Bool = false) {
         let url = target.url
         let key = url.path
         if let cached = volumeCache[key] {
             volume = cached.summary
             PageLoadProbe.mark(.disk, "volume")
-            if Date().timeIntervalSince(cached.at) < Self.volumeMaxAge {
+            if !force, Date().timeIntervalSince(cached.at) < Self.volumeMaxAge {
                 return
             }
         } else {
             volume = nil
         }
+        volumeReadGeneration += 1
+        let generation = volumeReadGeneration
         Task.detached(priority: .userInitiated) { [weak self] in
             let summary = VolumeSummary.load(for: url)
             await MainActor.run {
-                guard let self, self.target.url == url else { return }
+                guard let self, self.volumeReadGeneration == generation, self.target.url == url else { return }
                 guard let summary else { return }
                 self.volume = summary
                 self.storeVolume(summary, for: key)
@@ -320,6 +368,9 @@ final class DiskAnalysisModel {
 
     private func resetDisplay() {
         restoredAt = nil
+        scanVolumeIdentifier = nil
+        scanCoversVolume = false
+        scanIsComplete = false
         root = nil
         focus = nil
         progress = ScanProgress(files: 0, directories: 0, bytes: 0, unreadableDirectories: 0)
@@ -360,6 +411,9 @@ final class DiskAnalysisModel {
         let url = target.url
         let targetID = target.id
         let treeKey = cacheKey(for: url)
+        scanVolumeIdentifier = nil
+        scanCoversVolume = false
+        scanIsComplete = false
         loadVolume()
         let cache = cache
 
@@ -393,12 +447,24 @@ final class DiskAnalysisModel {
                     restored = CachedTree(scannedAt: scannedAt, elapsed: result.elapsed,
                                           progress: result.progress, tree: result.root, insights: insights)
                 }
+                // Read the volume after the scan rather than reusing the figures from its start,
+                // so the comparison describes the disk as the scan left it. A process launch, so
+                // it stays off the main actor.
+                let volumeInfo = VolumeSummary.load(for: url)
                 await MainActor.run {
                     guard let self, self.scanner === scanner else { return }
                     if let restored {
                         self.treeCache[treeKey] = restored
                         self.evictTreeCache(keeping: treeKey)
                     }
+                    if let volumeInfo {
+                        self.volumeReadGeneration += 1
+                        self.volume = volumeInfo
+                        self.storeVolume(volumeInfo, for: url.path)
+                    }
+                    self.scanVolumeIdentifier = volumeInfo?.identifier
+                    self.scanCoversVolume = volumeInfo?.mountPath == result.root.path
+                    self.scanIsComplete = !result.cancelled
                     self.root = result.root
                     self.focus = result.root
                     self.progress = result.progress
@@ -427,13 +493,33 @@ final class DiskAnalysisModel {
         }
     }
 
-    /// Largest files under `node`, filtered by kind and age.
+    /// The conditions currently set for the largest-files list and the charts.
+    var fileFilter: FileFilter {
+        FileFilter(text: searchText, minBytes: minFileBytes, kind: kindFilter, olderThanDays: olderThanDays)
+    }
+
+    var isFileFilterActive: Bool { fileFilter.isActive }
+
+    func clearFileFilters() {
+        searchText = ""
+        minFileBytes = 0
+        kindFilter = nil
+        olderThanDays = nil
+    }
+
+    /// Filter outcome for `node`, memoized on (tree, revision, filter) so the charts can ask on
+    /// every frame without walking the tree again. The age bound is fixed when an entry is
+    /// computed; the cache drops stale entries as soon as the tree or any condition changes.
+    func fileFilterResult(in node: DiskNode) -> FileFilterResult {
+        fileFilterCache.result(for: node, revision: revision, filter: fileFilter)
+    }
+
+    /// Largest files under `node`. The filter is applied before ranking, so a matching file is
+    /// never dropped just because many larger files fail the filter.
     func largestFiles(in node: DiskNode, limit: Int = 100) -> [DiskNode] {
-        let cutoff = olderThanDays.map { Date().addingTimeInterval(-Double($0) * 86_400) }
-        let candidates = (kindFilter == nil && cutoff == nil) ? node.largestFiles(limit: limit) : node.largestFiles(limit: 5000)
-        return Array(candidates.filter { f in
-            (kindFilter == nil || FileKind.of(f.name) == kindFilter) && (cutoff == nil || f.modified < cutoff!)
-        }.prefix(limit))
+        let filter = fileFilter
+        guard filter.isActive else { return node.largestFiles(limit: limit) }
+        return Array(fileFilterResult(in: node).files.prefix(limit))
     }
 
     func findDuplicates() async {

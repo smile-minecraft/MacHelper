@@ -43,7 +43,12 @@ extension MonitorStore {
                              secondary: "↓" + Fmt.rate(network?.inBytesPerSecond), fraction: nil, series: history[.netIn] ?? [],
                              secondarySeries: history[.netOut])
             case .battery:
-                return .init(module: m, text: Fmt.percent(battery?.charge), secondary: nil, fraction: battery?.charge, series: history[.battery] ?? [])
+                return .init(module: m, text: Fmt.percent(battery?.charge), secondary: nil, fraction: battery?.charge, series: history[.battery] ?? [],
+                             level: StatusRules.battery(battery?.charge))
+            case .accessories:
+                guard let low = accessories.map(\.charge).min() else { return nil }
+                return .init(module: m, text: Fmt.percent(low), secondary: nil, fraction: low,
+                             series: history[.accessory] ?? [], level: StatusRules.battery(low))
             case .temperature:
                 return .init(module: m, text: Fmt.celsius(cpuCelsius), secondary: nil, fraction: nil, series: history[.temperature] ?? [],
                              level: StatusRules.temperature(cpuCelsius)?.level)
@@ -122,6 +127,7 @@ private struct MenuBarItemView: View {
         case .disk: "px.ssd"
         case .network: "px.network"
         case .battery: "px.battery"
+        case .accessories: "px.battery"
         case .temperature: "px.temperature"
         case .fan: "px.fans"
         case .power: "px.power"
@@ -144,7 +150,7 @@ private struct MenuBarItemView: View {
     /// changes size (or shifts its neighbours) as numbers change.
     private var template: String {
         switch item.module {
-        case .cpu, .gpu, .memory, .battery: "100%"
+        case .cpu, .gpu, .memory, .battery, .accessories: "100%"
         case .disk: "888G"
         case .network: "↑888K"
         case .temperature: "100°"

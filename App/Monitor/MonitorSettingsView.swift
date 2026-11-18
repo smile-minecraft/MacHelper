@@ -63,6 +63,34 @@ struct MonitorSettingsView: View {
             } header: { Text("Items") } footer: {
                 Text("Turning an item off stops measuring it everywhere. “In menu bar” only decides whether it shows up there; it stays in the panel and the main window.")
                     .settingsCaption()
+                Text("Accessories appear only while connected.")
+                    .settingsCaption()
+            }
+
+            Section {
+                ForEach(Array(settings.configuration.panelPageOrder.enumerated()), id: \.element) { index, page in
+                    HStack(spacing: 12) {
+                        Toggle(page.title, isOn: pageVisibleBinding(page))
+                            .frame(minWidth: 90, alignment: .leading)
+                            .disabled(isLastVisiblePage(page))
+                        Spacer()
+                        Button { movePage(page, by: -1) } label: {
+                            Image(systemName: "chevron.up")
+                        }
+                        .buttonStyle(.plain)
+                        .help("Move up")
+                        .disabled(index == 0)
+                        Button { movePage(page, by: 1) } label: {
+                            Image(systemName: "chevron.down")
+                        }
+                        .buttonStyle(.plain)
+                        .help("Move down")
+                        .disabled(index == settings.configuration.panelPageOrder.count - 1)
+                    }
+                }
+            } header: { Text("Panel") } footer: {
+                Text("Choose which pages appear when you open the menu bar panel. Pages whose hardware is missing stay hidden automatically. At least one page stays visible.")
+                    .settingsCaption()
             }
         }
         .formStyle(.grouped)
@@ -71,6 +99,38 @@ struct MonitorSettingsView: View {
 
     private func binding(_ m: MonitorModule) -> Binding<ModuleConfig> {
         Binding(get: { settings[m] }, set: { settings[m] = $0 })
+    }
+
+    /// A page is shown by default; the toggle writes into `hiddenPanelPages`. The last visible
+    /// page stays on — switching it off is refused here and disabled on the toggle.
+    private func pageVisibleBinding(_ page: PanelPage) -> Binding<Bool> {
+        Binding(
+            get: { !settings.configuration.hiddenPanelPages.contains(page) },
+            set: { shown in
+                var configuration = settings.configuration
+                if shown {
+                    configuration.hiddenPanelPages.remove(page)
+                } else {
+                    guard configuration.panelPageOrder.count - configuration.hiddenPanelPages.count > 1 else { return }
+                    configuration.hiddenPanelPages.insert(page)
+                }
+                settings.configuration = configuration
+            }
+        )
+    }
+
+    private func isLastVisiblePage(_ page: PanelPage) -> Bool {
+        !settings.configuration.hiddenPanelPages.contains(page)
+            && settings.configuration.panelPageOrder.count - settings.configuration.hiddenPanelPages.count == 1
+    }
+
+    private func movePage(_ page: PanelPage, by offset: Int) {
+        var configuration = settings.configuration
+        guard let index = configuration.panelPageOrder.firstIndex(of: page) else { return }
+        let target = index + offset
+        guard configuration.panelPageOrder.indices.contains(target) else { return }
+        configuration.panelPageOrder.swapAt(index, target)
+        settings.configuration = configuration
     }
 }
 

@@ -199,6 +199,20 @@ struct SunburstChart: View {
         // The hovered arc and its ancestors stay bright; everything else dims.
         let hovered = hoveredArc.flatMap { id in layout.arcs.first { $0.id == id } }
         let path: Set<ObjectIdentifier> = Set(hovered?.node?.lineage.map(ObjectIdentifier.init) ?? [])
+        // When a filter is active, matching files and the folders that contain them stay
+        // bright and everything else fades; matched files get an accent edge.
+        let filter = model.isFileFilterActive ? model.fileFilterResult(in: focus) : nil
+        func filterDim(_ node: DiskNode?) -> Bool {
+            guard let filter else { return false }
+            guard let node else { return true }
+            return node.isDirectory
+                ? !filter.containingFolders.contains(ObjectIdentifier(node))
+                : !filter.matching.contains(ObjectIdentifier(node))
+        }
+        func filterMatch(_ node: DiskNode?) -> Bool {
+            guard let filter, let node, !node.isDirectory else { return false }
+            return filter.matching.contains(ObjectIdentifier(node))
+        }
         func onPath(_ a: SunburstArc) -> Bool {
             guard let hovered else { return true }
             if a.id == hovered.id { return true }
@@ -214,20 +228,23 @@ struct SunburstChart: View {
             p.addArc(center: center, radius: outer, startAngle: a0, endAngle: a1, clockwise: false)
             p.addArc(center: center, radius: inner, startAngle: a1, endAngle: a0, clockwise: true)
             p.closeSubpath()
+            let dimmed = !onPath(arc) || filterDim(arc.node)
             let color = model.flag(arc.node) != nil
-                ? DiskPalette.flagged(highlighted: arc.id == hoveredArc, dimmed: !onPath(arc))
+                ? DiskPalette.flagged(highlighted: arc.id == hoveredArc, dimmed: dimmed)
                 : DiskPalette.color(branch: arc.branch, depth: arc.depth, isFile: !(arc.node?.isDirectory ?? true),
-                                    highlighted: arc.id == hoveredArc, dimmed: !onPath(arc))
+                                    highlighted: arc.id == hoveredArc, dimmed: dimmed)
             ctx.fill(p, with: .color(color))
             ctx.stroke(p, with: .color(separator), lineWidth: 1.5)
             if model.flag(arc.node) != nil, onPath(arc) {
                 ctx.stroke(p, with: .color(Theme.amber), lineWidth: 1.5)
+            } else if filterMatch(arc.node) {
+                ctx.stroke(p, with: .color(Theme.accent), lineWidth: 1.5)
             }
         }
 
         // Labels along the arc, upright, only where they fit.
         let lctx = labelContext(ctx)
-        for arc in layout.arcs where arc.depth <= 3 && onPath(arc) {
+        for arc in layout.arcs where arc.depth <= 3 && onPath(arc) && !filterDim(arc.node) {
             let mid = (arc.start + arc.end) / 2
             let radius = (CGFloat(arc.depth) + 0.5) * ring
             let arcLength = CGFloat(arc.end - arc.start) * 2 * .pi * radius
@@ -380,14 +397,29 @@ struct TreemapChart: View {
     private func draw(_ ctx: inout GraphicsContext) {
         let lctx = labelContext(ctx)
         let hoveredTop = hoveredCell.flatMap { id in cells[id].parent ?? id }
+        // When a filter is active, matching files and the folders that contain them stay
+        // bright and everything else fades; matched files get an accent edge.
+        let filter = model.isFileFilterActive ? model.fileFilterResult(in: focus) : nil
+        func filterDim(_ node: DiskNode?) -> Bool {
+            guard let filter else { return false }
+            guard let node else { return true }
+            return node.isDirectory
+                ? !filter.containingFolders.contains(ObjectIdentifier(node))
+                : !filter.matching.contains(ObjectIdentifier(node))
+        }
+        func filterMatch(_ node: DiskNode?) -> Bool {
+            guard let filter, let node, !node.isDirectory else { return false }
+            return filter.matching.contains(ObjectIdentifier(node))
+        }
         for c in cells {
             let r = c.rect.insetBy(dx: 1, dy: 1)
             guard r.width > 1, r.height > 1 else { continue }
             let isHovered = c.id == hoveredCell
+            let fdim = filterDim(c.node)
             let color = model.flag(c.node) != nil
-                ? DiskPalette.flagged(highlighted: isHovered)
+                ? DiskPalette.flagged(highlighted: isHovered, dimmed: fdim)
                 : DiskPalette.color(branch: c.branch, depth: c.depth, rank: c.rank,
-                                    isFile: !(c.node?.isDirectory ?? true), highlighted: isHovered)
+                                    isFile: !(c.node?.isDirectory ?? true), highlighted: isHovered, dimmed: fdim)
             let shape = Path(roundedRect: r, cornerRadius: c.depth == 1 ? 6 : 4, style: .continuous)
             ctx.fill(shape, with: .color(color))
             if c.hasHeader {
@@ -398,6 +430,9 @@ struct TreemapChart: View {
             if model.flag(c.node) != nil, !isHovered {
                 ctx.stroke(Path(roundedRect: r.insetBy(dx: 0.75, dy: 0.75), cornerRadius: c.depth == 1 ? 6 : 4, style: .continuous),
                            with: .color(Theme.amber), lineWidth: 1.5)
+            } else if filterMatch(c.node) {
+                ctx.stroke(Path(roundedRect: r.insetBy(dx: 0.75, dy: 0.75), cornerRadius: c.depth == 1 ? 6 : 4, style: .continuous),
+                           with: .color(Theme.accent), lineWidth: 1.5)
             }
             if c.id == hoveredTop && c.depth == 1 {
                 ctx.stroke(shape, with: .color(.white.opacity(0.85)), lineWidth: 2)
@@ -405,7 +440,7 @@ struct TreemapChart: View {
                 ctx.stroke(shape, with: .color(.white.opacity(0.9)), lineWidth: 1.5)
             }
             // Flagged blocks are pale: dark labels without the shadow.
-            drawLabel(model.flag(c.node) != nil ? ctx : lctx, c, in: r)
+            if !fdim { drawLabel(model.flag(c.node) != nil ? ctx : lctx, c, in: r) }
         }
     }
 

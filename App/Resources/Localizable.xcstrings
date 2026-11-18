@@ -38513,6 +38513,1366 @@
           }
         }
       }
+    },
+    "Accessories": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accesorios"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アクセサリ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "액세서리"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配件"
+          }
+        }
+      }
+    },
+    "Accessories appear only while connected.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los accesorios solo aparecen mientras están conectados."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アクセサリは接続中のみ表示されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "액세서리는 연결된 동안에만 표시됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配件仅在连接时显示。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配件只在連線時顯示。"
+          }
+        }
+      }
+    },
+    "Battery readings are off": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las lecturas de batería están desactivadas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッテリーの読み取りはオフです"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "배터리 측정이 꺼져 있음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电池读数已关闭"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電池讀數已關閉"
+          }
+        }
+      }
+    },
+    "Turn on Battery in the menu bar settings to see the charge.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa Batería en los ajustes de la barra de menús para ver el nivel de carga."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバー設定で「バッテリー」をオンにすると充電状態が表示されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴 막대 설정에서 ‘배터리’를 켜면 충전 상태가 표시됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在菜单栏设置中开启“电池”即可查看电量。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在選單列設定中開啟「電池」即可查看電量。"
+          }
+        }
+      }
+    },
+    "Accessory readings are off": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las lecturas de accesorios están desactivadas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アクセサリの読み取りはオフです"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "액세서리 측정이 꺼져 있음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配件读数已关闭"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配件讀數已關閉"
+          }
+        }
+      }
+    },
+    "Turn on Accessories in the menu bar settings to see their charge.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa Accesorios en los ajustes de la barra de menús para ver su carga."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバー設定で「アクセサリ」をオンにすると各デバイスの充電状態が表示されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴 막대 설정에서 ‘액세서리’를 켜면 각 기기의 충전 상태가 표시됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在菜单栏设置中开启“配件”即可查看各设备电量。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在選單列設定中開啟「配件」即可查看各裝置電量。"
+          }
+        }
+      }
+    },
+    "No accessories connected": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay accesorios conectados"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接続されているアクセサリはありません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결된 액세서리 없음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未连接配件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未連接配件"
+          }
+        }
+      }
+    },
+    "Connect a Magic Keyboard, Mouse, Trackpad, or AirPods to see their charge.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conecta un Magic Keyboard, Mouse, Trackpad o AirPods para ver su carga."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Magic Keyboard、Mouse、Trackpad、AirPods を接続すると充電状態が表示されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Magic Keyboard, Mouse, Trackpad 또는 AirPods를 연결하면 충전 상태가 표시됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接妙控键盘、鼠标、触控板或 AirPods 即可查看电量。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連接妙控鍵盤、滑鼠、觸控板或 AirPods 即可查看電量。"
+          }
+        }
+      }
+    },
+    "Charge history": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historial de carga"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "充電履歴"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "충전 기록"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电量历史"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電量歷史"
+          }
+        }
+      }
+    },
+    "Battery health": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salud de la batería"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッテリーの状態"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "배터리 상태"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电池健康度"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電池健康度"
+          }
+        }
+      }
+    },
+    "Cycle count": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Número de ciclos"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サイクル回数"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "충전 횟수"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "循环次数"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "循環次數"
+          }
+        }
+      }
+    },
+    "Fully charged": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargada al 100 %"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "満充電"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "완전 충전됨"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已充满"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已充飽"
+          }
+        }
+      }
+    },
+    "Plugged in": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectado a la corriente"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電源に接続中"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "전원 연결됨"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已接通电源"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已接上電源"
+          }
+        }
+      }
+    },
+    "Keyboard": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teclado"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キーボード"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "키보드"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "键盘"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鍵盤"
+          }
+        }
+      }
+    },
+    "Mouse": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratón"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マウス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "마우스"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鼠标"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "滑鼠"
+          }
+        }
+      }
+    },
+    "Trackpad": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trackpad"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "トラックパッド"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "트랙패드"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "触控板"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "觸控板"
+          }
+        }
+      }
+    },
+    "Headphones": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auriculares"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヘッドフォン"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "헤드폰"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "耳机"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "耳機"
+          }
+        }
+      }
+    },
+    "Left": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izquierdo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "왼쪽"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左"
+          }
+        }
+      }
+    },
+    "Right": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derecho"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오른쪽"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "右"
+          }
+        }
+      }
+    },
+    "Case": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estuche"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ケース"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "케이스"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "充电盒"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "充電盒"
+          }
+        }
+      }
+    },
+    "Panel": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パネル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "패널"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "面板"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "面板"
+          }
+        }
+      }
+    },
+    "Move up": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subir"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上へ移動"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "위로 이동"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上移"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上移"
+          }
+        }
+      }
+    },
+    "Move down": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bajar"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下へ移動"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "아래로 이동"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下移"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下移"
+          }
+        }
+      }
+    },
+    "No panel pages": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay páginas de panel"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パネルページはありません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "패널 페이지 없음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有面板页面"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有面板頁面"
+          }
+        }
+      }
+    },
+    "Choose at least one page in Settings → Menu Bar.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa al menos una página en Ajustes → Barra de menús."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「設定」→「メニューバー」で少なくとも1つのページをオンにしてください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설정 → 메뉴 막대에서 페이지를 하나 이상 켜십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在「设置」→「菜单栏」打开至少一个页面。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請在「設定」→「選單列」開啟至少一個頁面。"
+          }
+        }
+      }
+    },
+    "Choose which pages appear when you open the menu bar panel. Pages whose hardware is missing stay hidden automatically. At least one page stays visible.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige qué páginas aparecen al abrir el panel de la barra de menús. Las páginas cuyo hardware no esté disponible permanecen ocultas automáticamente. Al menos una página permanece visible."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーのパネルを開いたときに表示するページを選びます。ハードウェアが無いページは自動的に非表示のままになります。少なくとも1ページは表示されたままになります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴 막대 패널을 열 때 표시할 페이지를 선택합니다. 해당 하드웨어가 없는 페이지는 자동으로 숨겨집니다. 최소 한 페이지는 계속 표시됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择打开菜单栏面板时显示的页面。没有对应硬件的页面会自动保持隐藏。至少保留一个页面始终显示。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇開啟選單列面板時顯示的頁面。缺少對應硬體的頁面會自動保持隱藏。至少保留一個頁面始終顯示。"
+          }
+        }
+      }
+    },
+    "The file contains an invalid panel layout.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El archivo contiene una disposición de panel no válida."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ファイルに無効なパネルレイアウトが含まれています。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "파일에 잘못된 패널 레이아웃이 포함되어 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件包含无效的面板布局。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檔案包含無效的面板版面。"
+          }
+        }
+      }
+    },
+    "Local snapshots share space with the volume; macOS manages them, and this app does not delete them.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las instantáneas locales comparten espacio con el volumen; las gestiona macOS y esta app no las elimina."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ローカルスナップショットはボリュームと領域を共有し、macOS が管理します。このアプリは削除しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로컬 스냅샷은 볼륨과 공간을 공유하며 macOS가 관리합니다. 이 앱은 삭제하지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地快照和宗卷共用空间，由 macOS 管理，这个 App 不会删除它们。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本機快照和卷宗共用空間，由 macOS 管理，這個 App 不會刪除它們。"
+          }
+        }
+      }
+    },
+    "No local snapshots": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay instantáneas locales"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ローカルスナップショットはありません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "로컬 스냅샷 없음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有本地快照"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有本機快照"
+          }
+        }
+      }
+    },
+    "Snapshot list unavailable: %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo obtener la lista de instantáneas: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スナップショット一覧を取得できません：%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스냅샷 목록을 가져올 수 없습니다: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法获取快照列表：%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法取得快照清單：%@"
+          }
+        }
+      }
+    },
+    "Some folders could not be read, so %@ of the volume's %@ in use is not accounted for. That gap is not space you can clean.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron leer algunas carpetas, así que %@ de los %@ en uso no están contabilizados. Esa diferencia no es espacio que puedas liberar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "読み取れないフォルダーがあり、%@ が計算に入っていません（ボリュームの使用中は %@）。この差は削除できる容量ではありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "읽을 수 없는 폴더가 있어 %@이(가) 계산되지 않았습니다(볼륨 사용량 %@). 이 차이는 정리할 수 있는 공간이 아닙니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有些文件夹无法读取，所以有 %@ 没有算到（宗卷使用中的空间共 %@）。这段差额不是可以清理的空间。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有些資料夾無法讀取，所以有 %@ 沒有算到（卷宗使用中的空間共 %@）。這段差額不是可以清理的空間。"
+          }
+        }
+      }
+    },
+    "Taken %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creadas el %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作成日時 %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "생성 시각 %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建时间 %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "建立時間 %@"
+          }
+        }
+      }
+    },
+    "The scan and the disk figures belong to different volumes, so they can't be compared.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis y los datos del disco pertenecen a volúmenes distintos, así que no se pueden comparar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スキャンとディスクの数値は別のボリュームのものなので、比較できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스캔과 디스크 수치가 서로 다른 볼륨에 속해 비교할 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描和磁盘数字属于不同的宗卷，所以不能相比。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描和磁碟數字屬於不同的卷宗，所以不能相比。"
+          }
+        }
+      }
+    },
+    "The scan counted %@ more than the volume reports; files changed while it ran or blocks are shared.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis contó %@ más de lo que informa el volumen; los archivos cambiaron durante el análisis o se comparten bloques."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スキャン結果はボリュームの報告より %@ 多くなっています。スキャン中にファイルが変わったか、ブロックが共有されています。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스캔 결과가 볼륨 보고보다 %@ 많습니다. 스캔 중 파일이 바뀌었거나 블록이 공유되어 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描结果比宗卷报告的多 %@；可能是扫描期间文件有变动，或是区块共用。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描結果比卷宗回報的多 %@；可能是掃描期間檔案有變動，或是區塊共用。"
+          }
+        }
+      }
+    },
+    "The scan covered a folder inside this volume, not the whole volume, so %@ can't be compared with the %@ the volume reports.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis cubrió una carpeta dentro del volumen, no el volumen completo, así que %@ no se puede comparar con los %@ que informa el volumen."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このスキャンはボリューム内のフォルダーだけで、ボリューム全体ではありません。そのため %@ はボリュームが報告する %@ と比較できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 스캔은 볼륨 안의 폴더만 포함하며 볼륨 전체가 아니므로 %@을(를) 볼륨이 보고하는 %@과(와) 비교할 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这次扫描只涵盖宗卷里的一个文件夹，不是整个宗卷，所以 %@ 不能和宗卷报告的 %@ 相比。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這次掃描只涵蓋卷宗裡的一個資料夾，不是整個卷宗，所以 %@ 不能和卷宗回報的 %@ 相比。"
+          }
+        }
+      }
+    },
+    "The scan covered this volume and measured %@ of %@ in use.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis cubrió todo el volumen y midió %@ de los %@ en uso."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このボリューム全体をスキャンし、%@ を測定しました。ボリュームの使用中は %@ です。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 볼륨 전체를 스캔해 %@을(를) 측정했습니다. 볼륨 사용량은 %@입니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这次扫描涵盖整个宗卷，测量到 %@，宗卷使用中的空间共 %@。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這次掃描涵蓋整個卷宗，量測到 %@，卷宗使用中的空間共 %@。"
+          }
+        }
+      }
+    },
+    "The scan covered this volume: %@ of %@ in use was measured. The remaining %@ is system data or space shared with other volumes, and is not space you can clean.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis cubrió todo el volumen: se midieron %@ de los %@ en uso. El resto, %@, son datos del sistema o espacio compartido con otros volúmenes, y no es espacio que puedas liberar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このボリューム全体をスキャンし、%@ を測定しました。ボリュームの使用中は %@ です。残りの %@ はシステムデータか他のボリュームと共有する領域で、削除できる容量ではありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 볼륨 전체를 스캔해 %@을(를) 측정했습니다. 볼륨 사용량은 %@입니다. 나머지 %@은(는) 시스템 데이터이거나 다른 볼륨과 공유하는 공간이라 정리할 수 있는 공간이 아닙니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这次扫描涵盖整个宗卷：已测量 %@，宗卷使用中的空间共 %@。其余 %@ 是系统数据或与其他宗卷共用的空间，不是可以清理的空间。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這次掃描涵蓋整個卷宗：已量測 %@，卷宗使用中的空間共 %@。其餘 %@ 是系統資料或與其他卷宗共用的空間，不是可以清理的空間。"
+          }
+        }
+      }
+    },
+    "The scan stopped before it finished, so its total can't be compared with the volume.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El análisis se detuvo antes de terminar, así que su total no se puede comparar con el volumen."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スキャンが完了する前に停止したため、その合計はボリュームと比較できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스캔이 끝나기 전에 중지되어 합계를 볼륨과 비교할 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描还没完成就停止了，所以它的总量不能和宗卷相比。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "掃描還沒完成就停止了，所以它的總量不能和卷宗相比。"
+          }
+        }
+      }
+    },
+    "The volume's capacity couldn't be read, so the scan total can't be compared with it.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo leer la capacidad del volumen, así que el total del análisis no se puede comparar con él."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボリュームの容量を読み取れなかったため、スキャンの合計と比較できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "볼륨 용량을 읽을 수 없어 스캔 합계와 비교할 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "读不到宗卷的容量，所以扫描总量不能和它相比。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讀不到卷宗的容量，所以掃描總量不能和它相比。"
+          }
+        }
+      }
+    },
+    "These disk figures were read after the saved scan, so they can't be compared with its result.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estos datos del disco se leyeron después del análisis guardado, así que no se pueden comparar con su resultado."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このディスクの数値は保存されたスキャンの後に読み取ったため、その結果とは比較できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 디스크 수치는 저장된 스캔 이후에 읽었으므로 그 결과와 비교할 수 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些磁盘数字是在保存的扫描之后读取的，所以不能和那次结果相比。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這些磁碟數字是在儲存的掃描之後才讀取的，所以不能和那次結果相比。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

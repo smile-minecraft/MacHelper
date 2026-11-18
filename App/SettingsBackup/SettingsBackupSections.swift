@@ -84,17 +84,24 @@ struct GeneralSettingsSection: SettingsSection {
     }
 }
 
-/// Portable menu bar layout. Module names are string keys so the payload bytes are stable; the
-/// stored preference keeps its own dictionary encoding.
+/// Portable menu bar layout. Module and page names are string keys so the payload bytes are stable;
+/// the stored preference keeps its own dictionary encoding.
 struct MonitorSettingsPayload: Codable, Equatable {
     var compact: Bool
     var modules: [String: ModuleConfig]
+    /// User's page order. All seven pages are listed.
+    var panelPageOrder: [PanelPage]
+    /// Pages the user switched off, sorted by the default order for stable JSON.
+    var hiddenPanelPages: [PanelPage]
 
     init(configuration: MonitorConfiguration) {
-        compact = configuration.compact
+        let normalized = configuration.normalized()
+        compact = normalized.compact
         modules = Dictionary(uniqueKeysWithValues: MonitorModule.allCases.map {
-            ($0.rawValue, configuration.config($0))
+            ($0.rawValue, normalized.config($0))
         })
+        panelPageOrder = normalized.panelPageOrder
+        hiddenPanelPages = PanelPage.allCases.filter { normalized.hiddenPanelPages.contains($0) }
     }
 
     func configuration() -> MonitorConfiguration? {
@@ -103,10 +110,46 @@ struct MonitorSettingsPayload: Codable, Equatable {
             guard let module = MonitorModule(rawValue: key) else { return nil }
             byModule[module] = config
         }
-        for module in MonitorModule.allCases where byModule[module] == nil {
-            byModule[module] = MonitorConfiguration.default.config(module)
-        }
-        return MonitorConfiguration(modules: byModule, compact: compact)
+        // The payload struct itself keeps the raw lists so validate() can reject an all-hidden
+        // layout; the returned configuration is always normalized with missing modules filled.
+        return MonitorConfiguration(modules: byModule, compact: compact,
+                                    panelPageOrder: panelPageOrder,
+                                    hiddenPanelPages: Set(hiddenPanelPages))
+            .withMissingModulesFilled()
+            .normalized()
+    }
+}
+
+extension MonitorSettingsPayload {
+    /// Old backups may not have the panel fields, and their panel lists may contain pages this
+    /// version does not know. Absent fields fall back to the defaults so importing an old file
+    /// does not drop the whole section.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        compact = try container.decodeIfPresent(Bool.self, forKey: .compact) ?? true
+        modules = try container.decode([String: ModuleConfig].self, forKey: .modules)
+        let order = Self.decodePages(container, forKey: .panelPageOrder) ?? PanelPage.allCases
+        panelPageOrder = order
+        hiddenPanelPages = Self.decodePages(container, forKey: .hiddenPanelPages) ?? []
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(compact, forKey: .compact)
+        try container.encode(modules, forKey: .modules)
+        try container.encode(panelPageOrder, forKey: .panelPageOrder)
+        try container.encode(PanelPage.allCases.filter { hiddenPanelPages.contains($0) },
+                             forKey: .hiddenPanelPages)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case compact, modules, panelPageOrder, hiddenPanelPages
+    }
+
+    private static func decodePages(_ container: KeyedDecodingContainer<CodingKeys>,
+                                    forKey key: CodingKeys) -> [PanelPage]? {
+        guard let raw = try? container.decodeIfPresent([String].self, forKey: key) else { return nil }
+        return raw.compactMap(PanelPage.init(rawValue:))
     }
 }
 
@@ -120,7 +163,7 @@ struct MonitorSettingsSection: SettingsSection {
 
     private var current: MonitorConfiguration {
         guard let data = defaults.data(forKey: MonitorSettingsStore.key),
-              let saved = try? JSONDecoder().decode(MonitorConfiguration.self, from: data)
+              let saved = MonitorConfiguration.upgraded(from: data)
         else { return .default }
         return saved
     }
@@ -133,6 +176,12 @@ struct MonitorSettingsSection: SettingsSection {
         let payload: MonitorSettingsPayload
         do { payload = try SettingsBackupJSON.decode(MonitorSettingsPayload.self, from: data) }
         catch { return .invalid(String(describing: error)) }
+
+        // Reject the raw payload before normalize would repair it: hiding every page is not a
+        // layout the app can apply.
+        if Set(payload.hiddenPanelPages).isSuperset(of: PanelPage.allCases) {
+            return .invalid(String(localized: "The file contains an invalid panel layout."))
+        }
 
         guard let config = payload.configuration() else {
             return .invalid(String(localized: "The file contains an unknown menu bar module."))

@@ -121,8 +121,38 @@ final class AppModel {
             NSApp.setActivationPolicy(.regular)
         }
         NSApp.activate()
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        // A SwiftUI `Settings` scene is presented by the app menu's Settings item, not by
+        // `showSettingsWindow:`. When no main window is open the app stays in accessory mode,
+        // `activate()` cannot bring it forward, and the old selector silently does nothing —
+        // that is why the panel gear had no effect. Invoke the very same menu item that
+        // "MacHelper > Settings…" uses, which works with no window and in accessory mode.
+        if !Self.invokeSettingsMenuItem() {
+            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        }
         DispatchQueue.main.async { AppModel.applyDockPreference() }
+    }
+
+    /// Invokes the SwiftUI-provided Settings menu item and reports whether it was found.
+    /// The item is identified by its Command-, key equivalent, which is stable across
+    /// localizations. Its action and target are SwiftUI internals, so they are read at runtime.
+    private static func invokeSettingsMenuItem() -> Bool {
+        func settingsItem(in menu: NSMenu) -> NSMenuItem? {
+            for item in menu.items {
+                if item.action != nil,
+                   item.keyEquivalent == ",",
+                   item.keyEquivalentModifierMask.contains(.command) {
+                    return item
+                }
+                if let submenu = item.submenu, let found = settingsItem(in: submenu) {
+                    return found
+                }
+            }
+            return nil
+        }
+        guard let mainMenu = NSApp.mainMenu,
+              let item = settingsItem(in: mainMenu),
+              let action = item.action else { return false }
+        return NSApp.sendAction(action, to: item.target, from: nil)
     }
 
     /// Keeps the app regular while the SwiftUI `Window` scene is being created. Applying the full
