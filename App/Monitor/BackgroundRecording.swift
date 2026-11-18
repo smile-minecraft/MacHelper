@@ -270,9 +270,10 @@ final class BackgroundRecordingModel {
     }
 
     /// Snapshot of the monitor modules the app can sample and the user enabled, with their intervals.
+    /// 配件電量只有即時讀數，沒有持久化歷史，所以不送進背景記錄。
     private func enabledModulePlans() -> [ModulePlan] {
         MonitorModule.allCases
-            .filter { availableModules.contains($0) && settings[$0].enabled }
+            .filter { availableModules.contains($0) && settings[$0].enabled && $0 != .accessories }
             .map { ModulePlan(module: $0.rawValue, interval: settings[$0].interval) }
     }
 
