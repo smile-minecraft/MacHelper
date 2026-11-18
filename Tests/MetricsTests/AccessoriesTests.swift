@@ -199,6 +199,66 @@ private func profilerJSON(_ body: String) -> Data { Data(body.utf8) }
         _ = sampler.sample()
         #expect(calls.value == 2)
     }
+
+    // MARK: - 新電量來源的合併
+
+    @Test func newSourcesAreMergedWithExistingOnes() {
+        let hidpp = AccessoryBatteryReading(id: "hidpp:046d:c547:2113000:1", name: "G502 X LIGHTSPEED", kind: .mouse, charge: 0.88, isCharging: true)
+        let hidBattery = AccessoryBatteryReading(id: "hid:19f5:1028:2120000", name: "USB Keyboard", kind: .keyboard, charge: 0.50)
+        let readings = AccessoryBatterySampler.readings(
+            hidProperties: [],
+            profilerJSON: nil,
+            hidBattery: [hidBattery],
+            hidpp: [hidpp]
+        )
+        // 兩個新來源都出現，且依電量低到高排序。
+        #expect(readings.map(\.id) == [hidBattery.id, hidpp.id])
+    }
+
+    @Test func differentSourcesWithSameNameNeverMerge() {
+        // USB 的 vid:pid:location id（hid/hidpp）與藍牙 address id 不可能相同；
+        // 即使名稱一樣，也不能靠名稱模糊合併，否則兩支同名裝置會被壓成一筆。
+        let hidpp = AccessoryBatteryReading(id: "hidpp:046d:c547:2113000:1", name: "G502 X LIGHTSPEED", kind: .mouse, charge: 0.88)
+        let json = profilerJSON("""
+        {"SPBluetoothDataType":[{"device_connected":[
+          {"G502 X LIGHTSPEED":{"device_address":"11:22:33:44:55:66","device_minorType":"Mouse",
+            "device_batteryLevelMain":"20%"}}
+        ]}]}
+        """)
+        let readings = AccessoryBatterySampler.readings(hidProperties: [], profilerJSON: json, hidpp: [hidpp])
+        #expect(readings.count == 2)
+        let charges = readings.map(\.charge).sorted()
+        #expect(charges == [0.20, 0.88])
+    }
+
+    @Test func sampleWiresInjectedNewSources() {
+        let hidBattery = AccessoryBatteryReading(id: "hid:test:a", name: "HID Device", kind: .keyboard, charge: 0.10)
+        let hidpp = AccessoryBatteryReading(id: "hidpp:046d:test:b", name: "HIDPP Device", kind: .mouse, charge: 0.90)
+        let sampler = AccessoryBatterySampler(
+            profilerOutput: { nil },
+            now: { Date() },
+            hidProperties: { [] },
+            hidBattery: { [hidBattery] },
+            hidpp: { [hidpp] }
+        )
+        #expect(sampler.sample().map(\.id) == ["hid:test:a", "hidpp:046d:test:b"])
+    }
+
+    @Test func newSourcesDoNotOverrideIORegistryBluetooth() {
+        // IORegistry 的藍牙配件與新來源的 id 空間不同，兩者都保留，IORegistry 仍然決定名稱與充電狀態。
+        let hid: [[String: Any]] = [[
+            "IOClass": "AppleHSBluetoothDevice", "DeviceName": "Bluetooth Board",
+            "DeviceAddress": "AA:BB", "BatteryPercent": NSNumber(value: 66),
+            "BatteryStatus": "Charging",
+        ]]
+        let hidpp = AccessoryBatteryReading(id: "hidpp:046d:c547:2113000:1", name: "G502 X LIGHTSPEED", kind: .mouse, charge: 0.88)
+        let readings = AccessoryBatterySampler.readings(hidProperties: hid, profilerJSON: nil, hidpp: [hidpp])
+        #expect(readings.count == 2)
+        let board = readings.first { $0.id == "aa:bb" }
+        #expect(board?.name == "Bluetooth Board")
+        #expect(board?.charge == 0.66)
+        #expect(board?.isCharging == true)
+    }
 }
 
 private final class TestClock: @unchecked Sendable {

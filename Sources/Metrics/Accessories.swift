@@ -64,7 +64,8 @@ public struct AccessoryBatteryReading: Sendable, Hashable, Identifiable {
     }
 }
 
-/// 每呼叫一次都重新讀 IORegistry；system_profiler 最多每 60 秒跑一次。
+/// 每呼叫一次都重新讀 IORegistry；system_profiler 最多每 60 秒跑一次；
+/// HID Battery Strength 與 HID++ 結果由各自的來源快取（約 45 秒）並在背景重查，回傳永遠是快取值。
 /// 共用狀態都用 NSLock 保護，呼叫端可以放心從背景執行緒呼叫。
 public final class AccessoryBatterySampler: @unchecked Sendable {
     static let profilerCacheInterval: TimeInterval = 60
@@ -73,24 +74,34 @@ public final class AccessoryBatterySampler: @unchecked Sendable {
     private let profilerOutput: @Sendable () -> Data?
     private let now: @Sendable () -> Date
     private let hidProperties: @Sendable () -> [[String: Any]]
+    private let hidBattery: @Sendable () -> [AccessoryBatteryReading]
+    private let hidpp: @Sendable () -> [AccessoryBatteryReading]
     private var cachedProfilerJSON: Data?
     private var cachedAt: Date?
 
-    public init() {
-        self.profilerOutput = Self.runSystemProfiler
-        self.now = Date.init
-        self.hidProperties = Self.readHIDProperties
+    public convenience init() {
+        self.init(
+            profilerOutput: Self.runSystemProfiler,
+            now: Date.init,
+            hidProperties: Self.readHIDProperties,
+            hidBattery: { HIDBatteryReader.shared.readings() },
+            hidpp: { LogitechHIDPPSampler.shared.readings() }
+        )
     }
 
-    /// 注入點：測試用它提供假的 profiler 輸出、時鐘與 IORegistry properties，不碰真的系統指令。
+    /// 注入點：測試用它提供假的 profiler 輸出、時鐘、IORegistry properties 與 USB/HID++ 電量，不碰真的系統指令。
     init(
         profilerOutput: @escaping @Sendable () -> Data?,
         now: @escaping @Sendable () -> Date = Date.init,
-        hidProperties: @escaping @Sendable () -> [[String: Any]] = { AccessoryBatterySampler.readHIDProperties() }
+        hidProperties: @escaping @Sendable () -> [[String: Any]] = { AccessoryBatterySampler.readHIDProperties() },
+        hidBattery: @escaping @Sendable () -> [AccessoryBatteryReading] = { [] },
+        hidpp: @escaping @Sendable () -> [AccessoryBatteryReading] = { [] }
     ) {
         self.profilerOutput = profilerOutput
         self.now = now
         self.hidProperties = hidProperties
+        self.hidBattery = hidBattery
+        self.hidpp = hidpp
     }
 
     public func sample() -> [AccessoryBatteryReading] {
@@ -106,7 +117,7 @@ public final class AccessoryBatterySampler: @unchecked Sendable {
             self.cachedAt = date
             return output
         }
-        return Self.readings(hidProperties: hid, profilerJSON: profilerJSON)
+        return Self.readings(hidProperties: hid, profilerJSON: profilerJSON, hidBattery: hidBattery(), hidpp: hidpp())
     }
 
     private static func runSystemProfiler() -> Data? {
@@ -169,9 +180,16 @@ public final class AccessoryBatterySampler: @unchecked Sendable {
 // MARK: - 解析
 
 extension AccessoryBatterySampler {
-    /// 兩條來源合併：同 id 以 IORegistry 的名稱、電量與充電狀態為準，
-    /// 但保留 profiler 提供的元件；最後依電量由低到高、名稱排序。
-    static func readings(hidProperties: [[String: Any]], profilerJSON: Data?) -> [AccessoryBatteryReading] {
+    /// 合併五條來源：同 id 以 IORegistry 的名稱、電量與充電狀態為準，
+    /// HID++、HID Battery Strength 依序比對（同 id 先出現的優先；新來源的 id 天生不會撞）；
+    /// profiler 只補 components。最後依電量由低到高、名稱排序。
+    /// 新來源產生的讀數不會蓋掉 IORegistry 的藍牙配件，既有行為不變。
+    static func readings(
+        hidProperties: [[String: Any]],
+        profilerJSON: Data?,
+        hidBattery: [AccessoryBatteryReading] = [],
+        hidpp: [AccessoryBatteryReading] = []
+    ) -> [AccessoryBatteryReading] {
         let hid = parseHID(hidProperties)
         let profiler = profilerJSON.flatMap(parseProfiler) ?? []
 
@@ -180,6 +198,15 @@ extension AccessoryBatterySampler {
 
         // HID 先進場基準；同 id 的 profiler 只補元件，不覆蓋 IORegistry 的名稱、電量與充電狀態。
         for reading in hid where merged[reading.id] == nil {
+            merged[reading.id] = reading
+            order.append(reading.id)
+        }
+        // HID++ 接在後面：資訊量比標準 HID 豐富（有名稱與充電狀態），但不影響 IORegistry 的優先權。
+        for reading in hidpp where merged[reading.id] == nil {
+            merged[reading.id] = reading
+            order.append(reading.id)
+        }
+        for reading in hidBattery where merged[reading.id] == nil {
             merged[reading.id] = reading
             order.append(reading.id)
         }
