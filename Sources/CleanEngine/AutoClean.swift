@@ -1,14 +1,20 @@
 import Foundation
 
 /// Scheduled low-risk cleaning. The app edits this config and registers a LaunchAgent that runs
-/// `machelper autoclean --run-if-due` hourly; the CLI decides whether a run is due and records the result.
+/// `machelper autoclean --run-if-due` every 30 minutes; the CLI decides whether a run is due and records the result.
 public struct AutoCleanConfig: Codable, Sendable, Equatable {
     public enum Frequency: String, Codable, Sendable, CaseIterable {
+        case every30Minutes = "every-30-minutes"
+        case hourly = "hourly"
+        case every3Hours = "every-3-hours"
         case daily, weekly
 
-        /// Slightly less than the nominal period, so an hourly check never drifts a whole day.
+        /// Slightly less than the nominal period, so a scheduled check never drifts a whole period.
         public var interval: TimeInterval {
             switch self {
+            case .every30Minutes: 30 * 60 - 60
+            case .hourly: 3600 - 60
+            case .every3Hours: 3 * 3600 - 180
             case .daily: 23 * 3600
             case .weekly: 7 * 86_400 - 3600
             }
@@ -26,6 +32,11 @@ public struct AutoCleanConfig: Codable, Sendable, Equatable {
     /// Maintenance task ids to run with each clean, from `AutoClean.maintenanceTaskIDs`. Optional so
     /// older config files still decode; nil means all of them.
     public var maintenanceTasks: [String]?
+    /// Remove expired agent test temp directories (known agent test temp roots) after each clean.
+    /// Optional so older config files still decode; nil means off. The sweep's retention does not
+    /// depend on the schedule frequency, and its removal action follows the same setting matrix
+    /// as the low-risk rules (see `AgentTempClean.defaultOptions`).
+    public var agentTempClean: Bool?
     public var lastRun: Date?
     public var lastTrashedBytes: UInt64 = 0
     public var lastFreedBytes: UInt64 = 0
@@ -89,15 +100,32 @@ public enum AutoClean {
     }
 
     /// Runs one scheduled clean: low-risk rules, default selection, running apps skipped; then
-    /// the enabled maintenance tasks. Tasks not available on this Mac are skipped, not failed.
+    /// the enabled maintenance tasks; then, when enabled in the config, the sweep of expired
+    /// agent test temp directories. The sweep's removals land in the same report, following the
+    /// same setting matrix as the low-risk rules (permanent wins, then trashInstead): with the
+    /// Trash setting off, surviving directories are deleted permanently and free space; with it
+    /// on, they move to the Trash (recoverable, taking space only until the Trash is emptied).
+    /// Its pass/fail and summary ride in the tasks list. Tasks not available on this Mac are
+    /// skipped, not failed.
     public static func run(config: AutoCleanConfig, rules: [CleanRule],
-                           runTask: (MaintenanceTask) -> TaskOutcome = { MaintenanceRunner().run($0, dryRun: false, command: "autoclean") })
+                           runTask: (MaintenanceTask) -> TaskOutcome = { MaintenanceRunner().run($0, dryRun: false, command: "autoclean") },
+                           agentTempClean: (AutoCleanConfig) -> AgentTempClean.AgentTempCleanResult = { config in
+                               AgentTempClean.run(options: AgentTempClean.defaultOptions(for: config))
+                           })
         -> (CleanPlan, CleanReport, [TaskOutcome]) {
         let eligible = rules.filter { $0.risk <= maxRisk && $0.selectedByDefault }
         let plan = CleanScanner(rules: eligible).scan()
         let report = CleanExecutor(safety: .forCleaning(), permanent: config.permanent, alwaysTrash: config.trashInstead == true)
             .execute(plan.removalItems, dryRun: false, command: "autoclean")
-        return (plan, report, runMaintenance(config: config, runTask: runTask))
+
+        var items = report.items
+        var outcomes = runMaintenance(config: config, runTask: runTask)
+        if config.agentTempClean == true {
+            let sweep = agentTempClean(config)
+            items += sweep.items
+            outcomes.append(TaskOutcome(id: AgentTempClean.taskID, ok: sweep.isSuccess, dryRun: false, output: sweep.summary))
+        }
+        return (plan, CleanReport(schemaVersion: report.schemaVersion, dryRun: false, items: items), outcomes)
     }
 
     public static func runMaintenance(config: AutoCleanConfig, catalog: [MaintenanceTask] = MaintenanceCatalog.all,
@@ -119,7 +147,7 @@ public enum AutoClean {
         }
         let failedTasks = tasks.filter { !$0.ok }
         if !failedTasks.isEmpty {
-            errors.append(String(localized: "Maintenance failed: \(failedTasks.map(\.id).joined(separator: ", "))", bundle: .module))
+            errors.append(String(localized: "Scheduled task failed: \(failedTasks.map(\.id).joined(separator: ", "))", bundle: .module))
         }
         config.lastError = errors.isEmpty ? nil : errors.joined(separator: "\n")
     }

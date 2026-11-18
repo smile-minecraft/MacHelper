@@ -131,6 +131,15 @@ keys = [
     "Set a schedule to clean low-risk items automatically.",
     "On",
     "Off",
+    "Every 30 Minutes",
+    "Hourly",
+    "Every 3 Hours",
+    "Clean expired agent test temp files",
+    "Known agent test directories move to the Trash once they are at least 7 days old, unchanged, and not in use — or are deleted permanently, whichever your “Move to the Trash instead of deleting” setting says. Anything in use, still being written, or unrecognized is skipped.",
+    "Agent Test Temp",
+    "Off by default. Retention is 7 days regardless of schedule frequency. With the Trash setting off — the default for existing installs — expired directories are deleted permanently, freeing space; with it on, they move to the Trash, freeing space once you empty it.",
+    "Background schedule update failed",
+    "Retry schedule update",
 ]
 missing = []
 for key in keys:

@@ -114,9 +114,11 @@ struct AutoCleanCommand: ParsableCommand {
         Settings live in ~/Library/Application Support/MacHelper/autoclean.json and are edited in the app.
         Only low-risk rules selected by default run; caches of running apps are skipped; the Trash is never emptied.
         Then the enabled safe maintenance tasks run (QuickLook cache reset, deleting unavailable simulators);
-        tasks that don't apply on this Mac are skipped.
+        tasks that don't apply on this Mac are skipped. When agentTempClean is on, expired agent test
+        temp directories are removed (7-day retention): they move to the Trash when the Trash setting
+        is on; otherwise they are deleted permanently, which frees space.
           machelper autoclean --status          # show settings and last result
-          machelper autoclean --run-if-due      # what the hourly agent calls
+          machelper autoclean --run-if-due      # what the scheduled background agent calls
           machelper autoclean --now             # run immediately
         """
     )
@@ -147,6 +149,7 @@ struct AutoCleanCommand: ParsableCommand {
                     Output.line("Never run.")
                 }
                 Output.line("Maintenance: \(config.enabledMaintenanceTasks.isEmpty ? "none" : config.enabledMaintenanceTasks.joined(separator: ", "))")
+                Output.line("Agent temp clean: \(config.agentTempClean == true ? (config.trashInstead == true && !config.permanent ? "on (to the Trash)" : "on (deleted directly, freeing space)") : "off")")
                 for t in config.lastTasks ?? [] { Output.line("  last \(t.id): \(t.ok ? "ok" : "failed")") }
                 if let e = config.lastError { Output.line("Last error: \(e)") }
                 if let next = config.nextRun { Output.line("Next run: \(next.formatted())") }

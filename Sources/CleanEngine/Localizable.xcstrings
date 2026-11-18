@@ -2279,36 +2279,36 @@
         }
       }
     },
-    "Maintenance failed: %@": {
+    "Scheduled task failed: %@": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Error en el mantenimiento: %@"
+            "value": "La tarea programada falló: %@"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "メンテナンスに失敗しました: %@"
+            "value": "スケジュールタスクに失敗しました: %@"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "유지 관리 실패: %@"
+            "value": "예약된 작업 실패: %@"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "维护任务失败：%@"
+            "value": "计划任务失败：%@"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "維護任務失敗：%@"
+            "value": "排程工作失敗：%@"
           }
         }
       }

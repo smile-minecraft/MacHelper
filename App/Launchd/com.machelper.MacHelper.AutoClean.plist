@@ -13,8 +13,11 @@
 		<string>autoclean</string>
 		<string>--run-if-due</string>
 	</array>
+	<!-- Runs the embedded CLI as the user. It exits immediately unless auto clean is enabled and due.
+	     Checks every 30 minutes so the half-hour frequency setting takes effect; the CLI decides
+	     whether a run is due based on the configured frequency. -->
 	<key>StartInterval</key>
-	<integer>3600</integer>
+	<integer>1800</integer>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>ProcessType</key>

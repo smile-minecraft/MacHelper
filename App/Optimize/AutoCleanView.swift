@@ -15,6 +15,9 @@ struct AutoCleanView: View {
             Form {
                 Toggle("Enable Auto Clean", isOn: $model.enabled)
                 Picker("Frequency", selection: $model.frequency) {
+                    Text("Every 30 Minutes").tag(AutoCleanConfig.Frequency.every30Minutes)
+                    Text("Hourly").tag(AutoCleanConfig.Frequency.hourly)
+                    Text("Every 3 Hours").tag(AutoCleanConfig.Frequency.every3Hours)
                     Text("Daily").tag(AutoCleanConfig.Frequency.daily)
                     Text("Weekly").tag(AutoCleanConfig.Frequency.weekly)
                 }
@@ -23,7 +26,32 @@ struct AutoCleanView: View {
                     Toggle("Move to the Trash instead of deleting", isOn: $model.trashInstead)
                     Text(model.trashInstead
                          ? "Cleaned items go to the Trash; the space is freed once you empty it."
-                         : "Auto Clean only touches low-risk caches and logs, which are deleted directly and free space immediately (apps rebuild this data themselves).")
+                         : "Items are deleted directly and free space immediately: caches, logs, and (if enabled) expired agent test temp directories. Unknown or in-use items are never touched.")
+                        .font(.mhCaption).foregroundStyle(Palette.textMuted)
+                }
+                if let scheduleError = model.scheduleMigrationError {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label("Background schedule update failed", systemImage: "exclamationmark.triangle")
+                            .font(.mhCaption).foregroundStyle(Theme.orange)
+                        Text(scheduleError).font(.mhCaption).foregroundStyle(Palette.textMuted)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button("Retry schedule update") { model.retryScheduleMigration() }
+                            .controlSize(.small)
+                    }
+                    .padding(.vertical, 2)
+                }
+                Section {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Toggle("Clean expired agent test temp files", isOn: Binding(get: { model.agentTempClean },
+                                                                                  set: { model.agentTempClean = $0 }))
+                            .disabled(!model.enabled)
+                        Text("Known agent test directories move to the Trash once they are at least 7 days old, unchanged, and not in use — or are deleted permanently, whichever your “Move to the Trash instead of deleting” setting says. Anything in use, still being written, or unrecognized is skipped.")
+                            .font(.mhCaption).foregroundStyle(Palette.textMuted)
+                    }
+                } header: {
+                    Text("Agent Test Temp")
+                } footer: {
+                    Text("Off by default. Retention is 7 days regardless of schedule frequency. With the Trash setting off — the default for existing installs — expired directories are deleted permanently, freeing space; with it on, they move to the Trash, freeing space once you empty it.")
                         .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
                 Section {

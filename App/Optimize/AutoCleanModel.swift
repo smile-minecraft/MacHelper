@@ -4,7 +4,9 @@ import Observation
 import ServiceManagement
 
 /// Auto clean settings. The schedule runs as a user LaunchAgent (registered here through SMAppService)
-/// that calls the embedded CLI hourly; the CLI runs only when enabled and due, so the app need not be open.
+/// that calls the embedded CLI every 30 minutes; the CLI runs only when enabled and due, so the app need not be open.
+/// Existing installs get the new trigger through `AutoCleanScheduleMigration` — one explicit,
+/// visible, retryable re-registration; never a best-effort `try?` on every refresh.
 @MainActor
 @Observable
 final class AutoCleanModel {
@@ -13,7 +15,11 @@ final class AutoCleanModel {
     private(set) var config = AutoClean.load()
     private(set) var agentStatus: SMAppService.Status = .notRegistered
     private(set) var message: String?
+    /// Reason an existing-agent schedule migration failed, when it did. Written, cleared or
+    /// retried only through `refreshScheduleMigration()`; shown in Settings with a Retry action.
+    private(set) var scheduleMigrationError: String?
     private(set) var isRunning = false
+    @ObservationIgnored private let agentServicing = SMAppServiceAgentServicing()
 
     @ObservationIgnored private let agent = SMAppService.agent(plistName: AutoCleanModel.agentPlist)
 
@@ -27,6 +33,27 @@ final class AutoCleanModel {
             let availability = await Task.detached(priority: .utility) { tasks.map(\.isAvailable) }.value
             maintenanceRows = zip(tasks, availability).map { ($0, $1) }
         }
+        Task { await refreshScheduleMigration() }
+    }
+
+    /// Runs the one-time schedule migration for an already-registered agent. No-op when the
+    /// current version is already recorded (or the agent is inactive). Failure is surfaced, and
+    /// the next refresh, the next frequency change or an explicit retry can run it again.
+    private func refreshScheduleMigration() async {
+        switch await AutoCleanScheduleMigration.runIfNeeded(servicing: agentServicing) {
+        case .alreadyCurrent, .inactive:
+            scheduleMigrationError = nil
+        case .migrated:
+            scheduleMigrationError = nil
+            agentStatus = agent.status
+        case .failed(let message):
+            scheduleMigrationError = message
+        }
+    }
+
+    /// User-facing retry for a failed schedule migration (Settings shows it only when there is an error).
+    func retryScheduleMigration() {
+        Task { await refreshScheduleMigration() }
     }
 
     var enabled: Bool {
@@ -36,12 +63,23 @@ final class AutoCleanModel {
 
     var frequency: AutoCleanConfig.Frequency {
         get { config.frequency }
-        set { config.frequency = newValue; save() }
+        set {
+            config.frequency = newValue
+            save()
+            // Picking a frequency is exactly when a missing schedule migration matters; the
+            // migrator no-ops (zero agent calls) when the registered agent is current.
+            Task { await refreshScheduleMigration() }
+        }
     }
 
     var trashInstead: Bool {
         get { config.trashInstead == true }
         set { config.trashInstead = newValue; save() }
+    }
+
+    var agentTempClean: Bool {
+        get { config.agentTempClean == true }
+        set { config.agentTempClean = newValue ? true : nil; save() }
     }
 
     /// Safe maintenance tasks Auto Clean may run, with whether each applies on this Mac
@@ -59,14 +97,21 @@ final class AutoCleanModel {
         save()
     }
 
-    func title(forTask id: String) -> String { MaintenanceCatalog.all.first { $0.id == id }?.title ?? id }
+    func title(forTask id: String) -> String {
+        if id == AgentTempClean.taskID { return String(localized: "Clean expired agent test temp files") }
+        return MaintenanceCatalog.all.first { $0.id == id }?.title ?? id
+    }
 
     private func setEnabled(_ on: Bool) async {
         config.enabled = on
         save()
         do {
             if on {
-                if agent.status != .enabled { try agent.register() }
+                if agent.status != .enabled {
+                    try agent.register()
+                    // A fresh registration installs the embedded plist; no migration needed after this.
+                    AutoCleanScheduleMigration.recordRegistration()
+                }
             } else if agent.status == .enabled || agent.status == .requiresApproval {
                 try await agent.unregister()
             }
@@ -102,6 +147,7 @@ final class AutoCleanModel {
         updated.permanent = config.permanent
         updated.trashInstead = config.trashInstead
         updated.maintenanceTasks = config.maintenanceTasks
+        updated.agentTempClean = config.agentTempClean
         config = updated
         save()
         message = String(localized: "Cleaned \(config.lastItemCount) items.")
