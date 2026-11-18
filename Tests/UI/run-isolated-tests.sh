@@ -43,7 +43,12 @@ cp -R "$root/Sources/PrivilegedOps" "$work/Sources/PrivilegedOps"
 cp -R "$root/Sources/CleanEngine" "$work/Sources/CleanEngine"
 mkdir -p "$work/Sources/UpdatesFeature"
 cp "$root/App/Updates/UpdatesModel.swift" "$work/Sources/UpdatesFeature/UpdatesModel.swift"
+cp "$root/App/Optimize/AutoCleanSchedule.swift" "$work/Sources/UpdatesFeature/AutoCleanSchedule.swift"
+cp "$root/App/Optimize/AutoCleanModel.swift" "$work/Sources/UpdatesFeature/AutoCleanModel.swift"
+mkdir -p "$work/App/Launchd"
+cp "$root/App/Launchd/com.machelper.MacHelper.AutoClean.plist" "$work/App/Launchd/"
 cp "$here/UpdatesModelTests.swift" "$work/Tests/UpdatesModelTests/UpdatesModelTests.swift"
+cp "$here/AutoCleanScheduleTests.swift" "$work/Tests/UpdatesModelTests/AutoCleanScheduleTests.swift"
 cp "$root/Tests/CleanEngineTests/CleanEngineTests.swift" "$work/Tests/EngineTests/CleanEngineTests.swift"
 cp "$root/Tests/CleanEngineTests/HomebrewUpdatesCheckTests.swift" "$work/Tests/EngineTests/HomebrewUpdatesCheckTests.swift"
 
@@ -87,7 +92,7 @@ export TMPDIR="$work/tmp"
 
 # The manifest has no remote packages. These flags make a resolution attempt fail instead of
 # silently reaching the network if one is ever added.
-swift test --package-path "$work" --disable-automatic-resolution --skip-update --filter 'UpdatesModelTests|UpdatesFreshnessTests'
+swift test --package-path "$work" --disable-automatic-resolution --skip-update --filter 'UpdatesModelTests|UpdatesFreshnessTests|AutoCleanScheduleTests'
 if [ "$mode" = "all" ]; then
     swift test --package-path "$work" --disable-automatic-resolution --skip-update \
         --filter 'HomebrewUpdatesCheckTests|UpdatesHeadlineTests|HomebrewUpdateSessionTests|HomebrewUpdatesPerformanceTests'

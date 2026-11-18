@@ -131,6 +131,15 @@ keys = [
     "Set a schedule to clean low-risk items automatically.",
     "On",
     "Off",
+    "Every 30 Minutes",
+    "Hourly",
+    "Every 3 Hours",
+    "Clean expired temporary files",
+    "Files and folders in your Mac’s temporary folder that are at least 7 days old, unchanged, and not in use move to the Trash — or are deleted permanently, whichever your “Move to the Trash instead of deleting” setting says. Anything in use, still being written, or managed by the system is skipped.",
+    "Temporary Files",
+    "Off by default. Retention is 7 days regardless of schedule frequency. With the Trash setting off — the default for existing installs — expired files are deleted permanently, freeing space; with it on, they move to the Trash, freeing space once you empty it.",
+    "Background schedule update failed",
+    "Retry schedule update",
 ]
 missing = []
 for key in keys:
@@ -202,6 +211,7 @@ launch_app() {
         --snapshot-section optimize \
         -AppleLanguages '(en)' -AppleLocale en_US \
         -helper.registeredCDHash "$HELPER_HASH" \
+        -MacHelper.autoCleanAgent.plistVersion 2 \
         >"$OUT/app-$APP_LOG_STATE.log" 2>&1 &
     APP_PID=$!
 }

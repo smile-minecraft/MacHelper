@@ -20561,40 +20561,6 @@
         }
       }
     },
-    "Auto Clean only touches low-risk caches and logs, which are deleted directly and free space immediately (apps rebuild this data themselves).": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La limpieza automática solo toca cachés y registros de riesgo bajo, que se eliminan directamente y liberan espacio al momento (las apps vuelven a crear estos datos)."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "自動クリーンが対象にするのは低リスクのキャッシュとログだけです。これらは直接削除され、すぐに容量が空きます（App が自分で作り直すデータです）。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "자동 정리는 낮은 위험 캐시와 로그만 다루며, 이 항목은 바로 삭제되어 즉시 공간이 확보됩니다(앱이 직접 다시 만드는 데이터)."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "自动清理只处理低风险的缓存与日志，会直接删除并立即释放空间（App 会自行重建这些数据）。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "自動清理只處理低風險的快取與日誌，會直接刪除並立即釋放空間（App 會自行重建這些資料）。"
-          }
-        }
-      }
-    },
     "Cleaned %@.": {
       "localizations": {
         "es": {
@@ -39870,6 +39836,346 @@
           "stringUnit": {
             "state": "translated",
             "value": "這些磁碟數字是在儲存的掃描之後才讀取的，所以不能和那次結果相比。"
+          }
+        }
+      }
+    },
+    "Every 30 Minutes": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada 30 minutos"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30分ごと"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30분마다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每 30 分钟"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每 30 分鐘"
+          }
+        }
+      }
+    },
+    "Hourly": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada hora"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1時間ごと"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "매시간"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每小时"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每小時"
+          }
+        }
+      }
+    },
+    "Every 3 Hours": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada 3 horas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3時間ごと"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3시간마다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每 3 小时"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每 3 小時"
+          }
+        }
+      }
+    },
+    "Clean expired temporary files": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpiar archivos temporales caducados"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "期限切れの一時ファイルを削除"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "만료된 임시 파일 정리"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理过期的临时文件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理過期的暫存檔案"
+          }
+        }
+      }
+    },
+    "Temporary Files": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos temporales"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一時ファイル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "임시 파일"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "临时文件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暫存檔案"
+          }
+        }
+      }
+    },
+    "Files and folders in your Mac’s temporary folder that are at least 7 days old, unchanged, and not in use move to the Trash — or are deleted permanently, whichever your “Move to the Trash instead of deleting” setting says. Anything in use, still being written, or managed by the system is skipped.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los archivos y carpetas de la carpeta temporal de tu Mac que tengan al menos 7 días, sin cambios y sin uso se mueven a la Papelera — o se eliminan de forma permanente, según tu ajuste «Mover a la Papelera en lugar de eliminar». Lo que esté en uso, se esté escribiendo o lo gestione el sistema se omite."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Macの一時フォルダにある、7日以上変更がなく、使用中でないファイルとフォルダはゴミ箱に移動します。「削除せずにゴミ箱へ移動」設定に応じて永久に削除される場合もあります。使用中、書き込み中、システム管理の項目はスキップされます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac의 임시 폴더에서 7일 이상 변동이 없고 사용 중이 아닌 파일과 폴더는 휴지통으로 이동하거나, 「삭제 대신 휴지통으로 이동」 설정에 따라 영구 삭제됩니다. 사용 중이거나 기록 중이거나 시스템이 관리하는 항목은 건너뜁니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 临时文件夹中至少 7 天未变动且没有在用的文件和文件夹会移到废纸篓——或按你的「移到废纸篓而不是删除」设置直接永久删除。正在使用、正在写入或由系统管理的项目会跳过。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 暫存資料夾中至少 7 天未變動且沒有在用的檔案和資料夾會移到垃圾桶——或依你的「移到垃圾桶而不是刪除」設定直接永久刪除。正在使用、正在寫入或由系統管理的項目會跳過。"
+          }
+        }
+      }
+    },
+    "Off by default. Retention is 7 days regardless of schedule frequency. With the Trash setting off — the default for existing installs — expired files are deleted permanently, freeing space; with it on, they move to the Trash, freeing space once you empty it.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactivado de forma predeterminada. La retención es de 7 días sin importar la frecuencia de ejecución. Con el ajuste de Papelera desactivado (el valor predeterminado en instalaciones existentes), los archivos caducados se eliminan de forma permanente y liberan espacio; con él activado, van a la Papelera y liberan espacio cuando la vacíes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "既定ではオフです。保持期間は実行頻度に関係なく7日です。ゴミ箱設定がオフ（既存の環境の既定値）の場合、期限切れファイルは永久に削除されて領域を解放します。オンの場合はゴミ箱へ移動し、空にすると解放されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기본값은 꺼짐입니다. 보존 기간은 실행 빈도와 무관하게 7일입니다. 휴지통 설정이 꺼져 있으면(기존 설치의 기본값) 만료된 파일은 영구 삭제되어 공간이 확보됩니다. 켜져 있으면 휴지통으로 이동하며, 비우면 공간이 확보됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认关闭。保留期限 7 天，与排程频率无关。「移到废纸篓」关闭时（既有安装的默认值），过期文件会被永久删除并释放空间；开启时会移到废纸篓，清空废纸篓后才释放空间。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預設關閉。保留期限 7 天，與排程頻率無關。「移到垃圾桶」關閉時（既有安裝的預設值），過期檔案會被永久刪除並釋放空間；開啟時會移到垃圾桶，清空垃圾桶後才釋放空間。"
+          }
+        }
+      }
+    },
+    "Background schedule update failed": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo actualizar la programación en segundo plano"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バックグラウンドのスケジュールを更新できませんでした"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "백그라운드 일정 갱신 실패"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后台排程更新失败"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景排程更新失敗"
+          }
+        }
+      }
+    },
+    "Retry schedule update": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar la actualización de la programación"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スケジュールの更新を再試行"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일정 갱신 재시도"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试排程更新"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重試排程更新"
+          }
+        }
+      }
+    },
+    "Items are deleted directly and free space immediately: caches, logs, and (if enabled) expired temporary files. In-use items and items managed by the system are never touched.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los elementos se eliminan directamente y liberan espacio de inmediato: cachés, registros y, si está activado, archivos temporales caducados. Los elementos en uso y los que gestiona el sistema nunca se tocan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "項目は即座に直接削除され、その場で空き領域が増えます: キャッシュ、ログ、(有効にしている場合) 期限切れの一時ファイル。使用中の項目とシステム管理の項目には一切手を付けません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "항목은 즉시 직접 삭제되어 바로 공간을 확보합니다: 캐시, 로그, (활성화된 경우) 만료된 임시 파일. 사용 중인 항목과 시스템이 관리하는 항목은 절대 건드리지 않습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "项目会立即直接删除并释放空间：缓存、日志和（启用时）过期的临时文件。使用中的项目和由系统管理的项目不会被动。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "項目會立即直接刪除並釋放空間：快取、日誌和（啟用時）過期的暫存檔案。使用中的項目和由系統管理的項目不會被動。"
           }
         }
       }
