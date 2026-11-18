@@ -199,8 +199,9 @@ private struct DummyError: Error {
         let interval = contents?["StartInterval"] as? Int
         // Schedule version history: 1 = hourly (3600 s), 2 = every 30 minutes (1800 s).
         let expected: [Int: Int] = [1: 3600, 2: 1800]
-        #expect(interval == expected[AutoCleanAgentScheduleVersion.current],
-                "bump the version together with the plist, or existing installs never migrate")
+        let target = try #require(expected[AutoCleanAgentScheduleVersion.current],
+                                   "bump the version together with the plist, or existing installs never migrate")
+        #expect(interval == target)
     }
 
     @Test(arguments: [AutoCleanAgentStatus.notRegistered, .requiresApproval, .notFound, .unknown])
