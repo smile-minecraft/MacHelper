@@ -94,6 +94,13 @@ enum AutoCleanScheduleMigration {
         defaults.removeObject(forKey: pendingKey)
     }
 
+    /// Records that a registration is intended but not yet confirmed, so a later refresh or an
+    /// explicit retry resumes it (see `runIfNeeded`). Cleared by `recordRegistration` and `cancel`.
+    @MainActor
+    static func markPending(defaults: UserDefaults = .standard) {
+        defaults.set(true, forKey: pendingKey)
+    }
+
     /// Marks the registered agent as current. Called when the user enables Auto Clean (a fresh
     /// `register()` installs the embedded plist) — no migration call needed afterwards.
     @MainActor

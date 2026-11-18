@@ -139,6 +139,51 @@ private struct DummyError: Error {
         #expect(service.calls == ["unregister"])
     }
 
+    @Test func failedReenableRegistrationIsRetriedOnRefresh() async throws {
+        let (defaults, suite) = freshDefaults()
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let configURL = directory.appending(path: "autoclean.json")
+        var config = AutoCleanConfig()
+        config.enabled = false
+        try AutoClean.save(config, to: configURL)
+        let service = FakeAgentServicing(status: .notRegistered)
+        service.registerError = DummyError(message: "connection refused")
+        let model = AutoCleanModel(agent: service, configURL: configURL, defaults: defaults)
+
+        model.enabled = true
+        while !service.calls.contains("register") { await Task.yield() }
+        while model.isUpdatingSchedule { await Task.yield() }
+        #expect(model.message?.isEmpty == false, "the failed registration is surfaced")
+        #expect(service.calls == ["register", "register"],
+                "the enable operation itself retries once through the pending marker")
+        #expect(model.scheduleMigrationError?.isEmpty == false, "the second failure surfaces with a Retry action")
+
+        service.registerError = nil
+        await model.refreshScheduleMigration()
+        #expect(service.calls == ["register", "register", "register"], "a refresh must resume the interrupted registration")
+        #expect(model.agentStatus == .enabled)
+        #expect(model.scheduleMigrationError == nil)
+        #expect(defaults.integer(forKey: AutoCleanScheduleMigration.defaultsKey) == AutoCleanAgentScheduleVersion.current)
+    }
+
+    @Test func shippedPlistMatchesCurrentScheduleVersion() throws {
+        // The migration only moves existing installs to the plist embedded in the app bundle, so
+        // the shipped trigger and `AutoCleanAgentScheduleVersion.current` must change together —
+        // otherwise existing installs silently keep their old trigger forever.
+        let plist = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appending(path: "App/Launchd/com.machelper.MacHelper.AutoClean.plist")
+        let data = try Data(contentsOf: plist)
+        let contents = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+        let interval = contents?["StartInterval"] as? Int
+        // Schedule version history: 1 = hourly (3600 s), 2 = every 30 minutes (1800 s).
+        let expected: [Int: Int] = [1: 3600, 2: 1800]
+        #expect(interval == expected[AutoCleanAgentScheduleVersion.current],
+                "bump the version together with the plist, or existing installs never migrate")
+    }
+
     @Test(arguments: [AutoCleanAgentStatus.notRegistered, .requiresApproval, .notFound, .unknown])
     func inactiveAgentIsNotMigrated(status: AutoCleanAgentStatus) async {
         let (defaults, suite) = freshDefaults()

@@ -138,6 +138,11 @@ final class AutoCleanModel {
             do {
                 if config.enabled {
                     if agent.status != .enabled && agent.status != .requiresApproval {
+                        // Persist the intent before the service call: a register that fails here
+                        // leaves the marker set, so the next refresh or Retry resumes instead of
+                        // reporting the agent inactive (the user would otherwise have to flip the
+                        // switch off and on again).
+                        AutoCleanScheduleMigration.markPending(defaults: defaults)
                         try agent.register()
                         AutoCleanScheduleMigration.recordRegistration(defaults: defaults)
                     }

@@ -80,6 +80,9 @@ public enum AgentTempClean {
         /// or nil when that cannot be established. Default is a single batched, NUL-field-delimited
         /// lsof invocation. Called twice per run: before planning and again before removal.
         public var openFiles: @Sendable (UInt32) -> [String]? = { uid in systemOpenFiles(uid: uid) }
+        /// Exclusion patterns honored like everywhere else in Auto Clean. nil = the user's
+        /// clean-whitelist.txt entries; tests pass explicit patterns so they never read the file.
+        public var whitelist: [String]? = nil
         public init() {}
     }
 
@@ -236,8 +239,15 @@ public enum AgentTempClean {
         }
         let reInUse = inUseCandidates(rootPath: rootPath, candidates: survivors.map(\.name), openPaths: reOpenPaths)
         let log = options.log ?? .shared
-        let safety = PathSafety(protectedPaths: [], whitelist: [], allowedRoots: [rootPath], minimumDepth: 1)
-        let executor = options.executor ?? CleanExecutor(safety: safety, log: log)
+        let executor: CleanExecutor
+        if let injected = options.executor {
+            executor = injected
+        } else {
+            // The user's exclusion list wins over the sweep, exactly like the declarative rules.
+            let safety = PathSafety(protectedPaths: [], whitelist: options.whitelist ?? PathSafety.loadWhitelist(),
+                                    allowedRoots: [rootPath], minimumDepth: 1)
+            executor = CleanExecutor(safety: safety, log: log)
+        }
         var outcomes: [ItemOutcome] = []
         var failure: String?
 
@@ -282,6 +292,11 @@ public enum AgentTempClean {
             let removal = RemovalItem(path: candidate.path, source: taskID, bytes: rewalk.bytes,
                                       action: options.useTrash ? .trash : .delete)
             outcomes.append(executor.executeItem(removal, dryRun: false))
+        }
+        // A root that changed while the last removal was in flight must not read as verified just
+        // because the per-item guard already consumed its turn.
+        if failure == nil, !sameRoot(rootPath, as: rst) {
+            failure = "the temp folder changed during the scan"
         }
         executor.log.append(command: options.command, outcomes: outcomes)
         return AgentTempCleanResult(verified: failure == nil, failure: failure, items: items + outcomes)

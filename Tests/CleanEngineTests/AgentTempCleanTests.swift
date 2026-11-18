@@ -331,6 +331,56 @@ import Testing
         #expect(fileManager.fileExists(atPath: later.path))
     }
 
+    @Test func whitelistedCandidatesAreNeverRemoved() throws {
+        let s = try makeSandbox()
+        defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
+        let old = Date().addingTimeInterval(-30 * 86_400)
+        let kept = try makeCandidate(s.root, "cardiary-host-Keep01", childMtime: old)
+        let removed = try makeCandidate(s.root, "cardiary-host-Drop02", childMtime: old)
+        try age(kept, to: old)
+        try age(removed, to: old)
+
+        // No injected executor: run() must build one that honors the exclusion patterns.
+        var options = AgentTempClean.Options()
+        options.tempRoot = s.root
+        options.now = Date()
+        options.command = "autoclean"
+        options.openFiles = { _ in [] }
+        options.log = OperationLog(url: s.log)
+        options.useTrash = false
+        options.whitelist = [PathSafety.normalize(kept.path)]
+        let result = AgentTempClean.run(options: options)
+
+        #expect(result.verified)
+        #expect(result.deletedCount == 1)
+        #expect(result.items.contains { $0.path == PathSafety.normalize(kept.path) && $0.result == .skipped })
+        #expect(fileManager.fileExists(atPath: kept.path), "the user's exclusion list must win over the sweep")
+        #expect(!fileManager.fileExists(atPath: removed.path))
+    }
+
+    @Test func rootReplacedDuringTheLastRemovalStillReportsUnverified() throws {
+        let s = try makeSandbox()
+        defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
+        let old = Date().addingTimeInterval(-30 * 86_400)
+        let candidate = try makeCandidate(s.root, "cardiary-host-Sw1234", childMtime: old)
+        try age(candidate, to: old)
+        var options = options(root: s.root, trash: s.trash, log: s.log)
+        options.useTrash = false
+        let safety = PathSafety(protectedPaths: [], whitelist: [], allowedRoots: [s.root.path], minimumDepth: 1)
+        options.executor = CleanExecutor.injected(safety: safety, log: OperationLog(url: s.log),
+            removal: .custom(trash: { _ in Issue.record("unexpected Trash operation") }, delete: { url in
+                try FileManager.default.removeItem(at: url)
+                // The temp root is swapped right after this removal: same path, different directory.
+                try FileManager.default.removeItem(at: s.root)
+                try FileManager.default.createDirectory(at: s.root, withIntermediateDirectories: true)
+            }))
+
+        let result = AgentTempClean.run(options: options)
+        #expect(result.deletedCount == 1, "the removal already happened; the report must keep counting it")
+        #expect(result.verified == false, "a root that changed during the batch must never read as verified")
+        #expect(result.failure?.contains("temp folder changed") == true)
+    }
+
     @Test func emptyOldDirectoryMoves() throws {
         let s = try makeSandbox()
         defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
