@@ -6,10 +6,9 @@
 # `.package(url:)` entry and SwiftPM has nothing to fetch:
 #
 #   App/Monitor/MonitorPanel.swift                  the whole menu panel (split for private tabs)
-#   App/Monitor/DiskActivityModel.swift             per-app disk I/O sampling loop
-#   App/Monitor/DiskIOSection.swift                 per-app disk I/O presentation
 #   App/Monitor/DiskCapacitySelectionModel.swift    selection, volume and history state
 #   App/Monitor/DiskCapacityHistoryChart.swift      seven-day free-space chart
+#   App/Monitor/NetworkDetailsSection.swift         the network page's live section
 #   App/Monitor/NetworkDetailsContent.swift         the network page's presentation-only content
 #   App/Monitor/HistoryManagementSection.swift      the settings section for monitoring history
 #   App/Monitor/Formatting.swift                    Fmt
@@ -17,14 +16,13 @@
 #   Sources/SMCKit/*.swift                          real fan reading type
 #   Sources/CSystemBridge                           the thin C layer those modules use
 #
-# `MonitorPanel`'s `DiskTab` and `DiskSectionHeader` are private to the file, so the script
-# compiles the panel in two parts: `MonitorPanel.swift` without those three declarations (the
-# panel, the other tabs and all helpers), and `MonitorPanelSections.swift` with the extracted
-# declarations. The extracted text is byte-for-byte the source; only `private` is removed from
-# the three declarations so the test target can construct them. The generator reverses those
-# edits and compares against the original blocks. Every line of the production file is still
-# compiled, and `MonitorPanel` keeps referring to the same types because both parts are in one
-# module.
+# `MonitorPanel`'s `DiskTab`, `DiskSectionHeader` and `NetworkTab` are private to the file, so the
+# script compiles the panel in two parts: `MonitorPanel.swift` without those four declarations
+# (the panel, the other tabs and all helpers), and `MonitorPanelSections.swift` with the extracted
+# declarations. The extracted text is byte-for-byte the source; only `private` is removed from the
+# four declarations so the test target can construct them. The generator reverses those edits and
+# compares against the original blocks. Every line of the production file is still compiled, and
+# `MonitorPanel` keeps referring to the same types because both parts are in one module.
 #
 # Stand-ins (all listed here so the limits of the result are explicit):
 #
@@ -43,11 +41,13 @@
 #     `VolumeCapacityHistory` is compiled from a fixed snapshot; the rest are minimal stand-ins.
 #     The in-memory GRDB database in the test is created and filled by the test itself.
 #
-# The per-app disk section and its sampling loop are production files too. `DiskTabRender` drops
-# the page's two `.task` blocks and the `.onReceive` handler because `ImageRenderer` was observed
-# to run SwiftUI lifecycle modifiers in the test process; the test drives `DiskIOSection` and
-# `DiskActivityModel` directly. The full production `DiskTab` (with those modifiers) remains
-# compiled and is what `MonitorPanel` uses.
+# The network section's default `NetworkDetailsSampler` reads real interfaces. The test never
+# renders that section: `NetworkTabRender` replaces exactly that one call with a boundary view,
+# and the real `NetworkTab` body is built and type-checked but never hosted. This is required
+# because `ImageRenderer` was observed to run SwiftUI lifecycle modifiers in the test process;
+# `DiskTabRender` therefore also drops the page's `.task`/`.onReceive` block and the test drives
+# the model directly. The full production `DiskTab`/`NetworkTab` (with those modifiers) remain
+# compiled and are what `MonitorPanel` uses.
 #
 # The local GRDB checkout is used read-only because the upstream Storage file imports GRDB. It is
 # never modified; SwiftPM builds it inside this throwaway folder. Set MACHELPER_GRDB_CHECKOUT
@@ -164,10 +164,9 @@ cp "$root"/Sources/SMCKit/*.swift "$work/package/Sources/SMCKit/"
 cp "$root"/Sources/Metrics/*.swift "$work/package/Sources/Metrics/"
 cp "$volume_history" "$work/package/Sources/Storage/VolumeCapacityHistory.swift"
 cp "$history_segments" "$work/package/Sources/Storage/HistorySegments.swift"
-cp "$root/App/Monitor/DiskActivityModel.swift" "$work/package/Sources/MonitorPanelFeature/DiskActivityModel.swift"
-cp "$root/App/Monitor/DiskIOSection.swift" "$work/package/Sources/MonitorPanelFeature/DiskIOSection.swift"
 cp "$root/App/Monitor/DiskCapacitySelectionModel.swift" "$work/package/Sources/MonitorPanelFeature/DiskCapacitySelectionModel.swift"
 cp "$root/App/Monitor/DiskCapacityHistoryChart.swift" "$work/package/Sources/MonitorPanelFeature/DiskCapacityHistoryChart.swift"
+cp "$root/App/Monitor/NetworkDetailsSection.swift" "$work/package/Sources/MonitorPanelFeature/NetworkDetailsSection.swift"
 cp "$root/App/Monitor/NetworkDetailsContent.swift" "$work/package/Sources/MonitorPanelFeature/NetworkDetailsContent.swift"
 cp "$root/App/Monitor/HistoryManagementSection.swift" "$work/package/Sources/MonitorPanelFeature/HistoryManagementSection.swift"
 cp "$root/App/Monitor/Formatting.swift" "$work/package/Sources/MonitorPanelFeature/Formatting.swift"
@@ -324,6 +323,7 @@ starts = {
     "Series": series_start,
     "DiskTab": find("private struct DiskTab: View {"),
     "DiskSectionHeader": find("private struct DiskSectionHeader: View {"),
+    "NetworkTab": find("private struct NetworkTab: View {"),
 }
 
 blocks = {}
@@ -337,6 +337,7 @@ edits = {
     "Series": ("@MainActor\nprivate enum Series {", "@MainActor\nenum Series {"),
     "DiskTab": ("private struct DiskTab: View {", "struct DiskTab: View {"),
     "DiskSectionHeader": ("private struct DiskSectionHeader: View {", "struct DiskSectionHeader: View {"),
+    "NetworkTab": ("private struct NetworkTab: View {", "struct NetworkTab: View {"),
 }
 
 rendered = {}
@@ -349,42 +350,45 @@ for name, original in blocks.items():
         raise SystemExit(f"{name}: reversing the visibility edit did not reproduce the source")
     rendered[name] = changed
 
-# Render-only DiskTab: same body minus the lifecycle modifiers (the per-app I/O loop and the
-# 60-second refresh, plus the history-clear notification). The test drives the views and models
-# directly instead of hosting the page.
+# Render-only DiskTab: same body minus the two lifecycle modifiers.
 disk_tab = rendered["DiskTab"]
 disk_render = disk_tab.replace("struct DiskTab: View {", "struct DiskTabRender: View {", 1)
 if disk_render == disk_tab:
     raise SystemExit("DiskTabRender: name edit did not apply")
 disk_lines = disk_render.splitlines(keepends=True)
-task_starts = [i for i, line in enumerate(disk_lines) if line == "        .task {\n"]
-if len(task_starts) != 2:
-    raise SystemExit(f"DiskTabRender: expected two .task blocks, found {len(task_starts)}")
-spans = []
-for start in task_starts:
-    end = remove_braced(disk_lines, start)
-    spans.append((start, end + 1, "".join(disk_lines[start:end + 1])))
-on_receive_start = next((i for i, line in enumerate(disk_lines)
-                         if line.startswith("        .onReceive(NotificationCenter.default.publisher(for: .monitoringHistoryCleared))")), None)
-if on_receive_start is None:
-    raise SystemExit("DiskTabRender: .onReceive block not found")
+task_start = next((i for i, line in enumerate(disk_lines) if line == "        .task {\n"), None)
+if task_start is None:
+    raise SystemExit("DiskTabRender: .task block not found")
+task_end = remove_braced(disk_lines, task_start)
+on_receive_start = task_end + 1
+if not disk_lines[on_receive_start].startswith(
+        "        .onReceive(NotificationCenter.default.publisher(for: .monitoringHistoryCleared))"):
+    raise SystemExit("DiskTabRender: .onReceive block does not follow .task")
 on_receive_end = remove_braced(disk_lines, on_receive_start)
-spans.append((on_receive_start, on_receive_end + 1, "".join(disk_lines[on_receive_start:on_receive_end + 1])))
-spans.sort(key=lambda span: span[0])
-kept = []
-cursor = 0
-for start, end, _ in spans:
-    kept.extend(disk_lines[cursor:start])
-    cursor = end
-kept.extend(disk_lines[cursor:])
-without_lifecycle = "".join(kept)
-removed_text = "".join(text for _, _, text in spans)
-for marker in (".task {", "appIO.run()", "selection.connect(reader:", "monitoringHistoryCleared", "selection.historyDidClear()"):
-    if marker not in removed_text:
+removed = "".join(disk_lines[task_start:on_receive_end + 1])
+for marker in (".task {", "selection.connect(reader:", "monitoringHistoryCleared", "selection.historyDidClear()"):
+    if marker not in removed:
         raise SystemExit(f"DiskTabRender: removed block is missing {marker!r}")
+without_lifecycle = "".join(disk_lines[:task_start] + disk_lines[on_receive_end + 1:])
+reconstructed = "".join(disk_lines[:task_start]) + removed + "".join(disk_lines[on_receive_end + 1:])
+if reconstructed != disk_render:
+    raise SystemExit("DiskTabRender: removing the lifecycle block was not reversible")
 if ".task {" in without_lifecycle or ".onReceive(" in without_lifecycle:
     raise SystemExit("DiskTabRender: a lifecycle modifier remains")
 disk_render = without_lifecycle
+
+# Render-only NetworkTab: same body with the live section replaced by a boundary stub.
+network_tab = rendered["NetworkTab"]
+network_render = network_tab.replace("struct NetworkTab: View {",
+                                     "struct NetworkTabRender: View {", 1)
+live_line = "            NetworkDetailsSection()\n"
+boundary_line = "            NetworkDetailsSectionBoundary()\n"
+if network_render.count(live_line) != 1:
+    raise SystemExit("NetworkTabRender: expected exactly one NetworkDetailsSection() line")
+network_render = network_render.replace(live_line, boundary_line, 1)
+if network_render.replace(boundary_line, live_line, 1).replace(
+        "struct NetworkTabRender: View {", "struct NetworkTab: View {", 1) != network_tab:
+    raise SystemExit("NetworkTabRender: reversing the render edits did not reproduce the source")
 
 def unified(original: str, changed: str, label: str) -> str:
     diff = difflib.unified_diff(original.splitlines(keepends=True),
@@ -414,23 +418,39 @@ common_header = (
     "import Storage\n"
     "import SwiftUI\n\n"
 )
-sections = common_header + "\n".join(rendered[name] for name in ("Series", "DiskTab", "DiskSectionHeader"))
+sections = common_header + "\n".join(rendered[name] for name in ("Series", "DiskTab", "DiskSectionHeader", "NetworkTab"))
 sections_path.write_text(sections)
 
+boundary = '''
+/// Test-only boundary for the live network section. `NetworkDetailsSection` owns a default
+/// sampler that reads real interfaces; `NetworkTabRender` replaces that one call with this view
+/// so the tab's production chrome can be rendered without a system read.
+struct NetworkDetailsSectionBoundary: View {
+    var body: some View {
+        Text("Live network section boundary (not rendered)")
+            .font(.mh(size: 10.5))
+            .foregroundStyle(Palette.textFaint)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+            .background(Palette.inset, in: SurfaceShape(cornerRadius: 8, style: .continuous))
+    }
+}
+'''
 render_header = (
     "// Generated by Tests/UI/run-monitor-panel-integration-tests.sh from\n"
     "// App/Monitor/MonitorPanel.swift. These render-only variants exist because `ImageRenderer`\n"
     "// can run SwiftUI lifecycle modifiers in the same process: `DiskTabRender` drops only the\n"
-    "// `.task`/`.onReceive` blocks (the test drives the models directly). Every other line is the\n"
-    "// production text. The full `DiskTab` remains compiled in `MonitorPanelSections.swift` and\n"
-    "// is used by `MonitorPanel`.\n\n"
+    "// `.task`/`.onReceive` block (the test drives the model directly), and `NetworkTabRender`\n"
+    "// replaces only the live `NetworkDetailsSection()` call with a boundary view. Every other\n"
+    "// line is the production text. The full `DiskTab`/`NetworkTab` remain compiled in\n"
+    "// `MonitorPanelSections.swift` and are used by `MonitorPanel`.\n\n"
     "import AppKit\n"
     "import Charts\n"
     "import Metrics\n"
     "import Storage\n"
     "import SwiftUI\n\n"
 )
-render_file = render_header + disk_render
+render_file = render_header + disk_render + "\n" + network_render + "\n" + boundary
 render_path.write_text(render_file)
 
 print(f"MonitorPanel.swift sha256: {hashlib.sha256(source.encode()).hexdigest()}")
@@ -442,6 +462,8 @@ for name, original in blocks.items():
     print(f"extracted {name}: lines {start + 1}-{end + 1}, {len(original.splitlines())} lines, byte-identical except visibility")
 print("--- DiskTabRender differences ---")
 print(unified(disk_tab, disk_render, "DiskTab"))
+print("--- NetworkTabRender differences ---")
+print(unified(network_tab, network_render, "NetworkTab"))
 PY
 
 # The production views use the app's shared visual language. These stand-ins keep the surface
@@ -773,7 +795,6 @@ extension View {
 enum ProcessIcon {
     static func icon(for p: ProcessUsage) -> NSImage { blankIcon }
     static func icon(for p: GPUProcessUsage) -> NSImage { blankIcon }
-    static func icon(appPath: String?) -> NSImage { blankIcon }
 
     private static var blankIcon: NSImage { NSImage(size: NSSize(width: 18, height: 18)) }
 }

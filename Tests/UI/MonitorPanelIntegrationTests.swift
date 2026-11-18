@@ -8,18 +8,19 @@ import SwiftUI
 import Testing
 @testable import MonitorPanelFeature
 
-/// Exercises the real menu-bar SSD page sources in an isolated package.
+/// Exercises the real menu-bar SSD and network page sources in an isolated package.
 ///
 /// The views under test are the production files: all of `MonitorPanel.swift` is compiled, with
-/// `DiskTab`/`DiskSectionHeader` moved to a generated file as the byte-identical declarations
-/// (only `private` removed) so this test can construct them. The per-app disk model and section
-/// are compiled from their production files. Rendering uses a generated variant that differs
-/// only where the system boundary is: `DiskTabRender` drops the `.task`/`.onReceive` modifiers
-/// because ImageRenderer can run them in-process. The real production body is still built and
-/// type-checked. The store, design system, helper client and Storage surface are stand-ins; the
-/// test fills them with synthetic volumes, points and readings and creates its own in-memory GRDB
-/// database. Nothing here starts the app, the helper, the menu bar, a background recorder, Disk
-/// Arbitration, a network read or a user preference lookup.
+/// `DiskTab`/`DiskSectionHeader`/`NetworkTab` moved to a generated file as the byte-identical
+/// declarations (only `private` removed) so this test can construct them. Rendering uses two
+/// generated variants that differ only where the system boundary is: `DiskTabRender` drops the
+/// `.task`/`.onReceive` modifiers because ImageRenderer can run them in-process, and
+/// `NetworkTabRender` replaces the live `NetworkDetailsSection()` with a boundary view. The real
+/// production bodies are still built and type-checked. The store, design system, helper client
+/// and Storage surface are stand-ins; the test fills them with synthetic volumes, points and
+/// readings and creates its own in-memory GRDB database. Nothing here starts the app, the helper,
+/// the menu bar, a background recorder, Disk Arbitration, a network read or a user preference
+/// lookup.
 @Suite(.serialized)
 @MainActor
 struct MonitorPanelIntegrationTests {
@@ -204,100 +205,28 @@ struct MonitorPanelIntegrationTests {
         #expect(redPixelCount(historyImage) == 0, "a failed history read must not draw the chart")
     }
 
-    // MARK: - Per-app disk I/O
+    // MARK: - Network page
 
-    private func diskItem(_ name: String,
-                          read: Double?,
-                          write: Double?,
-                          totalRead: UInt64,
-                          totalWrite: UInt64,
-                          appPath: String? = nil,
-                          processes: Int = 1) -> ProcessDiskIOUsage {
-        ProcessDiskIOUsage(id: appPath ?? name, name: name,
-                           path: appPath.map { $0 + "/Contents/MacOS/" + name },
-                           appPath: appPath, processCount: processes,
-                           readBytesPerSecond: read, writeBytesPerSecond: write,
-                           totalReadBytes: totalRead, totalWriteBytes: totalWrite)
-    }
-
-    @Test func diskIOSectionRanksAppsByTheLatestInterval() {
-        let snapshot = ProcessDiskIOSnapshot(capturedAt: Date(), items: [
-            diskItem("Quiet", read: 1_000, write: 0, totalRead: 9_000_000, totalWrite: 0,
-                     appPath: "/Applications/Quiet.app"),
-            diskItem("Writer", read: 0, write: 4_000_000, totalRead: 0, totalWrite: 80_000_000,
-                     appPath: "/Applications/Writer.app"),
-            diskItem("Reader", read: 2_000_000, write: 0, totalRead: 40_000_000, totalWrite: 0,
-                     appPath: "/Applications/Reader.app"),
-        ], hasRates: true, hiddenCount: 3)
-
-        let ranked = DiskIOSection.ranked(snapshot)
-        #expect(ranked.map(\.name) == ["Writer", "Reader", "Quiet"])
-        #expect(ranked[0].rate == 4_000_000)
-        #expect(ranked[1].read == 2_000_000)
-        #expect(ranked[1].write == 0)
-        #expect(snapshot.hiddenCount == 3)
-
-        // The first snapshot has no rates: rows are ordered by total bytes and their rates stay
-        // nil, so the view shows a dash instead of a zero.
-        let first = ProcessDiskIOSnapshot(capturedAt: Date(), items: [
-            diskItem("Small", read: nil, write: nil, totalRead: 1_000, totalWrite: 0),
-            diskItem("Large", read: nil, write: nil, totalRead: 50_000, totalWrite: 0),
-        ], hasRates: false, hiddenCount: 0)
-        let firstRanked = DiskIOSection.ranked(first)
-        #expect(firstRanked.map(\.name) == ["Large", "Small"])
-        #expect(firstRanked.allSatisfy { $0.read == nil && $0.write == nil && $0.rate == 0 })
-    }
-
-    @Test func diskIOSectionRendersRowsAndWaitsForTheFirstSample() throws {
-        let loading = try render(DiskIOSection(snapshot: nil))
-        #expect(loading.pixelsWide == 420)
-        #expect(loading.pixelsHigh > 0)
-        #expect(nonWhitePixelCount(loading) > 0)
-
-        let snapshot = ProcessDiskIOSnapshot(capturedAt: Date(), items: [
-            diskItem("Reader", read: 12_400_000, write: 0, totalRead: 740_000_000, totalWrite: 0,
-                     appPath: "/Applications/Reader.app", processes: 2),
-            diskItem("Writer", read: 0, write: 3_100_000, totalRead: 0, totalWrite: 120_000_000,
-                     appPath: "/Applications/Writer.app"),
-        ], hasRates: true, hiddenCount: 12)
-        let image = try render(DiskIOSection(snapshot: snapshot))
-        #expect(image.pixelsWide == 420)
-        #expect(image.pixelsHigh > 0)
-        #expect(greenPixelCount(image) > 0, "the read rates used the read color")
-        #expect(bluePixelCount(image) > 0, "the write rates used the write color")
-    }
-
-    @Test func diskActivityModelSamplesOnlyBetweenStartAndStop() async throws {
-        let counter = Counter()
-        let model = DiskActivityModel(sample: {
-            let n = counter.incrementAndGet()
-            return ProcessDiskIOSnapshot(capturedAt: Date(timeIntervalSince1970: Double(n)),
-                                         items: [], hasRates: n > 1, hiddenCount: 0)
-        })
-
-        model.start(interval: .milliseconds(5))
-        #expect(await eventually { counter.value >= 2 })
-        #expect(model.snapshot != nil)
-        model.stop()
-
-        // A sample already in flight may finish, but no new one may start.
-        let stopped = counter.value
-        try? await Task.sleep(for: .milliseconds(50))
-        let settled = counter.value
-        #expect(settled <= stopped + 1, "stopping may not let a second sample start")
-        try? await Task.sleep(for: .milliseconds(50))
-        #expect(counter.value == settled, "the loop must end after stop()")
-    }
-
-    // MARK: - Network content
-
-    @Test func networkDetailsContentRendersTheSyntheticSnapshot() throws {
+    @Test func networkTabRendersFakeRatesOnlyWithTheLiveSectionBoundary() throws {
+        let store = makeStore(history: nil)
         let snapshot = makeSnapshot(at: Date())
-        let image = try render(NetworkDetailsContent(snapshot: snapshot))
+
+        // The real production body builds with the fake store. It constructs the real
+        // `NetworkDetailsSection` (whose sampler only reads on appear) but does not host it, so
+        // no interface is read. The render variant below replaces exactly that one call.
+        _ = NetworkTab(store: store).body
+
+        let image = try render(NetworkTabRender(store: store))
         #expect(image.pixelsWide == 420)
         #expect(image.pixelsHigh > 0)
-        #expect(nonWhitePixelCount(image) > 0, "the real network content drew the synthetic snapshot")
-        #expect(greenPixelCount(image) > 0, "the synthetic Wi-Fi interface and primary pill were drawn")
+        #expect(greenPixelCount(image) > 0, "the download rate and mirrored chart used the fake readings")
+        #expect(bluePixelCount(image) > 0, "the upload series used the fake readings")
+
+        let contentImage = try render(NetworkDetailsContent(snapshot: snapshot))
+        #expect(contentImage.pixelsWide == 420)
+        #expect(contentImage.pixelsHigh > 0)
+        #expect(nonWhitePixelCount(contentImage) > 0, "the real network content drew the synthetic snapshot")
+        #expect(greenPixelCount(contentImage) > 0, "the synthetic Wi-Fi interface and primary pill were drawn")
     }
 
     // MARK: - Settings section
@@ -429,13 +358,6 @@ private final class Counter: @unchecked Sendable {
 
     func increment() {
         lock.withLock { count += 1 }
-    }
-
-    func incrementAndGet() -> Int {
-        lock.withLock {
-            count += 1
-            return count
-        }
     }
 
     var value: Int {
