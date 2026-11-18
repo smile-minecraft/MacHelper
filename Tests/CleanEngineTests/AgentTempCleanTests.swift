@@ -340,7 +340,9 @@ import Testing
         try age(kept, to: old)
         try age(removed, to: old)
 
-        // No injected executor: run() must build one that honors the exclusion patterns.
+        // No injected executor: run() must build one that honors the exclusion patterns. The
+        // entry keeps the /var/folders/... spelling the CLI records, while candidates inside the
+        // sweep are normalized to /private/var/folders/... — both spellings must be honored.
         var options = AgentTempClean.Options()
         options.tempRoot = s.root
         options.now = Date()
@@ -348,7 +350,7 @@ import Testing
         options.openFiles = { _ in [] }
         options.log = OperationLog(url: s.log)
         options.useTrash = false
-        options.whitelist = [PathSafety.normalize(kept.path)]
+        options.whitelist = [kept.path]
         let result = AgentTempClean.run(options: options)
 
         #expect(result.verified)

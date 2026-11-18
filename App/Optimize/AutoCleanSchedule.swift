@@ -71,13 +71,19 @@ enum AutoCleanScheduleMigration {
                             defaults: UserDefaults = .standard,
                             shouldRegister: () -> Bool = { true }) async -> Outcome {
         guard shouldRegister() else { return .inactive }
-        if defaults.integer(forKey: defaultsKey) >= AutoCleanAgentScheduleVersion.current {
-            return .alreadyCurrent
-        }
         let pending = defaults.bool(forKey: pendingKey)
         let status = servicing.status
-        guard status == .enabled || (pending && status == .notRegistered) else { return .inactive }
-        defaults.set(true, forKey: pendingKey)
+        // An interrupted registration resumes first, whatever the recorded version: the agent
+        // is gone, so the version marker no longer describes any installed plist. Checking the
+        // version first would leave an updated install (marker already current) that failed
+        // mid-re-enable permanently unregistered with no retry path.
+        if !(pending && status == .notRegistered) {
+            guard status == .enabled else { return .inactive }
+            if defaults.integer(forKey: defaultsKey) >= AutoCleanAgentScheduleVersion.current {
+                return .alreadyCurrent
+            }
+            defaults.set(true, forKey: pendingKey)
+        }
         do {
             if status == .enabled { try await servicing.unregister() }
             guard shouldRegister() else { return .inactive }

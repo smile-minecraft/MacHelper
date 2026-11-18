@@ -139,6 +139,22 @@ private struct DummyError: Error {
         #expect(service.calls == ["unregister"])
     }
 
+    @Test func pendingRegistrationResumesEvenWhenTheVersionIsCurrent() async {
+        let (defaults, suite) = freshDefaults()
+        defer { defaults.removePersistentDomain(forName: suite) }
+        // An updated install that disabled Auto Clean keeps the current-version marker. Then a
+        // re-enable failed mid-registration: the intent marker is set, the agent is gone. The
+        // resume path must win over the version check, or that user is never re-registered.
+        defaults.set(AutoCleanAgentScheduleVersion.current, forKey: AutoCleanScheduleMigration.defaultsKey)
+        AutoCleanScheduleMigration.markPending(defaults: defaults)
+        let service = FakeAgentServicing(status: .notRegistered)
+
+        let outcome = await AutoCleanScheduleMigration.runIfNeeded(servicing: service, defaults: defaults)
+
+        #expect(outcome == .migrated)
+        #expect(service.calls == ["register"])
+    }
+
     @Test func failedReenableRegistrationIsRetriedOnRefresh() async throws {
         let (defaults, suite) = freshDefaults()
         defer { defaults.removePersistentDomain(forName: suite) }
@@ -148,6 +164,9 @@ private struct DummyError: Error {
         var config = AutoCleanConfig()
         config.enabled = false
         try AutoClean.save(config, to: configURL)
+        // An install that already saw the current schedule: only the resume path can recover
+        // a registration that fails while re-enabling.
+        defaults.set(AutoCleanAgentScheduleVersion.current, forKey: AutoCleanScheduleMigration.defaultsKey)
         let service = FakeAgentServicing(status: .notRegistered)
         service.registerError = DummyError(message: "connection refused")
         let model = AutoCleanModel(agent: service, configURL: configURL, defaults: defaults)
