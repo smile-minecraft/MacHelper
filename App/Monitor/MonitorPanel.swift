@@ -429,7 +429,6 @@ private struct MemoryTab: View {
 private struct DiskTab: View {
     let store: MonitorStore
     let selection: DiskCapacitySelectionModel
-    @State private var appIO = DiskActivityModel()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -439,15 +438,14 @@ private struct DiskTab: View {
             }
             historySection
             activitySection
-            DiskIOSection(snapshot: appIO.snapshot)
+            // DiskIOSection owns its sampler and `.task`; it stops sampling when the page goes
+            // away.
+            DiskIOSection()
         }
         .task {
             // Every appearance refreshes immediately, so points written while another tab was
             // visible are picked up when this page returns.
             selection.connect(reader: DiskCapacitySelectionModel.historyReader(for: store.persistentHistory))
-            // Per-app I/O is sampled only while this page is hosted; leaving the panel or the
-            // page cancels this task and stops the loop.
-            await appIO.run()
         }
         .task {
             // Disk Arbitration has no timeout and capacity points arrive hourly, so refresh on

@@ -7,15 +7,30 @@ import SwiftUI
 /// The numbers are process counters, not physical disk throughput: a read counts only when it
 /// misses the page cache, a write counts when it is submitted, and processes this user may not
 /// inspect are left out (and counted in the footnote) instead of being shown as zero.
+///
+/// The section owns its sampler: `.task` starts the sampling loop when the view is hosted and
+/// cancels it on the way out, so leaving the SSD page or closing the panel stops the sampling.
 struct DiskIOSection: View {
-    let snapshot: ProcessDiskIOSnapshot?
+    @State private var appIO: DiskActivityModel
+    private let interval: Duration
+
+    init(interval: Duration = .seconds(2)) {
+        _appIO = State(initialValue: DiskActivityModel())
+        self.interval = interval
+    }
+
+    /// Test seam: injects a model whose sampling can be observed.
+    init(model: DiskActivityModel, interval: Duration = .seconds(2)) {
+        _appIO = State(initialValue: model)
+        self.interval = interval
+    }
 
     private static let visibleRows = 6
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             PanelCardHeader(title: "Disk I/O by app", subtitle: "Process I/O, not disk throughput")
-            if let snapshot {
+            if let snapshot = appIO.snapshot {
                 let ranked = Self.ranked(snapshot)
                 if ranked.isEmpty {
                     Text("No app read from or wrote to disk in the last few seconds.")
@@ -52,6 +67,7 @@ struct DiskIOSection: View {
         }
         .padding(12)
         .surface(Palette.base)
+        .task { await appIO.run(interval: interval) }
     }
 
     // MARK: Ranking
