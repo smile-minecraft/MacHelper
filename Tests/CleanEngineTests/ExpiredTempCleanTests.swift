@@ -3,10 +3,10 @@ import Foundation
 import Testing
 @testable import CleanEngine
 
-/// Tests for the opt-in sweep of expired agent test temp directories. Every filesystem test
+/// Tests for the opt-in sweep of expired files in the user's private temp folder. Every filesystem test
 /// builds its own isolated tree inside $TMPDIR and injects a directory-backed removal backend, so
 /// the user's Trash, operations log and real temp folder are never touched.
-@Suite struct AgentTempCleanTests {
+@Suite struct ExpiredTempCleanTests {
     private let fileManager = FileManager.default
 
     /// Creates a UUID-named root in the real temp folder (candidates live directly inside it) and
@@ -22,12 +22,12 @@ import Testing
 
     private func options(root: URL, trash: URL, log: URL,
                          openFiles: @escaping @Sendable (UInt32) -> [String]? = { _ in [] },
-                         retention: TimeInterval = AgentTempClean.defaultRetention,
-                         now: Date = Date()) -> AgentTempClean.Options {
+                         retention: TimeInterval = ExpiredTempClean.defaultRetention,
+                         now: Date = Date()) -> ExpiredTempClean.Options {
         let backend = TestTrashBackend(trashDirectory: trash)
         let safety = PathSafety(protectedPaths: [], whitelist: [],
                                 allowedRoots: [root.path], minimumDepth: 1)
-        var options = AgentTempClean.Options()
+        var options = ExpiredTempClean.Options()
         options.tempRoot = root
         options.retention = retention
         options.now = now
@@ -60,7 +60,7 @@ import Testing
 
     // MARK: Configuration compatibility
 
-    @Test func olderConfigFilesStillDecodeAgentTempCleanAsOff() throws {
+    @Test func olderConfigFilesStillDecodeExpiredTempCleanAsOff() throws {
         let old = #"{"enabled":true,"frequency":"daily","permanent":false,"trashInstead":true,"maintenanceTasks":[],"lastTrashedBytes":10,"lastFreedBytes":20,"lastItemCount":3}"#
         let dir = fileManager.temporaryDirectory.appending(path: "agent-temp-clean-\(UUID().uuidString)")
         try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -68,7 +68,7 @@ import Testing
         let url = dir.appending(path: "autoclean.json")
         try Data(old.utf8).write(to: url)
         let config = AutoClean.load(from: url)
-        #expect(config.agentTempClean == nil, "pre-update files decode with the sweep off")
+        #expect(config.tempClean == nil, "pre-update files decode with the sweep off")
         #expect(config.frequency == .daily)
         #expect(config.enabled)
         #expect(config.trashInstead == true)
@@ -76,22 +76,22 @@ import Testing
         #expect(config.lastItemCount == 3)
     }
 
-    @Test func agentTempCleanRoundTrips() throws {
+    @Test func tempCleanRoundTrips() throws {
         var config = AutoCleanConfig()
-        #expect(config.agentTempClean == nil)
-        config.agentTempClean = true
+        #expect(config.tempClean == nil)
+        config.tempClean = true
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         let data = try encoder.encode(config)
         let text = String(decoding: data, as: UTF8.self)
-        #expect(text.contains(#""agentTempClean":true"#) || text.contains(#""agentTempClean" : true"#))
+        #expect(text.contains(#""tempClean":true"#) || text.contains(#""tempClean" : true"#))
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let decoded = try decoder.decode(AutoCleanConfig.self, from: data)
-        #expect(decoded.agentTempClean == true)
-        config.agentTempClean = nil
+        #expect(decoded.tempClean == true)
+        config.tempClean = nil
         let off = try encoder.encode(config)
-        #expect(!String(decoding: off, as: UTF8.self).contains("agentTempClean"),
+        #expect(!String(decoding: off, as: UTF8.self).contains("tempClean"),
                 "off serializes without the key so old files stay byte-compatible")
     }
 
@@ -130,22 +130,25 @@ import Testing
                 "an undecodable config falls back to the safe default (off)")
     }
 
-    // MARK: Name matching
+    // MARK: Candidate selection
 
-    @Test func knownNamesMatchExactly() {
-        for prefix in AgentTempClean.knownPrefixes {
-            #expect(AgentTempClean.matchesKnownName(prefix + "A1b2C3"))
-            #expect(!AgentTempClean.matchesKnownName(prefix + "A1b2C"), "five-char suffix rejected")
-            #expect(!AgentTempClean.matchesKnownName(prefix + "A1b2C34"), "seven-char suffix rejected")
-            #expect(!AgentTempClean.matchesKnownName(prefix + "A1b-C3"), "dash rejected")
-            #expect(!AgentTempClean.matchesKnownName(prefix + "Aéb2C3"), "non-ASCII rejected")
-            #expect(!AgentTempClean.matchesKnownName(prefix), "missing suffix rejected")
-            #expect(!AgentTempClean.matchesKnownName(prefix + "A1b2C3\n"), "trailing newline rejected")
-            #expect(!AgentTempClean.matchesKnownName(prefix + "A1b2C3\r\n"), "trailing CRLF rejected")
-        }
-        #expect(!AgentTempClean.matchesKnownName("cardiary-import-source-A1b2C3"), "Swift-style names are not allowlisted")
-        #expect(!AgentTempClean.matchesKnownName("agent-contract-A1b2C3"), "generic agent prefix is not allowlisted")
-        #expect(!AgentTempClean.matchesKnownName("../cardiary-host-A1b2C3"), "path separator rejected")
+    @Test func protectedNamesStayUntouched() throws {
+        let s = try makeSandbox()
+        defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
+        let old = Date().addingTimeInterval(-30 * 86_400)
+        let autosave = try makeCandidate(s.root, "TemporaryItems", childMtime: old)
+        let apple = try makeCandidate(s.root, "com.apple.something", childMtime: old)
+        try age(autosave, to: old)
+        try age(apple, to: old)
+
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
+        #expect(result.verified)
+        #expect(result.movedCount == 0)
+        #expect(ExpiredTempClean.isProtected("TemporaryItems"))
+        #expect(ExpiredTempClean.isProtected("com.apple.abc"))
+        #expect(!ExpiredTempClean.isProtected("com.apple"))
+        #expect(fileManager.fileExists(atPath: autosave.path))
+        #expect(fileManager.fileExists(atPath: apple.path))
     }
 
     // MARK: Sweep behavior (isolated)
@@ -157,7 +160,7 @@ import Testing
         let candidate = try makeCandidate(s.root, "cardiary-host-Ab1Cd2", childMtime: old)
         try age(candidate, to: old)
 
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
         #expect(result.verified)
         #expect(result.movedCount == 1)
         #expect(result.isSuccess)
@@ -167,24 +170,27 @@ import Testing
 
         let log = OperationLog(url: s.log)
         let entries = log.read(limit: 10)
-        #expect(entries.contains { $0.source == AgentTempClean.taskID && $0.result == "trashed" && $0.command == "autoclean" })
+        #expect(entries.contains { $0.source == ExpiredTempClean.taskID && $0.result == "trashed" && $0.command == "autoclean" })
     }
 
-    @Test func unknownAndMalformedNamesAreUntouched() throws {
+    @Test func arbitraryNamesAndTopLevelFilesAreCleaned() throws {
         let s = try makeSandbox()
         defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
         let old = Date().addingTimeInterval(-30 * 86_400)
-        let a = try makeCandidate(s.root, "cardiary-unknown-Ab1Cd2")
-        let b = try makeCandidate(s.root, "cardiary-host-ab1")
-        let c = try makeCandidate(s.root, "cardiary-contract-Ab1Cd2-extra")
-        for url in [a, b, c] { try age(url, to: old) }
-        _ = try makeCandidate(s.root, "random-Ab1Cd2")
+        let dir = try makeCandidate(s.root, "some-app-workdir-anyname", childMtime: old)
+        try age(dir, to: old)
+        let file = s.root.appending(path: "scratch-file-anything.log")
+        try Data("junk".utf8).write(to: file)
+        try fileManager.setAttributes([.modificationDate: old], ofItemAtPath: file.path)
+        try fileManager.setAttributes([.creationDate: old], ofItemAtPath: file.path)
 
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
         #expect(result.verified)
-        #expect(result.movedCount == 0)
-        #expect(result.skippedCount == 0, "unknown names are ignored entirely, not counted as skipped candidates")
-        for url in [a, b, c] { #expect(fileManager.fileExists(atPath: url.path)) }
+        #expect(result.movedCount == 2, "an old unused entry is expired whatever its name — file or directory")
+        #expect(!fileManager.fileExists(atPath: dir.path))
+        #expect(!fileManager.fileExists(atPath: file.path))
+        let trashed = ((try? fileManager.contentsOfDirectory(atPath: s.trash.path)) ?? [])
+        #expect(trashed.contains("some-app-workdir-anyname") && trashed.contains("scratch-file-anything.log"))
     }
 
     @Test func recentlyWrittenChildProtectsTheWholeCandidate() throws {
@@ -198,7 +204,7 @@ import Testing
                                      atomically: true, encoding: .utf8) // mtime = now; the only fresh entry
         try age(candidate, to: old)  // dir aged again; the fresh child must be what protects it
 
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
         let skipped = result.items.filter { $0.result == .skipped }
         #expect(skipped.count == 1)
         #expect(skipped.first?.message?.contains("retention") == true)
@@ -212,7 +218,7 @@ import Testing
         let candidate = try makeCandidate(s.root, "cardiary-context-Ab1Cd2", contents: ["deep/nested.txt": "fresh"])
         try age(candidate, to: old)
 
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
         #expect(result.movedCount == 0)
         #expect(fileManager.fileExists(atPath: candidate.path))
     }
@@ -231,7 +237,7 @@ import Testing
         // The active candidate has a process cwd deep inside it; only that candidate is protected.
         let options = options(root: s.root, trash: s.trash, log: s.log,
                               openFiles: { _ in [deepPath + "/out.log", deepPath] })
-        let result = AgentTempClean.run(options: options)
+        let result = ExpiredTempClean.run(options: options)
         #expect(result.movedCount == 1)
         #expect(fileManager.fileExists(atPath: active.path), "candidate with an open deep cwd is skipped")
         #expect(!fileManager.fileExists(atPath: idle.path), "the other candidate moves")
@@ -246,7 +252,7 @@ import Testing
         try age(candidate, to: old)
 
         let options = options(root: s.root, trash: s.trash, log: s.log, openFiles: { _ in nil })
-        let result = AgentTempClean.run(options: options)
+        let result = ExpiredTempClean.run(options: options)
         #expect(!result.verified)
         #expect(result.movedCount == 0 && result.items.isEmpty)
         #expect(result.failure?.contains("lsof") == true)
@@ -261,11 +267,11 @@ import Testing
         let link = s.root.appending(path: "cardiary-host-Xy1Za2")
         try fileManager.createSymbolicLink(at: link, withDestinationURL: target)
 
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
         #expect(result.movedCount == 0)
         #expect(fileManager.fileExists(atPath: link.path))
         #expect(fileManager.fileExists(atPath: target.path))
-        #expect(result.items.contains { $0.path == PathSafety.normalize(link.path) && $0.result == .skipped && $0.message == "not a directory" })
+        #expect(result.items.contains { $0.path == PathSafety.normalize(link.path) && $0.result == .skipped && $0.message == "not a file or directory" })
     }
 
     @Test func symlinkInsideCandidateIsNotFollowed() throws {
@@ -287,23 +293,21 @@ import Testing
         #expect(touch.terminationStatus == 0)
         try age(candidate, to: old)
 
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
         #expect(result.movedCount == 1, "a nested symlink does not block the move")
         #expect(fileManager.fileExists(atPath: outside.path), "the symlink target outside the candidate is untouched")
     }
 
-    @Test func nonDirectoryWithKnownNameIsSkipped() throws {
+    @Test func otherEntryKindIsSkipped() throws {
         let s = try makeSandbox()
         defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
-        let file = s.root.appending(path: "cardiary-contract-Qw1Er2")
-        try "data".write(to: file, atomically: true, encoding: .utf8)
-        let old = Date().addingTimeInterval(-30 * 86_400)
-        try age(file, to: old)
+        let fifo = s.root.appending(path: "some-worker-pipe")
+        mkfifo(fifo.path, 0o600)
 
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
         #expect(result.movedCount == 0)
-        #expect(fileManager.fileExists(atPath: file.path))
-        #expect(result.items.contains { $0.path == PathSafety.normalize(file.path) && $0.result == .skipped })
+        #expect(fileManager.fileExists(atPath: fifo.path))
+        #expect(result.items.contains { $0.path == PathSafety.normalize(fifo.path) && $0.result == .skipped && $0.message == "not a file or directory" })
     }
 
     @Test func earlierRemovalCannotInvalidateLaterCandidates() throws {
@@ -325,7 +329,7 @@ import Testing
                 try FileManager.default.removeItem(at: url)
             }))
 
-        let result = AgentTempClean.run(options: options)
+        let result = ExpiredTempClean.run(options: options)
         #expect(result.deletedCount == 1)
         #expect(result.items.contains { $0.path == PathSafety.normalize(later.path) && $0.result == .skipped })
         #expect(fileManager.fileExists(atPath: later.path))
@@ -343,7 +347,7 @@ import Testing
         // No injected executor: run() must build one that honors the exclusion patterns. The
         // entry keeps the /var/folders/... spelling the CLI records, while candidates inside the
         // sweep are normalized to /private/var/folders/... — both spellings must be honored.
-        var options = AgentTempClean.Options()
+        var options = ExpiredTempClean.Options()
         options.tempRoot = s.root
         options.now = Date()
         options.command = "autoclean"
@@ -351,7 +355,7 @@ import Testing
         options.log = OperationLog(url: s.log)
         options.useTrash = false
         options.whitelist = [kept.path]
-        let result = AgentTempClean.run(options: options)
+        let result = ExpiredTempClean.run(options: options)
 
         #expect(result.verified)
         #expect(result.deletedCount == 1)
@@ -372,7 +376,7 @@ import Testing
         for entry in [s.root.path + "/cardiary-host-Keep*", "*/cardiary-host-Keep*"] {
             let removed = try makeCandidate(s.root, "cardiary-host-Drop02", childMtime: old)
             try age(removed, to: old)
-            var options = AgentTempClean.Options()
+            var options = ExpiredTempClean.Options()
             options.tempRoot = s.root
             options.now = Date()
             options.command = "autoclean"
@@ -380,7 +384,7 @@ import Testing
             options.log = OperationLog(url: s.log)
             options.useTrash = false
             options.whitelist = [entry]
-            let result = AgentTempClean.run(options: options)
+            let result = ExpiredTempClean.run(options: options)
 
             #expect(result.verified)
             #expect(result.deletedCount == 1, "the glob entry \(entry) must protect the kept candidate")
@@ -406,7 +410,7 @@ import Testing
                 try FileManager.default.createDirectory(at: s.root, withIntermediateDirectories: true)
             }))
 
-        let result = AgentTempClean.run(options: options)
+        let result = ExpiredTempClean.run(options: options)
         #expect(result.deletedCount == 1, "the removal already happened; the report must keep counting it")
         #expect(result.verified == false, "a root that changed during the batch must never read as verified")
         #expect(result.failure?.contains("temp folder changed") == true)
@@ -419,7 +423,7 @@ import Testing
         let candidate = try makeCandidate(s.root, "cardiary-host-Empty1", contents: [:])
         try age(candidate, to: old)
 
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log))
         #expect(result.movedCount == 1)
         #expect(!fileManager.fileExists(atPath: candidate.path))
     }
@@ -433,7 +437,7 @@ import Testing
         var st = stat()
         #expect(lstat(candidate.path, &st) == 0)
         let fakeDifferentDev = rootDev(of: s.root) + 999
-        let walk = AgentTempClean.walkTree(candidate.path, rootDev: fakeDifferentDev, rootMtime: Date())
+        let walk = ExpiredTempClean.walkTree(candidate.path, rootDev: fakeDifferentDev, rootMtime: Date())
         #expect(!walk.ok, "a tree on a different device fails verification")
         #expect(walk.error?.contains("mounted filesystem") == true || walk.error?.contains("could not") == true)
     }
@@ -444,8 +448,8 @@ import Testing
         let candidate = try makeCandidate(s.root, "cardiary-host-Owner1")
         let device = rootDev(of: candidate)
         let now = Date()
-        #expect(AgentTempClean.walkTree(candidate.path, rootDev: device, rootMtime: now, expectedUID: getuid()).ok)
-        let foreign = AgentTempClean.walkTree(candidate.path, rootDev: device, rootMtime: now, expectedUID: getuid() &+ 1)
+        #expect(ExpiredTempClean.walkTree(candidate.path, rootDev: device, rootMtime: now, expectedUID: getuid()).ok)
+        let foreign = ExpiredTempClean.walkTree(candidate.path, rootDev: device, rootMtime: now, expectedUID: getuid() &+ 1)
         #expect(!foreign.ok)
         #expect(foreign.error?.contains("child.txt is owned by another user") == true)
     }
@@ -469,7 +473,7 @@ import Testing
         let safety = PathSafety(protectedPaths: [], whitelist: [], allowedRoots: [s.root.path], minimumDepth: 1)
         options.executor = CleanExecutor.injected(safety: safety, log: OperationLog(url: s.log), removal: backend.backend)
 
-        let result = AgentTempClean.run(options: options)
+        let result = ExpiredTempClean.run(options: options)
         #expect(result.deletedCount == 1)
         #expect(result.trashedCount == 0)
         #expect(!fileManager.fileExists(atPath: candidate.path))
@@ -491,7 +495,7 @@ import Testing
         let safety = PathSafety(protectedPaths: [], whitelist: [], allowedRoots: [s.root.path], minimumDepth: 1)
         options.executor = CleanExecutor.injected(safety: safety, log: OperationLog(url: s.log), removal: backend.backend)
 
-        let result = AgentTempClean.run(options: options)
+        let result = ExpiredTempClean.run(options: options)
         #expect(result.trashedCount == 1)
         #expect(result.deletedCount == 0)
         #expect(backend.trashedPaths == [PathSafety.normalize(candidate.path)])
@@ -502,28 +506,28 @@ import Testing
     @Test func defaultOptionsFollowTheSettingMatrix() {
         var config = AutoCleanConfig()
         config.trashInstead = nil; config.permanent = false
-        #expect(!AgentTempClean.defaultOptions(for: config).useTrash, "missing setting means delete, matching the low-risk rules")
+        #expect(!ExpiredTempClean.defaultOptions(for: config).useTrash, "missing setting means delete, matching the low-risk rules")
         config.trashInstead = false
-        #expect(!AgentTempClean.defaultOptions(for: config).useTrash)
+        #expect(!ExpiredTempClean.defaultOptions(for: config).useTrash)
         config.trashInstead = true
-        #expect(AgentTempClean.defaultOptions(for: config).useTrash)
+        #expect(ExpiredTempClean.defaultOptions(for: config).useTrash)
         config.permanent = true
-        #expect(!AgentTempClean.defaultOptions(for: config).useTrash, "permanent wins over trashInstead")
+        #expect(!ExpiredTempClean.defaultOptions(for: config).useTrash, "permanent wins over trashInstead")
         config.trashInstead = nil
-        #expect(!AgentTempClean.defaultOptions(for: config).useTrash)
+        #expect(!ExpiredTempClean.defaultOptions(for: config).useTrash)
     }
 
     @Test func parseOpenFilesOutputKeepsNewlinesAndRejectsGarbage() {
         let bytes: [UInt8] = Array("p181\0".utf8) + [0x0A] + Array("fcwd\0".utf8) + Array("n/tmp/a\nb\0".utf8) + [0x0A] + Array("ftxt\0".utf8)
-        #expect(AgentTempClean.parseOpenFilesOutput(Data(bytes)) == ["/tmp/a\nb"])
+        #expect(ExpiredTempClean.parseOpenFilesOutput(Data(bytes)) == ["/tmp/a\nb"])
 
         let raw = Data("p1\0".utf8) + Array("n/x y\0".utf8)
-        #expect(AgentTempClean.parseOpenFilesOutput(raw) == ["/x y"])
+        #expect(ExpiredTempClean.parseOpenFilesOutput(raw) == ["/x y"])
 
-        #expect(AgentTempClean.parseOpenFilesOutput(Data([0x0A, 0x0A])) == [])
-        #expect(AgentTempClean.parseOpenFilesOutput(Data()) == [])
-        #expect(AgentTempClean.parseOpenFilesOutput(Data("q1\0".utf8)) == nil, "an unexpected field identifier rejects the output")
-        #expect(AgentTempClean.parseOpenFilesOutput(Data("p1\0garbage".utf8)) == nil, "an unterminated/unknown field rejects the output")
+        #expect(ExpiredTempClean.parseOpenFilesOutput(Data([0x0A, 0x0A])) == [])
+        #expect(ExpiredTempClean.parseOpenFilesOutput(Data()) == [])
+        #expect(ExpiredTempClean.parseOpenFilesOutput(Data("q1\0".utf8)) == nil, "an unexpected field identifier rejects the output")
+        #expect(ExpiredTempClean.parseOpenFilesOutput(Data("p1\0garbage".utf8)) == nil, "an unterminated/unknown field rejects the output")
     }
 
     @Test func openFileWithNewlineInPathIsListed() throws {
@@ -536,7 +540,7 @@ import Testing
         let handle = try FileHandle(forReadingFrom: file)
         defer { try? handle.close() }
 
-        let paths = AgentTempClean.systemOpenFiles(uid: getuid())
+        let paths = ExpiredTempClean.systemOpenFiles(uid: getuid())
         #expect(paths != nil)
         // What the sweep actually relies on: the open path appears, and its first component under
         // the root is the candidate. (Darwin lsof 4.91 renders the newlines inside the file name
@@ -566,13 +570,13 @@ import Testing
         let parentPrefix = PathSafety.normalize(s.root.path) + "/"
         while !found, Date() < deadline {
             Thread.sleep(forTimeInterval: 0.1)
-            found = AgentTempClean.systemOpenFiles(uid: getuid())?.contains {
+            found = ExpiredTempClean.systemOpenFiles(uid: getuid())?.contains {
                 // First component only; the newline inside the directory name is escape-rendered.
                 $0.hasPrefix(parentPrefix + "cwd")
             } ?? false
         }
         #expect(found, "lsof must list this user's process cwd even though the path contains a newline")
-        let finalListing = AgentTempClean.systemOpenFiles(uid: getuid()) ?? []
+        let finalListing = ExpiredTempClean.systemOpenFiles(uid: getuid()) ?? []
         #expect(finalListing.contains { $0.contains("cwd\\nwith-newline") },
                 "Darwin lsof renders LF in names as a two-byte escape; observe and pin it")
     }
@@ -586,7 +590,7 @@ import Testing
 
         let counter = ProbeCounter()
         let openFiles: @Sendable (UInt32) -> [String]? = { _ in counter.next(); return [] }
-        _ = try AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
+        _ = try ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
         #expect(counter.count == 2, "one probe before planning, one right before removal")
     }
 
@@ -597,7 +601,7 @@ import Testing
         let counter = ProbeCounter()
         let openFiles: @Sendable (UInt32) -> [String]? = { _ in counter.next(); return [] }
 
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
         #expect(result.movedCount == 0)
         #expect(counter.count == 1, "no final probe when no candidate survived the first pass")
     }
@@ -615,7 +619,7 @@ import Testing
             if counter.next() == 1 { return [] }
             return [hit]   // the process we adopted mid-scan opened its log file before removal
         }
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
         #expect(result.movedCount == 0)
         #expect(fileManager.fileExists(atPath: candidate.path))
         #expect(result.items.contains { $0.path == PathSafety.normalize(candidate.path) && $0.result == .skipped && ($0.message ?? "").contains("re-checked before removal") })
@@ -634,7 +638,7 @@ import Testing
             try? "fresh data".write(to: candidate.appendingPathComponent("child.txt"), atomically: true, encoding: .utf8)
             return []
         }
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
         #expect(result.movedCount == 0)
         #expect(fileManager.fileExists(atPath: candidate.path))
         #expect(result.items.contains { $0.path == PathSafety.normalize(candidate.path) && $0.result == .skipped })
@@ -658,7 +662,7 @@ import Testing
             try? FileManager.default.setAttributes([.modificationDate: old], ofItemAtPath: candidate.path)
             return []
         }
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
         #expect(result.movedCount == 0)
         #expect(fileManager.fileExists(atPath: candidate.path), "the replacement directory must survive")
         #expect(result.items.contains { $0.path == PathSafety.normalize(candidate.path) && $0.result == .skipped && ($0.message ?? "").contains("changed during the scan") })
@@ -679,7 +683,7 @@ import Testing
             try? FileManager.default.createDirectory(at: s.root, withIntermediateDirectories: true)
             return []
         }
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
         #expect(result.verified == false)
         #expect(result.failure?.contains("temp folder changed") == true)
         #expect(result.movedCount == 0)
@@ -699,7 +703,7 @@ import Testing
             if counter.next() == 1 { return [] }
             return nil   // the second probe cannot be trusted
         }
-        let result = AgentTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
+        let result = ExpiredTempClean.run(options: options(root: s.root, trash: s.trash, log: s.log, openFiles: openFiles))
         #expect(result.verified == false)
         #expect(result.failure?.contains("re-check which files are open") == true)
         #expect(result.movedCount == 0)
@@ -724,40 +728,40 @@ import Testing
         var called = false
         let result = AutoClean.run(config: config, rules: [],
                                    runTask: { TaskOutcome(id: $0.id, ok: true, dryRun: false, output: "") },
-                                   agentTempClean: { _ in
+                                   tempClean: { _ in
                                        called = true
-                                       return AgentTempClean.AgentTempCleanResult(verified: true, failure: nil, items: [])
+                                       return ExpiredTempClean.ExpiredTempCleanResult(verified: true, failure: nil, items: [])
                                    })
         #expect(!called, "agent temp sweep is off by default")
-        #expect(!result.2.contains { $0.id == AgentTempClean.taskID })
+        #expect(!result.2.contains { $0.id == ExpiredTempClean.taskID })
 
-        config.agentTempClean = true
+        config.tempClean = true
         let seen = AutoClean.run(config: config, rules: [],
                                  runTask: { TaskOutcome(id: $0.id, ok: true, dryRun: false, output: "") },
-                                 agentTempClean: { _ in
+                                 tempClean: { _ in
                                      called = true
-                                     return AgentTempClean.AgentTempCleanResult(verified: true, failure: nil, items: [])
+                                     return ExpiredTempClean.ExpiredTempCleanResult(verified: true, failure: nil, items: [])
                                  })
         #expect(called)
-        #expect(seen.2.contains { $0.id == AgentTempClean.taskID && $0.ok })
+        #expect(seen.2.contains { $0.id == ExpiredTempClean.taskID && $0.ok })
     }
 
     @Test func sweepItemsFoldIntoTheReportAndTheOutcomeShowsUp() throws {
         var config = AutoCleanConfig()
         config.enabled = true
-        config.agentTempClean = true
+        config.tempClean = true
         config.maintenanceTasks = []
         let sweepItem = ItemOutcome(path: "/private/var/folders/xx/testT/cardiary-host-Ab1Cd2",
-                                    source: AgentTempClean.taskID, bytes: 1234, result: .trashed, message: nil)
+                                    source: ExpiredTempClean.taskID, bytes: 1234, result: .trashed, message: nil)
 
         let (_, report, tasks) = AutoClean.run(config: config, rules: [],
                                                runTask: { TaskOutcome(id: $0.id, ok: true, dryRun: false, output: "") },
-                                               agentTempClean: { _ in
-                                                   AgentTempClean.AgentTempCleanResult(verified: true, failure: nil, items: [sweepItem])
+                                               tempClean: { _ in
+                                                   ExpiredTempClean.ExpiredTempCleanResult(verified: true, failure: nil, items: [sweepItem])
                                                })
         #expect(report.items.contains { $0.path == sweepItem.path })
         #expect(report.trashedBytes == 1234)
-        #expect(tasks.contains { $0.id == AgentTempClean.taskID && $0.ok && $0.output.contains("moved 1 item") })
+        #expect(tasks.contains { $0.id == ExpiredTempClean.taskID && $0.ok && $0.output.contains("moved 1 item") })
 
         AutoClean.record(report, tasks: tasks, into: &config)
         #expect(config.lastItemCount == 1)
@@ -768,19 +772,19 @@ import Testing
     @Test func unverifiableSweepLandsInTheLastError() throws {
         var config = AutoCleanConfig()
         config.enabled = true
-        config.agentTempClean = true
+        config.tempClean = true
         config.maintenanceTasks = []
 
         let (_, report, tasks) = AutoClean.run(config: config, rules: [],
                                                runTask: { TaskOutcome(id: $0.id, ok: true, dryRun: false, output: "") },
-                                               agentTempClean: { _ in
-                                                   AgentTempClean.AgentTempCleanResult(verified: false, failure: "could not check which files are open (lsof); nothing was touched", items: [])
+                                               tempClean: { _ in
+                                                   ExpiredTempClean.ExpiredTempCleanResult(verified: false, failure: "could not check which files are open (lsof); nothing was touched", items: [])
                                                })
-        let failureTask = tasks.first { $0.id == AgentTempClean.taskID }
+        let failureTask = tasks.first { $0.id == ExpiredTempClean.taskID }
         #expect(failureTask?.ok == false)
 
         AutoClean.record(report, tasks: tasks, into: &config)
-        #expect(config.lastError?.contains("agent-temp.clean") == true)
+        #expect(config.lastError?.contains(ExpiredTempClean.taskID) == true)
         #expect(config.lastError?.contains("Scheduled task failed") == true)
     }
 }

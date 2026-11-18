@@ -1,53 +1,42 @@
 import Darwin
 import Foundation
 
-/// Sweep of agent test temp directories.
+/// Sweep of expired files in the user's private macOS temp folder.
 ///
-/// Agent-driven test suites (Cardiary) create their working directories with `mkdtemp()` directly
-/// inside the user's private macOS temp folder, and nothing removes them. Only top-level entries of
-/// the temp folder whose names are *exactly* a known test prefix followed by the six random
-/// characters Node's `mkdtemp()` appends are touched, and only when they are old, unchanged, and
-/// verifiably unused. Everything else — unknown names, other users' files, symlinks, mounted
-/// filesystems, recently written children, open files — is skipped. Anything we cannot verify
-/// means the whole sweep stands down and reports `verified: false`.
+/// Applications drop scratch files and working directories straight into the temp folder and
+/// routinely leave them behind. By the platform's temp contract nothing there is guaranteed to
+/// survive — apps must be able to rebuild what they keep in it — so an entry that is old,
+/// unchanged, owned by this user and verifiably unused is expired, whatever its name.
+///
+/// Everything at the top level of the temp root is a candidate except the entries the system
+/// manages itself (see `protectedPrefixes`). Directories and regular files are removed; symlinks
+/// and anything else is skipped, and symlinks inside a walked tree are never followed. Anything
+/// we cannot verify — the root, an open-file probe, a candidate's identity, a tree's contents —
+/// means that item is skipped, or when the environment itself cannot be trusted the whole sweep
+/// stands down and reports `verified: false`.
 ///
 /// Removal follows the user's existing Auto Clean setting (`trashInstead`/`permanent`): the same
 /// matrix low-risk rules use. With the Trash setting off (the default for older configs — missing
-/// setting means delete) surviving candidates are deleted permanently, which is what actually frees
-/// space; with the Trash setting on they move to the Trash and continue to occupy space until it is
-/// emptied.
-///
-/// Open files are probed twice: once while planning and once again right before removal, together
-/// with a re-walk of each surviving tree (see `run`). A process that opens a file inside a candidate
-/// *during* the scan is caught in between. What neither probe nor re-check can close is a process
-/// that opens its file in the instant between the final check and the removal: for a directory this
-/// user owns there is no user-space barrier against that, and we do not pretend to close it.
-public enum AgentTempClean {
+/// setting means delete) surviving entries are deleted permanently, which is what actually frees
+/// space; with the Trash setting on they move to the Trash and continue to occupy space until it
+/// is emptied. What no probe can close is a process that opens its file in the instant between
+/// the final check and the removal: for a directory this user owns there is no user-space barrier
+/// against that, and we do not pretend to close it.
+public enum ExpiredTempClean {
     /// Identifier for the scheduled task outcome and the operations log.
-    public static let taskID = "agent-temp.clean"
-    /// Idle time a candidate must have accumulated before it may move. Not affected by the schedule frequency.
+    public static let taskID = "temp.expired"
+    /// Idle time an entry must have accumulated before it may move. Not affected by the schedule frequency.
     public static let defaultRetention: TimeInterval = 7 * 86_400
     /// Upper bound on entries visited per candidate; protects the scheduled run from pathological trees.
     static let maxWalkedEntries = 200_000
 
-    /// The only temporary directories this sweep considers, by exact prefix. Node's mkdtemp() appends
-    /// six "[A-Za-z0-9]" characters to the prefix (verified with `node -e 'fs.mkdtempSync(...)'`).
-    public static let knownPrefixes = [
-        "cardiary-contract-", "cardiary-host-", "cardiary-import-",
-        "cardiary-context-", "cardiary-mcp-concurrent-",
-    ]
-
-    static let nameRegex: NSRegularExpression = {
-        let prefixes = knownPrefixes.map { NSRegularExpression.escapedPattern(for: $0) }.joined(separator: "|")
-        let pattern = "^(?:" + prefixes + ")[A-Za-z0-9]{6}$"
-        // Force try: both the prefixes and the anchors are compile-time constants.
-        return try! NSRegularExpression(pattern: pattern)
-    }()
-
-    public static func matchesKnownName(_ name: String) -> Bool {
-        let range = NSRange(name.startIndex..., in: name)
-        return nameRegex.firstMatch(in: name, range: range)?.range == range
-    }
+    /// Top-level names the sweep never touches, with the reason each is excluded.
+    ///
+    /// `TemporaryItems` holds document auto-save data: an entry whose owning document is open in
+    /// an app that does not keep the file handle open would lose unsaved work, so the whole subtree
+    /// is off limits. `com.apple.` is the system's own scratch space; the system manages it, and it
+    /// is not this app's place to decide an OS entry is dead. Both skip with a recorded reason.
+    public static let protectedPrefixes = ["TemporaryItems", "com.apple."]
 
     /// How the removal action is chosen for a scheduled run: the same setting matrix the low-risk
     /// rules use. `permanent` wins; otherwise `trashInstead == true` removes to the Trash and
@@ -86,7 +75,7 @@ public enum AgentTempClean {
         public init() {}
     }
 
-    public struct AgentTempCleanResult: Sendable {
+    public struct ExpiredTempCleanResult: Sendable {
         /// False when the environment cannot be verified (temp root unusable or the open-file probe
         /// failed or changed). A root change stops subsequent removals.
         public let verified: Bool
@@ -198,14 +187,19 @@ public enum AgentTempClean {
         return paths
     }
 
-    public static func run(options: Options = Options()) -> AgentTempCleanResult {
+    /// Whether a top-level name belongs to something the sweep must leave alone.
+    static func isProtected(_ name: String) -> Bool {
+        protectedPrefixes.contains { name == $0 || name.hasPrefix($0) }
+    }
+
+    public static func run(options: Options = Options()) -> ExpiredTempCleanResult {
         guard let rootURL = options.tempRoot ?? validatedTempRoot() else {
-            return AgentTempCleanResult(verified: false, failure: "the user's temporary folder could not be verified; nothing was touched", items: [])
+            return ExpiredTempCleanResult(verified: false, failure: "the user's temporary folder could not be verified; nothing was touched", items: [])
         }
         let rootPath = PathSafety.normalize(rootURL.path)
         var rst = stat()
         guard lstat(rootPath, &rst) == 0, (rst.st_mode & S_IFMT) == S_IFDIR, rst.st_uid == getuid() else {
-            return AgentTempCleanResult(verified: false, failure: "the temp root is not a directory owned by this user; nothing was touched", items: [])
+            return ExpiredTempCleanResult(verified: false, failure: "the temp root is not a directory owned by this user; nothing was touched", items: [])
         }
         let rootDev = rst.st_dev
 
@@ -213,21 +207,21 @@ public enum AgentTempClean {
         do {
             names = try FileManager.default.contentsOfDirectory(atPath: rootPath)
         } catch {
-            return AgentTempCleanResult(verified: false, failure: "could not list the temp folder: \(error.localizedDescription); nothing was touched", items: [])
+            return ExpiredTempCleanResult(verified: false, failure: "could not list the temp folder: \(error.localizedDescription); nothing was touched", items: [])
         }
-        let candidates = names.filter(matchesKnownName).sorted()
-        guard !candidates.isEmpty else { return AgentTempCleanResult(verified: true, failure: nil, items: []) }
+        let candidates = names.filter { !isProtected($0) }.sorted()
+        guard !candidates.isEmpty else { return ExpiredTempCleanResult(verified: true, failure: nil, items: []) }
 
         // Phase 1: one batched open-file probe, then the per-candidate checks.
         guard let openPaths = options.openFiles(getuid()) else {
-            return AgentTempCleanResult(verified: false, failure: "could not check which files are open (lsof); nothing was touched", items: [])
+            return ExpiredTempCleanResult(verified: false, failure: "could not check which files are open (lsof); nothing was touched", items: [])
         }
         let inUse = inUseCandidates(rootPath: rootPath, candidates: candidates, openPaths: openPaths)
 
         var items: [ItemOutcome] = []
         let survivors = filterCandidates(candidates, rootPath: rootPath, rootDev: rootDev, options: options, inUse: inUse, into: &items)
         guard !survivors.isEmpty else {
-            return AgentTempCleanResult(verified: true, failure: nil, items: items)
+            return ExpiredTempCleanResult(verified: true, failure: nil, items: items)
         }
 
         // Phase 2 (final snapshot before removal): re-probe open files first, then re-verify the
@@ -235,7 +229,7 @@ public enum AgentTempClean {
         // scan window is caught here and reported as unverifiable instead of silently skipped.
         guard let reOpenPaths = options.openFiles(getuid()) else {
             for candidate in survivors { items.append(skip(candidate.path, "could not be re-checked before removal")) }
-            return AgentTempCleanResult(verified: false, failure: "could not re-check which files are open before removal; nothing was removed", items: items)
+            return ExpiredTempCleanResult(verified: false, failure: "could not re-check which files are open before removal; nothing was removed", items: items)
         }
         let reInUse = inUseCandidates(rootPath: rootPath, candidates: survivors.map(\.name), openPaths: reOpenPaths)
         let log = options.log ?? .shared
@@ -267,18 +261,20 @@ public enum AgentTempClean {
             if reInUse.contains(candidate.name) { items.append(skip(candidate.path, "in use (re-checked before removal)")); continue }
             var st = stat()
             guard lstat(candidate.path, &st) == 0,
-                  (st.st_mode & S_IFMT) == S_IFDIR,
+                  (st.st_mode & S_IFMT) == (candidate.isDirectory ? S_IFDIR : S_IFREG),
                   st.st_uid == getuid(),
                   Int64(st.st_dev) == candidate.device,
                   UInt64(st.st_ino) == candidate.inode else {
-                items.append(skip(candidate.path, "the directory changed during the scan"))
+                items.append(skip(candidate.path, "the entry changed during the scan"))
                 continue
             }
-            let rewalk = walkTree(candidate.path, rootDev: rootDev, rootMtime: modificationDate(of: st))
+            let rewalk = candidate.isDirectory
+                ? walkTree(candidate.path, rootDev: rootDev, rootMtime: modificationDate(of: st))
+                : Walk(bytes: UInt64(max(0, Int64(st.st_size))), newest: modificationDate(of: st), ok: true, error: nil)
             guard rewalk.ok,
                   rewalk.newest == candidate.walk.newest,
                   rewalk.bytes == candidate.walk.bytes else {
-                items.append(skip(candidate.path, "the directory changed during the scan"))
+                items.append(skip(candidate.path, "the entry changed during the scan"))
                 continue
             }
             if options.now.timeIntervalSince(rewalk.newest) < options.retention {
@@ -291,7 +287,7 @@ public enum AgentTempClean {
                   afterWalk.st_mode == st.st_mode, afterWalk.st_uid == st.st_uid,
                   afterWalk.st_ctimespec.tv_sec == st.st_ctimespec.tv_sec,
                   afterWalk.st_ctimespec.tv_nsec == st.st_ctimespec.tv_nsec else {
-                items.append(skip(candidate.path, "the directory changed during the final check"))
+                items.append(skip(candidate.path, "the entry changed during the final check"))
                 continue
             }
             let removal = RemovalItem(path: candidate.path, source: taskID, bytes: rewalk.bytes,
@@ -304,9 +300,11 @@ public enum AgentTempClean {
             failure = "the temp folder changed during the scan"
         }
         executor.log.append(command: options.command, outcomes: outcomes)
-        return AgentTempCleanResult(verified: failure == nil, failure: failure, items: items + outcomes)
+        return ExpiredTempCleanResult(verified: failure == nil, failure: failure, items: items + outcomes)
     }
 
+    /// The temp root pinned at scan time: same directory (device and inode), same owner, or the
+    /// whole batch is unverifiable.
     private static func sameRoot(_ path: String, as original: stat) -> Bool {
         var current = stat()
         return lstat(path, &current) == 0 && (current.st_mode & S_IFMT) == S_IFDIR
@@ -314,12 +312,13 @@ public enum AgentTempClean {
             && current.st_ino == original.st_ino
     }
 
-    /// A candidate that survived every first-pass check, pinned with the directory's device and
+    /// A candidate that survived every first-pass check, pinned with the entry's type, device and
     /// inode so the final pre-removal pass can prove it is the same object, together with the walk
     /// that proved it old and unchanged.
     private struct VerifiedCandidate {
         let name: String
         let path: String
+        let isDirectory: Bool
         let device: Int64
         let inode: UInt64
         let walk: Walk
@@ -335,17 +334,28 @@ public enum AgentTempClean {
             let path = rootPath + "/" + name
             var st = stat()
             guard lstat(path, &st) == 0 else { items.append(skip(path, "could not be inspected")); continue }
-            guard (st.st_mode & S_IFMT) == S_IFDIR else { items.append(skip(path, "not a directory")); continue }
+            let isDirectory = (st.st_mode & S_IFMT) == S_IFDIR
+            guard isDirectory || (st.st_mode & S_IFMT) == S_IFREG else {
+                items.append(skip(path, "not a file or directory")); continue
+            }
             guard st.st_uid == getuid() else { items.append(skip(path, "owned by another user")); continue }
             guard Int64(st.st_dev) == Int64(rootDev) else { items.append(skip(path, "mounted filesystem")); continue }
             if inUse.contains(name) { items.append(skip(path, "in use (an open file or working directory points inside)")); continue }
-            let walk = walkTree(path, rootDev: rootDev, rootMtime: modificationDate(of: st))
-            guard walk.ok else { items.append(skip(path, walk.error ?? "could not be verified")); continue }
+            let walk: Walk
+            if isDirectory {
+                walk = walkTree(path, rootDev: rootDev, rootMtime: modificationDate(of: st))
+                guard walk.ok else { items.append(skip(path, walk.error ?? "could not be verified")); continue }
+            } else {
+                // A file candidate's "walk" is the file itself, once the same ownership and
+                // filesystem checks a directory's walk enforces have passed above.
+                walk = Walk(bytes: UInt64(max(0, Int64(st.st_size))), newest: modificationDate(of: st), ok: true, error: nil)
+            }
             if options.now.timeIntervalSince(walk.newest) < options.retention {
                 items.append(skip(path, "changed within the retention period"))
                 continue
             }
-            verified.append(VerifiedCandidate(name: name, path: path, device: Int64(st.st_dev), inode: UInt64(st.st_ino), walk: walk))
+            verified.append(VerifiedCandidate(name: name, path: path, isDirectory: isDirectory,
+                                              device: Int64(st.st_dev), inode: UInt64(st.st_ino), walk: walk))
         }
         return verified
     }

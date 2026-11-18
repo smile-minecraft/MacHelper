@@ -98,9 +98,9 @@ final class AutoCleanModel {
         set { config.trashInstead = newValue; save() }
     }
 
-    var agentTempClean: Bool {
-        get { config.agentTempClean == true }
-        set { config.agentTempClean = newValue ? true : nil; save() }
+    var tempClean: Bool {
+        get { config.tempClean == true }
+        set { config.tempClean = newValue ? true : nil; save() }
     }
 
     /// Safe maintenance tasks Auto Clean may run, with whether each applies on this Mac
@@ -119,7 +119,7 @@ final class AutoCleanModel {
     }
 
     func title(forTask id: String) -> String {
-        if id == AgentTempClean.taskID { return String(localized: "Clean expired agent test temp files") }
+        if id == ExpiredTempClean.taskID { return String(localized: "Clean expired temporary files") }
         return MaintenanceCatalog.all.first { $0.id == id }?.title ?? id
     }
 
@@ -189,7 +189,7 @@ final class AutoCleanModel {
         updated.permanent = config.permanent
         updated.trashInstead = config.trashInstead
         updated.maintenanceTasks = config.maintenanceTasks
-        updated.agentTempClean = config.agentTempClean
+        updated.tempClean = config.tempClean
         config = updated
         save()
         message = String(localized: "Cleaned \(config.lastItemCount) items.")

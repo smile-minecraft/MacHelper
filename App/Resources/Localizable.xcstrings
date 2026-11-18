@@ -39942,138 +39942,138 @@
         }
       }
     },
-    "Clean expired agent test temp files": {
+    "Clean expired temporary files": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Limpiar temporales de prueba de agentes caducados"
+            "value": "Limpiar archivos temporales caducados"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "期限切れのエージェントテスト一時ファイルを整理"
+            "value": "期限切れの一時ファイルを削除"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "만료된 에이전트 테스트 임시 파일 정리"
+            "value": "만료된 임시 파일 정리"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清理过期的代理测试临时文件"
+            "value": "清理过期的临时文件"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "清理過期的代理測試暫存檔"
+            "value": "清理過期的暫存檔案"
           }
         }
       }
     },
-    "Agent Test Temp": {
+    "Temporary Files": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Temporales de prueba de agentes"
+            "value": "Archivos temporales"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "エージェントテストの一時ファイル"
+            "value": "一時ファイル"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "에이전트 테스트 임시 파일"
+            "value": "임시 파일"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "代理测试临时文件"
+            "value": "临时文件"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "代理測試暫存檔"
+            "value": "暫存檔案"
           }
         }
       }
     },
-    "Known agent test directories move to the Trash once they are at least 7 days old, unchanged, and not in use — or are deleted permanently, whichever your “Move to the Trash instead of deleting” setting says. Anything in use, still being written, or unrecognized is skipped.": {
+    "Files and folders in your Mac’s temporary folder that are at least 7 days old, unchanged, and not in use move to the Trash — or are deleted permanently, whichever your “Move to the Trash instead of deleting” setting says. Anything in use, still being written, or managed by the system is skipped.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los directorios conocidos de pruebas de agente se envían a la papelera cuando tienen al menos 7 días, no han cambiado y no están en uso; o se borran por completo, según lo que indique el ajuste «Mover a la papelera en vez de borrar». Lo que está en uso, sigue escribiéndose o no se reconoce se omite."
+            "value": "Los archivos y carpetas de la carpeta temporal de tu Mac que tengan al menos 7 días, sin cambios y sin uso se mueven a la Papelera — o se eliminan de forma permanente, según tu ajuste «Mover a la Papelera en lugar de eliminar». Lo que esté en uso, se esté escribiendo o lo gestione el sistema se omite."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "既知のエージェントテスト用ディレクトリは、7日以上経過し、変更がなく、使用されていない場合に「ゴミ箱に移動する（削除しない）」設定に従って削除またはゴミ箱に移動します。使用中・書き込み中・認識できないものはスキップされます。"
+            "value": "Macの一時フォルダにある、7日以上変更がなく、使用中でないファイルとフォルダはゴミ箱に移動します。「削除せずにゴミ箱へ移動」設定に応じて永久に削除される場合もあります。使用中、書き込み中、システム管理の項目はスキップされます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "알려진 에이전트 테스트 임시 디렉터리는 7일 이상 지났고 변경되지 않았으며 사용 중이지 않으면 ‘삭제 대신 휴지통으로 이동’ 설정에 따라 휴지통으로 이동하거나 영구 삭제됩니다. 사용 중이거나 쓰는 중이거나 인식할 수 없는 항목은 건너뜁니다."
+            "value": "Mac의 임시 폴더에서 7일 이상 변동이 없고 사용 중이 아닌 파일과 폴더는 휴지통으로 이동하거나, 「삭제 대신 휴지통으로 이동」 설정에 따라 영구 삭제됩니다. 사용 중이거나 기록 중이거나 시스템이 관리하는 항목은 건너뜁니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已知的代理测试临时目录在至少 7 天、未更改且未使用时，会按照“移到废纸篓而不是直接删除”的设置决定是移到废纸篓还是永久删除。占用中、正在写入或无法识别的内容会被跳过。"
+            "value": "Mac 临时文件夹中至少 7 天未变动且没有在用的文件和文件夹会移到废纸篓——或按你的「移到废纸篓而不是删除」设置直接永久删除。正在使用、正在写入或由系统管理的项目会跳过。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "已知的代理測試暫存目錄在至少 7 天、未變更且未使用時，會依「移到垃圾桶而不是直接刪除」設定決定移到垃圾桶或永久刪除。使用中、正在寫入或無法辨識的內容會被略過。"
+            "value": "Mac 暫存資料夾中至少 7 天未變動且沒有在用的檔案和資料夾會移到垃圾桶——或依你的「移到垃圾桶而不是刪除」設定直接永久刪除。正在使用、正在寫入或由系統管理的項目會跳過。"
           }
         }
       }
     },
-    "Off by default. Retention is 7 days regardless of schedule frequency. With the Trash setting off — the default for existing installs — expired directories are deleted permanently, freeing space; with it on, they move to the Trash, freeing space once you empty it.": {
+    "Off by default. Retention is 7 days regardless of schedule frequency. With the Trash setting off — the default for existing installs — expired files are deleted permanently, freeing space; with it on, they move to the Trash, freeing space once you empty it.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desactivado por defecto. La retención es de 7 días, al margen de la frecuencia del horario. Con «Mover a la papelera» desactivado —lo habitual en las instalaciones existentes— los directorios vencidos se borran por completo y liberan espacio; con él activado, se envían a la papelera y el espacio se libera al vaciarla."
+            "value": "Desactivado de forma predeterminada. La retención es de 7 días sin importar la frecuencia de ejecución. Con el ajuste de Papelera desactivado (el valor predeterminado en instalaciones existentes), los archivos caducados se eliminan de forma permanente y liberan espacio; con él activado, van a la Papelera y liberan espacio cuando la vacíes."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "既定ではオフ。保持期間はいずれの頻度のスケジュールでも 7 日です。「ゴミ箱に移動する」がオフの場合（これまでのインストールの既定）、期限切れのディレクトリは完全に削除され、空き領域ができます。オンの場合はゴミ箱に移動し、空にしたときに領域が空きます。"
+            "value": "既定ではオフです。保持期間は実行頻度に関係なく7日です。ゴミ箱設定がオフ（既存の環境の既定値）の場合、期限切れファイルは永久に削除されて領域を解放します。オンの場合はゴミ箱へ移動し、空にすると解放されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "기본값은 꺼짐입니다. 보존 기간은 일정 주기와 관계없이 7일입니다. ‘삭제 대신 휴지통으로 이동’이 꺼져 있으면(기존 설치의 기본값) 만료된 디렉터리는 영구 삭제되어 공간이 확보되고, 켜져 있으면 휴지통으로 이동하며 휴지통을 비울 때 공간이 확보됩니다."
+            "value": "기본값은 꺼짐입니다. 보존 기간은 실행 빈도와 무관하게 7일입니다. 휴지통 설정이 꺼져 있으면(기존 설치의 기본값) 만료된 파일은 영구 삭제되어 공간이 확보됩니다. 켜져 있으면 휴지통으로 이동하며, 비우면 공간이 확보됩니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "默认关闭。保留期限 7 天，与排程频率无关。“移到废纸篓”关闭时（现有安装的默认值），过期目录会被永久删除并释放空间；开启时会移到废纸篓，清空废纸篓后才释放空间。"
+            "value": "默认关闭。保留期限 7 天，与排程频率无关。「移到废纸篓」关闭时（既有安装的默认值），过期文件会被永久删除并释放空间；开启时会移到废纸篓，清空废纸篓后才释放空间。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "預設關閉。保留期限 7 天，與排程頻率無關。「移到垃圾桶」關閉時（既有安裝的預設值），過期目錄會被永久刪除並釋放空間；開啟時會移到垃圾桶，清空垃圾桶後才釋放空間。"
+            "value": "預設關閉。保留期限 7 天，與排程頻率無關。「移到垃圾桶」關閉時（既有安裝的預設值），過期檔案會被永久刪除並釋放空間；開啟時會移到垃圾桶，清空垃圾桶後才釋放空間。"
           }
         }
       }
@@ -40146,36 +40146,36 @@
         }
       }
     },
-    "Items are deleted directly and free space immediately: caches, logs, and (if enabled) expired agent test temp directories. Unknown or in-use items are never touched.": {
+    "Items are deleted directly and free space immediately: caches, logs, and (if enabled) expired temporary files. Unknown or in-use items are never touched.": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los elementos se eliminan directamente y liberan espacio de inmediato: cachés, registros y, si está activado, directorios temporales de pruebas de agent. Los elementos desconocidos o en uso nunca se tocan."
+            "value": "Los elementos se eliminan directamente y liberan espacio de inmediato: cachés, registros y, si está activado, archivos temporales caducados. Los elementos desconocidos o en uso nunca se tocan."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "項目は即座に直接削除され、その場で空き領域が増えます: キャッシュ、ログ、(有効にしている場合) 期限切れの agent テスト用一時ディレクトリ。不明な項目や使用中の項目には一切手を付けません。"
+            "value": "項目は即座に直接削除され、その場で空き領域が増えます: キャッシュ、ログ、(有効にしている場合) 期限切れの一時ファイル。不明な項目や使用中の項目には一切手を付けません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "항목은 즉시 직접 삭제되어 바로 공간을 확보합니다: 캐시, 로그, (활성화된 경우) 만료된 agent 테스트 임시 디렉터리. 알 수 없거나 사용 중인 항목은 절대 건드리지 않습니다."
+            "value": "항목은 즉시 직접 삭제되어 바로 공간을 확보합니다: 캐시, 로그, (활성화된 경우) 만료된 임시 파일. 알 수 없거나 사용 중인 항목은 절대 건드리지 않습니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "项目会立即直接删除并释放空间：缓存、日志和（启用时）过期的 agent 测试临时目录。未知项或使用中的项不会被动。"
+            "value": "项目会立即直接删除并释放空间：缓存、日志和（启用时）过期的临时文件。未知项或使用中的项不会被动。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "項目會立即直接刪除並釋放空間：快取、日誌和（啟用時）過期的 agent 測試暫存目錄。未知項目或使用中的項目不會被動。"
+            "value": "項目會立即直接刪除並釋放空間：快取、日誌和（啟用時）過期的暫存檔案。未知項或使用中的項目不會被動。"
           }
         }
       }

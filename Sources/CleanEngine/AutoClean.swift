@@ -32,11 +32,11 @@ public struct AutoCleanConfig: Codable, Sendable, Equatable {
     /// Maintenance task ids to run with each clean, from `AutoClean.maintenanceTaskIDs`. Optional so
     /// older config files still decode; nil means all of them.
     public var maintenanceTasks: [String]?
-    /// Remove expired agent test temp directories (known agent test temp roots) after each clean.
-    /// Optional so older config files still decode; nil means off. The sweep's retention does not
-    /// depend on the schedule frequency, and its removal action follows the same setting matrix
-    /// as the low-risk rules (see `AgentTempClean.defaultOptions`).
-    public var agentTempClean: Bool?
+    /// Remove expired files from this user's temporary folder after each clean. Optional so
+    /// older config files still decode; nil means off. The sweep's retention does not depend
+    /// on the schedule frequency, and its removal action follows the same setting matrix
+    /// as the low-risk rules (see `ExpiredTempClean.defaultOptions`).
+    public var tempClean: Bool?
     public var lastRun: Date?
     public var lastTrashedBytes: UInt64 = 0
     public var lastFreedBytes: UInt64 = 0
@@ -101,16 +101,16 @@ public enum AutoClean {
 
     /// Runs one scheduled clean: low-risk rules, default selection, running apps skipped; then
     /// the enabled maintenance tasks; then, when enabled in the config, the sweep of expired
-    /// agent test temp directories. The sweep's removals land in the same report, following the
-    /// same setting matrix as the low-risk rules (permanent wins, then trashInstead): with the
-    /// Trash setting off, surviving directories are deleted permanently and free space; with it
+    /// temporary files. The sweep's removals land in the same report, following the same
+    /// setting matrix as the low-risk rules (permanent wins, then trashInstead): with the
+    /// Trash setting off, surviving entries are deleted permanently and free space; with it
     /// on, they move to the Trash (recoverable, taking space only until the Trash is emptied).
     /// Its pass/fail and summary ride in the tasks list. Tasks not available on this Mac are
     /// skipped, not failed.
     public static func run(config: AutoCleanConfig, rules: [CleanRule],
                            runTask: (MaintenanceTask) -> TaskOutcome = { MaintenanceRunner().run($0, dryRun: false, command: "autoclean") },
-                           agentTempClean: (AutoCleanConfig) -> AgentTempClean.AgentTempCleanResult = { config in
-                               AgentTempClean.run(options: AgentTempClean.defaultOptions(for: config))
+                           tempClean: (AutoCleanConfig) -> ExpiredTempClean.ExpiredTempCleanResult = { config in
+                               ExpiredTempClean.run(options: ExpiredTempClean.defaultOptions(for: config))
                            })
         -> (CleanPlan, CleanReport, [TaskOutcome]) {
         let eligible = rules.filter { $0.risk <= maxRisk && $0.selectedByDefault }
@@ -120,10 +120,10 @@ public enum AutoClean {
 
         var items = report.items
         var outcomes = runMaintenance(config: config, runTask: runTask)
-        if config.agentTempClean == true {
-            let sweep = agentTempClean(config)
+        if config.tempClean == true {
+            let sweep = tempClean(config)
             items += sweep.items
-            outcomes.append(TaskOutcome(id: AgentTempClean.taskID, ok: sweep.isSuccess, dryRun: false, output: sweep.summary))
+            outcomes.append(TaskOutcome(id: ExpiredTempClean.taskID, ok: sweep.isSuccess, dryRun: false, output: sweep.summary))
         }
         return (plan, CleanReport(schemaVersion: report.schemaVersion, dryRun: false, items: items), outcomes)
     }

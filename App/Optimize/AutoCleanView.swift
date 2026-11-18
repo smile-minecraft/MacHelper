@@ -26,7 +26,7 @@ struct AutoCleanView: View {
                     Toggle("Move to the Trash instead of deleting", isOn: $model.trashInstead)
                     Text(model.trashInstead
                          ? "Cleaned items go to the Trash; the space is freed once you empty it."
-                         : "Items are deleted directly and free space immediately: caches, logs, and (if enabled) expired agent test temp directories. Unknown or in-use items are never touched.")
+                         : "Items are deleted directly and free space immediately: caches, logs, and (if enabled) expired temporary files. Unknown or in-use items are never touched.")
                         .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
                 if let scheduleError = model.scheduleMigrationError {
@@ -42,16 +42,16 @@ struct AutoCleanView: View {
                 }
                 Section {
                     VStack(alignment: .leading, spacing: 2) {
-                        Toggle("Clean expired agent test temp files", isOn: Binding(get: { model.agentTempClean },
-                                                                                  set: { model.agentTempClean = $0 }))
+                        Toggle("Clean expired temporary files", isOn: Binding(get: { model.tempClean },
+                                                                           set: { model.tempClean = $0 }))
                             .disabled(!model.enabled)
-                        Text("Known agent test directories move to the Trash once they are at least 7 days old, unchanged, and not in use — or are deleted permanently, whichever your “Move to the Trash instead of deleting” setting says. Anything in use, still being written, or unrecognized is skipped.")
+                        Text("Files and folders in your Mac’s temporary folder that are at least 7 days old, unchanged, and not in use move to the Trash — or are deleted permanently, whichever your “Move to the Trash instead of deleting” setting says. Anything in use, still being written, or managed by the system is skipped.")
                             .font(.mhCaption).foregroundStyle(Palette.textMuted)
                     }
                 } header: {
-                    Text("Agent Test Temp")
+                    Text("Temporary Files")
                 } footer: {
-                    Text("Off by default. Retention is 7 days regardless of schedule frequency. With the Trash setting off — the default for existing installs — expired directories are deleted permanently, freeing space; with it on, they move to the Trash, freeing space once you empty it.")
+                    Text("Off by default. Retention is 7 days regardless of schedule frequency. With the Trash setting off — the default for existing installs — expired files are deleted permanently, freeing space; with it on, they move to the Trash, freeing space once you empty it.")
                         .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
                 Section {
