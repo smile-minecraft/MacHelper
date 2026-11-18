@@ -12,6 +12,7 @@ final class BatterySourceCache: @unchecked Sendable {
     private let ttl: TimeInterval
     private let now: @Sendable () -> Date
     private let query: @Sendable () -> [AccessoryBatteryReading]
+    private let refreshGroup = DispatchGroup()
     private var cached: [AccessoryBatteryReading] = []
     private var cachedAt: Date?
     private var refreshing = false
@@ -33,18 +34,31 @@ final class BatterySourceCache: @unchecked Sendable {
             if stale && !refreshing {
                 refreshing = true
                 let query = query
+                let refreshGroup = refreshGroup
+                refreshGroup.enter()
                 DispatchQueue.global(qos: .utility).async { [weak self] in
                     let fresh = query()
-                    guard let self else { return }
+                    guard let self else {
+                        refreshGroup.leave()
+                        return
+                    }
                     self.lock.withLock {
                         self.cached = fresh
                         self.cachedAt = self.now()
                         self.refreshing = false
                     }
+                    refreshGroup.leave()
                 }
             }
             return cached
         }
+    }
+
+    /// 測試用：等待進行中的背景重查完成（含快取寫入）。回傳 false 表示 30 秒內未完成，視為 deadlock。
+    /// 這只是防呆上限，不是斷言用的時限；背景工作一完成就立刻回傳。
+    @discardableResult
+    func waitForBackgroundRefreshForTesting() -> Bool {
+        refreshGroup.wait(timeout: .now() + 30) == .success
     }
 
     /// 測試用：同步執行一次查詢並更新快取，回傳查詢結果。

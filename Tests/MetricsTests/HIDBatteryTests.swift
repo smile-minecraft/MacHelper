@@ -72,12 +72,7 @@ import Testing
         #expect(stale.map(\.charge) == [0.25])
 
         gate.signal() // 放行背景查詢
-        var attempts = 0
-        while attempts < 200 {
-            if cache.readings().map(\.charge) == [0.9] { break }
-            usleep(10_000)
-            attempts += 1
-        }
+        #expect(cache.waitForBackgroundRefreshForTesting()) // 背景重查完成（含快取寫入）
         #expect(cache.readings().map(\.charge) == [0.9])
     }
 
@@ -92,12 +87,7 @@ import Testing
         #expect(cache.readings().isEmpty)
         gate.signal()
 
-        var attempts = 0
-        while attempts < 200 {
-            if !cache.readings().isEmpty { break }
-            usleep(10_000)
-            attempts += 1
-        }
+        #expect(cache.waitForBackgroundRefreshForTesting()) // 背景重查完成（含快取寫入）
         #expect(cache.readings().map(\.charge) == [0.75])
     }
 }
