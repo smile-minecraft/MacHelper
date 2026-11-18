@@ -7,6 +7,8 @@
 #
 #   App/Monitor/MonitorPanel.swift                  the whole menu panel (split for private tabs)
 #   App/Monitor/PanelPage.swift                     the panel page list and PanelLayout helper
+#   App/Monitor/DiskIOSection.swift                 the SSD page's per-app I/O section
+#   App/Monitor/DiskActivityModel.swift             the sampling loop that section owns
 #   App/Monitor/DiskCapacitySelectionModel.swift    selection, volume and history state
 #   App/Monitor/DiskCapacityHistoryChart.swift      seven-day free-space chart
 #   App/Monitor/NetworkDetailsSection.swift         the network page's live section
@@ -34,7 +36,10 @@
 #   * The design system (`Theme`, `Palette`, `SurfaceShape`, the small components and fonts):
 #     the real one reads `ThemeStore` and user appearance preferences. The stand-ins keep the
 #     same init signatures and draw plain shapes, so the production view bodies compile and
-#     render unchanged.
+#     render unchanged. The disk I/O rows reuse the same stand-ins: `ProcessIcon`, `Meter`,
+#     `SkeletonRows`, `.surface` and the `.mh`/`.display` fonts; `PanelCardHeader`, which the
+#     disk I/O rows draw their title with, is compiled from the production
+#     `PanelTrendChart.swift`.
 #   * `HelperClient`, `ThemeStore`, `UpdateAvailableButton`, `Host`, `AppSection`: app-shell
 #     types the panel mentions. `Host`'s members added by `MonitorPanel.swift` are compiled as
 #     written; the base type is empty because no menu tab used here reads the machine model.
@@ -50,6 +55,13 @@
 # `DiskTabRender` therefore also drops the page's `.task`/`.onReceive` block and the test drives
 # the model directly. The full production `DiskTab`/`NetworkTab` (with those modifiers) remain
 # compiled and are what `MonitorPanel` uses.
+#
+# `DiskIOSection` is compiled from the production file and keeps its own `.task`, which calls
+# `DiskActivityModel.run(interval:)`. The section mounts inside the rendered variant but no
+# ImageRenderer pass here has started it (the rendered screen shows the skeleton rows, and the
+# assertions hold on that screen); even if a future pass starts it, sampling only reads kernel
+# process counters and writes nothing. Nothing in the tests asserts on the skeleton rows either
+# way.
 #
 # The local GRDB checkout is used read-only because the upstream Storage file imports GRDB. It is
 # never modified; SwiftPM builds it inside this throwaway folder. Set MACHELPER_GRDB_CHECKOUT
@@ -177,6 +189,8 @@ cp "$root/App/Monitor/HistoryManagementSection.swift" "$work/package/Sources/Mon
 cp "$root/App/Monitor/Formatting.swift" "$work/package/Sources/MonitorPanelFeature/Formatting.swift"
 # Sidecar contract file for the panel page list; the isolated package compiles it directly.
 cp "$root/App/Monitor/PanelPage.swift" "$work/package/Sources/MonitorPanelFeature/PanelPage.swift"
+cp "$root/App/Monitor/DiskIOSection.swift" "$work/package/Sources/MonitorPanelFeature/DiskIOSection.swift"
+cp "$root/App/Monitor/DiskActivityModel.swift" "$work/package/Sources/MonitorPanelFeature/DiskActivityModel.swift"
 cp "$here/MonitorPanelIntegrationTests.swift" "$work/package/Tests/MonitorPanelIntegrationTests/MonitorPanelIntegrationTests.swift"
 cp "$root/App/Resources/DiskVolumeSelection.xcstrings" "$work/package/Tests/MonitorPanelIntegrationTests/Resources/DiskVolumeSelection.xcstrings"
 cp "$root/App/Resources/DiskCapacityHistory.xcstrings" "$work/package/Tests/MonitorPanelIntegrationTests/Resources/DiskCapacityHistory.xcstrings"
@@ -1115,6 +1129,8 @@ for file in \
     "$root/App/Monitor/HistoryManagementSection.swift" \
     "$root/App/Monitor/Formatting.swift" \
     "$root/App/Monitor/PanelPage.swift" \
+    "$root/App/Monitor/DiskIOSection.swift" \
+    "$root/App/Monitor/DiskActivityModel.swift" \
     "$volume_history" \
     "$history_segments"; do
     printf '%s  %s\n' "$(shasum -a 256 "$file" | awk '{print $1}')" "$file"
@@ -1123,4 +1139,5 @@ echo "--- end manifest ---"
 
 swift test --package-path "$work/package" \
     --disable-automatic-resolution \
+    --jobs 2 \
     --filter 'MonitorPanelIntegrationTests'

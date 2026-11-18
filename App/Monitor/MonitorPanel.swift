@@ -444,8 +444,6 @@ private struct DiskTab: View {
             // Every appearance refreshes immediately, so points written while another tab was
             // visible are picked up when this page returns.
             selection.connect(reader: DiskCapacitySelectionModel.historyReader(for: store.persistentHistory))
-        }
-        .task {
             // Disk Arbitration has no timeout and capacity points arrive hourly, so refresh on
             // a slow cadence while visible instead of every second. The model also refreshes
             // the history window on this tick, which notices clears from other processes.
