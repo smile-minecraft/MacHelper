@@ -3,6 +3,16 @@
 Each release's notes on GitHub come from its section here (`scripts/release.sh`). Add changes under
 **Unreleased** as they land, then rename it to the version before releasing.
 
+## [Unreleased]
+
+Clean adds rules for Claude Code, Codex and OpenCode. Their low-risk files — caches, logs older
+than a week and temporary files — are cleaned by default. Session history from each agent — Claude
+Code transcripts, Codex sessions, OpenCode tool output — is only offered, never preselected, and
+moves to the Trash after a month. The rules do not touch any agent’s own program, installed
+plugins, settings or credentials. Every agent rule pauses while the agent itself is running —
+checked freshly before each removal — and a file that changed after the preview, by a resumed
+session for example, is left in place. The rule text is translated into all six languages.
+
 ## [0.3.5]
 
 The menu bar Network page is rebuilt around the numbers that matter, and a new Power page shows

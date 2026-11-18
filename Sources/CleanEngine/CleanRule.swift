@@ -40,7 +40,8 @@ public struct CleanRule: Codable, Sendable, Identifiable, Hashable {
     /// Skip the whole rule while any of these apps (bundle identifiers) is running.
     public var skipIfRunning: [String]
     /// Skip the whole rule while a process with one of these executable names runs (command-line tools
-    /// without a bundle identifier, e.g. "opencode"). Matched against the first 32 characters of the name.
+    /// without a bundle identifier, e.g. "opencode"). Matched against the first 32 characters of the name,
+    /// case-insensitively.
     public var skipIfProcessRunning: [String]
     public var selectedByDefault: Bool
     public var action: CleanAction

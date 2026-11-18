@@ -61,6 +61,137 @@
       "skipIfRunning": [
         "ai.elementlabs.lmstudio"
       ]
+    },
+    {
+      "id": "ai.claude-cache",
+      "title": "Claude Code caches",
+      "description": "Shell snapshots, telemetry and other caches from the Claude Code agent. Rebuilt as you use it; projects and settings are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.claude/shell-snapshots/*",
+        "~/.claude/cache/*",
+        "~/.claude/telemetry/*"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "claude"
+      ]
+    },
+    {
+      "id": "ai.claude-transcripts",
+      "title": "Claude Code old transcripts",
+      "description": "Session transcripts from projects you worked on more than a month ago. Recent sessions and settings are kept.",
+      "category": "ai",
+      "risk": "medium",
+      "paths": [
+        "~/.claude/projects/*/*.jsonl",
+        "~/.claude/transcripts/*"
+      ],
+      "minAgeDays": 30,
+      "skipIfProcessRunning": [
+        "claude"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "ai.codex-cache",
+      "title": "Codex caches",
+      "description": "Downloaded caches from the Codex agent, rebuilt on the next run. The agent itself, its installed plugins and its settings are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.codex/cache/*"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "codex"
+      ]
+    },
+    {
+      "id": "ai.codex-logs",
+      "title": "Codex log database",
+      "description": "Log databases the Codex agent rebuilds on the next run. Session history and settings are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.codex/logs_*.sqlite*",
+        "~/.codex/sqlite/logs_*.sqlite*"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "codex"
+      ]
+    },
+    {
+      "id": "ai.codex-temp",
+      "title": "Codex temporary files",
+      "description": "Shell snapshots and temporary files left by the Codex agent more than a week ago.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.codex/shell_snapshots/*",
+        "~/.codex/tmp/*"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "codex"
+      ]
+    },
+    {
+      "id": "ai.codex-sessions",
+      "title": "Codex old sessions",
+      "description": "Session files older than 30 days, grouped by year, month and day, plus the archived sessions list. Recent sessions and settings are kept.",
+      "category": "ai",
+      "risk": "medium",
+      "paths": [
+        "~/.codex/sessions/*/*/*/*.jsonl",
+        "~/.codex/archived_sessions/*"
+      ],
+      "minAgeDays": 30,
+      "skipIfProcessRunning": [
+        "codex"
+      ],
+      "selectedByDefault": false
+    },
+    {
+      "id": "ai.opencode-log",
+      "title": "OpenCode server log",
+      "description": "The OpenCode agent's log files older than a week. Sessions and settings are kept.",
+      "category": "ai",
+      "risk": "low",
+      "paths": [
+        "~/.local/share/opencode/log/*"
+      ],
+      "minAgeDays": 7,
+      "skipIfProcessRunning": [
+        "opencode"
+      ],
+      "skipIfRunning": [
+        "ai.opencode.desktop",
+        "ai.opencode.desktop.beta",
+        "ai.opencode.desktop.dev"
+      ]
+    },
+    {
+      "id": "ai.opencode-tool-output",
+      "title": "OpenCode old tool output",
+      "description": "Saved copies of tool output from OpenCode sessions older than a month. Sessions and settings are kept.",
+      "category": "ai",
+      "risk": "medium",
+      "paths": [
+        "~/.local/share/opencode/tool-output/*"
+      ],
+      "minAgeDays": 30,
+      "skipIfProcessRunning": [
+        "opencode"
+      ],
+      "selectedByDefault": false,
+      "skipIfRunning": [
+        "ai.opencode.desktop",
+        "ai.opencode.desktop.beta",
+        "ai.opencode.desktop.dev"
+      ]
     }
   ]
 }

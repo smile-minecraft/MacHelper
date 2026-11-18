@@ -24,8 +24,11 @@ jobs:
           xcodebuild -version
       - name: Test the Swift packages
         run: swift test
+      - name: Fetch the vendored Sparkle framework
+        run: scripts/sparkle/fetch.sh
       - name: Build the app (ad-hoc signed)
         run: |
+          set -o pipefail
           brew install xcodegen
           xcodegen generate --quiet
           xcodebuild -project MacHelper.xcodeproj -scheme MacHelper -configuration Release \
