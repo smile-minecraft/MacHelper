@@ -38,57 +38,43 @@ struct MonitorPanel: View {
     let actions: PanelActions
     /// false only for offscreen snapshots (ImageRenderer cannot draw ScrollView content).
     var scrollable = true
-    @AppStorage("panel.module") private var tab: Tab = .cpu
+    @AppStorage("panel.module") private var tab: PanelPage = .cpu
     /// Kept above the tab switch so the selected disk survives moving between tabs while the
     /// panel is open.
     @State private var diskSelection = DiskCapacitySelectionModel()
 
-    enum Tab: String, CaseIterable {
-        case cpu, gpu, memory, disk, network, power
+    typealias Tab = PanelPage
 
-        var icon: String {
-            switch self {
-            case .cpu: "px.cpu"
-            case .gpu: "px.gpu"
-            case .memory: "px.memory"
-            case .disk: "px.ssd"
-            case .network: "px.network"
-            case .power: "px.power"
-            }
-        }
-
-        var title: LocalizedStringKey {
-            switch self {
-            case .cpu: "CPU"
-            case .gpu: "GPU"
-            case .memory: "Memory"
-            case .disk: "SSD"
-            case .network: "Network"
-            case .power: "Power"
-            }
-        }
-
-        /// The power page (power plus fans) exists only on a Mac that has one of them.
-        func isAvailable(_ store: MonitorStore) -> Bool {
-            switch self {
-            case .power: !store.availableModules.isDisjoint(with: [.power, .fan])
-            default: true
-            }
+    /// Pages to show, in the user's order, minus the hidden ones and the ones this Mac cannot show.
+    @MainActor private var tabs: [PanelPage] {
+        store.settings.configuration.panelLayout.visiblePages {
+            $0.isAvailable(in: store.availableModules, hasAccessories: !store.accessories.isEmpty)
         }
     }
 
-    private var tabs: [Tab] { Tab.allCases.filter { $0.isAvailable(store) } }
-    /// A stored page this Mac does not have (settings moved from another Mac) shows CPU instead.
-    private var shownTab: Tab { tabs.contains(tab) ? tab : .cpu }
+    /// The stored page this Mac cannot show (or the user hid) falls back to the first visible page.
+    @MainActor private var shownTab: PanelPage? { tabs.contains(tab) ? tab : tabs.first }
+
+    /// The strip and the content must highlight and show the same page, so the strip receives
+    /// this resolved binding instead of the raw stored page. Reads fall back to the first
+    /// visible page (`cpu` while nothing is visible, when the strip is hidden anyway); taps
+    /// write through to the stored page. The stored value is kept, so a hidden page the user
+    /// selected becomes selected again once it can show.
+    @MainActor private var resolvedSelection: Binding<PanelPage> {
+        Binding(get: { shownTab ?? .cpu },
+                set: { tab = $0 })
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             header
-            TabStrip(items: tabs.map { ($0, $0.title) },
-                     icons: Dictionary(uniqueKeysWithValues: Tab.allCases.map { ($0, $0.icon) }),
-                     selection: $tab, stacked: tabs.count > 5)
-                .padding(.horizontal, 18)
-                .padding(.bottom, 12)
+            if !tabs.isEmpty {
+                TabStrip(items: tabs.map { ($0, LocalizedStringKey($0.title)) },
+                         icons: Dictionary(uniqueKeysWithValues: PanelPage.allCases.map { ($0, $0.icon) }),
+                         selection: resolvedSelection, stacked: tabs.count > 5)
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 12)
+            }
             Group {
                 if scrollable {
                     ScrollView { content.padding(.horizontal, 20).padding(.bottom, 16) }
@@ -128,13 +114,25 @@ struct MonitorPanel: View {
     }
 
     @ViewBuilder private var content: some View {
-        switch shownTab {
-        case .cpu: CPUTab(store: store)
-        case .gpu: GPUTab(store: store)
-        case .memory: MemoryTab(store: store)
-        case .disk: DiskTab(store: store, selection: diskSelection)
-        case .network: PanelNetworkTab(store: store)
-        case .power: PanelPowerTab(store: store, openFanControl: actions.openFanControl)
+        if let shownTab {
+            switch shownTab {
+            case .cpu: CPUTab(store: store)
+            case .gpu: GPUTab(store: store)
+            case .memory: MemoryTab(store: store)
+            case .disk: DiskTab(store: store, selection: diskSelection)
+            case .network: PanelNetworkTab(store: store)
+            case .battery: BatteryTab(store: store)
+            case .power: PanelPowerTab(store: store, openFanControl: actions.openFanControl)
+            }
+        } else {
+            VStack(spacing: 8) {
+                PanelEmptyState(symbol: "rectangle.slash", title: "No panel pages",
+                                detail: "Choose at least one page in Settings → Menu Bar.")
+                Button("Open Settings", action: actions.openSettings)
+                    .buttonStyle(.borderedProminent)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 32)
         }
     }
 
@@ -438,6 +436,9 @@ private struct DiskTab: View {
             }
             historySection
             activitySection
+            // DiskIOSection owns its sampler and `.task`; it stops sampling when the page goes
+            // away.
+            DiskIOSection()
         }
         .task {
             // Every appearance refreshes immediately, so points written while another tab was
@@ -732,6 +733,147 @@ private struct DiskSectionHeader: View {
         .padding(.top, 12)
         .padding(.bottom, 2)
         .accessibilityAddTraits(.isHeader)
+    }
+}
+
+// MARK: - Battery
+
+/// Internal battery and connected accessories share one page. Macs with neither don't show this tab.
+private struct BatteryTab: View {
+    let store: MonitorStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if store.availableModules.contains(.battery) {
+                internalBatterySection
+            }
+            accessorySection
+        }
+    }
+
+    @ViewBuilder private var internalBatterySection: some View {
+        if !store.isActive(.battery) {
+            PanelEmptyState(symbol: "battery.0", title: "Battery readings are off",
+                            detail: "Turn on Battery in the menu bar settings to see the charge.")
+        } else if let b = store.battery {
+            HStack(alignment: .center, spacing: 16) {
+                RingGauge(fraction: b.charge, value: Fmt.percent(b.charge), caption: "Charge",
+                          color: batteryColor(b.charge), size: 132, lineWidth: 14)
+                VStack(alignment: .leading, spacing: 0) {
+                    KeyValueRow(label: String(localized: "Status"), value: batteryStatus(b),
+                                dot: batteryColor(b.charge))
+                    KeyValueRow(label: String(localized: "Power"), value: Fmt.watts(b.watts),
+                                dot: Theme.slate)
+                    KeyValueRow(label: String(localized: "Battery health"), value: Fmt.percent(b.health),
+                                dot: Theme.mint)
+                    KeyValueRow(label: String(localized: "Cycle count"), value: "\(b.cycleCount)")
+                    KeyValueRow(label: String(localized: "Temperature"), value: Fmt.celsius(b.celsius),
+                                dot: Theme.amber)
+                }
+            }
+            HairlineHeader(text: "Charge history")
+            HistoryArea(values: Series.values(store, .battery), maxValue: 1,
+                        color: batteryColor(b.charge)).equatable().frame(height: 84)
+        } else {
+            SkeletonRows(count: 5)
+        }
+    }
+
+    @ViewBuilder private var accessorySection: some View {
+        if store.availableModules.contains(.accessories) {
+            HairlineHeader(text: "Accessories")
+            if !store.isActive(.accessories) {
+                PanelEmptyState(symbol: "keyboard", title: "Accessory readings are off",
+                                detail: "Turn on Accessories in the menu bar settings to see their charge.")
+            } else if store.accessories.isEmpty {
+                PanelEmptyState(symbol: "keyboard", title: "No accessories connected",
+                                detail: "Connect a Magic Keyboard, Mouse, Trackpad, or AirPods to see their charge.")
+            } else {
+                let readings = store.accessories.sorted {
+                    $0.charge == $1.charge
+                        ? $0.name.localizedStandardCompare($1.name) == .orderedAscending
+                        : $0.charge < $1.charge
+                }
+                VStack(spacing: 0) {
+                    ForEach(Array(readings.enumerated()), id: \.element.id) { i, reading in
+                        accessoryRow(reading)
+                            .overlay(alignment: .bottom) {
+                                if i < readings.count - 1 {
+                                    Rectangle().fill(Palette.hairline).frame(height: 1)
+                                }
+                            }
+                    }
+                }
+            }
+        }
+    }
+
+    private func accessoryRow(_ reading: AccessoryBatteryReading) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: accessorySymbol(reading.kind))
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Palette.textMuted)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(reading.name)
+                        .font(.mh(size: 13, weight: .medium))
+                        .foregroundStyle(Palette.text)
+                        .lineLimit(1)
+                    if reading.isCharging {
+                        Image(systemName: "bolt.fill")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(Theme.amber)
+                    }
+                    Spacer(minLength: 8)
+                    Text(Fmt.percent(reading.charge))
+                        .font(.display(13, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(batteryColor(reading.charge))
+                }
+                Meter(fraction: reading.charge, color: batteryColor(reading.charge))
+                if !reading.components.isEmpty {
+                    Text(componentsText(reading.components))
+                        .font(.mh(size: 10.5))
+                        .foregroundStyle(Palette.textFaint)
+                        .lineLimit(1)
+                }
+            }
+        }
+        .padding(.vertical, 5)
+    }
+
+    /// Neutral at a healthy charge; battery rules supply amber / rose only when it needs attention.
+    private func batteryColor(_ charge: Double) -> Color {
+        StatusRules.battery(charge)?.color ?? Palette.text
+    }
+
+    private func batteryStatus(_ b: BatteryReading) -> String {
+        if b.isCharging { return String(localized: "Charging") }
+        if b.externalPower && b.charge >= 0.995 { return String(localized: "Fully charged") }
+        if b.externalPower { return String(localized: "Plugged in") }
+        return String(localized: "On battery")
+    }
+
+    private func accessorySymbol(_ kind: AccessoryBatteryReading.Kind) -> String {
+        switch kind {
+        case .keyboard: "keyboard"
+        case .mouse: "computermouse"
+        case .trackpad: "rectangle.and.hand.point.up.left"
+        case .headphones: "airpods"
+        case .other: "dot.radiowaves.left.and.right"
+        }
+    }
+
+    private func componentsText(_ components: [AccessoryBatteryReading.Component]) -> String {
+        components.map { component in
+            let label: String
+            switch component.id {
+            case .left: label = String(localized: "Left")
+            case .right: label = String(localized: "Right")
+            case .chargingCase: label = String(localized: "Case")
+            }
+            return "\(label) \(Fmt.percent(component.charge))"
+        }.joined(separator: " · ")
     }
 }
 

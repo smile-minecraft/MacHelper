@@ -6,6 +6,9 @@
 # `.package(url:)` entry and SwiftPM has nothing to fetch:
 #
 #   App/Monitor/MonitorPanel.swift                  the whole menu panel (split for private tabs)
+#   App/Monitor/PanelPage.swift                     the panel page list and PanelLayout helper
+#   App/Monitor/DiskIOSection.swift                 the SSD page's per-app I/O section
+#   App/Monitor/DiskActivityModel.swift             the sampling loop that section owns
 #   App/Monitor/DiskCapacitySelectionModel.swift    selection, volume and history state
 #   App/Monitor/DiskCapacityHistoryChart.swift      seven-day free-space chart
 #   App/Monitor/NetworkDetailsSection.swift         the network page's live section
@@ -28,11 +31,15 @@
 #
 #   * `MonitorStore`, `LiveHistory`, `SeriesKey`, `ChartPoint`: the real store owns live hardware
 #     samplers, the shared history database and the background recording loops. The stand-in only
-#     exposes the properties the panel reads and records `watchProcesses` calls.
+#     exposes the properties the panel reads and records `watchProcesses` calls. `settings` is a
+#     minimal `MonitorSettingsStore` stand-in exposing `panelLayout` for the page strip.
 #   * The design system (`Theme`, `Palette`, `SurfaceShape`, the small components and fonts):
 #     the real one reads `ThemeStore` and user appearance preferences. The stand-ins keep the
 #     same init signatures and draw plain shapes, so the production view bodies compile and
-#     render unchanged.
+#     render unchanged. The disk I/O rows reuse the same stand-ins: `ProcessIcon`, `Meter`,
+#     `SkeletonRows`, `.surface` and the `.mh`/`.display` fonts; `PanelCardHeader`, which the
+#     disk I/O rows draw their title with, is compiled from the production
+#     `PanelTrendChart.swift`.
 #   * `HelperClient`, `ThemeStore`, `UpdateAvailableButton`, `Host`, `AppSection`: app-shell
 #     types the panel mentions. `Host`'s members added by `MonitorPanel.swift` are compiled as
 #     written; the base type is empty because no menu tab used here reads the machine model.
@@ -48,6 +55,13 @@
 # `DiskTabRender` therefore also drops the page's `.task`/`.onReceive` block and the test drives
 # the model directly. The full production `DiskTab`/`NetworkTab` (with those modifiers) remain
 # compiled and are what `MonitorPanel` uses.
+#
+# `DiskIOSection` is compiled from the production file and keeps its own `.task`, which calls
+# `DiskActivityModel.run(interval:)`. The section mounts inside the rendered variant but no
+# ImageRenderer pass here has started it (the rendered screen shows the skeleton rows, and the
+# assertions hold on that screen); even if a future pass starts it, sampling only reads kernel
+# process counters and writes nothing. Nothing in the tests asserts on the skeleton rows either
+# way.
 #
 # The local GRDB checkout is used read-only because the upstream Storage file imports GRDB. It is
 # never modified; SwiftPM builds it inside this throwaway folder. Set MACHELPER_GRDB_CHECKOUT
@@ -168,8 +182,15 @@ cp "$root/App/Monitor/DiskCapacitySelectionModel.swift" "$work/package/Sources/M
 cp "$root/App/Monitor/DiskCapacityHistoryChart.swift" "$work/package/Sources/MonitorPanelFeature/DiskCapacityHistoryChart.swift"
 cp "$root/App/Monitor/NetworkDetailsSection.swift" "$work/package/Sources/MonitorPanelFeature/NetworkDetailsSection.swift"
 cp "$root/App/Monitor/NetworkDetailsContent.swift" "$work/package/Sources/MonitorPanelFeature/NetworkDetailsContent.swift"
+cp "$root/App/Monitor/PanelNetworkTab.swift" "$work/package/Sources/MonitorPanelFeature/PanelNetworkTab.swift"
+cp "$root/App/Monitor/PanelTrendChart.swift" "$work/package/Sources/MonitorPanelFeature/PanelTrendChart.swift"
+cp "$root/App/Monitor/NetworkPanelModel.swift" "$work/package/Sources/MonitorPanelFeature/NetworkPanelModel.swift"
 cp "$root/App/Monitor/HistoryManagementSection.swift" "$work/package/Sources/MonitorPanelFeature/HistoryManagementSection.swift"
 cp "$root/App/Monitor/Formatting.swift" "$work/package/Sources/MonitorPanelFeature/Formatting.swift"
+# Sidecar contract file for the panel page list; the isolated package compiles it directly.
+cp "$root/App/Monitor/PanelPage.swift" "$work/package/Sources/MonitorPanelFeature/PanelPage.swift"
+cp "$root/App/Monitor/DiskIOSection.swift" "$work/package/Sources/MonitorPanelFeature/DiskIOSection.swift"
+cp "$root/App/Monitor/DiskActivityModel.swift" "$work/package/Sources/MonitorPanelFeature/DiskActivityModel.swift"
 cp "$here/MonitorPanelIntegrationTests.swift" "$work/package/Tests/MonitorPanelIntegrationTests/MonitorPanelIntegrationTests.swift"
 cp "$root/App/Resources/DiskVolumeSelection.xcstrings" "$work/package/Tests/MonitorPanelIntegrationTests/Resources/DiskVolumeSelection.xcstrings"
 cp "$root/App/Resources/DiskCapacityHistory.xcstrings" "$work/package/Tests/MonitorPanelIntegrationTests/Resources/DiskCapacityHistory.xcstrings"
@@ -192,6 +213,19 @@ import GRDB
 
 /// Stand-in for the shared history database wrapper. The menu views only need its connection and
 /// the whole-hour boundary; the test supplies an in-memory GRDB database.
+/// Minimal stand-in for the shared history sample used by the production trend chart.
+public struct MetricSample: Sendable, Hashable {
+    public var time: Date
+    public var networkIn: Double?
+    public var networkOut: Double?
+
+    public init(time: Date, networkIn: Double? = nil, networkOut: Double? = nil) {
+        self.time = time
+        self.networkIn = networkIn
+        self.networkOut = networkOut
+    }
+}
+
 public struct MetricsHistory: Sendable {
     public let db: any DatabaseWriter
 
@@ -202,6 +236,10 @@ public struct MetricsHistory: Sendable {
     public static func hourStart(_ date: Date) -> Date {
         Date(timeIntervalSince1970: (date.timeIntervalSince1970 / 3600).rounded(.down) * 3600)
     }
+
+    /// The long-range chart reads through here; no samples keeps the production code compiling
+    /// without touching the in-memory test database or any user history file.
+    public func samples(since: Date, bucket: TimeInterval = 60) throws -> [MetricSample] { [] }
 }
 
 public enum HistoryKind: Sendable {
@@ -273,7 +311,8 @@ EOF
 python3 - "$root/App/Monitor/MonitorPanel.swift" \
         "$work/package/Sources/MonitorPanelFeature/MonitorPanel.swift" \
         "$work/package/Sources/MonitorPanelFeature/MonitorPanelSections.swift" \
-        "$work/package/Sources/MonitorPanelFeature/MonitorPanelRenderSections.swift" <<'PY'
+        "$work/package/Sources/MonitorPanelFeature/MonitorPanelRenderSections.swift" \
+        "$root/App/Monitor/PanelNetworkTab.swift" <<'PY'
 import difflib
 import hashlib
 import pathlib
@@ -283,7 +322,9 @@ source_path = pathlib.Path(sys.argv[1])
 panel_path = pathlib.Path(sys.argv[2])
 sections_path = pathlib.Path(sys.argv[3])
 render_path = pathlib.Path(sys.argv[4])
+network_path = pathlib.Path(sys.argv[5])
 source = source_path.read_text()
+network_source = network_path.read_text()
 lines = source.splitlines(keepends=True)
 
 def block(start_index: int):
@@ -323,7 +364,7 @@ starts = {
     "Series": series_start,
     "DiskTab": find("private struct DiskTab: View {"),
     "DiskSectionHeader": find("private struct DiskSectionHeader: View {"),
-    "NetworkTab": find("private struct NetworkTab: View {"),
+    "BatteryTab": find("private struct BatteryTab: View {"),
 }
 
 blocks = {}
@@ -337,7 +378,7 @@ edits = {
     "Series": ("@MainActor\nprivate enum Series {", "@MainActor\nenum Series {"),
     "DiskTab": ("private struct DiskTab: View {", "struct DiskTab: View {"),
     "DiskSectionHeader": ("private struct DiskSectionHeader: View {", "struct DiskSectionHeader: View {"),
-    "NetworkTab": ("private struct NetworkTab: View {", "struct NetworkTab: View {"),
+    "BatteryTab": ("private struct BatteryTab: View {", "struct BatteryTab: View {"),
 }
 
 rendered = {}
@@ -377,18 +418,38 @@ if ".task {" in without_lifecycle or ".onReceive(" in without_lifecycle:
     raise SystemExit("DiskTabRender: a lifecycle modifier remains")
 disk_render = without_lifecycle
 
-# Render-only NetworkTab: same body with the live section replaced by a boundary stub.
-network_tab = rendered["NetworkTab"]
-network_render = network_tab.replace("struct NetworkTab: View {",
-                                     "struct NetworkTabRender: View {", 1)
-live_line = "            NetworkDetailsSection()\n"
-boundary_line = "            NetworkDetailsSectionBoundary()\n"
-if network_render.count(live_line) != 1:
-    raise SystemExit("NetworkTabRender: expected exactly one NetworkDetailsSection() line")
-network_render = network_render.replace(live_line, boundary_line, 1)
-if network_render.replace(boundary_line, live_line, 1).replace(
-        "struct NetworkTabRender: View {", "struct NetworkTab: View {", 1) != network_tab:
-    raise SystemExit("NetworkTabRender: reversing the render edits did not reproduce the source")
+# Render-only network tab: the production body with only its three lifecycle modifiers removed.
+# The model initializer is inert (it only stores closures); `.onAppear` is what starts the real
+# Wi-Fi, interface and nettop samplers, so dropping these lines keeps the hosted render offline.
+# Private child views are renamed so this generated file can coexist with the production copy.
+lifecycle_block = (
+    "        .onAppear { model.start() }\n"
+    "        .onDisappear { model.stop() }\n"
+    "        .task(id: range) { await history.run(range, history: store.persistentHistory) }\n"
+)
+if network_source.count(lifecycle_block) != 1:
+    raise SystemExit("PanelNetworkTabRender: expected exactly one lifecycle block")
+without_lifecycle = network_source.replace(lifecycle_block, "", 1)
+if any(marker in without_lifecycle for marker in (
+        ".onAppear { model.start() }", ".onDisappear { model.stop() }", ".task(id: range)")):
+    raise SystemExit("PanelNetworkTabRender: a lifecycle modifier remains")
+
+network_render = without_lifecycle
+render_renames = [
+    ("struct PanelNetworkTab: View {", "struct PanelNetworkTabRender: View {"),
+    ("ConnectionCard", "ConnectionCardRender"),
+    ("RateCard", "RateCardRender"),
+    ("NetworkTrafficSources", "NetworkTrafficSourcesRender"),
+]
+for old, new in render_renames:
+    if old not in network_render:
+        raise SystemExit(f"PanelNetworkTabRender: missing {old!r}")
+    network_render = network_render.replace(old, new)
+reversed_render = network_render
+for old, new in reversed(render_renames):
+    reversed_render = reversed_render.replace(new, old)
+if reversed_render != without_lifecycle:
+    raise SystemExit("PanelNetworkTabRender: reversing the renames did not reproduce the source")
 
 def unified(original: str, changed: str, label: str) -> str:
     diff = difflib.unified_diff(original.splitlines(keepends=True),
@@ -418,39 +479,25 @@ common_header = (
     "import Storage\n"
     "import SwiftUI\n\n"
 )
-sections = common_header + "\n".join(rendered[name] for name in ("Series", "DiskTab", "DiskSectionHeader", "NetworkTab"))
+sections = common_header + "\n".join(rendered[name] for name in ("Series", "DiskTab", "DiskSectionHeader", "BatteryTab"))
 sections_path.write_text(sections)
 
-boundary = '''
-/// Test-only boundary for the live network section. `NetworkDetailsSection` owns a default
-/// sampler that reads real interfaces; `NetworkTabRender` replaces that one call with this view
-/// so the tab's production chrome can be rendered without a system read.
-struct NetworkDetailsSectionBoundary: View {
-    var body: some View {
-        Text("Live network section boundary (not rendered)")
-            .font(.mh(size: 10.5))
-            .foregroundStyle(Palette.textFaint)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(8)
-            .background(Palette.inset, in: SurfaceShape(cornerRadius: 8, style: .continuous))
-    }
-}
-'''
 render_header = (
     "// Generated by Tests/UI/run-monitor-panel-integration-tests.sh from\n"
-    "// App/Monitor/MonitorPanel.swift. These render-only variants exist because `ImageRenderer`\n"
-    "// can run SwiftUI lifecycle modifiers in the same process: `DiskTabRender` drops only the\n"
-    "// `.task`/`.onReceive` block (the test drives the model directly), and `NetworkTabRender`\n"
-    "// replaces only the live `NetworkDetailsSection()` call with a boundary view. Every other\n"
-    "// line is the production text. The full `DiskTab`/`NetworkTab` remain compiled in\n"
-    "// `MonitorPanelSections.swift` and are used by `MonitorPanel`.\n\n"
+    "// App/Monitor/MonitorPanel.swift and App/Monitor/PanelNetworkTab.swift. These render-only\n"
+    "// variants exist because `ImageRenderer` can run SwiftUI lifecycle modifiers in the same\n"
+    "// process: `DiskTabRender` drops only the `.task`/`.onReceive` block (the test drives the\n"
+    "// model directly), and `PanelNetworkTabRender` drops only `.onAppear`/`.onDisappear`/`.task`\n"
+    "// so no live sampler starts. Every other line is the production text. The full `DiskTab`\n"
+    "// and `PanelNetworkTab` remain compiled from the production files and are used by\n"
+    "// `MonitorPanel`.\n\n"
     "import AppKit\n"
     "import Charts\n"
     "import Metrics\n"
     "import Storage\n"
     "import SwiftUI\n\n"
 )
-render_file = render_header + disk_render + "\n" + network_render + "\n" + boundary
+render_file = render_header + disk_render + "\n" + network_render + "\n"
 render_path.write_text(render_file)
 
 print(f"MonitorPanel.swift sha256: {hashlib.sha256(source.encode()).hexdigest()}")
@@ -462,8 +509,8 @@ for name, original in blocks.items():
     print(f"extracted {name}: lines {start + 1}-{end + 1}, {len(original.splitlines())} lines, byte-identical except visibility")
 print("--- DiskTabRender differences ---")
 print(unified(disk_tab, disk_render, "DiskTab"))
-print("--- NetworkTabRender differences ---")
-print(unified(network_tab, network_render, "NetworkTab"))
+print("--- PanelNetworkTabRender differences (lifecycle + type renames) ---")
+print(unified(network_source, network_render, "PanelNetworkTab"))
 PY
 
 # The production views use the app's shared visual language. These stand-ins keep the surface
@@ -591,10 +638,35 @@ struct PixelIcon: View {
     }
 }
 
+/// Records what the real panel passes into TabStrip so tests can assert on the resolved
+/// selection binding the panel provides instead of a re-implemented fallback.
+enum TabStripSelectionRecorder {
+    nonisolated(unsafe) static var resolvedSelection: String?
+    nonisolated(unsafe) static var itemRawValues: [String] = []
+
+    static func reset() {
+        resolvedSelection = nil
+        itemRawValues = []
+    }
+}
+
 struct TabStrip<Value: Hashable>: View {
     let items: [(Value, LocalizedStringKey)]
     var icons: [Value: String] = [:]
     @Binding var selection: Value
+    var stacked = false
+
+    init(items: [(Value, LocalizedStringKey)],
+         icons: [Value: String] = [:],
+         selection: Binding<Value>,
+         stacked: Bool = false) {
+        self.items = items
+        self.icons = icons
+        self._selection = selection
+        self.stacked = stacked
+        TabStripSelectionRecorder.resolvedSelection = String(describing: selection.wrappedValue)
+        TabStripSelectionRecorder.itemRawValues = items.map { String(describing: $0.0) }
+    }
 
     var body: some View {
         HStack(spacing: 2) {
@@ -655,6 +727,14 @@ struct Reading {
 enum StatusRules {
     static func temperature(_ celsius: Double?) -> Reading? {
         celsius.map { _ in Reading(level: .good) }
+    }
+
+    /// Mirrors the production thresholds: neutral at a healthy charge, attention at 20%, critical at 10%.
+    static func battery(_ charge: Double?) -> StatusLevel? {
+        guard let charge else { return nil }
+        if charge <= 0.1 { return .critical }
+        if charge <= 0.2 { return .attention }
+        return .good
     }
 }
 
@@ -785,9 +865,87 @@ struct SkeletonRows: View {
     }
 }
 
+struct Meter: View {
+    let fraction: Double
+    var color: Color = Theme.accent
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                SurfaceShape.capsule.fill(Palette.inset)
+                SurfaceShape.capsule.fill(color)
+                    .frame(width: max(geo.size.width * min(max(fraction, 0), 1), fraction > 0 ? 3 : 0))
+            }
+        }
+        .frame(height: 8)
+    }
+}
+
+struct PanelEmptyState: View {
+    let symbol: String
+    let title: LocalizedStringKey
+    let detail: LocalizedStringKey
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: symbol).font(.mh(size: 26, weight: .semibold)).foregroundStyle(Palette.textFaint)
+            Text(title).font(.mh(size: 13.5, weight: .semibold)).foregroundStyle(Palette.text)
+            Text(detail).font(.mh(size: 11.5)).foregroundStyle(Palette.textMuted)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+    }
+}
+
+struct ChipBar<Value: Hashable>: View {
+    let items: [(Value, LocalizedStringKey)]
+    @Binding var selection: Value
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                Button { selection = item.0 } label: {
+                    Text(item.1)
+                        .font(.mh(size: 11, weight: .medium))
+                        .foregroundStyle(item.0 == selection ? Palette.text : Palette.textMuted)
+                        .padding(.horizontal, 9).padding(.vertical, 4)
+                        .background(item.0 == selection ? Palette.raised : .clear,
+                                    in: SurfaceShape(cornerRadius: 6, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+struct AreaSparkline: View, Equatable {
+    let values: [Double]
+    var maxValue: Double? = 1
+    var color: Color = Theme.accent
+
+    var body: some View {
+        Canvas { context, size in
+            guard values.count > 1 else { return }
+            let peak = max(maxValue ?? 1, values.max() ?? 1, 0.0001)
+            let step = size.width / CGFloat(values.count - 1)
+            var path = Path()
+            path.move(to: CGPoint(x: 0, y: size.height))
+            for (i, value) in values.enumerated() {
+                path.addLine(to: CGPoint(x: CGFloat(i) * step,
+                                         y: size.height - size.height * CGFloat(min(max(value / peak, 0), 1))))
+            }
+            context.stroke(path, with: .color(color), lineWidth: 2)
+        }
+    }
+}
+
 extension View {
     func settingsCaption(_ color: Color = Palette.textMuted) -> some View {
         font(.mh(size: 11)).foregroundStyle(color)
+    }
+
+    func surface(_ fill: Color = Palette.card) -> some View {
+        background(fill)
     }
 }
 
@@ -795,8 +953,32 @@ extension View {
 enum ProcessIcon {
     static func icon(for p: ProcessUsage) -> NSImage { blankIcon }
     static func icon(for p: GPUProcessUsage) -> NSImage { blankIcon }
+    static func icon(appPath: String?) -> NSImage { blankIcon }
 
     private static var blankIcon: NSImage { NSImage(size: NSSize(width: 18, height: 18)) }
+}
+
+// MARK: - Settings stand-in
+
+/// Minimal stand-in for the app's monitor configuration. Only the panel fields the menu panel
+/// reads; the production `normalized()` rules are exercised by the app's own state harness,
+/// not by this isolated package.
+struct MonitorConfiguration: Hashable, Sendable {
+    var panelPageOrder: [PanelPage] = PanelPage.allCases
+    var hiddenPanelPages: Set<PanelPage> = []
+
+    static let `default` = MonitorConfiguration()
+
+    var panelLayout: PanelLayout {
+        PanelLayout(order: panelPageOrder, hidden: hiddenPanelPages)
+    }
+}
+
+/// Stand-in for the app's settings store, exposing the configuration the menu panel reads.
+@MainActor
+@Observable
+final class MonitorSettingsStore {
+    var configuration = MonitorConfiguration.default
 }
 
 // MARK: - Store stand-in
@@ -807,7 +989,11 @@ struct ChartPoint: Hashable, Sendable {
 }
 
 enum SeriesKey: String, CaseIterable, Sendable {
-    case cpu, cpuP, cpuE, gpu, memory, diskRead, diskWrite, netIn, netOut, battery, temperature, fan, power
+    case cpu, cpuP, cpuE, gpu, memory, diskRead, diskWrite, netIn, netOut, battery, accessory, temperature, fan, power
+}
+
+enum MonitorModule: String, CaseIterable, Hashable, Sendable {
+    case cpu, gpu, memory, disk, network, battery, accessories, temperature, fan, power
 }
 
 struct LiveHistory {
@@ -832,10 +1018,14 @@ final class MonitorStore {
     var temperatures: [TemperatureReading] = []
     var fans: [FanReading] = []
     var power: PowerReading?
+    var battery: BatteryReading?
+    var accessories: [AccessoryBatteryReading] = []
+    var availableModules: Set<MonitorModule> = []
     var processes: ProcessSnapshot?
     var gpuProcesses: [GPUProcessUsage]?
     var history = LiveHistory()
     var persistentHistory: MetricsHistory?
+    let settings = MonitorSettingsStore()
 
     private(set) var watchCalls: [Bool] = []
 
@@ -848,6 +1038,19 @@ final class MonitorStore {
     func watchProcesses(_ on: Bool) {
         watchCalls.append(on)
     }
+
+    func isActive(_ module: MonitorModule) -> Bool {
+        availableModules.contains(module)
+    }
+}
+
+/// The power page is outside this work's scope; a minimal stand-in keeps `MonitorPanel`'s
+/// content switch compiling without pulling in the fan page and its hardware readers.
+struct PanelPowerTab: View {
+    let store: MonitorStore
+    var openFanControl: () -> Void = {}
+
+    var body: some View { EmptyView() }
 }
 EOF
 
@@ -920,8 +1123,14 @@ for file in \
     "$root/App/Monitor/DiskCapacityHistoryChart.swift" \
     "$root/App/Monitor/NetworkDetailsSection.swift" \
     "$root/App/Monitor/NetworkDetailsContent.swift" \
+    "$root/App/Monitor/PanelNetworkTab.swift" \
+    "$root/App/Monitor/PanelTrendChart.swift" \
+    "$root/App/Monitor/NetworkPanelModel.swift" \
     "$root/App/Monitor/HistoryManagementSection.swift" \
     "$root/App/Monitor/Formatting.swift" \
+    "$root/App/Monitor/PanelPage.swift" \
+    "$root/App/Monitor/DiskIOSection.swift" \
+    "$root/App/Monitor/DiskActivityModel.swift" \
     "$volume_history" \
     "$history_segments"; do
     printf '%s  %s\n' "$(shasum -a 256 "$file" | awk '{print $1}')" "$file"
@@ -930,4 +1139,5 @@ echo "--- end manifest ---"
 
 swift test --package-path "$work/package" \
     --disable-automatic-resolution \
+    --jobs 2 \
     --filter 'MonitorPanelIntegrationTests'
