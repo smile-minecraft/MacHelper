@@ -99,12 +99,19 @@ public struct PathSafety: Sendable {
 
     static func normalize(_ path: String) -> String {
         var p = URL(fileURLWithPath: expandTilde(path)).standardizedFileURL.path
-        // /private/var and /var, /private/tmp and /tmp are the same place.
-        for (alias, real) in [("/var/", "/private/var/"), ("/tmp/", "/private/tmp/")] where p.hasPrefix(alias) {
-            p = real + p.dropFirst(alias.count)
-        }
+        p = normalizeAlias(p)
         while p.count > 1 && p.hasSuffix("/") { p.removeLast() }
         return p
+    }
+
+    /// Only the absolute /var and /tmp alias prefixes are rewritten; anything else passes through
+    /// untouched. Use this for user-supplied exclusion patterns, where URL standardization is not
+    /// an option: it would prefix a relative glob (e.g. `*/cardiary-host-*`) with the process's
+    /// working directory and break the pattern.
+    static func normalizeAlias(_ pattern: String) -> String {
+        if pattern.hasPrefix("/var/") { return "/private/var/" + pattern.dropFirst("/var/".count) }
+        if pattern.hasPrefix("/tmp/") { return "/private/tmp/" + pattern.dropFirst("/tmp/".count) }
+        return pattern
     }
 }
 

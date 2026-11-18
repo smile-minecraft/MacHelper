@@ -245,10 +245,10 @@ public enum AgentTempClean {
         } else {
             // The user's exclusion list wins over the sweep, exactly like the declarative rules.
             // Entries can be recorded through the CLI with the /var/folders/... alias, while
-            // candidates here are normalized to /private/var/folders/...; normalize each entry
-            // the same way so an excluded directory is honored in both spellings. Glob entries
-            // survive: URL standardization keeps '*' and other filename characters as-is.
-            let patterns = (options.whitelist ?? PathSafety.loadWhitelist()).map(PathSafety.normalize)
+            // candidates here are normalized to /private/var/folders/...; rewrite only that alias
+            // prefix per entry. Full URL normalization is not an option: it would prefix a
+            // relative glob (e.g. `*/cardiary-host-*`) with the working directory.
+            let patterns = (options.whitelist ?? PathSafety.loadWhitelist()).map(PathSafety.normalizeAlias)
             let safety = PathSafety(protectedPaths: [], whitelist: patterns,
                                     allowedRoots: [rootPath], minimumDepth: 1)
             executor = CleanExecutor(safety: safety, log: log)

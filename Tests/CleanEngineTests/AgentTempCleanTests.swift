@@ -360,6 +360,35 @@ import Testing
         #expect(!fileManager.fileExists(atPath: removed.path))
     }
 
+    @Test func whitelistedGlobsSurviveTheAliasRewrite() throws {
+        let s = try makeSandbox()
+        defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
+        let old = Date().addingTimeInterval(-30 * 86_400)
+        let kept = try makeCandidate(s.root, "cardiary-host-Keep01", childMtime: old)
+        try age(kept, to: old)
+
+        // An absolute glob on the alias spelling and a relative glob must both keep working:
+        // full URL normalization would prefix the relative one with the working directory.
+        for entry in [s.root.path + "/cardiary-host-Keep*", "*/cardiary-host-Keep*"] {
+            let removed = try makeCandidate(s.root, "cardiary-host-Drop02", childMtime: old)
+            try age(removed, to: old)
+            var options = AgentTempClean.Options()
+            options.tempRoot = s.root
+            options.now = Date()
+            options.command = "autoclean"
+            options.openFiles = { _ in [] }
+            options.log = OperationLog(url: s.log)
+            options.useTrash = false
+            options.whitelist = [entry]
+            let result = AgentTempClean.run(options: options)
+
+            #expect(result.verified)
+            #expect(result.deletedCount == 1, "the glob entry \(entry) must protect the kept candidate")
+            #expect(fileManager.fileExists(atPath: kept.path))
+            #expect(!fileManager.fileExists(atPath: removed.path))
+        }
+    }
+
     @Test func rootReplacedDuringTheLastRemovalStillReportsUnverified() throws {
         let s = try makeSandbox()
         defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
