@@ -126,9 +126,12 @@ final class DiskAnalysisModel {
     /// Why the duplicate list is empty or incomplete: cloud-only files skipped, unreadable files,
     /// or the search not running at all.
     private(set) var duplicatesMessage: String?
-    // Filters for the largest-files list.
+    // Filters for the largest-files list; the charts use the same conditions to point out matches.
     var kindFilter: FileKind?
     var olderThanDays: Int?
+    var searchText: String = ""
+    /// Minimum allocated size for a file to match; 0 = any size.
+    var minFileBytes: UInt64 = 0
     var lastMessage: String?
     var previewURL: URL?
 
@@ -148,6 +151,7 @@ final class DiskAnalysisModel {
         let insights: SpaceInsights?
     }
     @ObservationIgnored private var treeCache: [String: CachedTree] = [:]
+    @ObservationIgnored private let fileFilterCache = FileFilterCache()
     private struct CachedVolume {
         let summary: VolumeSummary
         let at: Date
@@ -427,13 +431,33 @@ final class DiskAnalysisModel {
         }
     }
 
-    /// Largest files under `node`, filtered by kind and age.
+    /// The conditions currently set for the largest-files list and the charts.
+    var fileFilter: FileFilter {
+        FileFilter(text: searchText, minBytes: minFileBytes, kind: kindFilter, olderThanDays: olderThanDays)
+    }
+
+    var isFileFilterActive: Bool { fileFilter.isActive }
+
+    func clearFileFilters() {
+        searchText = ""
+        minFileBytes = 0
+        kindFilter = nil
+        olderThanDays = nil
+    }
+
+    /// Filter outcome for `node`, memoized on (tree, revision, filter) so the charts can ask on
+    /// every frame without walking the tree again. The age bound is fixed when an entry is
+    /// computed; the cache drops stale entries as soon as the tree or any condition changes.
+    func fileFilterResult(in node: DiskNode) -> FileFilterResult {
+        fileFilterCache.result(for: node, revision: revision, filter: fileFilter)
+    }
+
+    /// Largest files under `node`. The filter is applied before ranking, so a matching file is
+    /// never dropped just because many larger files fail the filter.
     func largestFiles(in node: DiskNode, limit: Int = 100) -> [DiskNode] {
-        let cutoff = olderThanDays.map { Date().addingTimeInterval(-Double($0) * 86_400) }
-        let candidates = (kindFilter == nil && cutoff == nil) ? node.largestFiles(limit: limit) : node.largestFiles(limit: 5000)
-        return Array(candidates.filter { f in
-            (kindFilter == nil || FileKind.of(f.name) == kindFilter) && (cutoff == nil || f.modified < cutoff!)
-        }.prefix(limit))
+        let filter = fileFilter
+        guard filter.isActive else { return node.largestFiles(limit: limit) }
+        return Array(fileFilterResult(in: node).files.prefix(limit))
     }
 
     func findDuplicates() async {
