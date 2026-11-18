@@ -267,10 +267,17 @@ struct DiskAnalysisView: View {
             if let v = model.volume {
                 Text("Disk used \(Fmt.bytes(v.used)) of \(Fmt.bytes(v.total))")
                 if v.purgeable > 0 { Text("Purgeable \(Fmt.bytes(v.purgeable))").help("Space macOS frees automatically when needed (mostly local Time Machine snapshots and system caches).") }
-                if v.localSnapshots > 0 { Text("\(v.localSnapshots) local snapshots") }
             }
         }
         .font(.mhCaption).foregroundStyle(Palette.textMuted)
+        if model.root != nil {
+            Group {
+                spaceAccountingSummary
+                if let v = model.volume { snapshotSummary(v.snapshots) }
+            }
+            .font(.mhCaption).foregroundStyle(Palette.textMuted)
+            .fixedSize(horizontal: false, vertical: true)
+        }
         if model.progress.cloudOnlyDirectories > 0 {
             HStack {
                 Image(systemName: "icloud.slash").foregroundStyle(Theme.orange)
@@ -297,6 +304,70 @@ struct DiskAnalysisView: View {
             }
             .font(.mhCaption)
         }
+    }
+
+    /// Whether the scan's total may be read against the volume's usage, and if not, why.
+    @ViewBuilder private var spaceAccountingSummary: some View {
+        switch model.spaceAccounting {
+        case .wholeVolume(let whole):
+            VStack(alignment: .leading, spacing: 2) {
+                if whole.unattributedBytes > 0 {
+                    Text("The scan covered this volume: \(Fmt.bytes(Int64(clamping: whole.scannedBytes))) of \(Fmt.bytes(whole.volume.used)) in use was measured. The remaining \(Fmt.bytes(Int64(clamping: whole.unattributedBytes))) is system data or space shared with other volumes, and is not space you can clean.")
+                } else {
+                    Text("The scan covered this volume and measured \(Fmt.bytes(Int64(clamping: whole.scannedBytes))) of \(Fmt.bytes(whole.volume.used)) in use.")
+                }
+                if whole.overcountedBytes > 0 {
+                    Text("The scan counted \(Fmt.bytes(Int64(clamping: whole.overcountedBytes))) more than the volume reports; files changed while it ran or blocks are shared.")
+                }
+            }
+        case .subfolder(let folder):
+            Text("The scan covered a folder inside this volume, not the whole volume, so \(Fmt.bytes(Int64(clamping: folder.scannedBytes))) can't be compared with the \(Fmt.bytes(folder.volume.used)) the volume reports.")
+        case .partialScan(let partial):
+            Text("Some folders could not be read, so \(Fmt.bytes(Int64(clamping: partial.gapBytes))) of the volume's \(Fmt.bytes(partial.volume.used)) in use is not accounted for. That gap is not space you can clean.")
+        case .unmeasured(let unmeasured):
+            switch unmeasured.reason {
+            case .noScan:
+                EmptyView()
+            case .savedScan:
+                Text("These disk figures were read after the saved scan, so they can't be compared with its result.")
+            case .incompleteScan:
+                Text("The scan stopped before it finished, so its total can't be compared with the volume.")
+            case .volumeUnavailable:
+                Text("The volume's capacity couldn't be read, so the scan total can't be compared with it.")
+            case .differentVolume:
+                Text("The scan and the disk figures belong to different volumes, so they can't be compared.")
+            }
+        }
+    }
+
+    /// Snapshot dates and count; never a size, and never an action.
+    @ViewBuilder private func snapshotSummary(_ snapshots: LocalSnapshots) -> some View {
+        Group {
+            switch snapshots {
+            case .none:
+                HStack(spacing: 6) {
+                    Image(systemName: "camera.on.rectangle")
+                    Text("No local snapshots")
+                }
+            case .list(let dates, let total):
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "camera.on.rectangle")
+                        Text("\(total) local snapshots")
+                    }
+                    if !dates.isEmpty {
+                        Text("Taken \(dates.map { $0.formatted(date: .abbreviated, time: .shortened) }.joined(separator: ", "))")
+                            .padding(.leading, 20)
+                    }
+                }
+            case .unavailable(let reason):
+                HStack(spacing: 6) {
+                    Image(systemName: "camera.on.rectangle").foregroundStyle(Theme.orange)
+                    Text("Snapshot list unavailable: \(reason)")
+                }
+            }
+        }
+        .help("Local snapshots share space with the volume; macOS manages them, and this app does not delete them.")
     }
 
     private func row(_ node: DiskNode, total: UInt64) -> some View {
