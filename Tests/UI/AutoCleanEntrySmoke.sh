@@ -211,6 +211,7 @@ launch_app() {
         --snapshot-section optimize \
         -AppleLanguages '(en)' -AppleLocale en_US \
         -helper.registeredCDHash "$HELPER_HASH" \
+        -MacHelper.autoCleanAgent.plistVersion 2 \
         >"$OUT/app-$APP_LOG_STATE.log" 2>&1 &
     APP_PID=$!
 }

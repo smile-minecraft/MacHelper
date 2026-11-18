@@ -1,28 +1,6 @@
 import Foundation
 import ServiceManagement
 
-/// One-time migration of the embedded Auto Clean background agent to the plist that ships with
-/// this app.
-///
-/// launchd keeps the copy of the plist that was registered when the agent was enabled. After an
-/// app update ships a new schedule (this release moves the trigger to every 30 minutes), an
-/// existing install keeps the old registration until the service is registered again — simply
-/// looking at `SMAppService.agent(plistName:).status` on a new build does not re-read the file.
-///
-/// So instead of re-registering on every refresh and hoping, the app performs one explicit,
-/// visible, retryable migration:
-///
-/// - `AutoCleanAgentScheduleVersion.current` is bumped only when the embedded plist's schedule
-///   changes.
-/// - A persisted `defaults` marker records the plist version the *registered* agent was
-///   installed with; a missing marker is treated as version 1 (the hourly trigger).
-/// - On refresh and on an explicit frequency change, `runIfNeeded` compares the two. When the
-///   agent is not `.enabled`, nothing happens (fresh registrations already install the current
-///   plist). When it is enabled and older, one explicit unregister + register moves it over;
-///   success stores the marker.
-/// - Failure keeps the marker (so refresh/frequency change/Retry can attempt it again), is
-///   surfaced in Settings with a Retry action, and does not churn the agent otherwise.
-
 /// Status of the composed background agent, stripped of ServiceManagement types so the logic can
 /// be unit-tested without constructing a real SMAppService.
 enum AutoCleanAgentStatus: Equatable, Sendable {
@@ -72,6 +50,8 @@ enum AutoCleanAgentScheduleVersion {
 enum AutoCleanScheduleMigration {
     static let defaultsKey = "MacHelper.autoCleanAgent.plistVersion"
 
+    private static let pendingKey = "MacHelper.autoCleanAgent.migrationPending"
+
     enum Outcome: Equatable {
         /// Recorded version is already the one being shipped; no agent call was made.
         case alreadyCurrent
@@ -84,24 +64,34 @@ enum AutoCleanScheduleMigration {
         case failed(String)
     }
 
-    /// Called from `refresh()` and when the user picks a frequency. No-ops (and performs no
-    /// agent calls) whenever the recorded version is current.
+    /// Persist intent before unregistering so a relaunch can resume if registration was interrupted.
+    /// The caller serializes service operations and supplies the current setting after suspension.
     @MainActor
     static func runIfNeeded(servicing: any AutoCleanAgentServicing,
                             defaults: UserDefaults = .standard,
-                            version: Int = AutoCleanAgentScheduleVersion.current) async -> Outcome {
-        let stored = defaults.object(forKey: defaultsKey) as? Int
-        if let stored, stored >= version { return .alreadyCurrent }
-        guard servicing.status == .enabled else { return .inactive }
+                            shouldRegister: () -> Bool = { true }) async -> Outcome {
+        guard shouldRegister() else { return .inactive }
+        if defaults.integer(forKey: defaultsKey) >= AutoCleanAgentScheduleVersion.current {
+            return .alreadyCurrent
+        }
+        let pending = defaults.bool(forKey: pendingKey)
+        let status = servicing.status
+        guard status == .enabled || (pending && status == .notRegistered) else { return .inactive }
+        defaults.set(true, forKey: pendingKey)
         do {
-            // Tolerate the agent already being gone; a failed register is the error that matters.
-            try? await servicing.unregister()
+            if status == .enabled { try await servicing.unregister() }
+            guard shouldRegister() else { return .inactive }
             try servicing.register()
-            defaults.set(version, forKey: defaultsKey)
+            recordRegistration(defaults: defaults)
             return .migrated
         } catch {
             return .failed(error.localizedDescription)
         }
+    }
+
+    @MainActor
+    static func cancel(defaults: UserDefaults) {
+        defaults.removeObject(forKey: pendingKey)
     }
 
     /// Marks the registered agent as current. Called when the user enables Auto Clean (a fresh
@@ -110,5 +100,6 @@ enum AutoCleanScheduleMigration {
     static func recordRegistration(defaults: UserDefaults = .standard,
                                    version: Int = AutoCleanAgentScheduleVersion.current) {
         defaults.set(version, forKey: defaultsKey)
+        cancel(defaults: defaults)
     }
 }

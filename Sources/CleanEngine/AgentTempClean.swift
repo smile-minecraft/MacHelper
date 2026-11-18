@@ -14,7 +14,7 @@ import Foundation
 /// Removal follows the user's existing Auto Clean setting (`trashInstead`/`permanent`): the same
 /// matrix low-risk rules use. With the Trash setting off (the default for older configs — missing
 /// setting means delete) surviving candidates are deleted permanently, which is what actually frees
-/// space; with the Trash setting on they move to the Trash and still take no space until it is
+/// space; with the Trash setting on they move to the Trash and continue to occupy space until it is
 /// emptied.
 ///
 /// Open files are probed twice: once while planning and once again right before removal, together
@@ -46,7 +46,7 @@ public enum AgentTempClean {
 
     public static func matchesKnownName(_ name: String) -> Bool {
         let range = NSRange(name.startIndex..., in: name)
-        return nameRegex.firstMatch(in: name, range: range) != nil
+        return nameRegex.firstMatch(in: name, range: range)?.range == range
     }
 
     /// How the removal action is chosen for a scheduled run: the same setting matrix the low-risk
@@ -85,7 +85,7 @@ public enum AgentTempClean {
 
     public struct AgentTempCleanResult: Sendable {
         /// False when the environment cannot be verified (temp root unusable or the open-file probe
-        /// failed). Nothing was touched in that case.
+        /// failed or changed). A root change stops subsequent removals.
         public let verified: Bool
         /// Why verification failed; nil otherwise.
         public let failure: String?
@@ -234,20 +234,21 @@ public enum AgentTempClean {
             for candidate in survivors { items.append(skip(candidate.path, "could not be re-checked before removal")) }
             return AgentTempCleanResult(verified: false, failure: "could not re-check which files are open before removal; nothing was removed", items: items)
         }
-        var rootAgain = stat()
-        let rootOK = lstat(rootPath, &rootAgain) == 0
-            && (rootAgain.st_mode & S_IFMT) == S_IFDIR
-            && rootAgain.st_uid == getuid()
-            && Int64(rootAgain.st_dev) == Int64(rootDev)
-            && UInt64(rootAgain.st_ino) == UInt64(rst.st_ino)
-        if !rootOK {
-            for candidate in survivors { items.append(skip(candidate.path, "the temp folder changed during the scan")) }
-            return AgentTempCleanResult(verified: false, failure: "the temp folder changed during the scan; nothing was removed", items: items)
-        }
         let reInUse = inUseCandidates(rootPath: rootPath, candidates: survivors.map(\.name), openPaths: reOpenPaths)
+        let log = options.log ?? .shared
+        let safety = PathSafety(protectedPaths: [], whitelist: [], allowedRoots: [rootPath], minimumDepth: 1)
+        let executor = options.executor ?? CleanExecutor(safety: safety, log: log)
+        var outcomes: [ItemOutcome] = []
+        var failure: String?
 
-        var removals: [RemovalItem] = []
+        // The process snapshot is shared across the batch. File metadata is rechecked per item,
+        // immediately before attempting removal. Neither check excludes concurrent access atomically.
         for candidate in survivors {
+            guard failure == nil, sameRoot(rootPath, as: rst) else {
+                failure = "the temp folder changed during the scan"
+                items.append(skip(candidate.path, "the temp folder changed during the scan"))
+                continue
+            }
             if reInUse.contains(candidate.name) { items.append(skip(candidate.path, "in use (re-checked before removal)")); continue }
             var st = stat()
             guard lstat(candidate.path, &st) == 0,
@@ -269,15 +270,28 @@ public enum AgentTempClean {
                 items.append(skip(candidate.path, "changed within the retention period"))
                 continue
             }
-            removals.append(RemovalItem(path: candidate.path, source: taskID, bytes: rewalk.bytes,
-                                        action: options.useTrash ? .trash : .delete))
+            var afterWalk = stat()
+            guard sameRoot(rootPath, as: rst), lstat(candidate.path, &afterWalk) == 0,
+                  afterWalk.st_dev == st.st_dev, afterWalk.st_ino == st.st_ino,
+                  afterWalk.st_mode == st.st_mode, afterWalk.st_uid == st.st_uid,
+                  afterWalk.st_ctimespec.tv_sec == st.st_ctimespec.tv_sec,
+                  afterWalk.st_ctimespec.tv_nsec == st.st_ctimespec.tv_nsec else {
+                items.append(skip(candidate.path, "the directory changed during the final check"))
+                continue
+            }
+            let removal = RemovalItem(path: candidate.path, source: taskID, bytes: rewalk.bytes,
+                                      action: options.useTrash ? .trash : .delete)
+            outcomes.append(executor.executeItem(removal, dryRun: false))
         }
+        executor.log.append(command: options.command, outcomes: outcomes)
+        return AgentTempCleanResult(verified: failure == nil, failure: failure, items: items + outcomes)
+    }
 
-        let log = options.log ?? .shared
-        let safety = PathSafety(protectedPaths: [], whitelist: [], allowedRoots: [rootPath], minimumDepth: 1)
-        let executor = options.executor ?? CleanExecutor(safety: safety, log: log)
-        let report = executor.execute(removals, dryRun: false, command: options.command)
-        return AgentTempCleanResult(verified: true, failure: nil, items: items + report.items)
+    private static func sameRoot(_ path: String, as original: stat) -> Bool {
+        var current = stat()
+        return lstat(path, &current) == 0 && (current.st_mode & S_IFMT) == S_IFDIR
+            && current.st_uid == original.st_uid && current.st_dev == original.st_dev
+            && current.st_ino == original.st_ino
     }
 
     /// A candidate that survived every first-pass check, pinned with the directory's device and
@@ -341,8 +355,8 @@ public enum AgentTempClean {
     }
 
     /// Iterative post-order-free walk: sums entry sizes, tracks the newest mtime, and verifies that
-    /// every descendant sits on the same filesystem. Symlinks are never followed.
-    static func walkTree(_ path: String, rootDev: dev_t, rootMtime: Date) -> Walk {
+    /// every descendant has the expected owner and sits on the same filesystem. Symlinks are never followed.
+    static func walkTree(_ path: String, rootDev: dev_t, rootMtime: Date, expectedUID: uid_t = getuid()) -> Walk {
         var bytes: UInt64 = 0
         var newest = rootMtime
         var visited = 0
@@ -366,6 +380,9 @@ public enum AgentTempClean {
                 }
                 guard Int64(st.st_dev) == Int64(rootDev) else {
                     return Walk(bytes: 0, newest: newest, ok: false, error: "\(child) is a mounted filesystem")
+                }
+                guard st.st_uid == expectedUID else {
+                    return Walk(bytes: 0, newest: newest, ok: false, error: "\(child) is owned by another user")
                 }
                 bytes += UInt64(max(0, Int64(st.st_size)))
                 let m = modificationDate(of: st)

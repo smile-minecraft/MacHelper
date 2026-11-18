@@ -1,3 +1,4 @@
+import CleanEngine
 import Foundation
 import Testing
 @testable import UpdatesFeature
@@ -9,6 +10,7 @@ private final class FakeAgentServicing: AutoCleanAgentServicing {
     var status: AutoCleanAgentStatus
     var unregisterError: Error?
     var registerError: Error?
+    var duringUnregister: (() async -> Void)?
     private(set) var calls: [String] = []
 
     init(status: AutoCleanAgentStatus) {
@@ -18,11 +20,14 @@ private final class FakeAgentServicing: AutoCleanAgentServicing {
     func register() throws {
         calls.append("register")
         if let registerError { throw registerError }
+        status = .enabled
     }
 
     func unregister() async throws {
         calls.append("unregister")
         if let unregisterError { throw unregisterError }
+        await duringUnregister?()
+        status = .notRegistered
     }
 }
 
@@ -72,18 +77,19 @@ private struct DummyError: Error {
         defaults.removePersistentDomain(forName: suite)
     }
 
-    @Test func unregisterFailureDoesNotBlockTheRegister() async {
+    @Test func unregisterFailureStopsMigration() async {
         let (defaults, suite) = freshDefaults()
         let service = FakeAgentServicing(status: .enabled)
-        service.unregisterError = DummyError(message: "gone")   // the agent was already gone
+        service.unregisterError = DummyError(message: "unregister denied")
 
         let outcome = await AutoCleanScheduleMigration.runIfNeeded(servicing: service, defaults: defaults)
-        #expect(outcome == .migrated)
-        #expect(service.calls == ["unregister", "register"])
+        guard case .failed = outcome else { Issue.record("unregister error was swallowed"); return }
+        #expect(service.calls == ["unregister"])
+        #expect(defaults.object(forKey: AutoCleanScheduleMigration.defaultsKey) == nil)
         defaults.removePersistentDomain(forName: suite)
     }
 
-    @Test func failedRegisterKeepsMarkerAndReportsError_thenRetrySucceeds() async {
+    @Test func failedRegisterKeepsMarkerAndReportsError_thenRetrySucceeds() async throws {
         let (defaults, suite) = freshDefaults()
         let service = FakeAgentServicing(status: .enabled)
         service.registerError = DummyError(message: "connection refused")
@@ -94,11 +100,43 @@ private struct DummyError: Error {
         #expect(defaults.object(forKey: AutoCleanScheduleMigration.defaultsKey) == nil, "a failed migration must not mark the install current")
 
         service.registerError = nil
-        let second = await AutoCleanScheduleMigration.runIfNeeded(servicing: service, defaults: defaults, version: AutoCleanAgentScheduleVersion.current)
+        let reopenedDefaults = try #require(UserDefaults(suiteName: suite))
+        let second = await AutoCleanScheduleMigration.runIfNeeded(servicing: service, defaults: reopenedDefaults)
         #expect(second == .migrated)
         #expect(defaults.integer(forKey: AutoCleanScheduleMigration.defaultsKey) == AutoCleanAgentScheduleVersion.current)
-        #expect(service.calls == ["unregister", "register", "unregister", "register"], "retry runs the full migration again")
+        #expect(service.calls == ["unregister", "register", "register"], "retry only registers the missing agent")
         defaults.removePersistentDomain(forName: suite)
+    }
+
+    @Test func offDuringMigrationPreventsReregistration() async throws {
+        let (defaults, suite) = freshDefaults()
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let directory = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let configURL = directory.appending(path: "autoclean.json")
+        var config = AutoCleanConfig()
+        config.enabled = true
+        try AutoClean.save(config, to: configURL)
+        let service = FakeAgentServicing(status: .enabled)
+        let model = AutoCleanModel(agent: service, configURL: configURL, defaults: defaults)
+        service.duringUnregister = { [weak model] in
+            guard let model else { return }
+            #expect(model.isUpdatingSchedule)
+            await model.refreshScheduleMigration()
+            model.enabled = false
+            await model.refreshScheduleMigration()
+        }
+
+        await model.refreshScheduleMigration()
+        #expect(service.calls == ["unregister"])
+        #expect(model.agentStatus == .notRegistered)
+        #expect(!model.isUpdatingSchedule)
+        #expect(!AutoClean.load(from: configURL).enabled)
+        #expect(model.scheduleMigrationError == nil)
+
+        let reopened = AutoCleanModel(agent: service, configURL: configURL, defaults: defaults)
+        await reopened.refreshScheduleMigration()
+        #expect(service.calls == ["unregister"])
     }
 
     @Test(arguments: [AutoCleanAgentStatus.notRegistered, .requiresApproval, .notFound, .unknown])

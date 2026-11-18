@@ -140,6 +140,8 @@ import Testing
             #expect(!AgentTempClean.matchesKnownName(prefix + "A1b-C3"), "dash rejected")
             #expect(!AgentTempClean.matchesKnownName(prefix + "Aéb2C3"), "non-ASCII rejected")
             #expect(!AgentTempClean.matchesKnownName(prefix), "missing suffix rejected")
+            #expect(!AgentTempClean.matchesKnownName(prefix + "A1b2C3\n"), "trailing newline rejected")
+            #expect(!AgentTempClean.matchesKnownName(prefix + "A1b2C3\r\n"), "trailing CRLF rejected")
         }
         #expect(!AgentTempClean.matchesKnownName("cardiary-import-source-A1b2C3"), "Swift-style names are not allowlisted")
         #expect(!AgentTempClean.matchesKnownName("agent-contract-A1b2C3"), "generic agent prefix is not allowlisted")
@@ -304,6 +306,31 @@ import Testing
         #expect(result.items.contains { $0.path == PathSafety.normalize(file.path) && $0.result == .skipped })
     }
 
+    @Test func earlierRemovalCannotInvalidateLaterCandidates() throws {
+        let s = try makeSandbox()
+        defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
+        let old = Date().addingTimeInterval(-10 * 86_400)
+        let first = try makeCandidate(s.root, "cardiary-host-Aaaaa1", childMtime: old)
+        let later = try makeCandidate(s.root, "cardiary-host-Bbbbb2", childMtime: old)
+        try age(first, to: old)
+        try age(later, to: old)
+        var options = options(root: s.root, trash: s.trash, log: s.log)
+        options.useTrash = false
+        let safety = PathSafety(protectedPaths: [], whitelist: [], allowedRoots: [s.root.path], minimumDepth: 1)
+        options.executor = CleanExecutor.injected(safety: safety, log: OperationLog(url: s.log),
+            removal: .custom(trash: { _ in Issue.record("unexpected Trash operation") }, delete: { url in
+                if url.lastPathComponent == first.lastPathComponent {
+                    try Data("new".utf8).write(to: later.appending(path: "child.txt"))
+                }
+                try FileManager.default.removeItem(at: url)
+            }))
+
+        let result = AgentTempClean.run(options: options)
+        #expect(result.deletedCount == 1)
+        #expect(result.items.contains { $0.path == PathSafety.normalize(later.path) && $0.result == .skipped })
+        #expect(fileManager.fileExists(atPath: later.path))
+    }
+
     @Test func emptyOldDirectoryMoves() throws {
         let s = try makeSandbox()
         defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
@@ -328,6 +355,18 @@ import Testing
         let walk = AgentTempClean.walkTree(candidate.path, rootDev: fakeDifferentDev, rootMtime: Date())
         #expect(!walk.ok, "a tree on a different device fails verification")
         #expect(walk.error?.contains("mounted filesystem") == true || walk.error?.contains("could not") == true)
+    }
+
+    @Test func descendantMustBelongToExpectedUser() throws {
+        let s = try makeSandbox()
+        defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
+        let candidate = try makeCandidate(s.root, "cardiary-host-Owner1")
+        let device = rootDev(of: candidate)
+        let now = Date()
+        #expect(AgentTempClean.walkTree(candidate.path, rootDev: device, rootMtime: now, expectedUID: getuid()).ok)
+        let foreign = AgentTempClean.walkTree(candidate.path, rootDev: device, rootMtime: now, expectedUID: getuid() &+ 1)
+        #expect(!foreign.ok)
+        #expect(foreign.error?.contains("child.txt is owned by another user") == true)
     }
 
     private func rootDev(of url: URL) -> dev_t {

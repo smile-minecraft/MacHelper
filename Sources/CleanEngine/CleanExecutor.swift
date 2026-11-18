@@ -134,59 +134,57 @@ public struct CleanExecutor: Sendable {
     }
 
     public func execute(_ items: [RemovalItem], dryRun: Bool, command: String) -> CleanReport {
-        var outcomes: [ItemOutcome] = []
-        for item in items {
-            let action = action(for: item)
-            // Re-check the agent's guard right before removal: it may have started after the scan
-            // or while this batch was already running.
-            if let busy = busyMarker(for: item) {
-                outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
-                                            message: "guard: \(busy) is running"))
-                continue
-            }
-            // Re-check right before removal: the tree may have changed since the preview.
-            let verdict = safety.check(item.path)
-            guard verdict == .allowed else {
-                outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
-                                            message: "safety: \(verdict)"))
-                continue
-            }
-            var st = stat()
-            guard lstat(item.path, &st) == 0 else {
-                outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
-                                            message: "no longer exists"))
-                continue
-            }
-            // Re-check the rule's age condition: a file modified since the preview (a resumed
-            // session appending to it) is live data again, whatever the preview said.
-            if item.minAgeDays > 0 {
-                let modified = Date(timeIntervalSince1970: TimeInterval(st.st_mtimespec.tv_sec))
-                if Date().timeIntervalSince(modified) < TimeInterval(item.minAgeDays) * 86_400 {
-                    outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
-                                                message: "age: modified since the preview"))
-                    continue
-                }
-            }
-            if dryRun {
-                outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: item.bytes,
-                                            result: action == .trash ? .wouldTrash : .wouldDelete, message: nil))
-                continue
-            }
-            let url = URL(fileURLWithPath: item.path)
-            do {
-                switch action {
-                case .trash: try removal.trash(url)
-                case .delete: try removal.delete(url)
-                }
-                outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: item.bytes,
-                                            result: action == .trash ? .trashed : .deleted, message: nil))
-            } catch {
-                outcomes.append(ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .failed,
-                                            message: (error as NSError).localizedDescription))
-            }
-        }
+        let outcomes = items.map { executeItem($0, dryRun: dryRun) }
         if !dryRun { log.append(command: command, outcomes: outcomes) }
         return CleanReport(schemaVersion: 1, dryRun: dryRun, items: outcomes)
+    }
+
+    /// Executes a single item without logging so callers can interleave checks and operations,
+    /// then append the outcomes in one batch.
+    func executeItem(_ item: RemovalItem, dryRun: Bool) -> ItemOutcome {
+        let action = action(for: item)
+        // Re-check the agent's guard right before removal: it may have started after the scan
+        // or while this batch was already running.
+        if let busy = busyMarker(for: item) {
+            return ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
+                                       message: "guard: \(busy) is running")
+        }
+        // Re-check right before removal: the tree may have changed since the preview.
+        let verdict = safety.check(item.path)
+        guard verdict == .allowed else {
+            return ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
+                                       message: "safety: \(verdict)")
+        }
+        var st = stat()
+        guard lstat(item.path, &st) == 0 else {
+            return ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
+                                       message: "no longer exists")
+        }
+        // Re-check the rule's age condition: a file modified since the preview (a resumed
+        // session appending to it) is live data again, whatever the preview said.
+        if item.minAgeDays > 0 {
+            let modified = Date(timeIntervalSince1970: TimeInterval(st.st_mtimespec.tv_sec))
+            if Date().timeIntervalSince(modified) < TimeInterval(item.minAgeDays) * 86_400 {
+                return ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .skipped,
+                                           message: "age: modified since the preview")
+            }
+        }
+        if dryRun {
+            return ItemOutcome(path: item.path, source: item.source, bytes: item.bytes,
+                                        result: action == .trash ? .wouldTrash : .wouldDelete, message: nil)
+        }
+        let url = URL(fileURLWithPath: item.path)
+        do {
+            switch action {
+            case .trash: try removal.trash(url)
+            case .delete: try removal.delete(url)
+            }
+            return ItemOutcome(path: item.path, source: item.source, bytes: item.bytes,
+                                        result: action == .trash ? .trashed : .deleted, message: nil)
+        } catch {
+            return ItemOutcome(path: item.path, source: item.source, bytes: 0, result: .failed,
+                                        message: (error as NSError).localizedDescription)
+        }
     }
 }
 

@@ -10,24 +10,37 @@ import ServiceManagement
 @MainActor
 @Observable
 final class AutoCleanModel {
-    static let agentPlist = "com.machelper.MacHelper.AutoClean.plist"
-
-    private(set) var config = AutoClean.load()
-    private(set) var agentStatus: SMAppService.Status = .notRegistered
+    private(set) var config: AutoCleanConfig
+    private(set) var agentStatus: AutoCleanAgentStatus = .notRegistered
     private(set) var message: String?
     /// Reason an existing-agent schedule migration failed, when it did. Written, cleared or
     /// retried only through `refreshScheduleMigration()`; shown in Settings with a Retry action.
     private(set) var scheduleMigrationError: String?
     private(set) var isRunning = false
-    @ObservationIgnored private let agentServicing = SMAppServiceAgentServicing()
+    @ObservationIgnored private let agent: any AutoCleanAgentServicing
+    @ObservationIgnored private let configURL: URL
+    @ObservationIgnored private let defaults: UserDefaults
+    private(set) var isUpdatingSchedule = false
+    @ObservationIgnored private var pendingEnabledChange = false
 
-    @ObservationIgnored private let agent = SMAppService.agent(plistName: AutoCleanModel.agentPlist)
+    convenience init() {
+        self.init(agent: SMAppServiceAgentServicing(), configURL: AutoClean.configURL, defaults: .standard)
+        refresh()
+    }
 
-    init() { refresh() }
+    init(agent: any AutoCleanAgentServicing, configURL: URL, defaults: UserDefaults) {
+        self.agent = agent
+        self.configURL = configURL
+        self.defaults = defaults
+        self.config = AutoClean.load(from: configURL)
+        self.agentStatus = agent.status
+    }
 
     func refresh() {
-        config = AutoClean.load()
-        agentStatus = agent.status
+        if !isUpdatingSchedule {
+            config = AutoClean.load(from: configURL)
+            agentStatus = agent.status
+        }
         let tasks = maintenanceRows.map(\.task)
         Task {
             let availability = await Task.detached(priority: .utility) { tasks.map(\.isAvailable) }.value
@@ -36,29 +49,37 @@ final class AutoCleanModel {
         Task { await refreshScheduleMigration() }
     }
 
-    /// Runs the one-time schedule migration for an already-registered agent. No-op when the
-    /// current version is already recorded (or the agent is inactive). Failure is surfaced, and
-    /// the next refresh, the next frequency change or an explicit retry can run it again.
-    private func refreshScheduleMigration() async {
-        switch await AutoCleanScheduleMigration.runIfNeeded(servicing: agentServicing) {
-        case .alreadyCurrent, .inactive:
-            scheduleMigrationError = nil
-        case .migrated:
-            scheduleMigrationError = nil
-            agentStatus = agent.status
-        case .failed(let message):
-            scheduleMigrationError = message
+    func refreshScheduleMigration() async {
+        guard !isUpdatingSchedule, !pendingEnabledChange, config.enabled else { return }
+        isUpdatingSchedule = true
+        let outcome = await AutoCleanScheduleMigration.runIfNeeded(servicing: agent, defaults: defaults) {
+            self.config.enabled && !self.pendingEnabledChange
         }
+        if case .failed(let error) = outcome { scheduleMigrationError = error }
+        else { scheduleMigrationError = nil }
+        await finishScheduleOperation()
     }
 
-    /// User-facing retry for a failed schedule migration (Settings shows it only when there is an error).
     func retryScheduleMigration() {
         Task { await refreshScheduleMigration() }
     }
 
     var enabled: Bool {
         get { config.enabled }
-        set { Task { await setEnabled(newValue) } }
+        set {
+            guard newValue != config.enabled else { return }
+            config.enabled = newValue
+            guard save() else {
+                config.enabled = !newValue
+                return
+            }
+            if !newValue {
+                AutoCleanScheduleMigration.cancel(defaults: defaults)
+                scheduleMigrationError = nil
+            }
+            pendingEnabledChange = true
+            Task { await applyEnabledChange() }
+        }
     }
 
     var frequency: AutoCleanConfig.Frequency {
@@ -102,31 +123,47 @@ final class AutoCleanModel {
         return MaintenanceCatalog.all.first { $0.id == id }?.title ?? id
     }
 
-    private func setEnabled(_ on: Bool) async {
-        config.enabled = on
-        save()
-        do {
-            if on {
-                if agent.status != .enabled {
-                    try agent.register()
-                    // A fresh registration installs the embedded plist; no migration needed after this.
-                    AutoCleanScheduleMigration.recordRegistration()
-                }
-            } else if agent.status == .enabled || agent.status == .requiresApproval {
-                try await agent.unregister()
-            }
-            message = nil
-        } catch {
-            // Agents can need approval in Login Items, which register() reports as an error.
-            message = agent.status == .requiresApproval
-                ? String(localized: "Allow MacHelper to run in the background in System Settings → General → Login Items.")
-                : String(localized: "Couldn’t set up the background schedule: \(error.localizedDescription)")
-        }
-        agentStatus = agent.status
+    private func applyEnabledChange() async {
+        guard !isUpdatingSchedule, pendingEnabledChange else { return }
+        isUpdatingSchedule = true
+        await finishScheduleOperation()
+        if config.enabled { await refreshScheduleMigration() }
     }
 
-    private func save() {
-        do { try AutoClean.save(config) } catch { message = String(localized: "Couldn’t save settings: \(error.localizedDescription)") }
+    /// A switch change can arrive while unregister is suspended. Reconcile the latest saved
+    /// setting within the same operation, before any other task may call the service.
+    private func finishScheduleOperation() async {
+        while pendingEnabledChange {
+            pendingEnabledChange = false
+            do {
+                if config.enabled {
+                    if agent.status != .enabled && agent.status != .requiresApproval {
+                        try agent.register()
+                        AutoCleanScheduleMigration.recordRegistration(defaults: defaults)
+                    }
+                } else if agent.status == .enabled || agent.status == .requiresApproval {
+                    try await agent.unregister()
+                }
+                message = nil
+            } catch {
+                message = agent.status == .requiresApproval
+                    ? String(localized: "Allow MacHelper to run in the background in System Settings → General → Login Items.")
+                    : String(localized: "Couldn’t set up the background schedule: \(error.localizedDescription)")
+            }
+        }
+        agentStatus = agent.status
+        isUpdatingSchedule = false
+    }
+
+    @discardableResult
+    private func save() -> Bool {
+        do {
+            try AutoClean.save(config, to: configURL)
+            return true
+        } catch {
+            message = String(localized: "Couldn’t save settings: \(error.localizedDescription)")
+            return false
+        }
     }
 
     /// Runs one low-risk clean now (in-process, same code path the agent uses).
@@ -140,7 +177,7 @@ final class AutoCleanModel {
             return (report, tasks)
         }.value
         guard let (report, tasks) = outcome else { message = String(localized: "Couldn’t load the cleaning rules"); return }
-        var updated = AutoClean.load()
+        var updated = AutoClean.load(from: configURL)
         AutoClean.record(report, tasks: tasks, into: &updated)
         updated.enabled = config.enabled
         updated.frequency = config.frequency
