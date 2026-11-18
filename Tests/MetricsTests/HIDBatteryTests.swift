@@ -59,35 +59,49 @@ import Testing
 
     @Test func expiredCacheReturnsStaleImmediatelyAndRefreshesInBackground() {
         let clock = TestClock(Date(timeIntervalSince1970: 10_000))
-        let gate = DispatchSemaphore(value: 0)
-        let twoPhase = TwoPhaseQuery(gate: gate)
-        let cache = BatterySourceCache(ttl: 45, now: { clock.now }, query: { twoPhase.call() })
+        let scheduler = TestScheduler()
+        let calls = Counter()
+        let cache = BatterySourceCache(
+            ttl: 45,
+            now: { clock.now },
+            schedule: { scheduler.enqueue($0) },
+            query: {
+                calls.tick()
+                return [reading(charge: calls.value == 1 ? 0.25 : 0.9)]
+            }
+        )
 
         // 第一次同步查詢立即回 0.25（refreshForTesting 走同一條 query 路徑）。
         _ = cache.refreshForTesting()
-        #expect(twoPhase.calls == 1)
+        #expect(calls.value == 1)
 
         clock.advance(46) // 超過 TTL
-        let stale = cache.readings() // 立即回舊值，並在背景重查
+        let stale = cache.readings() // 立即回舊值，並排入背景重查
         #expect(stale.map(\.charge) == [0.25])
+        #expect(cache.readings().map(\.charge) == [0.25])
+        #expect(calls.value == 1) // 排入後、手動執行前，query 尚未呼叫
+        #expect(scheduler.pendingCount == 1) // 連續 stale 讀取只排入一次
 
-        gate.signal() // 放行背景查詢
-        #expect(cache.waitForBackgroundRefreshForTesting()) // 背景重查完成（含快取寫入）
+        #expect(scheduler.runNext())
+        #expect(calls.value == 2)
         #expect(cache.readings().map(\.charge) == [0.9])
     }
 
     @Test func backgroundRefreshFillsEmptyCacheWithoutBlocking() {
-        let gate = DispatchSemaphore(value: 0)
-        let cache = BatterySourceCache(ttl: 45, now: Date.init, query: {
-            gate.wait()
+        let scheduler = TestScheduler()
+        let calls = Counter()
+        let cache = BatterySourceCache(ttl: 45, schedule: { scheduler.enqueue($0) }) {
+            calls.tick()
             return [reading(charge: 0.75)]
-        })
+        }
 
-        // 快取空：立即回 []，背景開始查詢。
+        // 快取空：立即回 []，只排入背景查詢，不執行 query。
         #expect(cache.readings().isEmpty)
-        gate.signal()
+        #expect(calls.value == 0)
+        #expect(scheduler.pendingCount == 1)
 
-        #expect(cache.waitForBackgroundRefreshForTesting()) // 背景重查完成（含快取寫入）
+        #expect(scheduler.runNext())
+        #expect(calls.value == 1)
         #expect(cache.readings().map(\.charge) == [0.75])
     }
 }
@@ -100,29 +114,29 @@ private final class TestClock: @unchecked Sendable {
     func advance(_ seconds: TimeInterval) { lock.withLock { current = current.addingTimeInterval(seconds) } }
 }
 
+private final class TestScheduler: @unchecked Sendable {
+    private let lock = NSLock()
+    private var pending: [@Sendable () -> Void] = []
+
+    func enqueue(_ work: @escaping @Sendable () -> Void) {
+        lock.withLock { pending.append(work) }
+    }
+
+    var pendingCount: Int { lock.withLock { pending.count } }
+
+    func runNext() -> Bool {
+        let work = lock.withLock { pending.isEmpty ? nil : pending.removeFirst() }
+        guard let work else { return false }
+        work()
+        return true
+    }
+}
+
 private final class Counter: @unchecked Sendable {
     private let lock = NSLock()
     private var count = 0
     func tick() { lock.withLock { count += 1 } }
     var value: Int { lock.withLock { count } }
-}
-
-/// 第一次呼叫立即回 0.25；之後的呼叫阻塞在 gate 上，直到測試放行。
-private final class TwoPhaseQuery: @unchecked Sendable {
-    private let lock = NSLock()
-    private var callCount = 0
-    private let gate: DispatchSemaphore
-    init(gate: DispatchSemaphore) { self.gate = gate }
-    var calls: Int { lock.withLock { callCount } }
-
-    func call() -> [AccessoryBatteryReading] {
-        lock.withLock { callCount += 1 }
-        if calls == 1 {
-            return [reading(charge: 0.25)]
-        }
-        gate.wait()
-        return [reading(charge: 0.9)]
-    }
 }
 
 private func reading(charge: Double) -> AccessoryBatteryReading {

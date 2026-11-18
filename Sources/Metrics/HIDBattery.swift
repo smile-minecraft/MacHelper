@@ -11,8 +11,8 @@ final class BatterySourceCache: @unchecked Sendable {
     private let lock = NSLock()
     private let ttl: TimeInterval
     private let now: @Sendable () -> Date
+    private let schedule: @Sendable (@escaping @Sendable () -> Void) -> Void
     private let query: @Sendable () -> [AccessoryBatteryReading]
-    private let refreshGroup = DispatchGroup()
     private var cached: [AccessoryBatteryReading] = []
     private var cachedAt: Date?
     private var refreshing = false
@@ -20,45 +20,39 @@ final class BatterySourceCache: @unchecked Sendable {
     init(
         ttl: TimeInterval = BatterySourceCache.defaultTTL,
         now: @escaping @Sendable () -> Date = Date.init,
+        schedule: @escaping @Sendable (@escaping @Sendable () -> Void) -> Void = { work in
+            DispatchQueue.global(qos: .utility).async(execute: work)
+        },
         query: @escaping @Sendable () -> [AccessoryBatteryReading]
     ) {
         self.ttl = ttl
         self.now = now
+        self.schedule = schedule
         self.query = query
     }
 
     func readings() -> [AccessoryBatteryReading] {
         let date = now()
-        return lock.withLock {
+        let (cachedReadings, shouldRefresh) = lock.withLock {
             let stale = cachedAt.map { date.timeIntervalSince($0) >= ttl } ?? true
-            if stale && !refreshing {
-                refreshing = true
-                let query = query
-                let refreshGroup = refreshGroup
-                refreshGroup.enter()
-                DispatchQueue.global(qos: .utility).async { [weak self] in
-                    let fresh = query()
-                    guard let self else {
-                        refreshGroup.leave()
-                        return
-                    }
-                    self.lock.withLock {
-                        self.cached = fresh
-                        self.cachedAt = self.now()
-                        self.refreshing = false
-                    }
-                    refreshGroup.leave()
+            guard stale && !refreshing else { return (cached, false) }
+            refreshing = true
+            return (cached, true)
+        }
+
+        if shouldRefresh {
+            let query = query
+            schedule { [weak self] in
+                let fresh = query()
+                guard let self else { return }
+                self.lock.withLock {
+                    self.cached = fresh
+                    self.cachedAt = self.now()
+                    self.refreshing = false
                 }
             }
-            return cached
         }
-    }
-
-    /// 測試用：等待進行中的背景重查完成（含快取寫入）。回傳 false 表示 30 秒內未完成，視為 deadlock。
-    /// 這只是防呆上限，不是斷言用的時限；背景工作一完成就立刻回傳。
-    @discardableResult
-    func waitForBackgroundRefreshForTesting() -> Bool {
-        refreshGroup.wait(timeout: .now() + 30) == .success
+        return cachedReadings
     }
 
     /// 測試用：同步執行一次查詢並更新快取，回傳查詢結果。
