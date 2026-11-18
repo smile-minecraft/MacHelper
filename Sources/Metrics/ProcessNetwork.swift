@@ -137,9 +137,9 @@ public final class ProcessNetworkSampler: @unchecked Sendable {
             }
             guard row.inBytes > 0 || row.outBytes > 0 else { continue }
             let path = resolvePath(row.pid)
-            let appPath = path.flatMap(Self.outermostApp)
+            let appPath = path.flatMap(ProcessGrouping.outermostApp)
             let key = appPath ?? "\(row.name).\(row.pid)"
-            var g = groups[key] ?? Group(name: appPath.map(Self.appName) ?? path.map { ($0 as NSString).lastPathComponent } ?? row.name,
+            var g = groups[key] ?? Group(name: appPath.map(ProcessGrouping.appName) ?? path.map { ($0 as NSString).lastPathComponent } ?? row.name,
                                          path: path, appPath: appPath)
             g.count += 1
             g.inRate += inRate
@@ -161,16 +161,6 @@ public final class ProcessNetworkSampler: @unchecked Sendable {
             return a.id < b.id
         }
         return ProcessNetworkSnapshot(capturedAt: now, items: items, hasRates: hasRates)
-    }
-
-    static func outermostApp(_ path: String) -> String? {
-        guard let r = path.range(of: ".app/") else { return nil }
-        return String(path[..<r.lowerBound]) + ".app"
-    }
-
-    static func appName(_ appPath: String) -> String {
-        let name = FileManager.default.displayName(atPath: appPath)
-        return name.hasSuffix(".app") ? String(name.dropLast(4)) : name
     }
 
     /// One snapshot. Gives up after 15 s so a stuck `nettop` cannot hold the loop forever.
