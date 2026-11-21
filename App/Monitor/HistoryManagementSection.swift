@@ -128,7 +128,7 @@ struct HistoryManagementSection: View {
             Button("Clear Monitoring History…") { confirmClear = true }
                 .disabled(model.usage == nil)
             Toggle("Record process usage", isOn: processCollectionBinding)
-            Text("Only the process name, CPU use, and memory are recorded. Paths, command-line arguments, and user names are never saved. Process history follows the retention above and can be cleared at any time. The switch applies to MacHelper and to background recording; background recording keeps collecting process history even when no menu bar items are selected. Turning this off stops new process history sampling. Stored history stays until the next recording removes samples past the retention, or until you clear it. This switch only controls history recording; the live process list on the Monitor screen is not affected.")
+            Text("Saves each process’s name, CPU and memory use once a minute, also from background recording. Paths, command-line arguments and user names are never saved. Turning it off stops new records; what is stored stays until it is older than the retention above or you clear it. Live process lists are not affected.")
                 .settingsCaption()
             Button("Clear Process Usage History…") { confirmClearProcesses = true }
                 .disabled(model.usage == nil)
@@ -140,7 +140,7 @@ struct HistoryManagementSection: View {
                     Text("This permanently deletes every stored process name, its CPU use, and its memory use. It can’t be undone. Monitoring history, sensor and core history, settings, and the operation history are not affected.")
                 }
             Toggle("Record sensor and core usage", isOn: seriesCollectionBinding)
-            Text("Records one average per minute for every temperature sensor and CPU core cluster from the CPU and temperature samples. This adds several dozen rows per minute, so leave it off unless you need the detail. The switch applies to MacHelper and to background recording, but it needs the matching CPU or temperature menu bar item to be on. Turning this off stops new sensor and core sampling. Stored history stays until the next recording removes samples past the retention, or until you clear it.")
+            Text("Saves a per-minute average for every temperature sensor and CPU core cluster. It adds dozens of rows a minute, so turn it on only when you need that detail. It needs the CPU or Temperature menu bar item to be on.")
                 .settingsCaption()
             Button("Clear Sensor and Core History…") { confirmClearSeries = true }
                 .disabled(model.usage == nil)

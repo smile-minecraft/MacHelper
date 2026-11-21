@@ -45,7 +45,7 @@ struct MonitorSettingsView: View {
             if let alerts { AlertSettingsSection(alerts: alerts) }
             Section {
                 HStack(spacing: 12) {
-                    Text("Item").frame(minWidth: 90, alignment: .leading)
+                    Text("Item").frame(width: ModuleRow.itemWidth, alignment: .leading)
                     Text("In menu bar")
                     Spacer()
                     Text("Graph").frame(minWidth: 80, alignment: .leading)
@@ -137,11 +137,17 @@ struct MonitorSettingsView: View {
 private struct ModuleRow: View {
     let module: MonitorModule
     @Binding var config: ModuleConfig
+    /// The item's name and its on/off switch, so the "In menu bar" header sits over the checkbox.
+    static let itemWidth: CGFloat = 170
 
     var body: some View {
         HStack(spacing: 12) {
-            Toggle(module.title, isOn: $config.enabled)
-                .frame(minWidth: 90, alignment: .leading)
+            HStack {
+                Text(module.title)
+                Spacer(minLength: 8)
+                Toggle(module.title, isOn: $config.enabled).labelsHidden()
+            }
+            .frame(width: Self.itemWidth)
             Toggle("Show", isOn: $config.inMenuBar)
                 .toggleStyle(.checkbox)
                 .disabled(!config.enabled)

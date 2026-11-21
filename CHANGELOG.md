@@ -17,6 +17,21 @@ Each release's notes on GitHub come from its section here (`scripts/release.sh`)
   power state, tiles for health, cycle count, temperature and power, the charge history, and
   accessory rows with their own icons and earbud and case levels.
 
+### Performance
+- The menu bar panel no longer animates gauges between readings that arrive every second. With
+  the CPU or GPU page open, MacHelper used about 40 % of a CPU core and now uses about 8 %; the
+  Memory page dropped from about 23 % to 8 % (Release build, 30-second average).
+- The Helper's status is asked of macOS at most once a second instead of on every redraw.
+
+### Settings
+- The Helper tab says what the Helper is for, shows its status in plain words and offers the one
+  next step (set it up, open Login Items or turn it off). The developer tools moved under
+  Diagnostics.
+- Alerts put each switch on its own row with its threshold below.
+- General keeps Check for Updates next to the version, and the background recording and data
+  management explanations are shorter.
+- The Fans page shows the Helper's status in the interface language.
+
 ### Building
 - `make setup`, `make open`, `make run` and `make test` cover day-to-day development without
   touching the installed app; `make install` replaces it. Building needs Xcode 26 or later.
