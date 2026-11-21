@@ -30,30 +30,14 @@ extension View {
     }
 }
 
-/// Renders sibling glass controls together, so they blend and morph as one layer instead of
-/// separate panes. Transparent where glass isn't used.
-///
-/// Only for views whose own label carries the glass (`glassSurface` on the label). A glass view
-/// that sits in a `.background {}` under other content must stay outside: the container draws
-/// all its glass on top of that content and hides it.
-struct GlassGroup<Content: View>: View {
-    var spacing: CGFloat?
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        if #available(macOS 26, *), !ThemeStore.shared.isPixel {
-            GlassEffectContainer(spacing: spacing) { content }
-        } else {
-            content
-        }
-    }
-}
-
 extension EnvironmentValues {
-    /// Cards drawn with `.surface()` become frosted glass (a blur of what is behind them with a
-    /// thin tint of their fill) instead of solid. Set by translucent containers such as the menu
-    /// bar panel; ignored without Liquid Glass and in the pixel style.
+    /// Cards drawn with `.surface()` become Liquid Glass panes (tinted with their fill, lifted by
+    /// a soft shadow) instead of solid. Set by translucent containers such as the menu bar panel;
+    /// ignored without Liquid Glass and in the pixel style.
     @Entry var frostedSurfaces = false
+    /// True inside a glass card: section headers drop their hairlines and sit at the card's
+    /// leading edge, because the card itself already separates the section.
+    @Entry var insideGlassCard = false
 }
 
 /// The bar with a selection total and the main action under a list or a result.

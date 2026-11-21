@@ -93,13 +93,13 @@ struct SurfaceBackground: ViewModifier {
                 .overlay(shape.strokeBorder(Palette.stroke, lineWidth: 2))
                 .background(shape.fill(Color.black.opacity(0.28)).offset(x: 0, y: 3))
         } else if frosted && LiquidGlass.isAvailable {
-            // Frosted glass: blurred backdrop, a thin wash of the card color, and a hairline
-            // that catches light along the top edge.
+            // A Liquid Glass pane tinted with the card color, so it refracts what is behind it
+            // and catches light on its edges, lifted off the panel by a soft shadow underneath.
             content
-                .background(fill.opacity(0.38), in: shape)
-                .background(.ultraThinMaterial, in: shape)
-                .overlay(shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.16), Palette.stroke.opacity(0.35)],
-                                                           startPoint: .top, endPoint: .bottom), lineWidth: 1))
+                .glassSurface(in: shape, tint: fill.opacity(0.45)) { $0 }
+                .background {
+                    shape.fill(Color.black.opacity(0.28)).blur(radius: 9).offset(y: 5).padding(.horizontal, 6)
+                }
         } else {
             content
                 .background(fill, in: shape)

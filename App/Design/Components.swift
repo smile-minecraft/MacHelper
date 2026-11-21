@@ -292,7 +292,19 @@ struct SectionLabel: View {
 /// Small centered section title between two hairlines.
 struct HairlineHeader: View {
     let text: LocalizedStringKey
+    @Environment(\.insideGlassCard) private var insideGlassCard
+
     var body: some View {
+        if insideGlassCard {
+            Text(text).font(.mh(size: 11.5, weight: .semibold)).foregroundStyle(Palette.textMuted)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityAddTraits(.isHeader)
+        } else {
+            hairlines
+        }
+    }
+
+    private var hairlines: some View {
         HStack(spacing: 8) {
             Rectangle().fill(Palette.hairline).frame(height: 1)
             Text(text).font(ThemeStore.shared.isPixel ? .display(11) : .mh(size: 11, weight: .semibold)).foregroundStyle(Palette.textMuted).fixedSize()
