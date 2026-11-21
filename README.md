@@ -208,7 +208,8 @@ make install    # Release build → /Applications/MacHelper.app, then relaunch
 Day-to-day work never touches `/Applications`: `make open` and `make run` build into `build/`. Quit an installed
 MacHelper first, because both copies share the same settings and data. Changes to the root Helper (fan control,
 system cleanup) are easiest to test with `make install`: the installed app is the copy the Helper was
-registered from. Run `make project` after adding or removing source files.
+registered from. Run `make project` after adding or removing source files. On a Mac without a battery,
+`make run ARGS=--demo-battery` fills the menu bar's Battery page with simulated readings.
 
 The build uses the Xcode chosen with `xcode-select`. To use another one for this project only, put its path in a
 git-ignored `Config/Local.env`:

@@ -10,12 +10,18 @@ Each release's notes on GitHub come from its section here (`scripts/release.sh`)
   new content in instead of cutting to it. Tab and filter highlights slide to the new choice, and
   the menu bar panel fades in and out. With Reduce Motion, nothing moves; only fades remain.
 - On macOS 26 and later, the smooth style uses Liquid Glass for controls that float above content:
-  the action bars under lists, tab highlights, header buttons and the main action button. The menu
-  bar panel is frosted, with glass tool tiles. The pixel style and older systems keep their look.
+  the action bars under lists, tab highlights, header buttons and the main action button. In the
+  menu bar panel, each section (gauges, history, cores, details, processes) sits on its own glass
+  card. The pixel style and older systems keep their look.
+- The menu bar Battery page is redesigned: a drawn battery with the charge in large type and the
+  power state, tiles for health, cycle count, temperature and power, the charge history, and
+  accessory rows with their own icons and earbud and case levels.
 
 ### Building
 - `make setup`, `make open`, `make run` and `make test` cover day-to-day development without
   touching the installed app; `make install` replaces it. Building needs Xcode 26 or later.
+- `make run ARGS=--demo-battery` previews the Battery page with simulated readings on a Mac
+  without a battery (Debug builds only; nothing is written to the history).
 
 ## [0.3.6]
 

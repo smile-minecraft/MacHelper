@@ -11,6 +11,8 @@ CONFIGURATION ?= Debug
 APP = build/Build/Products/$(CONFIGURATION)/MacHelper.app
 # Extra xcodebuild settings, e.g. `make build XCODEBUILD_FLAGS="CODE_SIGN_IDENTITY=-"`.
 XCODEBUILD_FLAGS ?=
+# Launch arguments for `make run`, e.g. `make run ARGS=--demo-battery` (Debug builds only).
+ARGS ?=
 
 .DEFAULT_GOAL := help
 .PHONY: help setup project open build run test install release clean
@@ -38,11 +40,11 @@ build: setup ## Build the app into build/ (CONFIGURATION=Debug by default)
 		     echo "Build failed; full log: build/xcodebuild-$(CONFIGURATION).log"; exit 1; }
 	@echo "Built $(APP)"
 
-run: ## Build and open the app from build/ (quit the installed copy first)
+run: ## Build and open the app from build/; ARGS=--demo-battery previews a battery
 	@if pgrep -x MacHelper >/dev/null; then \
 		echo "MacHelper is already running. Quit it first: both copies share settings and data."; exit 1; fi
 	@$(MAKE) --no-print-directory build
-	@open $(APP)
+	@open $(APP) $(if $(ARGS),--args $(ARGS))
 
 test: ## Run the unit tests of the Swift packages
 	@$(ENV) swift test

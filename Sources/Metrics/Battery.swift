@@ -12,6 +12,17 @@ public struct BatteryReading: Sendable, Hashable, Codable {
     /// Current full-charge capacity / design capacity.
     public var health: Double?
     public var celsius: Double?
+
+    public init(charge: Double, isCharging: Bool, externalPower: Bool, watts: Double, cycleCount: Int,
+                health: Double?, celsius: Double?) {
+        self.charge = charge
+        self.isCharging = isCharging
+        self.externalPower = externalPower
+        self.watts = watts
+        self.cycleCount = cycleCount
+        self.health = health
+        self.celsius = celsius
+    }
 }
 
 /// Reads `AppleSmartBattery`. Returns nil on desktops (no battery service).
