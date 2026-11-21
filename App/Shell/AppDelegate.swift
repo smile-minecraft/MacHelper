@@ -139,6 +139,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             }
             return
         }
+        // Debug aid: `--snapshot-popover` opens the menu bar panel for a real screenshot
+        // (`screencapture -l`); ImageRenderer can't draw the popover's glass or materials. It is
+        // anchored to the main window, because a second instance's status item is often hidden
+        // in a full menu bar, and it stays open without focus (a background instance never gets it).
+        if args.contains("--snapshot-popover") {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(3))
+                guard let view = NSApp.windows.first(where: { $0.identifier?.rawValue.hasPrefix("main") == true })?.contentView,
+                      let panel = makePanel() else { return }
+                popover.behavior = .applicationDefined
+                popover.contentViewController = panel
+                popover.show(relativeTo: NSRect(x: view.bounds.midX, y: view.bounds.maxY - 60, width: 1, height: 1),
+                             of: view, preferredEdge: .minY)
+            }
+            return
+        }
         if let i = args.firstIndex(of: "--snapshot-window"), i + 1 < args.count {
             renderWindowSnapshots(to: URL(fileURLWithPath: args[i + 1]))
             return
@@ -801,7 +817,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private func setUpPopover() {
         popover.behavior = .transient
-        popover.animates = false
+        // The system's own open/close fade (a fade, so it stays with Reduce Motion), so the panel
+        // doesn't pop in and vanish in a single frame.
+        popover.animates = true
         let actions = PanelActions(
             openSettings: { [weak self] in self?.openSettings() },
             openDiagnostics: { [weak self] in self?.openDiagnostics() },

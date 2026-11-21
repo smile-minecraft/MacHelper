@@ -84,11 +84,17 @@ struct MonitorPanel: View {
                     content.padding(.horizontal, 20).padding(.bottom, 16)
                 }
             }
+            // Pages cross-fade as the pill slides, instead of the content cutting over.
+            .animation(Motion.fade, value: shownTab)
             QuickBar(actions: actions)
             footer
         }
         .frame(width: 460)
-        .background(Palette.card)
+        // With Liquid Glass the panel is frosted: the popover's own glass shows through a thin
+        // wash of the theme color, cards inside are frosted too, and the controls on top
+        // (tab pill, header buttons, tool tiles, Quit) are Liquid Glass.
+        .background(LiquidGlass.isAvailable ? Palette.card.opacity(0.5) : Palette.card)
+        .environment(\.frostedSurfaces, true)
         .onAppear { store.watchProcesses(true) }
         .onDisappear { store.watchProcesses(false) }
     }
@@ -115,15 +121,18 @@ struct MonitorPanel: View {
 
     @ViewBuilder private var content: some View {
         if let shownTab {
-            switch shownTab {
-            case .cpu: CPUTab(store: store)
-            case .gpu: GPUTab(store: store)
-            case .memory: MemoryTab(store: store)
-            case .disk: DiskTab(store: store, selection: diskSelection)
-            case .network: PanelNetworkTab(store: store)
-            case .battery: BatteryTab(store: store)
-            case .power: PanelPowerTab(store: store, openFanControl: actions.openFanControl)
+            Group {
+                switch shownTab {
+                case .cpu: CPUTab(store: store)
+                case .gpu: GPUTab(store: store)
+                case .memory: MemoryTab(store: store)
+                case .disk: DiskTab(store: store, selection: diskSelection)
+                case .network: PanelNetworkTab(store: store)
+                case .battery: BatteryTab(store: store)
+                case .power: PanelPowerTab(store: store, openFanControl: actions.openFanControl)
+                }
             }
+            .transition(.opacity)
         } else {
             VStack(spacing: 8) {
                 PanelEmptyState(symbol: "rectangle.slash", title: "No panel pages",
@@ -143,14 +152,21 @@ struct MonitorPanel: View {
             Text(enabled ? "Helper running" : "Helper not enabled").font(.mh(size: 11)).foregroundStyle(Palette.textMuted)
             Spacer()
             UpdateAvailableButton(compact: true)
-            Button("Quit", action: actions.quit)
-                .buttonStyle(.plain)
-                .font(.mh(size: 11.5, weight: .medium))
-                .foregroundStyle(Palette.textMuted)
+            Button(action: actions.quit) {
+                Text("Quit")
+                    .font(.mh(size: 11.5, weight: .medium))
+                    .foregroundStyle(Palette.textMuted)
+                    .padding(.horizontal, LiquidGlass.isAvailable ? 11 : 0)
+                    .padding(.vertical, LiquidGlass.isAvailable ? 4 : 0)
+                    .glassSurface(in: Capsule(style: .continuous), interactive: true) { $0 }
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 9)
-        .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
+        .padding(.vertical, LiquidGlass.isAvailable ? 8 : 9)
+        .overlay(alignment: .top) {
+            if !LiquidGlass.isAvailable { Rectangle().fill(Palette.hairline).frame(height: 1) }
+        }
     }
 }
 
@@ -159,20 +175,32 @@ private struct QuickBar: View {
     let actions: PanelActions
 
     var body: some View {
-        HStack(spacing: 0) {
-            item(.optimize, actions.openOptimize)
-            if !ThemeStore.shared.isSimple { item(.fans, actions.openFanControl) }
-            item(.disk, actions.openDiskAnalysis)
-            item(.uninstall, actions.openUninstall)
-            if !ThemeStore.shared.isSimple { item(.startup, actions.openStartup) }
+        if LiquidGlass.isAvailable {
+            // A row of Liquid Glass tiles, rendered together so they read as one dock; each
+            // lights up under the pointer and gives under a click.
+            GlassGroup(spacing: 6) {
+                HStack(spacing: 6) { items(glass: true) }
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 4).padding(.bottom, 6)
+        } else {
+            HStack(spacing: 0) { items(glass: false) }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(Palette.base)
+                .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(Palette.base)
-        .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
     }
 
-    private func item(_ s: AppSection, _ action: @escaping () -> Void) -> some View {
+    @ViewBuilder private func items(glass: Bool) -> some View {
+        item(.optimize, glass: glass, actions.openOptimize)
+        if !ThemeStore.shared.isSimple { item(.fans, glass: glass, actions.openFanControl) }
+        item(.disk, glass: glass, actions.openDiskAnalysis)
+        item(.uninstall, glass: glass, actions.openUninstall)
+        if !ThemeStore.shared.isSimple { item(.startup, glass: glass, actions.openStartup) }
+    }
+
+    private func item(_ s: AppSection, glass: Bool, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 4) {
                 PixelIcon(name: s.icon, size: 30)
@@ -181,19 +209,23 @@ private struct QuickBar: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
             .contentShape(Rectangle())
+            .glassSurface(in: RoundedRectangle(cornerRadius: 14, style: .continuous), interactive: true) { $0 }
         }
-        .buttonStyle(QuickItemStyle())
+        .buttonStyle(QuickItemStyle(glass: glass))
         .help(s.title)
     }
 }
 
 private struct QuickItemStyle: ButtonStyle {
+    /// Glass tiles light up by themselves; only the flat look needs the hover fill.
+    var glass = false
     @State private var hover = false
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .background(hover ? Palette.inset : .clear, in: SurfaceShape(cornerRadius: 8, style: .continuous))
+            .background(hover && !glass ? Palette.inset : .clear, in: SurfaceShape(cornerRadius: 8, style: .continuous))
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
-            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isPressed)
+            .animation(Motion.hover, value: hover)
+            .animation(Motion.press, value: configuration.isPressed)
             .onHover { hover = $0 }
     }
 }
@@ -233,6 +265,7 @@ private struct CPUTab: View {
                           value: String(format: "%.2f", Host.loadAverages.0), caption: "Load", color: Theme.cyan, size: 88, lineWidth: 11)
             }
             .padding(.horizontal, 8).padding(.top, 6)
+            .panelHero()
 
             HairlineHeader(text: "Usage history")
             HistoryArea(values: Series.values(store, .cpu), maxValue: 1, color: Theme.blue).equatable().frame(height: 84)
@@ -300,6 +333,7 @@ private struct GPUTab: View {
                           caption: "Power", color: Theme.amber, size: 88, lineWidth: 11)
             }
             .padding(.horizontal, 8).padding(.top, 6)
+            .panelHero()
             HairlineHeader(text: "Usage history")
             HistoryArea(values: Series.values(store, .gpu), maxValue: 1, color: Theme.violet).equatable().frame(height: 96)
             HairlineHeader(text: "Details")
@@ -377,6 +411,7 @@ private struct MemoryTab: View {
                     Spacer()
                 }
                 .padding(.top, 6)
+                .panelHero()
 
                 HairlineHeader(text: "Usage history")
                 HistoryArea(values: Series.values(store, .memory), maxValue: 1, color: Theme.blue).equatable().frame(height: 84)
@@ -612,6 +647,7 @@ private struct DiskTab: View {
                 .padding(.leading, 14)
             }
             .padding(.top, 6)
+            .panelHero()
         } else {
             VStack(alignment: .leading, spacing: 3) {
                 Text(verbatim: selectedDisplayName)
@@ -771,6 +807,7 @@ private struct BatteryTab: View {
                                 dot: Theme.amber)
                 }
             }
+            .panelHero()
             HairlineHeader(text: "Charge history")
             HistoryArea(values: Series.values(store, .battery), maxValue: 1,
                         color: batteryColor(b.charge)).equatable().frame(height: 84)
@@ -971,5 +1008,17 @@ extension Host {
 
     static var uptimeShort: String {
         String(localized: "Up \(Duration.seconds(ProcessInfo.processInfo.systemUptime).formatted(.units(allowed: [.days, .hours, .minutes], width: .narrow, maximumUnitCount: 2)))")
+    }
+}
+
+private extension View {
+    /// The gauge row at the top of a tab: on a frosted card with Liquid Glass, so the panel's
+    /// main reading stands on its own pane; unchanged otherwise.
+    @ViewBuilder func panelHero() -> some View {
+        if LiquidGlass.isAvailable {
+            padding(12).frame(maxWidth: .infinity).surface(Palette.base)
+        } else {
+            self
+        }
     }
 }
