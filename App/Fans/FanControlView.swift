@@ -114,6 +114,8 @@ struct FanControlView: View {
                 curveEditor
             }
         }
+        // Switching modes fades the controls of the new mode in instead of cutting to them.
+        .animatesStates(model.mode)
     }
 
     private var curveEditor: some View {

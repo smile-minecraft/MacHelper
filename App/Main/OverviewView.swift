@@ -419,8 +419,10 @@ private struct ToDoList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Needs your attention").font(Theme.heading).foregroundStyle(Palette.text)
+            let items = items
             if items.isEmpty {
                 Text("Nothing right now.").font(.mh(size: 13)).foregroundStyle(Palette.textMuted)
+                    .transition(Motion.swap)
             }
             ForEach(items) { item in
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
@@ -433,8 +435,11 @@ private struct ToDoList: View {
                     .buttonStyle(.plain)
                 }
                 .padding(.vertical, 4)
+                .transition(Motion.swap)
             }
         }
+        // Items come and go as readings cross a threshold: they fade in place instead of popping.
+        .animatesStates(items.map(\.id))
     }
 }
 
@@ -458,9 +463,12 @@ struct PrimaryButtonStyle: ButtonStyle {
             .font(.mh(size: 13, weight: .semibold))
             .foregroundStyle(fill.isDarkForeground ? Color.white : Color.black)
             .padding(.horizontal, 16).padding(.vertical, 8)
-            .background(fill.opacity(configuration.isPressed ? 0.8 : 1), in: SurfaceShape(cornerRadius: 8))
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+            // Liquid Glass tinted with the accent; it brightens under the pointer by itself.
+            .glassSurface(in: Capsule(style: .continuous), tint: fill, interactive: true) { label in
+                label.background(fill.opacity(configuration.isPressed ? 0.8 : 1), in: SurfaceShape(cornerRadius: 8))
+            }
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(Motion.press, value: configuration.isPressed)
     }
 }
 
@@ -521,7 +529,8 @@ struct RowHoverStyle: ButtonStyle {
         configuration.label
             .background(hover ? Palette.inset.opacity(0.6) : .clear)
             .scaleEffect(configuration.isPressed ? 0.99 : 1)
-            .animation(.easeOut(duration: 0.12), value: hover)
+            .animation(Motion.hover, value: hover)
+            .animation(Motion.press, value: configuration.isPressed)
             .onHover { hover = $0 }
     }
 }
@@ -536,8 +545,8 @@ struct HoverCardButtonStyle: ButtonStyle {
             .overlay(SurfaceShape(cornerRadius: Theme.cardRadius, style: .continuous)
                 .strokeBorder(accent.opacity(hovering ? 0.55 : 0), lineWidth: 1.5))
             .scaleEffect(configuration.isPressed ? 0.985 : 1)
-            .animation(.easeOut(duration: 0.12), value: hovering)
-            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+            .animation(Motion.hover, value: hovering)
+            .animation(Motion.press, value: configuration.isPressed)
             .onHover { hovering = $0 }
     }
 }

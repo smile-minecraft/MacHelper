@@ -1,7 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// Top-level tabs: the selected one sits on a raised pill (magpie-style).
+/// Top-level tabs: the selected one sits on a raised pill (magpie-style) that slides to the new
+/// tab. With Liquid Glass the pill is a glass lens over the recessed track.
 struct TabStrip<Value: Hashable>: View {
     let items: [(Value, LocalizedStringKey)]
     var icons: [Value: String] = [:]
@@ -20,33 +21,31 @@ struct TabStrip<Value: Hashable>: View {
                         if let icon = icons[item.0] { PixelIcon(name: icon, size: stacked ? 16 : 14) }
                         Text(item.1)
                             .font(.mh(size: stacked ? 11 : 13, weight: selected ? .semibold : .medium))
-                            .foregroundStyle(selected ? Palette.text : Palette.textMuted)
                             .lineLimit(1).minimumScaleFactor(0.8)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, stacked ? 6 : 8)
                     .background {
-                        if selected {
-                            SurfaceShape(cornerRadius: 7, style: .continuous).fill(Palette.raised)
-                                .shadow(color: .black.opacity(0.12), radius: 1, y: 0.5)
-                                .matchedGeometryEffect(id: "tab", in: ns)
-                        }
+                        if selected { SelectionPill(cornerRadius: 7, namespace: ns) }
                     }
                     .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SelectableButtonStyle(selected: selected))
             }
         }
         .padding(3)
-        .background(Palette.inset, in: SurfaceShape(cornerRadius: 9, style: .continuous))
-        .animation(Motion.reduced ? nil : .snappy(duration: 0.2), value: selection)
+        // With glass the track is recessed but see-through, so the strip belongs to the
+        // translucent panel around it.
+        .background(Palette.inset.opacity(LiquidGlass.isAvailable ? 0.55 : 1), in: SurfaceShape(cornerRadius: 9, style: .continuous))
+        .animation(Motion.snappy, value: selection)
     }
 }
 
-/// Small filter chips (time ranges and the like).
+/// Small filter chips (time ranges and the like); the highlight slides to the chosen one.
 struct ChipBar<Value: Hashable>: View {
     let items: [(Value, LocalizedStringKey)]
     @Binding var selection: Value
+    @Namespace private var ns
 
     var body: some View {
         HStack(spacing: 4) {
@@ -55,15 +54,54 @@ struct ChipBar<Value: Hashable>: View {
                 Button { selection = item.0 } label: {
                     Text(item.1)
                         .font(.mh(size: 11, weight: .medium))
-                        .foregroundStyle(selected ? Palette.text : Palette.textMuted)
                         .padding(.horizontal, 9).padding(.vertical, 4)
-                        .background(selected ? Palette.raised : .clear, in: SurfaceShape(cornerRadius: 6, style: .continuous))
-                        .overlay(SurfaceShape(cornerRadius: 6, style: .continuous).strokeBorder(selected ? Palette.stroke : .clear))
+                        .background {
+                            if selected { SelectionPill(cornerRadius: 6, bordered: true, namespace: ns) }
+                        }
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SelectableButtonStyle(selected: selected))
             }
         }
+        .animation(Motion.snappy, value: selection)
+    }
+}
+
+/// The highlight under the selected tab or chip. One per strip, matched across items, so it
+/// slides instead of blinking from one place to the next.
+private struct SelectionPill: View {
+    var cornerRadius: CGFloat
+    var bordered = false
+    let namespace: Namespace.ID
+
+    var body: some View {
+        let shape = SurfaceShape(cornerRadius: cornerRadius, style: .continuous)
+        Group {
+            if LiquidGlass.isAvailable {
+                Color.clear.glassSurface(in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)) { $0 }
+            } else {
+                shape.fill(Palette.raised)
+                    .overlay { if bordered { shape.strokeBorder(Palette.stroke) } }
+                    .shadow(color: .black.opacity(bordered ? 0 : 0.12), radius: 1, y: 0.5)
+            }
+        }
+        .matchedGeometryEffect(id: "selection", in: namespace)
+    }
+}
+
+/// Label color for strip items: full text color when selected or under the pointer, muted
+/// otherwise, fading between the two; a slight press-in.
+private struct SelectableButtonStyle: ButtonStyle {
+    let selected: Bool
+    @State private var hover = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(selected || hover ? Palette.text : Palette.textMuted)
+            .scaleEffect(configuration.isPressed && !selected ? 0.97 : 1)
+            .animation(Motion.hover, value: hover)
+            .animation(Motion.press, value: configuration.isPressed)
+            .onHover { hover = $0 }
     }
 }
 
@@ -178,21 +216,37 @@ struct IconButton: View {
     let symbol: String
     let help: LocalizedStringKey
     let action: () -> Void
-    @State private var hover = false
 
     var body: some View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.mh(size: 12, weight: .medium))
-                .foregroundStyle(hover ? Palette.text : Palette.textMuted)
                 .frame(width: 26, height: 26)
-                .background(hover ? Palette.inset : .clear, in: SurfaceShape(cornerRadius: 7, style: .continuous))
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(IconButtonStyle())
         .help(help)
         .accessibilityLabel(help)
-        .onHover { hover = $0 }
+    }
+}
+
+/// A round glass button with Liquid Glass (it reacts to the pointer itself); otherwise a quiet
+/// glyph that gains a recessed square under the pointer.
+private struct IconButtonStyle: ButtonStyle {
+    @State private var hover = false
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(hover && isEnabled ? Palette.text : Palette.textMuted)
+            .glassSurface(in: Circle(), interactive: isEnabled) { label in
+                label.background(hover && isEnabled ? Palette.inset : .clear, in: SurfaceShape(cornerRadius: 7, style: .continuous))
+            }
+            .opacity(isEnabled ? 1 : 0.5)
+            .scaleEffect(configuration.isPressed ? 0.92 : 1)
+            .animation(Motion.hover, value: hover)
+            .animation(Motion.press, value: configuration.isPressed)
+            .onHover { hover = $0 }
     }
 }
 
@@ -238,7 +292,19 @@ struct SectionLabel: View {
 /// Small centered section title between two hairlines.
 struct HairlineHeader: View {
     let text: LocalizedStringKey
+    @Environment(\.insideGlassCard) private var insideGlassCard
+
     var body: some View {
+        if insideGlassCard {
+            Text(text).font(.mh(size: 11.5, weight: .semibold)).foregroundStyle(Palette.textMuted)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityAddTraits(.isHeader)
+        } else {
+            hairlines
+        }
+    }
+
+    private var hairlines: some View {
         HStack(spacing: 8) {
             Rectangle().fill(Palette.hairline).frame(height: 1)
             Text(text).font(ThemeStore.shared.isPixel ? .display(11) : .mh(size: 11, weight: .semibold)).foregroundStyle(Palette.textMuted).fixedSize()
@@ -534,7 +600,7 @@ struct PressableStyle: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .opacity(configuration.isPressed ? 0.85 : 1)
-            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isPressed)
+            .animation(Motion.press, value: configuration.isPressed)
     }
 }
 
@@ -573,15 +639,5 @@ private struct HairlineGridLayout: _VariadicView_MultiViewRoot {
                 if r < rows.count - 1 { Rectangle().fill(Palette.hairline).frame(height: 1) }
             }
         }
-    }
-}
-
-/// Motion rules shared by the gauges: they glide to a new value in the standard look, jump in the
-/// pixel look (it is drawn in whole blocks), and stand still with Reduce Motion.
-enum Motion {
-    static var reduced: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
-
-    static func meter(_ duration: Double) -> Animation? {
-        reduced || ThemeStore.shared.isPixel ? nil : .easeOut(duration: duration)
     }
 }

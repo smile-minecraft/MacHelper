@@ -40,8 +40,13 @@ struct DiskAnalysisView: View {
             toolbar
             if let scannedAt = model.restoredAt { savedScanBanner(scannedAt) }
             Divider()
-            content
+            ZStack {
+                content.transition(Motion.swap)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .animatesStates(model.phase)
         }
+        .animation(Motion.standard, value: model.restoredAt)
         .frame(minWidth: 720, minHeight: 560)
         .quickLookPreview($model.previewURL)
         .task { model.restoreSavedScanIfNeeded() }
@@ -135,11 +140,12 @@ struct DiskAnalysisView: View {
                 summary
                 ZStack(alignment: .bottomLeading) {
                     switch model.mode {
-                    case .sunburst: SunburstChart(model: model, focus: focus)
-                    case .treemap: TreemapChart(model: model, focus: focus)
+                    case .sunburst: SunburstChart(model: model, focus: focus).transition(.opacity)
+                    case .treemap: TreemapChart(model: model, focus: focus).transition(.opacity)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .animation(Motion.fade, value: model.mode)
                 // A saved scan cannot be collected from; the banner explains why, so the
                 // collector hint would contradict the disabled actions.
                 if !model.isShowingSavedScan {

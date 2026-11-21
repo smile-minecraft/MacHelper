@@ -83,6 +83,8 @@ struct CardStyle: ViewModifier {
 /// (like a game UI window); otherwise a rounded card with a hairline border.
 struct SurfaceBackground: ViewModifier {
     var fill: Color = Palette.card
+    @Environment(\.frostedSurfaces) private var frosted
+
     func body(content: Content) -> some View {
         let shape = SurfaceShape(cornerRadius: Theme.cardRadius)
         if ThemeStore.shared.isPixel {
@@ -90,6 +92,14 @@ struct SurfaceBackground: ViewModifier {
                 .background(shape.fill(fill))
                 .overlay(shape.strokeBorder(Palette.stroke, lineWidth: 2))
                 .background(shape.fill(Color.black.opacity(0.28)).offset(x: 0, y: 3))
+        } else if frosted && LiquidGlass.isAvailable {
+            // A Liquid Glass pane tinted with the card color, so it refracts what is behind it
+            // and catches light on its edges, lifted off the panel by a soft shadow underneath.
+            content
+                .glassSurface(in: shape, tint: fill.opacity(0.45)) { $0 }
+                .background {
+                    shape.fill(Color.black.opacity(0.28)).blur(radius: 9).offset(y: 5).padding(.horizontal, 6)
+                }
         } else {
             content
                 .background(fill, in: shape)

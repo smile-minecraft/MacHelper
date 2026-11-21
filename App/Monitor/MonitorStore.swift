@@ -40,7 +40,7 @@ final class MetricSources: @unchecked Sendable {
 
     func isAvailable(_ m: MonitorModule) -> Bool {
         switch m {
-        case .battery: BatterySampler.sample() != nil
+        case .battery: DemoData.battery || BatterySampler.sample() != nil
         // 配件可能之後才連線，而且探測會跑慢的 system_profiler，所以不在啟動時判斷可用性。
         case .accessories: true
         case .fan: (fans?.strategy.fanCount ?? 0) > 0
@@ -57,8 +57,10 @@ final class MetricSources: @unchecked Sendable {
         case .memory: return MemorySampler.sample().map(ModuleSample.memory)
         case .disk: return disk.sample().map(ModuleSample.disk)
         case .network: return network.sample().map(ModuleSample.network)
-        case .battery: return BatterySampler.sample().map(ModuleSample.battery)
-        case .accessories: return .accessories(accessories.sample())
+        case .battery:
+            if DemoData.battery { return .battery(DemoData.batteryReading()) }
+            return BatterySampler.sample().map(ModuleSample.battery)
+        case .accessories: return .accessories(accessories.sample() + DemoData.accessories)
         case .fan: return fans.map { .fan($0.readFans()) }
         case .power: return power?.sample().map(ModuleSample.power)
         case .temperature:
@@ -546,6 +548,8 @@ final class MonitorStore {
     private func record(_ key: SeriesKey, _ value: Double, _ date: Date) {
         guard let series = liveSeries[key] else { return }
         series.append(date, value, window: Self.historyWindow)
+        // Demo readings stay on screen only; the database keeps real measurements.
+        if DemoData.battery, key == .battery { return }
         if let column = key.historyColumn,
            let finished = minute.addTracked(column, value, at: date),
            let db = persistentHistory {

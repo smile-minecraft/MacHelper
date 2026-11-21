@@ -84,11 +84,17 @@ struct MonitorPanel: View {
                     content.padding(.horizontal, 20).padding(.bottom, 16)
                 }
             }
+            // Pages cross-fade as the pill slides, instead of the content cutting over.
+            .animation(Motion.fade, value: shownTab)
             QuickBar(actions: actions)
             footer
         }
         .frame(width: 460)
-        .background(Palette.card)
+        // With Liquid Glass the panel is frosted: the popover's own glass shows through a thin
+        // wash of the theme color, cards inside are frosted too, and the controls on top
+        // (tab pill, header buttons, tool tiles, Quit) are Liquid Glass.
+        .background(LiquidGlass.isAvailable ? Palette.card.opacity(0.5) : Palette.card)
+        .environment(\.frostedSurfaces, true)
         .onAppear { store.watchProcesses(true) }
         .onDisappear { store.watchProcesses(false) }
     }
@@ -115,15 +121,18 @@ struct MonitorPanel: View {
 
     @ViewBuilder private var content: some View {
         if let shownTab {
-            switch shownTab {
-            case .cpu: CPUTab(store: store)
-            case .gpu: GPUTab(store: store)
-            case .memory: MemoryTab(store: store)
-            case .disk: DiskTab(store: store, selection: diskSelection)
-            case .network: PanelNetworkTab(store: store)
-            case .battery: BatteryTab(store: store)
-            case .power: PanelPowerTab(store: store, openFanControl: actions.openFanControl)
+            Group {
+                switch shownTab {
+                case .cpu: CPUTab(store: store)
+                case .gpu: GPUTab(store: store)
+                case .memory: MemoryTab(store: store)
+                case .disk: DiskTab(store: store, selection: diskSelection)
+                case .network: PanelNetworkTab(store: store)
+                case .battery: BatteryTab(store: store)
+                case .power: PanelPowerTab(store: store, openFanControl: actions.openFanControl)
+                }
             }
+            .transition(.opacity)
         } else {
             VStack(spacing: 8) {
                 PanelEmptyState(symbol: "rectangle.slash", title: "No panel pages",
@@ -143,18 +152,23 @@ struct MonitorPanel: View {
             Text(enabled ? "Helper running" : "Helper not enabled").font(.mh(size: 11)).foregroundStyle(Palette.textMuted)
             Spacer()
             UpdateAvailableButton(compact: true)
-            Button("Quit", action: actions.quit)
-                .buttonStyle(.plain)
-                .font(.mh(size: 11.5, weight: .medium))
-                .foregroundStyle(Palette.textMuted)
+            Button(action: actions.quit) {
+                Text("Quit")
+                    .font(.mh(size: 11.5, weight: .medium))
+                    .foregroundStyle(Palette.textMuted)
+                    .padding(.horizontal, LiquidGlass.isAvailable ? 11 : 0)
+                    .padding(.vertical, LiquidGlass.isAvailable ? 4 : 0)
+                    .glassSurface(in: Capsule(style: .continuous), interactive: true) { $0 }
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 9)
+        .padding(.vertical, LiquidGlass.isAvailable ? 8 : 9)
         .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
     }
 }
 
-/// Always-visible shortcuts to the tools.
+/// Always-visible shortcuts to the tools: one strip along the bottom of the panel.
 private struct QuickBar: View {
     let actions: PanelActions
 
@@ -168,7 +182,8 @@ private struct QuickBar: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(Palette.base)
+        // See-through over the frosted panel with glass, solid otherwise.
+        .background(Palette.base.opacity(LiquidGlass.isAvailable ? 0.55 : 1))
         .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
     }
 
@@ -193,7 +208,8 @@ private struct QuickItemStyle: ButtonStyle {
         configuration.label
             .background(hover ? Palette.inset : .clear, in: SurfaceShape(cornerRadius: 8, style: .continuous))
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
-            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isPressed)
+            .animation(Motion.hover, value: hover)
+            .animation(Motion.press, value: configuration.isPressed)
             .onHover { hover = $0 }
     }
 }
@@ -233,42 +249,45 @@ private struct CPUTab: View {
                           value: String(format: "%.2f", Host.loadAverages.0), caption: "Load", color: Theme.cyan, size: 88, lineWidth: 11)
             }
             .padding(.horizontal, 8).padding(.top, 6)
+            .panelCard()
 
-            HairlineHeader(text: "Usage history")
-            HistoryArea(values: Series.values(store, .cpu), maxValue: 1, color: Theme.blue).equatable().frame(height: 84)
-
-            HStack {
-                HairlineHeader(text: "Cores")
-            }
-            if let c = store.cpu, !c.perCore.isEmpty {
-                CoreBars(values: c.perCore, kinds: c.coreKinds.map { $0 == .performance }).equatable().frame(height: 96)
-                HStack(spacing: 12) {
-                    legend(Theme.blue, String(localized: "Performance cores"), c.performance)
-                    legend(Theme.cyan, String(localized: "Efficiency cores"), c.efficiency)
-                    Spacer()
-                }
+            PanelSection(title: "Usage history") {
+                HistoryArea(values: Series.values(store, .cpu), maxValue: 1, color: Theme.blue).equatable().frame(height: 84)
             }
 
-            HairlineHeader(text: "Details")
-            VStack(spacing: 0) {
-                if let c = store.cpu {
-                    KeyValueRow(label: String(localized: "System (kernel)"), value: Fmt.percent(c.system), dot: Theme.slate)
-                    KeyValueRow(label: String(localized: "User"), value: Fmt.percent(c.user), dot: Theme.blue)
-                    KeyValueRow(label: String(localized: "Idle"), value: Fmt.percent(max(1 - c.total, 0)), dot: Palette.textFaint)
+            PanelSection(title: "Cores") {
+                if let c = store.cpu, !c.perCore.isEmpty {
+                    CoreBars(values: c.perCore, kinds: c.coreKinds.map { $0 == .performance }).equatable().frame(height: 96)
+                    HStack(spacing: 12) {
+                        legend(Theme.blue, String(localized: "Performance cores"), c.performance)
+                        legend(Theme.cyan, String(localized: "Efficiency cores"), c.efficiency)
+                        Spacer()
+                    }
                 }
-                let l = Host.loadAverages
-                KeyValueRow(label: String(localized: "Load average (1 · 5 · 15 min)"), value: String(format: "%.2f / %.2f / %.2f", l.0, l.1, l.2))
-                if let f = store.fans.first {
-                    KeyValueRow(label: String(localized: "Fans"), value: "\(Fmt.rpm(f.actualRPM)) rpm", dot: Theme.mint)
-                }
-                if let w = store.power?.systemWatts {
-                    KeyValueRow(label: String(localized: "Power"), value: Fmt.watts(w), dot: Theme.slate)
-                }
-                KeyValueRow(label: String(localized: "CPU power"), value: Fmt.watts(store.power?.cpuWatts), dot: Theme.blue)
             }
 
-            HairlineHeader(text: "Top processes")
-            ProcessTable(items: Array((store.processes?.byCPU ?? []).prefix(6)), sort: .cpu, showHeader: false)
+            PanelSection(title: "Details") {
+                VStack(spacing: 0) {
+                    if let c = store.cpu {
+                        KeyValueRow(label: String(localized: "System (kernel)"), value: Fmt.percent(c.system), dot: Theme.slate)
+                        KeyValueRow(label: String(localized: "User"), value: Fmt.percent(c.user), dot: Theme.blue)
+                        KeyValueRow(label: String(localized: "Idle"), value: Fmt.percent(max(1 - c.total, 0)), dot: Palette.textFaint)
+                    }
+                    let l = Host.loadAverages
+                    KeyValueRow(label: String(localized: "Load average (1 · 5 · 15 min)"), value: String(format: "%.2f / %.2f / %.2f", l.0, l.1, l.2))
+                    if let f = store.fans.first {
+                        KeyValueRow(label: String(localized: "Fans"), value: "\(Fmt.rpm(f.actualRPM)) rpm", dot: Theme.mint)
+                    }
+                    if let w = store.power?.systemWatts {
+                        KeyValueRow(label: String(localized: "Power"), value: Fmt.watts(w), dot: Theme.slate)
+                    }
+                    KeyValueRow(label: String(localized: "CPU power"), value: Fmt.watts(store.power?.cpuWatts), dot: Theme.blue)
+                }
+            }
+
+            PanelSection(title: "Top processes") {
+                ProcessTable(items: Array((store.processes?.byCPU ?? []).prefix(6)), sort: .cpu, showHeader: false)
+            }
         }
     }
 
@@ -300,17 +319,21 @@ private struct GPUTab: View {
                           caption: "Power", color: Theme.amber, size: 88, lineWidth: 11)
             }
             .padding(.horizontal, 8).padding(.top, 6)
-            HairlineHeader(text: "Usage history")
-            HistoryArea(values: Series.values(store, .gpu), maxValue: 1, color: Theme.violet).equatable().frame(height: 96)
-            HairlineHeader(text: "Details")
-            VStack(spacing: 0) {
-                KeyValueRow(label: String(localized: "Model"), value: store.gpu?.name ?? "–")
-                KeyValueRow(label: String(localized: "Utilization"), value: Fmt.percent(store.gpu?.utilization), dot: Theme.violet)
-                if let w = store.power?.gpuWatts { KeyValueRow(label: String(localized: "GPU power"), value: Fmt.watts(w), dot: Theme.amber) }
-                KeyValueRow(label: String(localized: "Hottest GPU sensor"), value: Fmt.celsius(gpuTemp), dot: Series.tempColor(gpuTemp))
+            .panelCard()
+            PanelSection(title: "Usage history") {
+                HistoryArea(values: Series.values(store, .gpu), maxValue: 1, color: Theme.violet).equatable().frame(height: 96)
             }
-            HairlineHeader(text: "Top processes")
-            GPUProcessTable(items: store.gpuProcesses.map { Array($0.prefix(6)) })
+            PanelSection(title: "Details") {
+                VStack(spacing: 0) {
+                    KeyValueRow(label: String(localized: "Model"), value: store.gpu?.name ?? "–")
+                    KeyValueRow(label: String(localized: "Utilization"), value: Fmt.percent(store.gpu?.utilization), dot: Theme.violet)
+                    if let w = store.power?.gpuWatts { KeyValueRow(label: String(localized: "GPU power"), value: Fmt.watts(w), dot: Theme.amber) }
+                    KeyValueRow(label: String(localized: "Hottest GPU sensor"), value: Fmt.celsius(gpuTemp), dot: Series.tempColor(gpuTemp))
+                }
+            }
+            PanelSection(title: "Top processes") {
+                GPUProcessTable(items: store.gpuProcesses.map { Array($0.prefix(6)) })
+            }
         }
     }
 }
@@ -377,31 +400,35 @@ private struct MemoryTab: View {
                     Spacer()
                 }
                 .padding(.top, 6)
+                .panelCard()
 
-                HairlineHeader(text: "Usage history")
-                HistoryArea(values: Series.values(store, .memory), maxValue: 1, color: Theme.blue).equatable().frame(height: 84)
-
-                HairlineHeader(text: "Details")
-                HStack {
-                    Text("Used").font(.mh(size: 13)).foregroundStyle(Palette.textMuted)
-                    Spacer()
-                    Text("\(Fmt.memory(m.usedBytes)) / \(Fmt.memory(m.totalBytes))")
-                        .font(.display(13).monospacedDigit()).foregroundStyle(Palette.text)
+                PanelSection(title: "Usage history") {
+                    HistoryArea(values: Series.values(store, .memory), maxValue: 1, color: Theme.blue).equatable().frame(height: 84)
                 }
-                StackedBar(parts: [(app, Theme.blue), (wired, Theme.amber), (comp, Theme.rose)]).padding(.bottom, 2)
-                VStack(spacing: 0) {
-                    KeyValueRow(label: String(localized: "App"), value: Fmt.memory(m.appBytes), dot: Theme.blue)
-                    KeyValueRow(label: String(localized: "Wired"), value: Fmt.memory(m.wiredBytes), dot: Theme.amber)
-                    KeyValueRow(label: String(localized: "Compressed"), value: Fmt.memory(m.compressedBytes), dot: Theme.rose)
-                    KeyValueRow(label: String(localized: "Free"), value: Fmt.memory(m.totalBytes - min(m.usedBytes, m.totalBytes)), dot: Palette.inset)
-                    KeyValueRow(label: String(localized: "Swap"), value: Fmt.memory(m.swapUsedBytes),
-                                valueColor: m.swapUsedBytes > 0 ? Theme.amber : Palette.text)
+
+                PanelSection(title: "Details") {
+                    HStack {
+                        Text("Used").font(.mh(size: 13)).foregroundStyle(Palette.textMuted)
+                        Spacer()
+                        Text("\(Fmt.memory(m.usedBytes)) / \(Fmt.memory(m.totalBytes))")
+                            .font(.display(13).monospacedDigit()).foregroundStyle(Palette.text)
+                    }
+                    StackedBar(parts: [(app, Theme.blue), (wired, Theme.amber), (comp, Theme.rose)]).padding(.bottom, 2)
+                    VStack(spacing: 0) {
+                        KeyValueRow(label: String(localized: "App"), value: Fmt.memory(m.appBytes), dot: Theme.blue)
+                        KeyValueRow(label: String(localized: "Wired"), value: Fmt.memory(m.wiredBytes), dot: Theme.amber)
+                        KeyValueRow(label: String(localized: "Compressed"), value: Fmt.memory(m.compressedBytes), dot: Theme.rose)
+                        KeyValueRow(label: String(localized: "Free"), value: Fmt.memory(m.totalBytes - min(m.usedBytes, m.totalBytes)), dot: Palette.inset)
+                        KeyValueRow(label: String(localized: "Swap"), value: Fmt.memory(m.swapUsedBytes),
+                                    valueColor: m.swapUsedBytes > 0 ? Theme.amber : Palette.text)
+                    }
                 }
             } else {
                 SkeletonRows(count: 6).padding(.top, 12)
             }
-            HairlineHeader(text: "Top processes")
-            ProcessTable(items: Array((store.processes?.byMemory ?? []).prefix(6)), sort: .memory, showHeader: false, valueIsMemory: true)
+            PanelSection(title: "Top processes") {
+                ProcessTable(items: Array((store.processes?.byMemory ?? []).prefix(6)), sort: .memory, showHeader: false, valueIsMemory: true)
+            }
         }
     }
 
@@ -430,12 +457,15 @@ private struct DiskTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            volumeSection
-            if selection.isMountedSelection {
-                capacitySection
+            VStack(alignment: .leading, spacing: 12) {
+                volumeSection
+                if selection.isMountedSelection {
+                    capacitySection
+                }
+                historySection
             }
-            historySection
-            activitySection
+            .panelCard()
+            activitySection.panelCard()
             // DiskIOSection owns its sampler and `.task`; it stops sampling when the page goes
             // away.
             DiskIOSection()
@@ -720,8 +750,21 @@ private struct DiskTab: View {
 /// `HairlineHeader` only takes a `LocalizedStringKey`, which would look in `Localizable`.
 private struct DiskSectionHeader: View {
     let text: DiskVolumeSelectionText
+    @Environment(\.insideGlassCard) private var insideGlassCard
 
     var body: some View {
+        if insideGlassCard {
+            Text(verbatim: text.localized())
+                .font(.mh(size: 11.5, weight: .semibold))
+                .foregroundStyle(Palette.textMuted)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityAddTraits(.isHeader)
+        } else {
+            hairlines
+        }
+    }
+
+    private var hairlines: some View {
         HStack(spacing: 8) {
             Rectangle().fill(Palette.hairline).frame(height: 1)
             Text(verbatim: text.localized())
@@ -739,6 +782,10 @@ private struct DiskSectionHeader: View {
 // MARK: - Battery
 
 /// Internal battery and connected accessories share one page. Macs with neither don't show this tab.
+///
+/// The internal battery leads with a drawn battery and its charge, then the four numbers people
+/// check (health, cycles, temperature, power) as tiles, then the charge history. Accessories
+/// follow as rows with their own small battery bars, least charged first.
 private struct BatteryTab: View {
     let store: MonitorStore
 
@@ -756,52 +803,76 @@ private struct BatteryTab: View {
             PanelEmptyState(symbol: "battery.0", title: "Battery readings are off",
                             detail: "Turn on Battery in the menu bar settings to see the charge.")
         } else if let b = store.battery {
-            HStack(alignment: .center, spacing: 16) {
-                RingGauge(fraction: b.charge, value: Fmt.percent(b.charge), caption: "Charge",
-                          color: batteryColor(b.charge), size: 132, lineWidth: 14)
-                VStack(alignment: .leading, spacing: 0) {
-                    KeyValueRow(label: String(localized: "Status"), value: batteryStatus(b),
-                                dot: batteryColor(b.charge))
-                    KeyValueRow(label: String(localized: "Power"), value: Fmt.watts(b.watts),
-                                dot: Theme.slate)
-                    KeyValueRow(label: String(localized: "Battery health"), value: Fmt.percent(b.health),
-                                dot: Theme.mint)
-                    KeyValueRow(label: String(localized: "Cycle count"), value: "\(b.cycleCount)")
-                    KeyValueRow(label: String(localized: "Temperature"), value: Fmt.celsius(b.celsius),
-                                dot: Theme.amber)
+            hero(b).panelCard()
+            PanelSection {
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                    BatteryStatTile(title: "Battery health", value: Fmt.percent(b.health),
+                                    fraction: b.health, color: healthColor(b.health))
+                    BatteryStatTile(title: "Cycle count", value: "\(b.cycleCount)")
+                    BatteryStatTile(title: "Temperature", value: Fmt.celsius(b.celsius),
+                                    valueColor: Series.tempColor(b.celsius))
+                    BatteryStatTile(title: "Power", value: Fmt.watts(abs(b.watts)),
+                                    symbol: b.watts > 0.05 ? "arrow.down.circle.fill" : "arrow.up.circle.fill",
+                                    symbolColor: b.watts > 0.05 ? Theme.mint : Palette.textMuted)
                 }
             }
-            HairlineHeader(text: "Charge history")
-            HistoryArea(values: Series.values(store, .battery), maxValue: 1,
-                        color: batteryColor(b.charge)).equatable().frame(height: 84)
+            PanelSection(title: "Charge history") {
+                HistoryArea(values: Series.values(store, .battery), maxValue: 1,
+                            color: batteryColor(b.charge)).equatable().frame(height: 84)
+            }
         } else {
             SkeletonRows(count: 5)
         }
     }
 
+    /// The drawn battery, the charge in large type and what the power source is doing.
+    private func hero(_ b: BatteryReading) -> some View {
+        HStack(spacing: 18) {
+            BatteryGlyph(charge: b.charge, charging: b.isCharging, color: batteryColor(b.charge))
+                .frame(width: 104, height: 50)
+            VStack(alignment: .leading, spacing: 5) {
+                Text(Fmt.percent(b.charge))
+                    .font(.display(34, weight: .bold).monospacedDigit())
+                    .foregroundStyle(Palette.text)
+                HStack(spacing: 5) {
+                    Image(systemName: statusSymbol(b))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(b.isCharging ? Theme.amber : Palette.textMuted)
+                    Text(batteryStatus(b))
+                        .font(.mh(size: 12.5, weight: .medium))
+                        .foregroundStyle(Palette.textMuted)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .combine)
+    }
+
     @ViewBuilder private var accessorySection: some View {
         if store.availableModules.contains(.accessories) {
-            HairlineHeader(text: "Accessories")
-            if !store.isActive(.accessories) {
-                PanelEmptyState(symbol: "keyboard", title: "Accessory readings are off",
-                                detail: "Turn on Accessories in the menu bar settings to see their charge.")
-            } else if store.accessories.isEmpty {
-                PanelEmptyState(symbol: "keyboard", title: "No accessories connected",
-                                detail: "Connect a Magic Keyboard, Mouse, Trackpad, or AirPods to see their charge.")
-            } else {
-                let readings = store.accessories.sorted {
-                    $0.charge == $1.charge
-                        ? $0.name.localizedStandardCompare($1.name) == .orderedAscending
-                        : $0.charge < $1.charge
-                }
-                VStack(spacing: 0) {
-                    ForEach(Array(readings.enumerated()), id: \.element.id) { i, reading in
-                        accessoryRow(reading)
-                            .overlay(alignment: .bottom) {
-                                if i < readings.count - 1 {
-                                    Rectangle().fill(Palette.hairline).frame(height: 1)
+            PanelSection(title: "Accessories") {
+                if !store.isActive(.accessories) {
+                    PanelEmptyState(symbol: "keyboard", title: "Accessory readings are off",
+                                    detail: "Turn on Accessories in the menu bar settings to see their charge.")
+                } else if store.accessories.isEmpty {
+                    PanelEmptyState(symbol: "keyboard", title: "No accessories connected",
+                                    detail: "Connect a Magic Keyboard, Mouse, Trackpad, or AirPods to see their charge.")
+                } else {
+                    let readings = store.accessories.sorted {
+                        $0.charge == $1.charge
+                            ? $0.name.localizedStandardCompare($1.name) == .orderedAscending
+                            : $0.charge < $1.charge
+                    }
+                    VStack(spacing: 0) {
+                        ForEach(Array(readings.enumerated()), id: \.element.id) { i, reading in
+                            accessoryRow(reading)
+                                .overlay(alignment: .bottom) {
+                                    if i < readings.count - 1 {
+                                        Rectangle().fill(Palette.hairline).frame(height: 1).padding(.leading, 42)
+                                    }
                                 }
-                            }
+                        }
                     }
                 }
             }
@@ -809,15 +880,16 @@ private struct BatteryTab: View {
     }
 
     private func accessoryRow(_ reading: AccessoryBatteryReading) -> some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 12) {
             Image(systemName: accessorySymbol(reading.kind))
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(Palette.textMuted)
-                .frame(width: 22)
-            VStack(alignment: .leading, spacing: 4) {
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Palette.text)
+                .frame(width: 30, height: 30)
+                .background(Palette.inset.opacity(0.8), in: SurfaceShape(cornerRadius: 8, style: .continuous))
+            VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 6) {
                     Text(reading.name)
-                        .font(.mh(size: 13, weight: .medium))
+                        .font(.mh(size: 13, weight: .semibold))
                         .foregroundStyle(Palette.text)
                         .lineLimit(1)
                     if reading.isCharging {
@@ -832,14 +904,20 @@ private struct BatteryTab: View {
                 }
                 Meter(fraction: reading.charge, color: batteryColor(reading.charge))
                 if !reading.components.isEmpty {
-                    Text(componentsText(reading.components))
-                        .font(.mh(size: 10.5))
-                        .foregroundStyle(Palette.textFaint)
-                        .lineLimit(1)
+                    HStack(spacing: 6) {
+                        ForEach(reading.components) { component in
+                            Text(componentText(component))
+                                .font(.mh(size: 10.5, weight: .medium).monospacedDigit())
+                                .foregroundStyle(Palette.textMuted)
+                                .padding(.horizontal, 7).padding(.vertical, 2)
+                                .background(Palette.inset.opacity(0.8), in: SurfaceShape.capsule)
+                        }
+                    }
                 }
             }
         }
-        .padding(.vertical, 5)
+        .padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
     }
 
     /// Neutral at a healthy charge; battery rules supply amber / rose only when it needs attention.
@@ -847,11 +925,23 @@ private struct BatteryTab: View {
         StatusRules.battery(charge)?.color ?? Palette.text
     }
 
+    /// Health below 80 % is worth a look (Apple's own service threshold).
+    private func healthColor(_ health: Double?) -> Color {
+        guard let health else { return Palette.textMuted }
+        return health < 0.8 ? Theme.amber : Palette.textMuted
+    }
+
     private func batteryStatus(_ b: BatteryReading) -> String {
         if b.isCharging { return String(localized: "Charging") }
         if b.externalPower && b.charge >= 0.995 { return String(localized: "Fully charged") }
         if b.externalPower { return String(localized: "Plugged in") }
         return String(localized: "On battery")
+    }
+
+    private func statusSymbol(_ b: BatteryReading) -> String {
+        if b.isCharging { return "bolt.fill" }
+        if b.externalPower { return "powerplug.fill" }
+        return "battery.75percent"
     }
 
     private func accessorySymbol(_ kind: AccessoryBatteryReading.Kind) -> String {
@@ -864,16 +954,86 @@ private struct BatteryTab: View {
         }
     }
 
-    private func componentsText(_ components: [AccessoryBatteryReading.Component]) -> String {
-        components.map { component in
-            let label: String
-            switch component.id {
-            case .left: label = String(localized: "Left")
-            case .right: label = String(localized: "Right")
-            case .chargingCase: label = String(localized: "Case")
+    private func componentText(_ component: AccessoryBatteryReading.Component) -> String {
+        let label: String
+        switch component.id {
+        case .left: label = String(localized: "Left")
+        case .right: label = String(localized: "Right")
+        case .chargingCase: label = String(localized: "Case")
+        }
+        return "\(label) \(Fmt.percent(component.charge))"
+    }
+}
+
+/// A battery drawn as an object: outline, terminal nub, a fill to the charge that glides to new
+/// values, and a bolt while charging. Blocky in the pixel style through `SurfaceShape`.
+private struct BatteryGlyph: View {
+    let charge: Double
+    let charging: Bool
+    let color: Color
+
+    var body: some View {
+        GeometryReader { geo in
+            let nub = max(geo.size.width * 0.06, 4)
+            let body = CGSize(width: geo.size.width - nub - 2, height: geo.size.height)
+            let radius = body.height * 0.24
+            let inset: CGFloat = 4
+            HStack(spacing: 2) {
+                ZStack(alignment: .leading) {
+                    SurfaceShape(cornerRadius: radius, style: .continuous)
+                        .strokeBorder(Palette.textMuted.opacity(0.7), lineWidth: 2.5)
+                    SurfaceShape(cornerRadius: radius - inset / 2, style: .continuous)
+                        .fill(LinearGradient(colors: [color.opacity(0.95), color.opacity(0.7)],
+                                             startPoint: .top, endPoint: .bottom))
+                        .frame(width: max((body.width - inset * 2) * min(max(charge, 0), 1), 4))
+                        .padding(inset)
+                        .animation(Motion.meter(0.6), value: charge)
+                    if charging {
+                        Image(systemName: "bolt.fill")
+                            .font(.system(size: body.height * 0.42, weight: .bold))
+                            .foregroundStyle(Palette.text)
+                            .shadow(color: .black.opacity(0.35), radius: 2)
+                            .frame(width: body.width)
+                    }
+                }
+                .frame(width: body.width, height: body.height)
+                SurfaceShape(cornerRadius: 2, style: .continuous)
+                    .fill(Palette.textMuted.opacity(0.7))
+                    .frame(width: nub, height: body.height * 0.36)
             }
-            return "\(label) \(Fmt.percent(component.charge))"
-        }.joined(separator: " · ")
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// One number on the battery page: a label, the value, and an optional bar or symbol.
+private struct BatteryStatTile: View {
+    let title: LocalizedStringKey
+    let value: String
+    var fraction: Double? = nil
+    var color: Color = Palette.textMuted
+    var valueColor: Color = Palette.text
+    var symbol: String? = nil
+    var symbolColor: Color = Palette.textMuted
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title).font(.mh(size: 11.5, weight: .medium)).foregroundStyle(Palette.textMuted).lineLimit(1)
+            HStack(spacing: 5) {
+                if let symbol {
+                    Image(systemName: symbol).font(.system(size: 12, weight: .semibold)).foregroundStyle(symbolColor)
+                }
+                Text(value).font(.display(19, weight: .semibold).monospacedDigit()).foregroundStyle(valueColor)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+            }
+            if let fraction {
+                Meter(fraction: fraction, color: color)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 74, alignment: .topLeading)
+        .background(Palette.inset.opacity(0.55), in: SurfaceShape(cornerRadius: 10, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -971,5 +1131,35 @@ extension Host {
 
     static var uptimeShort: String {
         String(localized: "Up \(Duration.seconds(ProcessInfo.processInfo.systemUptime).formatted(.units(allowed: [.days, .hours, .minutes], width: .narrow, maximumUnitCount: 2)))")
+    }
+}
+
+extension View {
+    /// One section of a panel page on its own Liquid Glass card (the panel's "tables"). Without
+    /// glass the section stays flat, as the panel always looked.
+    @ViewBuilder func panelCard() -> some View {
+        if LiquidGlass.isAvailable {
+            padding(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .environment(\.insideGlassCard, true)
+                .surface(Palette.base)
+        } else {
+            self
+        }
+    }
+}
+
+/// A titled section of a panel page: a glass card with the title inside, or the flat hairline
+/// header and content without glass.
+struct PanelSection<Content: View>: View {
+    var title: LocalizedStringKey?
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: LiquidGlass.isAvailable ? 10 : 12) {
+            if let title { HairlineHeader(text: title) }
+            content
+        }
+        .panelCard()
     }
 }

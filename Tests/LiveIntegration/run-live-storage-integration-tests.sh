@@ -67,7 +67,7 @@
 # xcode-select points at the command-line tools:
 #   DEVELOPER_DIR=/path/to/Xcode.app/Contents/Developer Tests/LiveIntegration/run-live-storage-integration-tests.sh
 #
-# Set MACHELPER_LIVE_SCRATCH_ROOT to change the scratch disk (default below). Set
+# Set MACHELPER_LIVE_SCRATCH_ROOT to change the scratch disk (default: $TMPDIR). Set
 # MACHELPER_KEEP_WORK=1 to keep the throwaway package for debugging; the default removes
 # exactly the directory this script created. The test log is kept in the scratch root either
 # way.
@@ -79,14 +79,8 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 root="$(cd "$here/../.." && pwd)"
 
-if [[ -z "${DEVELOPER_DIR:-}" ]]; then
-    for candidate in /Applications/Xcode.app /Applications/Xcode-*.app /Volumes/Smile-Data/Applications/Xcode-*.app; do
-        if [[ -d "$candidate/Contents/Developer" ]]; then
-            export DEVELOPER_DIR="$candidate/Contents/Developer"
-            break
-        fi
-    done
-fi
+# The Xcode to use: xcode-select's, or DEVELOPER_DIR from the environment or Config/Local.env.
+pushd "$root" >/dev/null && . scripts/lib/env.sh && popd >/dev/null
 if ! xcrun --find swift >/dev/null 2>&1; then
     echo "error: swift is unavailable; set DEVELOPER_DIR to an Xcode with the macOS SDK" >&2
     exit 1
@@ -98,21 +92,15 @@ fi
 
 grdb="${MACHELPER_GRDB_CHECKOUT:-}"
 if [[ -z "$grdb" ]]; then
-    for candidate in \
-        "$root/.build/checkouts/GRDB.swift" \
-        "/Volumes/Smile-Data/MainData/Project-Nest/MacHelper/.build/checkouts/GRDB.swift"; do
-        if [[ -d "$candidate" ]]; then
-            grdb="$candidate"
-            break
-        fi
-    done
+    # `swift build` or `make test` in this checkout puts it here.
+    grdb="$root/.build/checkouts/GRDB.swift"
 fi
 if [[ ! -d "$grdb" ]]; then
     echo "error: GRDB.swift checkout not found; set MACHELPER_GRDB_CHECKOUT" >&2
     exit 1
 fi
 
-scratch_root="${MACHELPER_LIVE_SCRATCH_ROOT:-/Volumes/Smile-Data/MainData/opencode-scratch}"
+scratch_root="${MACHELPER_LIVE_SCRATCH_ROOT:-${TMPDIR:-/tmp}}"
 if ! mkdir -p "$scratch_root" 2>/dev/null; then
     scratch_root="${TMPDIR:-/tmp}"
     mkdir -p "$scratch_root"

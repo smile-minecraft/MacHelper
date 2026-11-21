@@ -22,14 +22,15 @@ jobs:
           xcode="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
           sudo xcode-select -s "$xcode"
           xcodebuild -version
+      # The same make targets contributors run, so the documented setup is what CI checks.
+      - name: Install XcodeGen
+        run: brew install xcodegen
       - name: Test the Swift packages
-        run: swift test
-      - name: Fetch the vendored Sparkle framework
-        run: scripts/sparkle/fetch.sh
+        run: make test
       - name: Build the app (ad-hoc signed)
         run: |
-          set -o pipefail
-          brew install xcodegen
-          xcodegen generate --quiet
-          xcodebuild -project MacHelper.xcodeproj -scheme MacHelper -configuration Release \
-            -derivedDataPath build CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= build | tail -20
+          make build CONFIGURATION=Release \
+            XCODEBUILD_FLAGS="CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="
+      - name: Show the build log
+        if: failure()
+        run: tail -60 build/xcodebuild-Release.log || true

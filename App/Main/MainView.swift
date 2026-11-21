@@ -16,20 +16,20 @@ struct MainView: View {
             Sidebar(app: app, setUpHelper: { chainOnboarding = false; onboarding = .helper })
                 .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
         } detail: {
-            // Each page fades in, rising a few points, while the previous one fades out, so a
-            // switch reads as one movement instead of a cut. Nothing moves with Reduce Motion.
+            // The previous page leaves at once and the new one fades in, rising a few points, so a
+            // switch reads as one movement and two heavy pages are never blended mid-fade.
+            // With Reduce Motion it is a plain fade.
             ZStack {
                 detail
                     .id(app.section)
                     .onAppear { PageLoadProbe.mark(app.section, "render") }
-                    .transition(Motion.reduced ? .identity : .asymmetric(
-                        insertion: .opacity.combined(with: .offset(y: 8)),
-                        removal: .opacity))
+                    .transition(Motion.pageIn)
             }
-            .animation(Motion.reduced ? nil : .easeOut(duration: 0.2), value: app.section)
+            .animation(Motion.reduced ? .easeOut(duration: 0.15) : .smooth(duration: 0.32), value: app.section)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Palette.base)
             .navigationTitle(Text(app.section.title))
+            .modifier(SteadyTitleBar())
         }
         .frame(minWidth: 980, minHeight: 640)
         .onAppear { app.openMainWindow = { openWindow(id: "main") } }
@@ -69,6 +69,20 @@ struct MainView: View {
         case .uninstall: UninstallView(model: app.uninstallModel)
         case .updates: UpdatesView(model: app.updatesModel)
         case .startup: StartupView(model: app.startupModel)
+        }
+    }
+}
+
+/// On macOS 26 the title bar's background follows whatever scroll view sits under it. During a
+/// page switch the old page leaves before the new one has faded in, so for a frame or two there is
+/// none and the bar flashed off and on. Hiding the bar's own background keeps it the same on every
+/// page and in between; scrolled content still fades under the title with the system edge effect.
+private struct SteadyTitleBar: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 26, *) {
+            content.toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+        } else {
+            content
         }
     }
 }

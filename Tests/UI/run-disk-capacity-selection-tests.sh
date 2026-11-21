@@ -27,14 +27,8 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 root="$(cd "$here/../.." && pwd)"
 
-if [[ -z "${DEVELOPER_DIR:-}" ]]; then
-    for candidate in /Applications/Xcode.app /Applications/Xcode-*.app /Volumes/Smile-Data/Applications/Xcode-*.app; do
-        if [[ -d "$candidate/Contents/Developer" ]]; then
-            export DEVELOPER_DIR="$candidate/Contents/Developer"
-            break
-        fi
-    done
-fi
+# The Xcode to use: xcode-select's, or DEVELOPER_DIR from the environment or Config/Local.env.
+pushd "$root" >/dev/null && . scripts/lib/env.sh && popd >/dev/null
 if ! xcrun --find swift >/dev/null 2>&1; then
     echo "error: swift is unavailable; set DEVELOPER_DIR to an Xcode with the macOS SDK" >&2
     exit 1
@@ -47,8 +41,7 @@ fi
 grdb="${MACHELPER_GRDB_CHECKOUT:-}"
 if [[ -z "$grdb" ]]; then
     for candidate in \
-        "$root/.build/checkouts/GRDB.swift" \
-        "/Volumes/Smile-Data/MainData/Project-Nest/MacHelper/.build/checkouts/GRDB.swift"; do
+        "$root/.build/checkouts/GRDB.swift"; do
         if [[ -d "$candidate" ]]; then
             grdb="$candidate"
             break

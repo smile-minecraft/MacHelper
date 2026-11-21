@@ -3,8 +3,8 @@
 # A clean replace matters: ditto over an old bundle merges stale files and breaks the seal.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-XCODE_DEFAULT=/Volumes/Smile-Data/Applications/Xcode-27.2.0.app/Contents/Developer
-if [[ -z "${DEVELOPER_DIR:-}" && -d "$XCODE_DEFAULT" ]]; then export DEVELOPER_DIR="$XCODE_DEFAULT"; fi
+# The Xcode to use: xcode-select's, or DEVELOPER_DIR from the environment or Config/Local.env.
+. scripts/lib/env.sh
 BUILD_NUMBER="${BUILD_NUMBER:-$(date +%Y%m%d%H%M)}"
 
 scripts/sparkle/fetch.sh
