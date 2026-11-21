@@ -9,13 +9,16 @@ MIN_XCODE=26
 ok=1
 say() { printf '%s\n' "$*"; }
 
-if ! version="$(xcodebuild -version 2>/dev/null | head -1)"; then
+# Read the whole output first: piping into `head -1` closes the pipe early, and with pipefail the
+# SIGPIPE xcodebuild then gets reads as "Xcode not found" (it did on the CI runner).
+if ! version_output="$(xcodebuild -version 2>/dev/null)"; then
     say "✗ Xcode not found. Install Xcode $MIN_XCODE or later from the App Store, then run:"
     say "    sudo xcode-select -s /Applications/Xcode.app/Contents/Developer"
     say "  (The Command Line Tools alone can't build the app.) To use another Xcode for this"
     say "  project only, put DEVELOPER_DIR=… in Config/Local.env."
     ok=0
 else
+    version="${version_output%%$'\n'*}"
     major="$(sed -E 's/^Xcode ([0-9]+).*/\1/' <<< "$version")"
     if [[ "$major" =~ ^[0-9]+$ ]] && (( major < MIN_XCODE )); then
         say "✗ $version is too old: the app uses the macOS 26 SDK (Liquid Glass). Install Xcode $MIN_XCODE or later."
