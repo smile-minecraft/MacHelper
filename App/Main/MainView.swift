@@ -29,6 +29,7 @@ struct MainView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Palette.base)
             .navigationTitle(Text(app.section.title))
+            .modifier(SteadyTitleBar())
         }
         .frame(minWidth: 980, minHeight: 640)
         .onAppear { app.openMainWindow = { openWindow(id: "main") } }
@@ -68,6 +69,20 @@ struct MainView: View {
         case .uninstall: UninstallView(model: app.uninstallModel)
         case .updates: UpdatesView(model: app.updatesModel)
         case .startup: StartupView(model: app.startupModel)
+        }
+    }
+}
+
+/// On macOS 26 the title bar's background follows whatever scroll view sits under it. During a
+/// page switch the old page leaves before the new one has faded in, so for a frame or two there is
+/// none and the bar flashed off and on. Hiding the bar's own background keeps it the same on every
+/// page and in between; scrolled content still fades under the title with the system edge effect.
+private struct SteadyTitleBar: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 26, *) {
+            content.toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+        } else {
+            content
         }
     }
 }

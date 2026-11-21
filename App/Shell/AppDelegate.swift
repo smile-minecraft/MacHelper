@@ -152,6 +152,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                 popover.contentViewController = panel
                 popover.show(relativeTo: NSRect(x: view.bounds.midX, y: view.bounds.maxY - 60, width: 1, height: 1),
                              of: view, preferredEdge: .minY)
+                clearInitialFocus()
             }
             return
         }
@@ -920,7 +921,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             NSApp.activate()
             if popover.contentViewController == nil { popover.contentViewController = makePanel() }
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            clearInitialFocus()
         }
+    }
+
+    /// The popover's window makes its first control key when it opens, which draws a focus ring
+    /// around the header's "MacHelper" button although nothing was typed. Start with nothing
+    /// focused instead; Tab still moves focus through the controls as usual.
+    private func clearInitialFocus() {
+        let window = popover.contentViewController?.view.window
+        window?.makeFirstResponder(nil)
+        // SwiftUI may assign focus once more after the first layout pass.
+        DispatchQueue.main.async { window?.makeFirstResponder(nil) }
     }
 
     // MARK: Navigation (the panel's buttons open the main window on a page)
