@@ -172,6 +172,7 @@ struct MeterRow<Leading: View>: View {
 struct Meter: View {
     let fraction: Double
     var color: Color = Theme.accent
+    @Environment(\.animatesReadings) private var animatesReadings
 
     var body: some View {
         if ThemeStore.shared.isPixel {
@@ -185,7 +186,7 @@ struct Meter: View {
                 }
             }
             .frame(height: 8)
-            .animation(Motion.meter(0.35), value: fraction)
+            .animation(animatesReadings ? Motion.meter(0.35) : nil, value: fraction)
         }
     }
 }
@@ -325,6 +326,7 @@ struct RingGauge: View {
     var color: Color = Theme.accent
     var size: CGFloat = 84
     var lineWidth: CGFloat = 10
+    @Environment(\.animatesReadings) private var animatesReadings
 
     var body: some View {
         VStack(spacing: 8) {
@@ -335,7 +337,7 @@ struct RingGauge: View {
                     // Recessed track.
                     Circle().stroke(Palette.inset, lineWidth: lineWidth)
                     Circle().stroke(Color.black.opacity(0.10), lineWidth: 1)
-                        .padding(lineWidth / 2).blendMode(.multiply)
+                        .padding(lineWidth / 2)
                     // Lit progress stroke.
                     Circle()
                         .trim(from: 0, to: min(max(fraction, 0.001), 1))
@@ -344,7 +346,7 @@ struct RingGauge: View {
                                 style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                         .rotationEffect(.degrees(-90))
                         .shadow(color: color.opacity(0.35), radius: 3, y: 1.5)
-                        .animation(Motion.meter(0.5), value: fraction)
+                        .animation(animatesReadings ? Motion.meter(0.5) : nil, value: fraction)
                 }
                 Text(value)
                     .font(.display(size * 0.22, weight: .bold).monospacedDigit())
@@ -466,6 +468,7 @@ struct SegmentedRing: View {
     let value: String
     var size: CGFloat = 100
     var lineWidth: CGFloat = 12
+    @Environment(\.animatesReadings) private var animatesReadings
 
     var body: some View {
         ZStack {
@@ -480,7 +483,7 @@ struct SegmentedRing: View {
             Text(value).font(.display(size * 0.22, weight: .bold).monospacedDigit()).foregroundStyle(Palette.text)
         }
         .frame(width: size, height: size)
-        .animation(Motion.meter(0.4), value: segments.map(\.0))
+        .animation(animatesReadings ? Motion.meter(0.4) : nil, value: segments.map(\.0))
     }
 
     private var ringStyle: StrokeStyle { StrokeStyle(lineWidth: lineWidth, lineCap: .butt) }
