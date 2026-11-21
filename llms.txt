@@ -13,7 +13,7 @@ Agent rules: every `machelper` command previews and changes nothing until `--yes
 ## Docs
 
 - [README](https://github.com/smile-minecraft/MacHelper/blob/main/README.md): features, install, first launch, FAQ
-- [CLI reference](https://github.com/smile-minecraft/MacHelper/blob/main/docs/CLI.md): every command, safety model, JSON schema notes, exit codes, recipes
+- [Command line](https://github.com/smile-minecraft/MacHelper/blob/main/README.md#command-line): overview; `machelper guide` and `machelper <command> --help` print the full reference
 - [Changelog](https://github.com/smile-minecraft/MacHelper/blob/main/CHANGELOG.md): what changed in each release
 
 ## Releases

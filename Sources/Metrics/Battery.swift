@@ -15,7 +15,7 @@ public struct BatteryReading: Sendable, Hashable, Codable {
 }
 
 /// Reads `AppleSmartBattery`. Returns nil on desktops (no battery service).
-/// Note: not yet verified on hardware (the dev machine is a Mac mini).
+/// Note: not yet verified on a Mac with a built-in battery.
 public enum BatterySampler {
     public static func sample() -> BatteryReading? {
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))

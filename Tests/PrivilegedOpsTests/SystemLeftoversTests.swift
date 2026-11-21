@@ -18,7 +18,7 @@ import Testing
         #expect(try SystemLeftovers.validate("/Library/Audio/Plug-Ins/HAL/Thing.driver").area.dir == "/Library/Audio/Plug-Ins/HAL")
         for bad in ["/Library/Caches", "/Library/Caches/", "/Library/Caches/a/b", "/Library/Caches/../Keychains",
                     "/Library/Caches//x", "Library/Caches/x", "/System/Library/x", "/etc/sudoers", "/Library/Keychains/x",
-                    "/Library/Application Support/A/B/C", "/Library/Caches/.hidden", "/Users/smile/Library/x"] {
+                    "/Library/Application Support/A/B/C", "/Library/Caches/.hidden", "/Users/someone/Library/x"] {
             #expect(throws: SystemLeftovers.ValidationError.self, "\(bad)") { try SystemLeftovers.validate(bad) }
         }
     }

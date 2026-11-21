@@ -3,6 +3,20 @@
 Each release's notes on GitHub come from its section here (`scripts/release.sh`). Add changes under
 **Unreleased** as they land, then rename it to the version before releasing.
 
+## [Unreleased]
+
+### Interface
+- Switching pages, and moving between a page's states (start, scanning, results), now fades the
+  new content in instead of cutting to it. Tab and filter highlights slide to the new choice, and
+  the menu bar panel fades in and out. With Reduce Motion, nothing moves; only fades remain.
+- On macOS 26 and later, the smooth style uses Liquid Glass for controls that float above content:
+  the action bars under lists, tab highlights, header buttons and the main action button. The menu
+  bar panel is frosted, with glass tool tiles. The pixel style and older systems keep their look.
+
+### Building
+- `make setup`, `make open`, `make run` and `make test` cover day-to-day development without
+  touching the installed app; `make install` replaces it. Building needs Xcode 26 or later.
+
 ## [0.3.6]
 
 The menu bar Battery page now shows the charge of connected accessories alongside the internal
