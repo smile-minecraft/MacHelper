@@ -48,6 +48,13 @@ enum Motion {
     }
 }
 
+extension EnvironmentValues {
+    /// Whether gauges glide to new readings. The menu bar panel turns it off: its readings arrive
+    /// every second, and redrawing a popover for half of every second cost about 30 % CPU with
+    /// three rings on the CPU page (measured on a Release build). Gauges there jump instead.
+    @Entry var animatesReadings = true
+}
+
 extension View {
     /// Animates whatever this view shows when `value` changes, with the shared content curve.
     /// Pair with `.transition(Motion.swap)` on the views that come and go.

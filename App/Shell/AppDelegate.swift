@@ -139,6 +139,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             }
             return
         }
+        // Debug aid: `--snapshot-settings [-settings.tab helper]` opens the settings window for a
+        // real screenshot (`screencapture -l`); Form pages don't draw in offscreen snapshots.
+        if args.contains("--snapshot-settings") {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(3))
+                app.showSettings()
+            }
+            return
+        }
         // Debug aid: `--snapshot-popover` opens the menu bar panel for a real screenshot
         // (`screencapture -l`); ImageRenderer can't draw the popover's glass or materials. It is
         // anchored to the main window, because a second instance's status item is often hidden

@@ -26,6 +26,18 @@ enum HelperClientError: Error, CustomStringConvertible {
 }
 
 extension SMAppService.Status {
+    /// The status in the interface language, for people rather than logs.
+    var localizedLabel: String {
+        switch self {
+        case .enabled: String(localized: "Running")
+        case .requiresApproval: String(localized: "Waiting for approval in Login Items")
+        case .notRegistered: String(localized: "Not set up")
+        case .notFound: String(localized: "Missing from the app")
+        @unknown default: String(localized: "Not set up")
+        }
+    }
+
+    /// The status for the CLI self-test and error messages (English, stable for logs).
     var label: String {
         switch self {
         case .notRegistered: "not registered"
@@ -44,8 +56,24 @@ final class HelperClient: @unchecked Sendable {
     let service = SMAppService.daemon(plistName: HelperConstants.daemonPlistName)
     private let lock = NSLock()
     private var connection: NSXPCConnection?
+    private var cachedStatus: (value: SMAppService.Status, at: Date)?
 
-    var status: SMAppService.Status { service.status }
+    /// The registration status, reused for a second. SMAppService answers over IPC on the calling
+    /// thread, and the sidebar, overview and panel ask on the main thread every few seconds or on
+    /// every redraw; the status itself only changes when the user turns the Helper on or off.
+    var status: SMAppService.Status {
+        if let cached = lock.withLock({ cachedStatus }), Date().timeIntervalSince(cached.at) < 1 {
+            return cached.value
+        }
+        return currentStatus
+    }
+
+    /// Asks launchd now. For code that has just changed the registration.
+    var currentStatus: SMAppService.Status {
+        let value = service.status
+        lock.withLock { cachedStatus = (value, Date()) }
+        return value
+    }
 
     private static let registeredHashKey = "helper.registeredCDHash"
 
@@ -72,16 +100,18 @@ final class HelperClient: @unchecked Sendable {
     func register() throws {
         do {
             try service.register()
-        } catch where status == .requiresApproval {
+        } catch where currentStatus == .requiresApproval {
             UserDefaults.standard.set(embeddedHelperHash, forKey: Self.registeredHashKey)
             return
         }
         UserDefaults.standard.set(embeddedHelperHash, forKey: Self.registeredHashKey)
+        lock.withLock { cachedStatus = nil }
     }
 
     func unregister() async throws {
         resetConnection()
         try await service.unregister()
+        lock.withLock { cachedStatus = nil }
         UserDefaults.standard.removeObject(forKey: Self.registeredHashKey)
     }
 
@@ -101,7 +131,7 @@ final class HelperClient: @unchecked Sendable {
         try? await unregister()
         // unregister() returns before launchd/BTM finish removing the job; registering too early
         // fails and leaves the service unregistered.
-        for _ in 0..<50 where status != .notRegistered {
+        for _ in 0..<50 where currentStatus != .notRegistered {
             try await Task.sleep(for: .milliseconds(100))
         }
         try register()

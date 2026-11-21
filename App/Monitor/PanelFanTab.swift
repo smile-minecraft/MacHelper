@@ -192,6 +192,7 @@ private struct HottestCard: View {
 
 /// A tube with a bulb, filled from the bulb up; ticks mark 30, 50, 70, 90 and 110 °C.
 private struct Thermometer: View {
+    @Environment(\.animatesReadings) private var animatesReadings
     let fraction: Double
     let color: Color
 
@@ -221,7 +222,7 @@ private struct Thermometer: View {
                 Capsule().fill(color.gradient)
                     .frame(width: tube * 0.56, height: max(tubeBottom - fillTop + tube * 0.56, tube * 0.56))
                     .position(x: bulb / 2, y: (fillTop + tubeBottom) / 2)
-                    .animation(Motion.meter(0.5), value: fraction)
+                    .animation(animatesReadings ? Motion.meter(0.5) : nil, value: fraction)
                 Circle().fill(color.gradient)
                     .frame(width: bulb * 0.72, height: bulb * 0.72)
                     .position(x: bulb / 2, y: geo.size.height - bulb / 2)

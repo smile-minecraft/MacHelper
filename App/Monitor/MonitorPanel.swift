@@ -95,6 +95,8 @@ struct MonitorPanel: View {
         // (tab pill, header buttons, tool tiles, Quit) are Liquid Glass.
         .background(LiquidGlass.isAvailable ? Palette.card.opacity(0.5) : Palette.card)
         .environment(\.frostedSurfaces, true)
+        // Readings arrive every second here; gliding to each one kept the popover redrawing.
+        .environment(\.animatesReadings, false)
         .onAppear { store.watchProcesses(true) }
         .onDisappear { store.watchProcesses(false) }
     }
@@ -971,6 +973,7 @@ private struct BatteryGlyph: View {
     let charge: Double
     let charging: Bool
     let color: Color
+    @Environment(\.animatesReadings) private var animatesReadings
 
     var body: some View {
         GeometryReader { geo in
@@ -987,7 +990,7 @@ private struct BatteryGlyph: View {
                                              startPoint: .top, endPoint: .bottom))
                         .frame(width: max((body.width - inset * 2) * min(max(charge, 0), 1), 4))
                         .padding(inset)
-                        .animation(Motion.meter(0.6), value: charge)
+                        .animation(animatesReadings ? Motion.meter(0.6) : nil, value: charge)
                     if charging {
                         Image(systemName: "bolt.fill")
                             .font(.system(size: body.height * 0.42, weight: .bold))
