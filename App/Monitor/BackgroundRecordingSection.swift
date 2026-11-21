@@ -26,7 +26,7 @@ struct BackgroundRecordingSection: View {
             if let message = model.message {
                 Text(message).settingsCaption(messageColor)
             }
-            Text("When this is on, MacHelper keeps recording history in the background after you quit the app. Process usage history is still recorded even when no menu bar items are selected, as long as Record process usage is on in Data management. macOS may ask you to allow MacHelper in Login Items.")
+            Text("History keeps being written once a minute after you quit MacHelper, so Health Check and the history charts have no gaps. macOS may ask you to allow MacHelper in Login Items.")
                 .settingsCaption()
         }
         .onAppear { model.refresh() }
