@@ -77,7 +77,7 @@ struct OnboardingFlowView: View {
                 Text(onboardingText(format: "Step %lld of %lld", model.step.rawValue + 1, OnboardingStep.allCases.count))
                     .font(.mhCaption.weight(.semibold))
                     .foregroundStyle(Palette.textMuted)
-                    .contentTransition(.numericText())
+                    .contentTransition(reduceMotion || Motion.reduced ? .identity : .numericText())
                 Text(verbatim: "·").font(.mhCaption).foregroundStyle(Palette.textFaint)
                 Text(model.step.title)
                     .font(.mhCaption.weight(.semibold))

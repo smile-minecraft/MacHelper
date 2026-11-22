@@ -35,41 +35,53 @@ struct HelperDiagnosticsView: View {
                         Text(health.summaryLabel).foregroundStyle(Palette.text)
                     }
                 }
-                switch status {
-                case .enabled:
-                    Button("Turn Off Helper", role: .destructive) { act("unregister") { try await client.unregister() } }
-                case .requiresApproval:
-                    Text("In General → Login Items & Extensions, turn on MacHelper under “Allow in the Background”. macOS asks for your password.")
-                        .settingsCaption()
-                    Button("Open Login Items") { client.openLoginItemsSettings() }
-                case .notFound:
-                    Text("The Helper is missing from this copy of MacHelper. Reinstall the app to restore it.")
-                        .settingsCaption(Theme.amber)
-                default:
-                    Button("Set up Helper…") { showSetup = true }
+                Group {
+                    switch status {
+                    case .enabled:
+                        Button("Turn Off Helper", role: .destructive) { act("unregister") { try await client.unregister() } }
+                    case .requiresApproval:
+                        Text("In General → Login Items & Extensions, turn on MacHelper under “Allow in the Background”. macOS asks for your password.")
+                            .settingsCaption()
+                        Button("Open Login Items") { client.openLoginItemsSettings() }
+                    case .notFound:
+                        Text("The Helper is missing from this copy of MacHelper. Reinstall the app to restore it.")
+                            .settingsCaption(Theme.amber)
+                    default:
+                        Button("Set up Helper…") { showSetup = true }
+                    }
                 }
-                if health.state.needsAttention {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(health.bannerMessage).settingsCaption(Theme.amber)
-                        HStack(spacing: 8) {
-                            if health.state.isRepairable {
-                                Button {
-                                    Task { await health.reinstallNow() }
-                                } label: {
-                                    HStack(spacing: 5) {
-                                        if health.isRepairing { ProgressView().controlSize(.small) }
-                                        Text("Repair / Reinstall Helper")
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(status)
+                Group {
+                    if health.state.needsAttention {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(health.bannerMessage).settingsCaption(Theme.amber)
+                            HStack(spacing: 8) {
+                                if health.state.isRepairable {
+                                    Button {
+                                        Task { await health.reinstallNow() }
+                                    } label: {
+                                        HStack(spacing: 5) {
+                                            if health.isRepairing { ProgressView().controlSize(.small) }
+                                            Text("Repair / Reinstall Helper")
+                                        }
                                     }
+                                    .disabled(health.isRepairing)
                                 }
-                                .disabled(health.isRepairing)
+                                Button("Open Login Items") { health.openLoginItems() }
                             }
-                            Button("Open Login Items") { health.openLoginItems() }
-                        }
-                        if let error = health.repairError {
-                            Text(error).settingsCaption(Theme.rose)
+                            Group {
+                                if let error = health.repairError {
+                                    Text(error).settingsCaption(Theme.rose)
+                                }
+                            }
+                            .transition(Motion.stateSwap)
+                            .animatesStateChanges(health.repairError)
                         }
                     }
                 }
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(health.state.needsAttention)
             } header: { Text("Helper") }
 
             Section {

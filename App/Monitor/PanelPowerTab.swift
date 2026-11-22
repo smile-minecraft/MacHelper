@@ -110,7 +110,6 @@ private struct PowerSplitCard: View {
                 Text(verbatim: Fmt.wattsLong(breakdown.total))
                     .font(.display(26, weight: .bold).monospacedDigit())
                     .foregroundStyle(Palette.text)
-                    .contentTransition(.numericText())
             }
             splitBar(slices).frame(height: 14)
             VStack(spacing: 0) {

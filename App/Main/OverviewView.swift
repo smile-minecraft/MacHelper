@@ -669,6 +669,7 @@ struct HealthScoreRing: View {
     let score: HealthScore
     var size: CGFloat = 92
     var lineWidth: CGFloat = 8
+    @Environment(\.animatesReadings) private var animatesReadings
 
     var color: Color {
         switch score.level {
@@ -702,7 +703,7 @@ struct HealthScoreRing: View {
             Text(verbatim: "\(score.value)")
                 .font(.display(size * 0.36, weight: .bold).monospacedDigit())
                 .foregroundStyle(Palette.text)
-                .contentTransition(Motion.meter(0.3) == nil ? .identity : .numericText(value: Double(score.value)))
+                .contentTransition(animatesReadings && Motion.meter(0.3) != nil ? .numericText(value: Double(score.value)) : .identity)
                 .animation(Motion.meter(0.3), value: score.value)
         }
         .frame(width: size, height: size)

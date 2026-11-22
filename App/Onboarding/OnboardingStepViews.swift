@@ -261,7 +261,7 @@ struct OnboardingTourStep: View {
         }
         .onAppear {
             guard !reduceMotion, !Motion.reduced else { return }
-            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) { pulse = true }
+            withAnimation(Motion.shimmer(duration: 1.1)) { pulse = true }
         }
     }
 
@@ -762,7 +762,7 @@ private struct OnboardingAppear: ViewModifier {
             .offset(y: shown || still ? 0 : 8)
             .onAppear {
                 guard !still else { return }
-                withAnimation(.smooth(duration: 0.4).delay(0.05 + Double(index) * 0.06)) { shown = true }
+                withAnimation(Motion.entrance(delay: 0.05 + Double(index) * 0.06)) { shown = true }
             }
     }
 }

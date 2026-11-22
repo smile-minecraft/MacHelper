@@ -28,7 +28,7 @@ struct MainView: View {
                         .onAppear { PageLoadProbe.mark(app.section, "render") }
                         .transition(Motion.pageIn)
                 }
-                .animation(Motion.reduced ? .easeOut(duration: 0.15) : .smooth(duration: 0.32), value: app.section)
+                .animation(Motion.pageSwitch, value: app.section)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .background(Palette.base)

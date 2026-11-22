@@ -18,6 +18,7 @@ struct AlertSettingsSection: View {
             .accessibilityLabel(Text("CPU temperature above"))
             .accessibilityValue(Text(Fmt.celsius(alerts.settings.temperatureCelsius)))
             .disabled(!alerts.settings.temperatureEnabled)
+            .animatesStateChanges(alerts.settings.temperatureEnabled)
             Toggle("Memory pressure becomes critical", isOn: $alerts.settings.memoryPressureEnabled)
             Toggle("Free disk space below", isOn: $alerts.settings.diskEnabled)
             Stepper(value: $alerts.settings.diskFreeGB, in: 5...200, step: 5) {
@@ -30,6 +31,7 @@ struct AlertSettingsSection: View {
             .accessibilityLabel(Text("Free disk space below"))
             .accessibilityValue(Text("\(Int(alerts.settings.diskFreeGB)) GB"))
             .disabled(!alerts.settings.diskEnabled)
+            .animatesStateChanges(alerts.settings.diskEnabled)
         } header: {
             Text("Notify me when")
         } footer: {
@@ -37,13 +39,18 @@ struct AlertSettingsSection: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("At most one notification of each kind every \(Int(alerts.settings.cooldownMinutes)) minutes.")
                         .settingsCaption()
+                        .animatesTextChanges(alerts.settings.cooldownMinutes)
                     Spacer()
                     Button("Send Test Notification") { alerts.sendTest() }
                 }
-                if alerts.authorizationDenied {
-                    Text("Notifications are turned off for MacHelper in System Settings → Notifications.")
-                        .settingsCaption(Theme.amber)
+                Group {
+                    if alerts.authorizationDenied {
+                        Text("Notifications are turned off for MacHelper in System Settings → Notifications.")
+                            .settingsCaption(Theme.amber)
+                    }
                 }
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(alerts.authorizationDenied)
             }
         }
     }

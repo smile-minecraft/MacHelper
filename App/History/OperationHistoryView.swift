@@ -8,21 +8,30 @@ struct OperationHistoryView: View {
         VStack(spacing: 0) {
             filterBar
             summary
-            if model.entries.isEmpty {
-                message("No operations logged yet.")
-            } else if model.filtered.isEmpty {
-                message("No records match these filters.")
-            } else {
-                switch model.display {
-                case .records: list
-                case .bySource: sourceList
-                case .byMonth: monthList
+            Group {
+                if model.entries.isEmpty {
+                    message("No operations logged yet.").transition(Motion.stateSwap)
+                } else if model.filtered.isEmpty {
+                    message("No records match these filters.").transition(Motion.stateSwap)
+                } else {
+                    switch model.display {
+                    case .records: list.transition(Motion.stateSwap)
+                    case .bySource: sourceList.transition(Motion.stateSwap)
+                    case .byMonth: monthList.transition(Motion.stateSwap)
+                    }
                 }
             }
+            .animatesStateChanges(contentState)
             footer
         }
         .background(Palette.base)
         .task { model.load() }
+    }
+
+    private var contentState: String {
+        if model.entries.isEmpty { return "empty" }
+        if model.filtered.isEmpty { return "filtered" }
+        return String(describing: model.display)
     }
 
     private var filterBar: some View {

@@ -28,10 +28,11 @@ struct MonitorSettingsView: View {
                     Text("White (menu bar text color)").tag(false)
                     Text("Soft hint when high").tag(true)
                 }
-                Text(look.settings.menuBarColored
+                let valueColorCaption = look.settings.menuBarColored
                      ? "Values that need attention get a pale yellow or red, close to white, so they stay easy to read."
-                     : "Every value uses the menu bar’s own text color.")
-                    .settingsCaption()
+                     : "Every value uses the menu bar’s own text color."
+                Text(valueColorCaption).settingsCaption()
+                    .animatesTextChanges(valueColorCaption)
                 Toggle("Two lines (name above value, saves width)", isOn: $settings.configuration.compact)
                     .disabled(look.settings.menuBarLabel != .text)
             } header: { Text("How Values Look") }

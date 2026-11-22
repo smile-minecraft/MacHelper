@@ -80,7 +80,12 @@ private struct GeneralSettings: View {
             BackgroundRecordingSection(model: app.backgroundRecording)
             HistoryManagementSection()
             Section("General") {
-                Picker("Dock icon", selection: $dockMode) {
+                Picker("Dock icon", selection: Binding(
+                    get: { dockMode },
+                    set: { newValue in
+                        withAnimation(Motion.stateChange) { dockMode = newValue }
+                    }
+                )) {
                     Text("Always").tag(DockMode.always)
                     Text("While a window is open").tag(DockMode.whileWindowOpen)
                     Text("Never").tag(DockMode.never)
@@ -96,13 +101,21 @@ private struct GeneralSettings: View {
                             openAtLogin = SMAppService.mainApp.status == .enabled
                         }
                     }
-                if let loginError {
-                    Text(loginError).settingsCaption(Theme.rose)
+                Group {
+                    if let loginError {
+                        Text(loginError).settingsCaption(Theme.rose)
+                    }
                 }
-                if dockMode == .never {
-                    Text("Without the Dock icon, MacHelper lives in the menu bar; its window opens from there.")
-                        .settingsCaption()
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(loginError)
+                Group {
+                    if dockMode == .never {
+                        Text("Without the Dock icon, MacHelper lives in the menu bar; its window opens from there.")
+                            .settingsCaption()
+                    }
                 }
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(dockMode)
             }
             Section {
                 LanguagePicker()

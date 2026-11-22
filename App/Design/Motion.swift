@@ -21,6 +21,21 @@ enum Motion {
     /// Cross-fades between two versions of the same area (another app picked, another chart
     /// type). Kept with Reduce Motion: nothing moves.
     static let fade: Animation = .easeInOut(duration: 0.2)
+    /// A caption or row that appears, disappears or changes text because an option changed.
+    /// Reduce Motion still fades; it only removes the movement.
+    static var stateChange: Animation { reduced ? fade : .smooth(duration: 0.34) }
+    /// A footer bar that enters from the edge when a result list becomes actionable.
+    static var bottomBar: AnyTransition {
+        reduced ? .opacity : .move(edge: .bottom).combined(with: .opacity)
+    }
+    /// The main window's page replacement: the old page leaves at once, the new one fades in.
+    static var pageSwitch: Animation { reduced ? .easeOut(duration: 0.15) : .smooth(duration: 0.32) }
+    /// Repeating placeholder shimmer. Callers skip it entirely with Reduce Motion.
+    static func shimmer(duration: Double) -> Animation {
+        .easeInOut(duration: duration).repeatForever(autoreverses: true)
+    }
+    /// A staggered first appearance. Callers skip it entirely with Reduce Motion.
+    static func entrance(delay: Double) -> Animation { .smooth(duration: 0.4).delay(delay) }
     /// Color and opacity on hover. Kept with Reduce Motion: it is a fade, not a movement.
     static let hover: Animation = .easeOut(duration: 0.16)
     /// Press-down scale on buttons and tiles.
@@ -37,6 +52,14 @@ enum Motion {
     static var swap: AnyTransition {
         reduced ? .opacity : .asymmetric(
             insertion: .opacity.combined(with: .offset(y: 6)).combined(with: .scale(scale: 0.995, anchor: .top)),
+            removal: .opacity)
+    }
+
+    /// One conditional row or caption in a settings form. Short enough that the form never looks
+    /// like it is sliding; Reduce Motion gets a plain cross-fade.
+    static var stateSwap: AnyTransition {
+        reduced ? .opacity : .asymmetric(
+            insertion: .opacity.combined(with: .offset(y: 4)),
             removal: .opacity)
     }
 
@@ -60,5 +83,19 @@ extension View {
     /// Pair with `.transition(Motion.swap)` on the views that come and go.
     func animatesStates<V: Equatable>(_ value: V) -> some View {
         animation(Motion.standard, value: value)
+    }
+
+    /// Conditional settings rows and captions. Unlike `animatesStates`, this keeps a plain fade
+    /// with Reduce Motion instead of turning the change into a hard cut.
+    func animatesStateChanges<V: Equatable>(_ value: V) -> some View {
+        animation(Motion.stateChange, value: value)
+    }
+
+    /// A caption whose wording changes with a setting: cross-fade the glyphs in place. Text identity
+    /// must stay stable here, so this avoids `.id` / `.transition` (a replaced view cannot animate
+    /// its own removal inside a Form row).
+    func animatesTextChanges<V: Equatable>(_ value: V) -> some View {
+        contentTransition(.opacity)
+        .animation(Motion.stateChange, value: value)
     }
 }

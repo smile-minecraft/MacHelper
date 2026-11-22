@@ -25,10 +25,10 @@ struct UpdatesView: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if !model.casks.isEmpty {
-                bottomBar.transition(Motion.reduced ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+                bottomBar.transition(Motion.bottomBar)
             }
         }
-        .animation(Motion.standard, value: model.casks.isEmpty)
+        .animation(Motion.stateChange, value: model.casks.isEmpty)
         // The previous list stays on screen while the check runs, so re-opening the page shows the
         // previous result and replaces it when Homebrew answers.
         .task { await model.check() }
