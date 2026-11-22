@@ -60,7 +60,7 @@ public enum SystemCleanupCatalog {
                  String(localized: "Files in /private/var/tmp that haven’t changed for 7 days.", bundle: .module), risk: .medium)
         case "deep.tmp":
             info(String(localized: "Shared temporary files", bundle: .module),
-                 String(localized: "Files in /tmp that haven’t changed for 7 days. An app that keeps a file open without writing to it can still need it, so check the list before cleaning.", bundle: .module), risk: .medium)
+                 String(localized: "Files in /tmp that haven’t changed for 7 days. An app that keeps a file open without writing to it can still need it, so leave this off if you aren’t sure.", bundle: .module), risk: .medium)
         case "deep.simulator-caches":
             info(String(localized: "Simulator system caches", bundle: .module),
                  String(localized: "Shared caches of the iOS simulators in /Library/Developer/CoreSimulator/Caches. Rebuilt the next time a simulator starts, which then takes longer.", bundle: .module))

@@ -86,7 +86,9 @@ struct OptimizeView: View {
                     .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center).frame(maxWidth: 400)
                 // Not set up, waiting for approval, outdated after an update or not answering:
                 // the setup sheet explains the state and offers the matching fix.
-                Text(helperHealth.summaryLabel).font(.mhCaption).foregroundStyle(Theme.amber)
+                if helperHealth.state.needsAttention {
+                    Text(helperHealth.summaryLabel).font(.mhCaption).foregroundStyle(Theme.amber)
+                }
                 Button("Set Up or Repair the Helper…") { showHelperSetup = true }.buttonStyle(.link).font(.mhCaption)
             }
         }
