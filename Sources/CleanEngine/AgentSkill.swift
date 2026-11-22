@@ -6,7 +6,7 @@ import Foundation
 public enum AgentSkill {
     public static let name = "machelper"
     /// Bump when the text changes: installed copies are refreshed when the app starts.
-    public static let version = 2
+    public static let version = 3
     static let marker = "<!-- managed by MacHelper: skill version"
 
     public struct Target: Sendable, Identifiable, Hashable {
@@ -72,6 +72,17 @@ public enum AgentSkill {
         Run `\(m)`. Every command previews by default and changes nothing until `--yes` is added. Add `--json`
         to get one JSON document on stdout with a `schemaVersion` field; parse that instead of the text output.
         \(notFound)
+        ## Start here
+
+        1. For any "check my Mac", "why is it slow", "what is using my disk" or "how healthy is this Mac" question,
+           run `\(m) report --json` first. It is one read-only call, redacted by default, and safe to put in the
+           conversation. Read `findings`, `suggestedActions` and `availableTools` before running anything else.
+        2. `suggestedActions[]` contains a ready `command`, the `reason` it was chosen, `previewOnly`, `risk` and
+           `requiresUserApproval`. `availableTools[]` is the full catalog of subcommands with purpose, safety level
+           and an example invocation. Chain those commands instead of guessing flags.
+        3. Never pass `--no-redact` unless the user explicitly asked for real paths, user names or host names. If
+           redacted output is not enough, ask first. Preview-first and `--yes` rules below still apply.
+
         ## Rules
 
         1. Preview first, then show the user what would happen (items, sizes, Trash or permanent) and get a clear
@@ -94,6 +105,7 @@ public enum AgentSkill {
 
         | The user wants to… | Run |
         |---|---|
+        | A whole-Mac diagnosis in one safe call | `\(m) report --json` (redacted by default; `--format markdown` for text) |
         | See where the space goes | `\(m) analyze ~ --json --depth 2` (or a folder path) |
         | Find unused big files and bloated folders | `\(m) insights ~ --json` (`--unused-days 365`, `--min-size 500MB`) |
         | Free up space safely | `\(m) clean --json`, then after approval `\(m) clean --yes --json` |
@@ -108,10 +120,16 @@ public enum AgentSkill {
         | Check security settings | `\(m) security --json` (read-only) |
         | Run maintenance | `\(m) optimize --json` (QuickLook reset, unavailable simulators, brew cleanup, …) |
 
-        `\(m) guide` prints this guide; `\(m) <command> --help` explains each command and its options.
+        `\(m) guide` prints this guide; `\(m) guide --json` prints the tool catalog as JSON;
+        `\(m) <command> --help` explains each command and its options.
 
         ## Reading results
 
+        - `report`: `redacted` tells you whether markers were applied (default `true`); `schemaVersion` is `1`.
+          `system`, `liveMetrics`, `health`, `storage`, `cleanupPreview`, `security`, `startup`, `updates` and optional
+          `diskDetail` hold the readings. `findings[]` are ranked `critical` → `warning` → `info`. `suggestedActions[]`
+          are safe next commands; `availableTools[]` is the full catalog. A missing history database only leaves
+          `health.history` empty.
         - `clean`: `plan.results[]` per rule with `candidates[]` (`path`, `size`, `selected`) and `rule.action`
           (`delete` or `trash`); after `--yes`, `report.items[].result` is `deleted`, `trashed`, `skipped` or `failed`.
         - `insights`: `insights.unusedFiles[]` (`path`, `size`, `lastUsed`, `kind`) and `insights.bloatedFolders[]`

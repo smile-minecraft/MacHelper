@@ -444,9 +444,25 @@ enum AgentCommand {
 struct Guide: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Print the guide for AI agents (the same text as the agent skill).",
-        discussion: "For the full option list of every command as JSON: machelper --experimental-dump-help")
+        discussion: "With --json, prints the machine-readable tool catalog instead of the text. For every option: machelper --experimental-dump-help")
 
-    func run() throws { Output.line(AgentSkill.markdown(command: AgentCommand.command, fallback: AgentCommand.fallback)) }
+    @OptionGroup var output: OutputOptions
+
+    func run() throws {
+        if output.json {
+            struct Out: Encodable {
+                let schemaVersion = 1
+                let skillVersion: Int
+                let tools: [SystemReport.ToolCapability]
+                let guide: String
+            }
+            try Output.json(Out(skillVersion: AgentSkill.version,
+                                 tools: SystemReport.toolCatalog,
+                                 guide: AgentSkill.markdown(command: AgentCommand.command, fallback: AgentCommand.fallback)))
+            return
+        }
+        Output.line(AgentSkill.markdown(command: AgentCommand.command, fallback: AgentCommand.fallback))
+    }
 }
 
 struct SkillCommand: ParsableCommand {
