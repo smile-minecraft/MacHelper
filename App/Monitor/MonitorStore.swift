@@ -3,6 +3,7 @@ import Metrics
 import Observation
 import SMCKit
 import Storage
+import Telemetry
 
 /// All hardware samplers, created once. Sampling runs off the main actor.
 final class MetricSources: @unchecked Sendable {
@@ -475,8 +476,11 @@ final class MonitorStore {
     private func startLoop(_ m: MonitorModule, interval: Double) -> Task<Void, Never> {
         guard let sources else { return Task {} }
         return Task { [weak self] in
+            let signpost = PerfSignpost.ui
             while !Task.isCancelled {
+                let tick = signpost.beginInterval("monitor.sample.tick")
                 let sample = await Task.detached(priority: .utility) { sources.sample(m) }.value
+                signpost.endInterval("monitor.sample.tick", tick)
                 guard let self, !Task.isCancelled else { return }
                 if let sample { self.apply(sample) }
                 try? await Task.sleep(for: .seconds(interval))

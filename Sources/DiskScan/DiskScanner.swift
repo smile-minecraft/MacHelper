@@ -1,6 +1,7 @@
 import CSystemBridge
 import Darwin
 import Foundation
+import Telemetry
 
 public struct ScanOptions: Sendable {
     /// Files at least this large become their own nodes; smaller ones are aggregated per directory.
@@ -128,7 +129,9 @@ public final class DiskScanner: @unchecked Sendable {
 
     /// Blocking. Call from a background task.
     public func scan(_ url: URL) throws -> ScanResult {
-        try ThreadMaterializePolicy.withBan { try scanProtected(url) }
+        let interval = PerfSignpost.diskScan.beginInterval("disk.fullScan")
+        defer { PerfSignpost.diskScan.endInterval("disk.fullScan", interval) }
+        return try ThreadMaterializePolicy.withBan { try scanProtected(url) }
     }
 
     private func scanProtected(_ url: URL) throws -> ScanResult {

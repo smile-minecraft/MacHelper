@@ -55,7 +55,7 @@ targets:
             subpath: Contents/Library/LaunchAgents
     dependencies:
       - package: MacHelperKit
-        products: [HelperProtocol, PrivilegedOps, Theming, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, SettingsPortability, Diagnostics]
+        products: [HelperProtocol, PrivilegedOps, Theming, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, Telemetry, SettingsPortability, Diagnostics]
       # Xcode 27.2 hangs on Sparkle's SPM binary target; scripts/sparkle/fetch.sh
       # downloads the official release into build/Vendor before xcodegen runs.
       - framework: build/Vendor/Sparkle/Sparkle.xcframework
@@ -86,6 +86,8 @@ targets:
         SUEnableAutomaticChecks: true
         SUScheduledCheckInterval: 14400
         SUAutomaticallyUpdate: false
+        # Empty by default: no payload can leave the app until a build or the user configures one.
+        MHTelemetryEndpointURL: ""
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.machelper.MacHelper
