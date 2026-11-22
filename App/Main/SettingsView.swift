@@ -96,13 +96,21 @@ private struct GeneralSettings: View {
                             openAtLogin = SMAppService.mainApp.status == .enabled
                         }
                     }
-                if let loginError {
-                    Text(loginError).settingsCaption(Theme.rose)
+                Group {
+                    if let loginError {
+                        Text(loginError).settingsCaption(Theme.rose)
+                    }
                 }
-                if dockMode == .never {
-                    Text("Without the Dock icon, MacHelper lives in the menu bar; its window opens from there.")
-                        .settingsCaption()
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(loginError)
+                Group {
+                    if dockMode == .never {
+                        Text("Without the Dock icon, MacHelper lives in the menu bar; its window opens from there.")
+                            .settingsCaption()
+                    }
                 }
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(dockMode)
             }
             Section {
                 LanguagePicker()

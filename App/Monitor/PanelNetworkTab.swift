@@ -213,7 +213,7 @@ private struct RateCard: View {
                 .font(.display(24, weight: .bold).monospacedDigit())
                 .foregroundStyle(Palette.text)
                 .lineLimit(1).minimumScaleFactor(0.6)
-                .contentTransition(.numericText())
+
             Text("Peak \(Fmt.rateLong(peak))")
                 .font(.mh(size: 10.5).monospacedDigit())
                 .foregroundStyle(Palette.textFaint)

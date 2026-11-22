@@ -599,7 +599,7 @@ struct SkeletonRows: View {
         .opacity(dim ? 0.55 : 1)
         .onAppear {
             guard !reduceMotion else { return }
-            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { dim = true }
+            withAnimation(Motion.shimmer(duration: 0.9)) { dim = true }
         }
         .accessibilityLabel("Loading")
     }

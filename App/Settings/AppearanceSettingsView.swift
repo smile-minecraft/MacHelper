@@ -20,10 +20,13 @@ struct AppearanceSettingsView: View {
                     Text("Advanced").tag(AppearanceSettings.Mode.advanced)
                 }
                 .pickerStyle(.segmented)
-                Text(store.settings.mode == .simple
+                let modeCaption = store.settings.mode == .simple
                      ? "Shows the essentials in plain language: how your Mac is doing, free space, and one-click cleanup. Monitoring charts, fan curves and startup items are hidden."
-                     : "Shows every page, chart and technical detail: monitoring history, fan curves, launch agents and per-process numbers.")
-                    .settingsCaption()
+                     : "Shows every page, chart and technical detail: monitoring history, fan curves, launch agents and per-process numbers."
+                Text(modeCaption).settingsCaption()
+                    .id(modeCaption)
+                    .transition(Motion.stateSwap)
+                    .animatesStateChanges(modeCaption)
             } header: { Text("Interface Mode") }
 
             Section {
@@ -34,10 +37,13 @@ struct AppearanceSettingsView: View {
                         }
                     }
                 }
-                Text(AppearancePreset.matching(store.settings) == nil
+                let lookCaption = AppearancePreset.matching(store.settings) == nil
                      ? "Custom: you changed details below. Pick a look to start over from it."
-                     : "A ready-made look sets the colors, shapes, title font and icons together. Change any detail below to make it your own.")
-                    .settingsCaption()
+                     : "A ready-made look sets the colors, shapes, title font and icons together. Change any detail below to make it your own."
+                Text(lookCaption).settingsCaption()
+                    .id(lookCaption)
+                    .transition(Motion.stateSwap)
+                    .animatesStateChanges(lookCaption)
             } header: { Text("Look") }
 
             SurfaceSettingsSection(store: store)
@@ -53,7 +59,11 @@ struct AppearanceSettingsView: View {
                         Button("Delete", role: .destructive) { deleteCurrent() }
                     }
                 }
-                if let message { Text(message).settingsCaption() }
+                Group {
+                    if let message { Text(message).settingsCaption() }
+                }
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(message)
             } header: { Text("Colors") } footer: {
                 Text("Editing a built-in theme saves your changes as a new copy, so the original stays. Imported VS Code themes keep their colors.")
                     .settingsCaption()
@@ -66,10 +76,13 @@ struct AppearanceSettingsView: View {
                         Text("Pixel").tag(AppearanceSettings.Style.pixel)
                     }
                     .pickerStyle(.segmented)
-                    Text(store.settings.style == .pixel
+                    let shapeCaption = store.settings.style == .pixel
                          ? "Pixel: stepped corners and block borders, like a retro game."
-                         : "Rounded: soft corners and smooth rings.")
-                        .settingsCaption()
+                         : "Rounded: soft corners and smooth rings."
+                    Text(shapeCaption).settingsCaption()
+                        .id(shapeCaption)
+                        .transition(Motion.stateSwap)
+                        .animatesStateChanges(shapeCaption)
                     Picker("Titles and numbers", selection: displayFont) {
                         Text("System Rounded").tag("rounded")
                         Text("System").tag("system")
@@ -121,11 +134,15 @@ struct AppearanceSettingsView: View {
                         NSWorkspace.shared.open(store.iconLibrary.root)
                     }
                     Spacer()
-                    if case .pack(let id) = store.settings.iconSet {
-                        Button("Delete Pack", role: .destructive) {
-                            do { try store.deleteIconPack(id) } catch { message = "\(error)" }
+                    Group {
+                        if case .pack(let id) = store.settings.iconSet {
+                            Button("Delete Pack", role: .destructive) {
+                                do { try store.deleteIconPack(id) } catch { message = "\(error)" }
+                            }
                         }
                     }
+                    .transition(Motion.stateSwap)
+                    .animatesStateChanges(store.settings.iconSet)
                 }
             } header: { Text("Icons") } footer: {
                 Text("Click an icon to replace it with your own image; replaced icons are used with every set. An icon pack is a folder of images named after the icons (cpu.png, fans.svg …); export the template to see every name. Images in a pack that MacHelper doesn’t use are ignored.")
@@ -582,6 +599,9 @@ private struct SurfaceSettingsSection: View {
             .pickerStyle(.segmented)
             .disabled(!store.theme.followsSystemAppearance)
             Text(appearanceCaption).settingsCaption()
+                .id(appearanceCaption)
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(appearanceCaption)
 
             Picker("Material", selection: $store.settings.surfaceMaterial) {
                 Text("Solid").tag(SurfaceMaterial.solid)
@@ -590,7 +610,14 @@ private struct SurfaceSettingsSection: View {
             }
             .pickerStyle(.segmented)
             Text(materialCaption).settingsCaption()
-            if let note = fallbackNote { Text(note).settingsCaption(Theme.amber) }
+                .id(materialCaption)
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(materialCaption)
+            Group {
+                if let note = fallbackNote { Text(note).settingsCaption(Theme.amber) }
+            }
+            .transition(Motion.stateSwap)
+            .animatesStateChanges(fallbackNote)
         } header: { Text("Light, Dark and Material") }
     }
 
