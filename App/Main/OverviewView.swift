@@ -15,17 +15,25 @@ struct OverviewView: View {
         // The menu bar and background recording read the store directly, not this view.
         if app.hasVisibleMainWindow {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: ThemeStore.shared.isSoft ? 24 : 32) {
                     Headline(store: store, app: app)
                     Readouts(store: store, advanced: !ThemeStore.shared.isSimple)
-                    Rectangle().fill(Palette.hairline).frame(height: 1)
-                    HStack(alignment: .top, spacing: 40) {
+                    if !ThemeStore.shared.isSoft {
+                        Rectangle().fill(Palette.hairline).frame(height: 1)
+                    }
+                    HStack(alignment: .top, spacing: ThemeStore.shared.isSoft ? 20 : 40) {
                         if ThemeStore.shared.isSimple {
-                            CommonTools(app: app).frame(maxWidth: .infinity, alignment: .topLeading)
+                            CommonTools(app: app)
+                                .softCard(padding: 16)
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
                         } else {
-                            BusiestApps(store: store).frame(maxWidth: .infinity, alignment: .topLeading)
+                            BusiestApps(store: store)
+                                .softCard(padding: 16)
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
                         }
-                        ToDoList(app: app).frame(maxWidth: .infinity, alignment: .topLeading)
+                        ToDoList(app: app)
+                            .softCard(padding: 16)
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
                     }
                     MachineLine()
                 }
@@ -260,8 +268,9 @@ private struct Readouts: View {
     let advanced: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 28) {
-            HStack(alignment: .top, spacing: 32) {
+        let soft = ThemeStore.shared.isSoft
+        VStack(alignment: .leading, spacing: soft ? 16 : 28) {
+            HStack(alignment: .top, spacing: soft ? 16 : 32) {
                 Readout(title: "CPU", value: Fmt.percent(store.cpu?.total), reading: StatusRules.cpu(store.cpu?.total),
                         series: store.history[.cpu], maxValue: 1)
                 Readout(title: "Memory", value: Fmt.percent(store.memoryFraction), reading: StatusRules.memory(store.memory),
@@ -272,8 +281,9 @@ private struct Readouts: View {
                         reading: StatusRules.disk(freeBytes: store.diskFreeBytes), series: nil, maxValue: nil,
                         bar: store.diskFreeFraction.map { 1 - $0 })
             }
+            .fixedSize(horizontal: false, vertical: true)
             if advanced {
-                HStack(alignment: .top, spacing: 32) {
+                HStack(alignment: .top, spacing: soft ? 16 : 32) {
                     Readout(title: "GPU", value: Fmt.percent(store.gpu?.utilization),
                             reading: StatusRules.fraction(store.gpu?.utilization).map { Reading(level: $0, word: "") },
                             series: store.history[.gpu], maxValue: 1)
@@ -284,6 +294,7 @@ private struct Readouts: View {
                     Readout(title: "Fans", value: store.fans.first.map { "\(Fmt.rpm($0.actualRPM)) rpm" } ?? "–", reading: nil,
                             series: store.history[.fan], maxValue: store.fans.first?.maxRPM)
                 }
+                .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -302,9 +313,10 @@ private struct Readout: View {
         let level = reading?.level ?? .good
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
-                Text(title).font(.mh(size: 12.5, weight: .medium)).foregroundStyle(Palette.textMuted)
+                Text(title).font(.mh(size: 12.5, weight: .medium)).foregroundStyle(Palette.textMuted).lineLimit(1)
                 if let word = reading?.word, !word.isEmpty {
                     Text(word).font(.mh(size: 12.5)).foregroundStyle(level == .good ? Palette.textFaint : level.color)
+                        .lineLimit(1).minimumScaleFactor(0.8)
                 }
             }
             // No rolling digits here: these change every second, and SwiftUI draws the numeric text
@@ -324,6 +336,7 @@ private struct Readout: View {
             if let note { Text(note).font(.mh(size: 11.5)).foregroundStyle(Palette.textFaint) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .softCard(padding: 14, fillHeight: true)
         .accessibilityElement(children: .combine)
     }
 
@@ -457,17 +470,35 @@ private struct MachineLine: View {
 
 /// The one filled button: ink on light, light on dark (the instrument's only "accent").
 struct PrimaryButtonStyle: ButtonStyle {
+    var large = false
+
     func makeBody(configuration: Configuration) -> some View {
         let fill = Theme.accent
+        let soft = ThemeStore.shared.isSoft
         configuration.label
-            .font(.mh(size: 13, weight: .semibold))
+            .font(.mh(size: large ? 14 : 13, weight: .semibold))
             .foregroundStyle(fill.isDarkForeground ? Color.white : Color.black)
-            .padding(.horizontal, 16).padding(.vertical, 8)
+            .padding(.horizontal, large ? 22 : 16).padding(.vertical, large ? 10 : 8)
             // Liquid Glass tinted with the accent; it brightens under the pointer by itself.
             .glassSurface(in: Capsule(style: .continuous), tint: fill, interactive: true) { label in
-                label.background(fill.opacity(configuration.isPressed ? 0.8 : 1), in: SurfaceShape(cornerRadius: 8))
+                if soft {
+                    let shape = SurfaceShape(cornerRadius: large ? 13 : 11, style: .continuous)
+                    label.background {
+                        if configuration.isPressed {
+                            shape.fill(
+                                fill.opacity(0.92)
+                                    .shadow(.inner(color: Color.black.opacity(0.32), radius: 3, x: 2, y: 2))
+                                    .shadow(.inner(color: Color.white.opacity(0.22), radius: 3, x: -2, y: -2))
+                            )
+                        } else {
+                            SoftSurface.raised(shape, fill: fill, elevation: .control)
+                        }
+                    }
+                } else {
+                    label.background(fill.opacity(configuration.isPressed ? 0.8 : 1), in: SurfaceShape(cornerRadius: 8))
+                }
             }
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .scaleEffect(configuration.isPressed ? (soft ? 0.985 : 0.97) : 1)
             .animation(Motion.press, value: configuration.isPressed)
     }
 }
@@ -624,6 +655,14 @@ struct HealthScoreRing: View {
         ZStack {
             if ThemeStore.shared.isPixel {
                 PixelRing(fraction: fraction, color: color, track: Palette.inset, lineWidth: lineWidth)
+            } else if ThemeStore.shared.isSoft {
+                Circle().stroke(SoftSurface.ringTrackStyle, lineWidth: lineWidth)
+                Circle()
+                    .trim(from: 0, to: max(fraction, 0.001))
+                    .stroke(color, style: StrokeStyle(lineWidth: max(lineWidth - 2, 4), lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .shadow(color: color.opacity(0.28), radius: 2, y: 1)
+                    .animation(Motion.meter(0.6), value: fraction)
             } else {
                 Circle().stroke(Palette.inset, lineWidth: lineWidth)
                 Circle()

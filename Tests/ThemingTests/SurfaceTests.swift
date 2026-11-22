@@ -51,6 +51,8 @@ import Testing
         for m in SurfaceMaterial.allCases {
             #expect(m.effective(glassSupported: true, isPixel: false, reduceTransparency: true, increaseContrast: false) == .solid,
                     "Reduce Transparency always wins")
+            #expect(m.effective(glassSupported: true, isPixel: false, isSoft: true, reduceTransparency: false, increaseContrast: false) == .solid,
+                    "soft style always uses solid surfaces so dual shadows stay crisp")
         }
         #expect(SurfaceMaterial.solid.effective(glassSupported: true, isPixel: false, reduceTransparency: false, increaseContrast: false) == .solid)
         #expect(SurfaceMaterial.frosted.effective(glassSupported: true, isPixel: true, reduceTransparency: false, increaseContrast: true) == .frosted)
@@ -84,6 +86,7 @@ import Testing
         #expect(ResolvedTheme(theme: t, mode: .dark, systemIsDark: false).colors.card == t.dark?.card)
         #expect(ResolvedTheme(theme: t, mode: .light, systemIsDark: true).colors.card == t.colors.card)
         #expect(ResolvedTheme.variants(of: t).count == 2 && ResolvedTheme.variants(of: BuiltInThemes.pixelNight).count == 1)
+        #expect(ResolvedTheme.variants(of: BuiltInThemes.soft).count == 2)
     }
 }
 
@@ -91,6 +94,7 @@ import Testing
     /// Every built-in variant passes every check: solid, frosted and glass surfaces, over a white
     /// and a black wallpaper.
     @Test func builtInThemesPassEverywhere() {
+        #expect(BuiltInThemes.all.contains(BuiltInThemes.soft))
         for theme in BuiltInThemes.all {
             for r in ResolvedTheme.variants(of: theme) {
                 let audit = ThemeContrastAudit(r)
@@ -131,6 +135,9 @@ import Testing
                 #expect(s.selectionText.isDark != r.isDark && s.selectionFill.isDark == r.isDark, "\(theme.name)")
                 #expect(s.glassPanelScrim.alpha >= 0.88 && s.glassCardTint.alpha >= 0.84)
                 #expect(s.glassShadow.alpha > (r.isDark ? 0.3 : 0.05))
+                #expect(s.softHighlight.luminance > r.colors.base.luminance || !r.isDark)
+                #expect(s.softShadow.luminance < r.colors.base.luminance || r.isDark)
+                #expect(s.softHighlight.alpha > 0 && s.softShadow.alpha > 0)
             }
         }
     }

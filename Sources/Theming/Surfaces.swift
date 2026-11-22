@@ -15,10 +15,11 @@ public enum SurfaceMaterial: String, Codable, Sendable, CaseIterable {
 
     public static let `default`: SurfaceMaterial = .frosted
 
-    /// What is actually drawn: Reduce Transparency always wins (solid); Liquid Glass needs
-    /// macOS 26, the smooth style and no Increase Contrast, and otherwise becomes frosted.
-    public func effective(glassSupported: Bool, isPixel: Bool, reduceTransparency: Bool, increaseContrast: Bool) -> SurfaceMaterial {
-        if reduceTransparency { return .solid }
+    /// What is actually drawn: Reduce Transparency and the soft (neumorphic) style always win
+    /// (solid, because translucency washes out dual shadows); Liquid Glass needs macOS 26, the
+    /// smooth style and no Increase Contrast, and otherwise becomes frosted.
+    public func effective(glassSupported: Bool, isPixel: Bool, isSoft: Bool = false, reduceTransparency: Bool, increaseContrast: Bool) -> SurfaceMaterial {
+        if reduceTransparency || isSoft { return .solid }
         switch self {
         case .solid: return .solid
         case .frosted: return .frosted
@@ -110,6 +111,7 @@ public struct SurfaceTokens: Sendable, Hashable {
         case chartAxisText, chartGridLine
         case glassPanelScrim, glassCardTint, glassCardBorder, glassShadow, glassControlTint, glassSelectionTint
         case frostedPanelScrim, panelCardFill, cardShadow
+        case softHighlight, softShadow, softWell
     }
 
     public var isDark: Bool
@@ -144,6 +146,12 @@ public struct SurfaceTokens: Sendable, Hashable {
     public var panelCardFill: HexColor
     /// Soft shadow under opaque cards on a translucent panel.
     public var cardShadow: HexColor
+    /// Top-left light highlight for neumorphic (soft) extruded and recessed surfaces.
+    public var softHighlight: HexColor
+    /// Bottom-right cast shadow for neumorphic (soft) extruded and recessed surfaces.
+    public var softShadow: HexColor
+    /// Subtle interior tint for recessed neumorphic wells, tracks and channels.
+    public var softWell: HexColor
 
     /// Worst-case backdrops a translucent surface may sit on: a white and a black wallpaper.
     public static let worstCaseBackdrops = [HexColor(0xFFFFFF), HexColor(0x000000)]
@@ -189,6 +197,13 @@ public struct SurfaceTokens: Sendable, Hashable {
         cardShadow = black.withAlpha(dark ? 0.30 : 0.07)
         glassControlTint = controlFill.withAlpha(Self.opacity(for: controlFill, floor: dark ? 0.82 : 0.78, inks: [(controlText, 4.5)]))
         glassSelectionTint = selectionFill.withAlpha(Self.opacity(for: selectionFill, floor: 0.92, inks: [(selectionText, 7)]))
+
+        // Neumorphic light and shadow derived from `base` so custom and imported themes work in
+        // soft style too: bright top-left light and cool-tinted bottom-right shadow in light,
+        // subtle lifted rim and deep shadow in dark.
+        softHighlight = dark ? base.mixed(with: white, 0.24).withAlpha(0.60) : base.mixed(with: white, 0.90).withAlpha(0.92)
+        softShadow = dark ? black.withAlpha(0.62) : base.mixed(with: ink, 0.36).withAlpha(0.46)
+        softWell = dark ? base.mixed(with: black, 0.16) : base.mixed(with: ink, 0.045)
     }
 
     /// The smallest opacity (from `floor`, in 2 % steps) at which `fill` — composited over
@@ -228,6 +243,9 @@ public struct SurfaceTokens: Sendable, Hashable {
         case .frostedPanelScrim: frostedPanelScrim
         case .panelCardFill: panelCardFill
         case .cardShadow: cardShadow
+        case .softHighlight: softHighlight
+        case .softShadow: softShadow
+        case .softWell: softWell
         }
     }
 }
