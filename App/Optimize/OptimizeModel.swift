@@ -168,6 +168,9 @@ final class OptimizeModel {
     var selectedSystemBytes: UInt64 { systemRows.filter(\.selected).reduce(0) { $0 + $1.bytes } }
     /// The part of `selectedSystemBytes` that deep clean deletes after the administrator password.
     var selectedDeepBytes: UInt64 { systemRows.filter { $0.selected && $0.info.deep }.reduce(0) { $0 + $1.bytes } }
+    /// Deep targets that will be sent for deletion (and so ask for the password), even when
+    /// their files add up to zero bytes.
+    var selectedDeepCount: Int { systemRows.filter { $0.selected && $0.info.deep && $0.count > 0 }.count }
 
     // MARK: Selection
 
@@ -304,7 +307,7 @@ final class OptimizeModel {
         let now = FullDiskAccess.isGranted
         defer { fullDiskAccess = now }
         if now, !fullDiskAccess, phase == .ready {
-            Task { await scan() }
+            Task { await scan(deep: deep) }
         }
     }
 

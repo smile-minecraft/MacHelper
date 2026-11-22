@@ -34,8 +34,9 @@ public enum SystemCleanupCatalog {
     }
 
     public static let deep: [SystemCleanupInfo] = SystemCleanup.deepTargets.map { t in
-        func info(_ title: String, _ description: String, risk: RiskLevel = .low, selected: Bool = true) -> SystemCleanupInfo {
-            SystemCleanupInfo(id: t.id, title: title, description: description, folder: t.root, risk: risk, selectedByDefault: selected, deep: true)
+        // Like every other cleanup item, only low-risk targets start selected.
+        func info(_ title: String, _ description: String, risk: RiskLevel = .low) -> SystemCleanupInfo {
+            SystemCleanupInfo(id: t.id, title: title, description: description, folder: t.root, risk: risk, selectedByDefault: risk == .low, deep: true)
         }
         return switch t.id {
         case "deep.system-caches":
@@ -56,15 +57,15 @@ public enum SystemCleanupCatalog {
                  String(localized: "Log files in the app folders of /Library/Logs, untouched for 7 days.", bundle: .module))
         case "deep.temp":
             info(String(localized: "System temporary files", bundle: .module),
-                 String(localized: "Files in /private/var/tmp nobody used for 7 days.", bundle: .module))
+                 String(localized: "Files in /private/var/tmp that haven’t changed for 7 days.", bundle: .module), risk: .medium)
         case "deep.tmp":
             info(String(localized: "Shared temporary files", bundle: .module),
-                 String(localized: "Files in /tmp nobody used for 7 days. Files still in use are newer and stay.", bundle: .module), risk: .medium)
+                 String(localized: "Files in /tmp that haven’t changed for 7 days. An app that keeps a file open without writing to it can still need it, so check the list before cleaning.", bundle: .module), risk: .medium)
         case "deep.simulator-caches":
             info(String(localized: "Simulator system caches", bundle: .module),
                  String(localized: "Shared caches of the iOS simulators in /Library/Developer/CoreSimulator/Caches. Rebuilt the next time a simulator starts, which then takes longer.", bundle: .module))
         default:
-            info(t.id, t.root, selected: false)
+            info(t.id, t.root, risk: .medium)
         }
     }
 

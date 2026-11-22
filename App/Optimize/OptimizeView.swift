@@ -9,6 +9,8 @@ struct OptimizeView: View {
     @State private var showExclusions = false
     @State private var showHelperSetup = false
     @State private var category: String?
+    /// The verified Helper state (running, outdated, unresponsive…), not just its registration.
+    @Bindable private var helperHealth = HelperHealthMonitor.shared
 
     var body: some View {
         ZStack {
@@ -68,7 +70,7 @@ struct OptimizeView: View {
     /// Deep clean: the same scan plus system caches, rotated logs and temporary files that only an
     /// administrator may delete. Needs the Helper; the password is asked right before deleting.
     @ViewBuilder private var deepEntry: some View {
-        let helperOn = HelperClient.shared.status == .enabled
+        let helperOn = helperHealth.isHealthy
         VStack(spacing: 4) {
             Button { category = "deep"; Task { await model.scan(deep: true) } } label: {
                 Label("Deep Optimize…", systemImage: "lock.shield")
@@ -82,7 +84,10 @@ struct OptimizeView: View {
             } else {
                 Text("Deep Optimize needs the MacHelper Helper, which works on system folders as administrator.")
                     .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center).frame(maxWidth: 400)
-                Button("Set Up the Helper…") { showHelperSetup = true }.buttonStyle(.link).font(.mhCaption)
+                // Not set up, waiting for approval, outdated after an update or not answering:
+                // the setup sheet explains the state and offers the matching fix.
+                Text(helperHealth.summaryLabel).font(.mhCaption).foregroundStyle(Theme.amber)
+                Button("Set Up or Repair the Helper…") { showHelperSetup = true }.buttonStyle(.link).font(.mhCaption)
             }
         }
         .padding(.top, 2)
@@ -135,9 +140,9 @@ struct OptimizeView: View {
                 }
                 Spacer(minLength: 12)
                 Button("Rescan") { Task { await model.scan(deep: model.deep) } }
-                Button(model.selectedDeepBytes > 0 ? "Authorize and Clean…" : "Clean…") { confirm = true }
+                Button(model.selectedDeepCount > 0 ? "Authorize and Clean…" : "Clean…") { confirm = true }
                     .buttonStyle(.borderedProminent)
-                    .disabled(model.selectedBytes == 0 && model.selectedTaskCount == 0)
+                    .disabled(model.selectedBytes == 0 && model.selectedTaskCount == 0 && model.selectedDeepCount == 0)
             }
         }
         .confirmationDialog("Clean the selected \(Fmt.bytes(Int64(clamping: model.selectedBytes)))?", isPresented: $confirm,
@@ -227,7 +232,13 @@ struct OptimizeView: View {
         }
     }
 
-    private var selectedCategory: String { category ?? categories.first?.id ?? "maintenance" }
+    /// The chosen category, or the first one when the choice no longer exists (a deep scan's
+    /// "deep" category after a normal rescan, say).
+    private var selectedCategory: String {
+        let ids = categories.map(\.id)
+        if let category, ids.contains(category) { return category }
+        return ids.first ?? "maintenance"
+    }
 
     private var categoryList: some View {
         List(selection: Binding(get: { selectedCategory }, set: { category = $0 })) {
@@ -416,7 +427,7 @@ struct OptimizeView: View {
         if standardSystemBytes > 0 {
             lines.append(String(localized: "Delete old system logs and diagnostic reports as administrator: \(Fmt.bytes(Int64(clamping: standardSystemBytes))). Only files older than 30 days in the fixed system log folders."))
         }
-        if model.selectedDeepBytes > 0 {
+        if model.selectedDeepCount > 0 {
             lines.append(String(localized: "Deep clean: delete \(Fmt.bytes(Int64(clamping: model.selectedDeepBytes))) of system caches, logs and temporary files as administrator. macOS asks for your administrator password first; cancelling deletes none of them."))
         }
         if model.selectedEmptyTrashBytes > 0 {
@@ -595,7 +606,7 @@ struct OptimizeView: View {
             ActionBar {
                 Text("All operations are logged in ~/Library/Logs/MacHelper/operations.jsonl").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 Spacer(minLength: 12)
-                Button("Scan Again") { Task { await model.scan() } }
+                Button("Scan Again") { Task { await model.scan(deep: model.deep) } }
             }
         }
     }

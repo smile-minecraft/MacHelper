@@ -32,12 +32,16 @@ public enum DeepCleanAuthorization {
     }
 
     /// Whether a stored definition is the one this right must have. Anyone may add a right that
-    /// doesn't exist yet, so a definition planted before the Helper's (say, `allow`) must be replaced.
+    /// doesn't exist yet, so a definition planted before the Helper's (an `allow` rule, a k-of-n
+    /// twist or a misleading prompt) must be replaced.
     static func isExpected(_ stored: [String: Any]) -> Bool {
-        guard stored["class"] as? String == "rule" else { return false }
-        if let rule = stored["rule"] as? String { return rule == ruleName }
-        if let rules = stored["rule"] as? [String] { return rules == [ruleName] }
-        return false
+        guard stored["class"] as? String == "rule", stored["k-of-n"] == nil else { return false }
+        let ruleMatches: Bool
+        if let rule = stored["rule"] as? String { ruleMatches = rule == ruleName }
+        else if let rules = stored["rule"] as? [String] { ruleMatches = rules == [ruleName] }
+        else { ruleMatches = false }
+        guard ruleMatches else { return false }
+        return (stored["default-prompt"] as? [String: String]) == (definition["default-prompt"] as? [String: String])
     }
 
     // MARK: App side
@@ -79,7 +83,8 @@ public enum DeepCleanAuthorization {
         var ref: AuthorizationRef?
         var status = AuthorizationCreateFromExternalForm(&form, &ref)
         guard status == errAuthorizationSuccess, let ref else { throw SystemCleanupError.authorizationDenied(status) }
-        defer { AuthorizationFree(ref, []) }
+        // Destroy what was granted as soon as this request is done: one password, one clean.
+        defer { AuthorizationFree(ref, [.destroyRights]) }
 
         try installRight()
 

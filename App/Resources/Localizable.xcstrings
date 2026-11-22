@@ -1,6 +1,15 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Set Up or Repair the Helper…": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Configurar o reparar el Helper…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Helper を設定または修復…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Helper 설정 또는 복구…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "设置或修复 Helper…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "設定或修復 Helper…" } }
+      }
+    },
     "Deep Optimize…": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Optimización profunda…" } },
@@ -35,15 +44,6 @@
         "ko": { "stringUnit": { "state": "translated", "value": "심층 최적화에는 관리자로 시스템 폴더를 다루는 MacHelper Helper가 필요합니다." } },
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "深层优化需要 MacHelper 的 Helper，由它以管理员身份处理系统文件夹。" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "深層優化需要 MacHelper 的 Helper，由它以管理員身分處理系統資料夾。" } }
-      }
-    },
-    "Set Up the Helper…": {
-      "localizations": {
-        "es": { "stringUnit": { "state": "translated", "value": "Configurar el Helper…" } },
-        "ja": { "stringUnit": { "state": "translated", "value": "Helper を設定…" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "Helper 설정…" } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "设置 Helper…" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "設定 Helper…" } }
       }
     },
     "Authorize and Clean…": {

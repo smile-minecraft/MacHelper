@@ -178,7 +178,7 @@ public enum SystemCleanup {
                             requiresAuthorization: true, skipsTopLevel: isAppleOwned, matches: anyFile),
         // Caches of processes running as root.
         SystemCleanupTarget(id: "deep.root-caches", root: "/private/var/root/Library/Caches", maxDepth: 5,
-                            minimumAge: deepMinimumAge, requiresAuthorization: true, matches: anyFile),
+                            minimumAge: deepMinimumAge, requiresAuthorization: true, skipsTopLevel: isAppleOwned, matches: anyFile),
         // Rotated and compressed system logs (system.log.3.gz, wifi.log.2.bz2, asl).
         SystemCleanupTarget(id: "deep.var-log", root: "/private/var/log", maxDepth: 3, minimumAge: 86_400,
                             requiresAuthorization: true, matches: isRotatedLogName),

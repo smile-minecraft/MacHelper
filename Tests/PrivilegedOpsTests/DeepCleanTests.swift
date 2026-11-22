@@ -66,6 +66,7 @@ import Testing
                     "\(t.id) stays out of the system volume, the system databases and home folders")
         }
         #expect(SystemCleanup.target("deep.var-log")?.root == "/private/var/log")
+        #expect(SystemCleanup.target("deep.root-caches").map { $0.skipsTopLevel("com.apple.something") } == true)
         #expect(SystemCleanup.target("system.logs")?.requiresAuthorization == false)
     }
 
@@ -189,7 +190,12 @@ import Testing
         #expect(!DeepCleanAuthorization.isExpected(["class": "allow"]), "a planted 'allow' right is replaced")
         #expect(!DeepCleanAuthorization.isExpected(["class": "rule", "rule": "allow"]))
         #expect(!DeepCleanAuthorization.isExpected(["class": "rule", "rule": ["is-root"]]))
-        #expect(DeepCleanAuthorization.isExpected(["class": "rule", "rule": ["authenticate-admin-nonshared"]]))
+        let prompt = d["default-prompt"] as? [String: String] ?? [:]
+        #expect(DeepCleanAuthorization.isExpected(["class": "rule", "rule": ["authenticate-admin-nonshared"], "default-prompt": prompt]))
+        #expect(!DeepCleanAuthorization.isExpected(["class": "rule", "rule": "authenticate-admin-nonshared", "default-prompt": prompt, "k-of-n": 0]),
+                "a k-of-n twist is replaced")
+        #expect(!DeepCleanAuthorization.isExpected(["class": "rule", "rule": "authenticate-admin-nonshared", "default-prompt": ["": "Enter your password to update Safari"]]),
+                "a planted misleading prompt is replaced")
     }
 
     @Test func appSessionMakesAnExternalFormOfTheRightSize() throws {

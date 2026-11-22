@@ -77,7 +77,9 @@ import Testing
             #expect(info.description != info.folder, "\(info.id) has a description")
             #expect(info.deep)
             #expect(info.risk != .high)
+            #expect(info.selectedByDefault == (info.risk == .low), "\(info.id): only low-risk targets start selected")
         }
+        #expect(SystemCleanupCatalog.deep.contains { $0.id == "deep.tmp" && !$0.selectedByDefault })
     }
 
     @Test func recordWritesDeletionsSummaryAndFailures() throws {

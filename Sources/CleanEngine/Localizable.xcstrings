@@ -2823,40 +2823,6 @@
         }
       }
     },
-    "Files in /private/var/tmp nobody used for 7 days.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archivos en /private/var/tmp que nadie usó en 7 días."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "/private/var/tmp にある、7 日間だれも使っていないファイル。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "/private/var/tmp에서 7일간 아무도 사용하지 않은 파일."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "/private/var/tmp 里 7 天没人用过的文件。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "/private/var/tmp 裡 7 天沒人用過的檔案。"
-          }
-        }
-      }
-    },
     "Shared temporary files": {
       "localizations": {
         "es": {
@@ -2887,40 +2853,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "共用暫存檔"
-          }
-        }
-      }
-    },
-    "Files in /tmp nobody used for 7 days. Files still in use are newer and stay.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archivos en /tmp que nadie usó en 7 días. Los que siguen en uso son más recientes y se quedan."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "/tmp にある、7 日間だれも使っていないファイル。使用中のファイルは新しいので残ります。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "/tmp에서 7일간 아무도 사용하지 않은 파일. 아직 사용 중인 파일은 더 최근이므로 남습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "/tmp 里 7 天没人用过的文件。还在用的文件比较新，会保留。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "/tmp 裡 7 天沒人用過的檔案。還在用的檔案比較新，會保留。"
           }
         }
       }
@@ -2989,6 +2921,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "/Library/Developer/CoreSimulator/Caches 裡 iOS 模擬器的共用快取。下次啟動模擬器時會重建，那一次會比較久。"
+          }
+        }
+      }
+    },
+    "Files in /tmp that haven’t changed for 7 days. An app that keeps a file open without writing to it can still need it, so check the list before cleaning.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos en /tmp que no cambian desde hace 7 días. Una app que mantiene un archivo abierto sin escribir en él aún puede necesitarlo; revisa la lista antes de limpiar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/tmp にある、7 日間変更されていないファイル。書き込まずに開いたままにしているアプリがまだ必要としている場合があるので、削除前に一覧を確認してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/tmp에서 7일간 변경되지 않은 파일. 쓰지 않고 열어 둔 앱이 아직 필요로 할 수 있으니 정리하기 전에 목록을 확인하세요."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/tmp 里 7 天没有变动的文件。有些 App 会一直开着文件却不写入，仍可能需要它，清理前请先看过列表。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/tmp 裡 7 天沒有變動的檔案。有些 App 會一直開著檔案卻不寫入，仍可能需要它，清理前請先看過清單。"
+          }
+        }
+      }
+    },
+    "Files in /private/var/tmp that haven’t changed for 7 days.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos en /private/var/tmp que no cambian desde hace 7 días."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/tmp にある、7 日間変更されていないファイル。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/tmp에서 7일간 변경되지 않은 파일."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/tmp 里 7 天没有变动的文件。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/tmp 裡 7 天沒有變動的檔案。"
           }
         }
       }
