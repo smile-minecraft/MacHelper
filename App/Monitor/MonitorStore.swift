@@ -212,15 +212,9 @@ final class MonitorStore {
     /// Busiest GPU users, sampled with the process list (only while someone is watching).
     private(set) var gpuProcesses: [GPUProcessUsage]?
     @ObservationIgnored private let gpuProcessSampler = GPUProcessSampler()
-    /// Persistent per-minute history (nil if the database can't be opened).
-    @ObservationIgnored let persistentHistory: MetricsHistory? = {
-        do {
-            return try MetricsHistory()
-        } catch {
-            NSLog("MacHelper history database unavailable: %@", error.localizedDescription)
-            return nil
-        }
-    }()
+    /// Persistent per-minute history (nil if the database can't be opened, and always nil for
+    /// the synthetic `--snapshot-demo` run, which must never open or write the real database).
+    @ObservationIgnored let persistentHistory: MetricsHistory?
     @ObservationIgnored private var minute = MinuteAccumulator()
     @ObservationIgnored let alerts = AlertCenter()
     @ObservationIgnored private var processTask: Task<Void, Never>?
@@ -232,14 +226,26 @@ final class MonitorStore {
 
     let settings: MonitorSettingsStore
     let availableModules: Set<MonitorModule>
-    @ObservationIgnored private let sources: MetricSources
+    /// Nil for the synthetic `--snapshot-demo` run: no sampler, SMC or fan driver is created.
+    @ObservationIgnored private let sources: MetricSources?
     @ObservationIgnored private var tasks: [MonitorModule: (config: ModuleConfig, task: Task<Void, Never>)] = [:]
     /// Every live chart shows at most the last five minutes; keep a little more for edge points.
     @ObservationIgnored private static let historyWindow: TimeInterval = 330
 
-    init(settings: MonitorSettingsStore, sources: MetricSources = MetricSources()) {
+    init(settings: MonitorSettingsStore, sources: MetricSources? = nil) {
         self.settings = settings
+        #if DEBUG
+        if DemoData.snapshot {
+            self.sources = nil
+            persistentHistory = nil
+            availableModules = DemoData.modules
+            loadDemoReadings()
+            return
+        }
+        #endif
+        let sources = sources ?? MetricSources()
         self.sources = sources
+        persistentHistory = Self.openHistory()
         availableModules = Set(MonitorModule.allCases.filter(sources.isAvailable))
         reconfigure()
         observeSettings()
@@ -247,6 +253,31 @@ final class MonitorStore {
         startSeriesCollection()
         startVolumeCapacityCollection()
     }
+
+    private static func openHistory() -> MetricsHistory? {
+        do {
+            return try MetricsHistory()
+        } catch {
+            NSLog("MacHelper history database unavailable: %@", error.localizedDescription)
+            return nil
+        }
+    }
+
+    #if DEBUG
+    /// Fills the live series with the synthetic Mac's last few minutes and leaves its readings
+    /// on screen. Nothing samples afterwards, so the numbers stay exactly the demo's.
+    private func loadDemoReadings() {
+        let now = Date()
+        for offset in stride(from: -DemoData.liveSpan, through: 0, by: 1) {
+            for sample in DemoData.samples(offset: Double(offset)) {
+                apply(sample, at: now.addingTimeInterval(Double(offset)))
+            }
+        }
+        processes = DemoData.processes
+        gpuProcesses = []
+        refreshMenuBarCache()
+    }
+    #endif
 
     /// Hottest CPU-die sensor, the number shown for "temperature".
     var cpuCelsius: Double? {
@@ -415,6 +446,8 @@ final class MonitorStore {
     /// Per-process sampling runs only while someone looks at it (panel open, overview or monitor shown).
     /// Calls are counted: every `true` needs a matching `false`.
     func watchProcesses(_ on: Bool) {
+        // The demo's process list is fixed; nothing is sampled.
+        guard sources != nil else { return }
         processWatchers = max(processWatchers + (on ? 1 : -1), 0)
         if processWatchers == 0 {
             processTask?.cancel()
@@ -440,7 +473,7 @@ final class MonitorStore {
     }
 
     private func startLoop(_ m: MonitorModule, interval: Double) -> Task<Void, Never> {
-        let sources = sources
+        guard let sources else { return Task {} }
         return Task { [weak self] in
             while !Task.isCancelled {
                 let sample = await Task.detached(priority: .utility) { sources.sample(m) }.value
@@ -451,8 +484,7 @@ final class MonitorStore {
         }
     }
 
-    private func apply(_ sample: ModuleSample) {
-        let now = Date()
+    private func apply(_ sample: ModuleSample, at now: Date = Date()) {
         switch sample {
         case .cpu(let r):
             cpu = r
@@ -465,11 +497,11 @@ final class MonitorStore {
             recordHistory(MonitorHistorySample.gpu(r), now)
         case .memory(let r):
             memory = r
-            alerts.check(cpuCelsius: nil, memory: r, disk: nil)
+            if sources != nil { alerts.check(cpuCelsius: nil, memory: r, disk: nil) }
             recordHistory(MonitorHistorySample.memory(r), now)
         case .disk(let r):
             disk = r
-            alerts.check(cpuCelsius: nil, memory: nil, disk: r)
+            if sources != nil { alerts.check(cpuCelsius: nil, memory: nil, disk: r) }
             recordHistory(MonitorHistorySample.disk(r), now)
         case .network(let r):
             network = r
@@ -482,7 +514,7 @@ final class MonitorStore {
             if let low = r.map(\.charge).min() { record(.accessory, low, now) }
         case .temperature(let r):
             temperatures = r
-            alerts.check(cpuCelsius: cpuCelsius, memory: nil, disk: nil)
+            if sources != nil { alerts.check(cpuCelsius: cpuCelsius, memory: nil, disk: nil) }
             recordHistory(MonitorHistorySample.temperature(r), now)
             recordSeries(SeriesValues.temperature(r.map { (name: $0.name, celsius: $0.celsius) }), now)
         case .fan(let r):

@@ -248,6 +248,8 @@ final class DiskAnalysisModel {
     }
 
     private func loadSavedScan() {
+        // The synthetic `--snapshot-demo` run never opens this Mac's saved scans.
+        guard !DemoData.snapshot else { return }
         let key = cacheKey(for: target.url)
         if let cached = treeCache[key] {
             restoreGeneration += 1
@@ -331,6 +333,7 @@ final class DiskAnalysisModel {
     }
 
     private func loadVolume(force: Bool = false) {
+        guard !DemoData.snapshot else { return }
         let url = target.url
         let key = url.path
         if let cached = volumeCache[key] {
@@ -560,6 +563,29 @@ final class DiskAnalysisModel {
     }
 
     func node(atPath path: String) -> DiskNode? { root?.descendant(atPath: path) }
+
+    #if DEBUG
+    /// Shows a synthetic tree as if a scan had just finished (`--snapshot-demo`). Nothing on
+    /// disk is scanned, restored or measured; the volume figures are the demo's too.
+    func showDemo(root: DiskNode, volume: VolumeSummary, files: Int, elapsed: TimeInterval) {
+        cancel()
+        // The picker shows the home folder whatever location this Mac scanned last.
+        if let home = targets.first(where: { $0.id == "home" }) { target = home }
+        self.root = root
+        focus = root
+        self.volume = volume
+        progress = ScanProgress(files: files, directories: files / 9, bytes: root.size, unreadableDirectories: 0)
+        self.elapsed = elapsed
+        restoredAt = nil
+        scanVolumeIdentifier = volume.identifier
+        scanCoversVolume = false
+        scanIsComplete = true
+        phase = .done
+        revision += 1
+        // Spotlight is never asked about the made-up paths.
+        setInsights(SpaceInsights.find(in: root, lastUse: { _ in nil }), root: root)
+    }
+    #endif
 
     func setInsights(_ i: SpaceInsights?, root: DiskNode) {
         insights = i

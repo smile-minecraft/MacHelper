@@ -92,6 +92,8 @@ final class BackgroundRecordingModel {
     /// The process switch lives in the shared history database, which the agent also reads,
     /// so it is re-read here instead of being cached.
     private func processCollectionEnabled() -> Bool {
+        // The synthetic `--snapshot-demo` run never opens the real history database.
+        guard !DemoData.snapshot else { return false }
         if historyStore == nil { historyStore = try? HistoryStore(readOnly: true) }
         return (try? historyStore?.isProcessCollectionEnabled()) == true
     }

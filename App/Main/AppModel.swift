@@ -67,7 +67,7 @@ final class AppModel {
     let diskModel = DiskAnalysisModel()
     let optimizeModel = OptimizeModel()
     let updatesModel = UpdatesModel()
-    let autoCleanModel = AutoCleanModel()
+    let autoCleanModel: AutoCleanModel
     let uninstallModel = UninstallModel()
     let startupModel = StartupModel()
     let healthModel = HealthModel()
@@ -98,7 +98,19 @@ final class AppModel {
 
     private init() {
         store = MonitorStore(settings: settings)
-        backgroundRecording = BackgroundRecordingModel(settings: settings, availableModules: store.availableModules)
+        if DemoData.snapshot {
+            // The synthetic screenshot run uses throwaway files, never the real recorder profile
+            // or auto-clean schedule, and skips the launch-time schedule migration.
+            let scratch = FileManager.default.temporaryDirectory.appending(path: "MacHelperDemo-\(ProcessInfo.processInfo.processIdentifier)")
+            backgroundRecording = BackgroundRecordingModel(settings: settings, availableModules: store.availableModules,
+                                                           profileURL: scratch.appending(path: "profile.json"),
+                                                           heartbeatURL: scratch.appending(path: "heartbeat.json"))
+            autoCleanModel = AutoCleanModel(agent: SMAppServiceAgentServicing(), configURL: scratch.appending(path: "autoclean.json"),
+                                            defaults: .standard)
+        } else {
+            backgroundRecording = BackgroundRecordingModel(settings: settings, availableModules: store.availableModules)
+            autoCleanModel = AutoCleanModel()
+        }
     }
 
     func show(_ section: AppSection) {

@@ -498,6 +498,7 @@ extension Color {
 
 enum Host {
     static let modelName: String = {
+        if DemoData.snapshot { return DemoData.demoModelName }
         let model = sysctl("hw.model"), chip = sysctl("machdep.cpu.brand_string")
         return chip.isEmpty ? model : "\(chip) (\(model))"
     }()
@@ -512,12 +513,13 @@ enum Host {
     }
 
     static let osVersion: String = {
+        if DemoData.snapshot { return DemoData.demoOSVersion }
         let v = ProcessInfo.processInfo.operatingSystemVersion
         return "macOS \(v.majorVersion).\(v.minorVersion)"
     }()
 
     static var uptime: String {
-        Duration.seconds(ProcessInfo.processInfo.systemUptime)
+        Duration.seconds(DemoData.snapshot ? DemoData.demoUptime : ProcessInfo.processInfo.systemUptime)
             .formatted(.units(allowed: [.days, .hours, .minutes], width: .abbreviated, maximumUnitCount: 2))
     }
 }

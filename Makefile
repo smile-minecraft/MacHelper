@@ -15,7 +15,7 @@ XCODEBUILD_FLAGS ?=
 ARGS ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help setup project open build run test install release clean
+.PHONY: help setup project open build run test screenshots install release clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-9s %s\n", $$1, $$2}'
@@ -48,6 +48,11 @@ run: ## Build and open the app from build/; ARGS=--demo-battery previews a batte
 
 test: ## Run the unit tests of the Swift packages
 	@$(ENV) swift test
+
+screenshots: ## Redraw the README screenshots in docs/images from made-up data (Debug build)
+	@CONFIGURATION=Debug $(MAKE) --no-print-directory build
+	@build/Build/Products/Debug/MacHelper.app/Contents/MacOS/MacHelper --snapshot-demo docs/images \
+		-AppleLanguages '(en)' -AppleLocale en_US
 
 install: ## Release build, replace /Applications/MacHelper.app and relaunch it
 	@scripts/install.sh

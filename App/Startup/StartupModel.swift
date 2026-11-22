@@ -39,7 +39,7 @@ final class StartupModel {
     /// Reads the Background Task Management list through the Helper (a few seconds, no password).
     /// The refresh button passes `forceRefresh`; opening the tab reuses a recent read.
     func loadBackground(forceRefresh: Bool = false) async {
-        guard !loadingBackground else { return }
+        guard !loadingBackground, !DemoData.snapshot else { return }
         loadingBackground = true
         let result = await BackgroundItemsSource.load(forceRefresh: forceRefresh)
         switch result {
@@ -63,7 +63,8 @@ final class StartupModel {
     }
 
     func load(forceRefresh: Bool = false) async {
-        guard !loading, !refreshing else { return }
+        // The synthetic `--snapshot-demo` run never lists this Mac's launch items.
+        guard !loading, !refreshing, !DemoData.snapshot else { return }
         if !forceRefresh, !items.isEmpty {
             PageLoadProbe.mark(.startup, "cache")
             PageLoadProbe.mark(.startup, "items")

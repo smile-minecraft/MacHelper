@@ -23,15 +23,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     /// The Sparkle updater. Created eagerly below so background checks start
     /// with the rest of the app, and retained so the updater is never deallocated.
-    /// Measurement instances skip it: they must not check for or install updates.
+    /// Measurement and demo screenshot instances skip it: they must not check for or install updates.
     private let updater: UpdaterController?
 
     override init() {
-        self.updater = CommandLine.arguments.contains("--measure-pages") ? nil : UpdaterController.shared
+        self.updater = CommandLine.arguments.contains("--measure-pages") || DemoData.snapshot ? nil : UpdaterController.shared
         super.init()
     }
 
     func applicationWillFinishLaunching(_ notification: Notification) {
+        // The demo screenshot run stays out of the Dock and keeps its pages "visible" itself.
+        if DemoData.snapshot {
+            NSApp.setActivationPolicy(.accessory)
+            return
+        }
         observeWindowVisibility()
         AppModel.prepareDockPreference()
     }
@@ -81,6 +86,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             runPageMeasurements(to: URL(fileURLWithPath: CommandLine.arguments[i + 1]))
             return
         }
+        #if DEBUG
+        // Debug aid: `--snapshot-demo DIR` renders the README screenshots from synthetic data
+        // (see DemoSnapshotRenderer). It returns before the status item, Sparkle, the Helper
+        // registration and heartbeat, fan control and every background service start.
+        if DemoData.snapshot {
+            if let i = CommandLine.arguments.firstIndex(of: "--snapshot-demo"), i + 1 < CommandLine.arguments.count {
+                DemoSnapshotRenderer.run(app: app, to: URL(fileURLWithPath: CommandLine.arguments[i + 1]))
+            } else {
+                FileHandle.standardError.write(Data("usage: MacHelper --snapshot-demo DIR\n".utf8))
+                NSApp.terminate(nil)
+            }
+            return
+        }
+        #endif
         setUpStatusItem()
         setUpPopover()
         // Sparkle stops the background recorder before replacing the app; restore it if this
@@ -165,6 +184,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             }
             return
         }
+        // `--snapshot-demo DIR` (synthetic README screenshots) is handled at the top of this
+        // method, before anything that touches the Helper, the fans or the history database.
         if let i = args.firstIndex(of: "--snapshot-window"), i + 1 < args.count {
             renderWindowSnapshots(to: URL(fileURLWithPath: args[i + 1]))
             return

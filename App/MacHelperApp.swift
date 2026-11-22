@@ -12,7 +12,13 @@ struct MacHelperApp: App {
 
     var body: some Scene {
         Window("MacHelper", id: "main") {
-            MainView(app: AppModel.shared)
+            // The synthetic screenshot run draws its pages in its own off-screen windows; the
+            // main window (sidebar, Helper status, first-launch sheets) never appears.
+            if DemoData.snapshot {
+                Color.clear.frame(width: 1, height: 1)
+            } else {
+                MainView(app: AppModel.shared)
+            }
         }
         .defaultSize(width: 1180, height: 780)
         .windowToolbarStyle(.unified)

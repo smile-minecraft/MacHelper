@@ -42,6 +42,25 @@ final class HealthModel {
     @ObservationIgnored private var securityUpdatedAt: Date?
     @ObservationIgnored private var loadGeneration = 0
     @ObservationIgnored private var backgroundTask: Task<Void, Never>?
+    /// Set by the synthetic `--snapshot-demo` run: the report on screen is the demo's, and no
+    /// check, Helper read or security tool runs.
+    @ObservationIgnored private var showsDemo = false
+
+    #if DEBUG
+    /// Shows a prepared report (`--snapshot-demo`) and stops every later check from replacing it.
+    func showDemo(report: HealthReport, diskPoints: [DiskSpacePoint], security: [SecurityCheck]) {
+        showsDemo = true
+        scoreTask?.cancel()
+        self.report = report
+        scoreReport = report
+        self.diskPoints = diskPoints
+        self.security = security
+        securityUpdatedAt = Date()
+        loading = false
+        updating = false
+        error = nil
+    }
+    #endif
 
     /// The health score from the live readings and the last 24-hour check.
     func score(store: MonitorStore) -> HealthScore? {
@@ -58,7 +77,7 @@ final class HealthModel {
 
     /// Re-runs the 24-hour check every few minutes for the score (overview, health page, menu bar).
     func startScoreUpdates(history: @escaping @MainActor () -> MetricsHistory?) {
-        guard scoreTask == nil else { return }
+        guard scoreTask == nil, !showsDemo else { return }
         scoreTask = Task { [weak self] in
             while !Task.isCancelled {
                 if let history = history(), let report = try? await Self.check(history: history, hours: 24) {
@@ -83,6 +102,7 @@ final class HealthModel {
     }
 
     func loadSecurity(forceRefresh: Bool = false) async {
+        guard !showsDemo else { return }
         if !forceRefresh, let security, let at = securityUpdatedAt, Date().timeIntervalSince(at) < Self.securityMaxAge {
             PageLoadProbe.mark(.health, "security")
             return
@@ -96,6 +116,7 @@ final class HealthModel {
     }
 
     func load(history: MetricsHistory?, forceRefresh: Bool = false) async {
+        guard !showsDemo else { return }
         guard let history else {
             error = String(localized: "The history database couldn’t be opened.")
             return
