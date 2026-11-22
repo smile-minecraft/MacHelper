@@ -60,11 +60,23 @@ import Testing
 
 @Suite struct SystemCleanupCatalogTests {
     @Test func everyHelperTargetHasTextAndIsLowRisk() {
-        #expect(SystemCleanupCatalog.all.map(\.id) == SystemCleanup.targets.map(\.id))
-        for info in SystemCleanupCatalog.all {
+        #expect(SystemCleanupCatalog.standard.map(\.id) == SystemCleanup.targets.map(\.id))
+        for info in SystemCleanupCatalog.standard {
             #expect(info.title != info.id)
             #expect(info.risk == .low)
             #expect(info.description.contains("30"))
+            #expect(!info.deep)
+        }
+    }
+
+    @Test func everyDeepTargetHasTextAndIsMarkedDeep() {
+        #expect(SystemCleanupCatalog.deep.map(\.id) == SystemCleanup.deepTargets.map(\.id))
+        #expect(SystemCleanupCatalog.all.map(\.id) == SystemCleanup.allTargets.map(\.id))
+        for info in SystemCleanupCatalog.deep {
+            #expect(info.title != info.id, "\(info.id) has a title")
+            #expect(info.description != info.folder, "\(info.id) has a description")
+            #expect(info.deep)
+            #expect(info.risk != .high)
         }
     }
 

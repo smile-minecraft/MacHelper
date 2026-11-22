@@ -135,7 +135,9 @@ final class HelperService: NSObject, HelperXPC, @unchecked Sendable {
         }
         DispatchQueue.global(qos: .utility).async {
             do {
-                let result = try SystemCleanup.run(decoded)
+                // Deep targets: the administrator dialog is shown (in the user's session) before
+                // anything is deleted; a cancel or refusal throws and nothing is touched.
+                let result = try SystemCleanup.run(decoded, authorize: DeepCleanAuthorization.authorize)
                 if !decoded.dryRun {
                     xpcLog.notice("System cleanup \(decoded.targetIDs.joined(separator: ","), privacy: .public): \(result.count) files, \(result.bytes) bytes")
                 }

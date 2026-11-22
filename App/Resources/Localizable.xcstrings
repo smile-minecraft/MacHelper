@@ -1,6 +1,132 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Deep Optimize…": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Optimización profunda…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ディープ最適化…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "심층 최적화…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "深层优化…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "深層優化…" } }
+      }
+    },
+    "Also cleans system caches, old system logs and temporary files. Asks for an administrator password before deleting.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "También limpia cachés del sistema, registros antiguos y archivos temporales. Pide la contraseña de administrador antes de borrar." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システムキャッシュ、古いシステムログ、一時ファイルも削除します。削除の前に管理者パスワードを求めます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 캐시, 오래된 시스템 로그 및 임시 파일도 정리합니다. 삭제하기 전에 관리자 암호를 요청합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "同时清理系统缓存、旧的系统日志与临时文件。删除前会要求输入管理员密码。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "同時清理系統快取、舊的系統日誌與暫存檔。刪除前會要求輸入管理員密碼。" } }
+      }
+    },
+    "Goes deeper into system folders. You review everything first; deleting asks for your administrator password.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Llega más a fondo en las carpetas del sistema. Primero revisas todo; al borrar se pide tu contraseña de administrador." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システムフォルダの奥まで整理します。まずすべての項目を確認でき、削除時に管理者パスワードを求めます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 폴더 깊숙이 정리합니다. 먼저 모든 항목을 확인하고, 삭제할 때 관리자 암호를 요청합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "深入系统文件夹清理。你会先看过所有项目，删除时才要求管理员密码。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "深入系統資料夾清理。你會先看過所有項目，刪除時才要求管理員密碼。" } }
+      }
+    },
+    "Deep Optimize needs the MacHelper Helper, which works on system folders as administrator.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "La optimización profunda necesita el Helper de MacHelper, que trabaja en las carpetas del sistema como administrador." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ディープ最適化には、管理者としてシステムフォルダを扱う MacHelper の Helper が必要です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "심층 최적화에는 관리자로 시스템 폴더를 다루는 MacHelper Helper가 필요합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "深层优化需要 MacHelper 的 Helper，由它以管理员身份处理系统文件夹。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "深層優化需要 MacHelper 的 Helper，由它以管理員身分處理系統資料夾。" } }
+      }
+    },
+    "Set Up the Helper…": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Configurar el Helper…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Helper を設定…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Helper 설정…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "设置 Helper…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "設定 Helper…" } }
+      }
+    },
+    "Authorize and Clean…": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Autorizar y limpiar…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "認証して削除…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "인증 후 정리…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "验证并清理…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "驗證並清理…" } }
+      }
+    },
+    "Deep Clean": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Limpieza profunda" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ディープクリーン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "심층 정리" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "深层优化" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "深層優化" } }
+      }
+    },
+    "Files are deleted directly, as administrator, after you enter your password. Items protected by macOS, Apple’s own caches and anything used in the last days are always left alone.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Tras introducir la contraseña, los archivos se borran directamente como administrador. Lo protegido por macOS, las cachés de Apple y lo usado en los últimos días nunca se toca." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パスワードを入力すると、ファイルは管理者として直接削除されます。macOS が保護する項目、Apple 自身のキャッシュ、ここ数日に使われたものは常にそのままです。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "암호를 입력하면 파일이 관리자로 바로 삭제됩니다. macOS가 보호하는 항목, Apple 자체 캐시, 최근 며칠 사이에 사용된 항목은 항상 그대로 둡니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "输入密码后，文件会以管理员身份直接删除。受 macOS 保护的项目、Apple 自己的缓存，以及最近几天用过的东西一律不动。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "輸入密碼後，檔案會以管理員身分直接刪除。受 macOS 保護的項目、Apple 自己的快取，以及最近幾天用過的東西一律不動。" } }
+      }
+    },
+    "Needs password": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Requiere contraseña" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パスワードが必要" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "암호 필요" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "需要密码" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "需要密碼" } }
+      }
+    },
+    "Deep clean: delete %@ of system caches, logs and temporary files as administrator. macOS asks for your administrator password first; cancelling deletes none of them.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Limpieza profunda: borrar %@ de cachés, registros y archivos temporales del sistema como administrador. macOS pide primero tu contraseña de administrador; si cancelas, no se borra nada de esto." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ディープクリーン：システムキャッシュ、ログ、一時ファイル %@ を管理者として削除します。先に macOS が管理者パスワードを求めます。キャンセルすると何も削除されません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "심층 정리: 시스템 캐시, 로그 및 임시 파일 %@을(를) 관리자로 삭제합니다. macOS가 먼저 관리자 암호를 요청하며, 취소하면 아무것도 삭제되지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "深层优化：以管理员身份删除 %@ 的系统缓存、日志与临时文件。macOS 会先要求输入管理员密码；取消的话这些都不会删除。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "深層優化：以管理員身分刪除 %@ 的系統快取、日誌與暫存檔。macOS 會先要求輸入管理員密碼；取消的話這些都不會刪除。" } }
+      }
+    },
+    " (+%lld more)": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": " (+%lld más)" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "（ほか %lld 件）" } },
+        "ko": { "stringUnit": { "state": "translated", "value": " (외 %lld개)" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "（另有 %lld 项）" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "（另有 %lld 項）" } }
+      }
+    },
+    "Deleted %lld files as administrator, %@.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Se borraron %lld archivos como administrador (%@)." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "管理者として %lld 個のファイル（%@）を削除しました。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "관리자로 파일 %lld개(%@)를 삭제했습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已以管理员身份删除 %lld 个文件，共 %@。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已以管理員身分刪除 %lld 個檔案，共 %@。" } }
+      }
+    },
+    "Cancelled: the administrator password wasn’t entered, so nothing was deleted.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cancelado: no se introdujo la contraseña de administrador, así que no se borró nada." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "キャンセルしました。管理者パスワードが入力されなかったため、何も削除していません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "취소됨: 관리자 암호를 입력하지 않아 아무것도 삭제하지 않았습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已取消：没有输入管理员密码，所以什么都没删除。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已取消：沒有輸入管理員密碼，所以什麼都沒刪除。" } }
+      }
+    },
+    "The administrator password wasn’t accepted, so nothing was deleted.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No se aceptó la contraseña de administrador, así que no se borró nada." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "管理者パスワードが認証されなかったため、何も削除していません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "관리자 암호가 승인되지 않아 아무것도 삭제하지 않았습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "管理员密码没有通过验证，所以什么都没删除。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "管理員密碼沒有通過驗證，所以什麼都沒刪除。" } }
+      }
+    },
     "Preview Sample Payload": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Ver carga útil de ejemplo" } },

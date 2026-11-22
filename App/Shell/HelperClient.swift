@@ -337,10 +337,12 @@ final class HelperClient: @unchecked Sendable {
         }
     }
 
-    /// Old system logs and diagnostic reports (fixed folders, older than 30 days). Deleting is permanent.
-    func systemCleanup(_ request: SystemCleanupRequest) async throws -> SystemCleanupResult {
+    /// Old system logs and diagnostic reports, and the deep targets (fixed folders and age limits).
+    /// Deleting is permanent. Deleting deep targets waits for the administrator password dialog the
+    /// Helper shows, so callers pass a longer `timeout`.
+    func systemCleanup(_ request: SystemCleanupRequest, timeout: Duration = .seconds(60)) async throws -> SystemCleanupResult {
         let json = try JSONEncoder().encode(request)
-        let data: Data = try await call(timeout: .seconds(60)) { proxy, done in
+        let data: Data = try await call(timeout: timeout) { proxy, done in
             proxy.systemCleanup(json) { data, error in
                 if let data { done(.success(data)) } else { done(.failure(HelperClientError.remote(error ?? "unknown"))) }
             }
