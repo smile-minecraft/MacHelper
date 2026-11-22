@@ -3,7 +3,13 @@
 Each release's notes on GitHub come from its section here (`scripts/release.sh`). Add changes under
 **Unreleased** as they land, then rename it to the version before releasing.
 
-## [Unreleased]
+## [0.4.0]
+
+MacHelper now moves smoothly: pages and their states fade in instead of cutting over, and on
+macOS 26 the controls that float above content use Liquid Glass. Each section of the menu bar
+panel sits on its own glass card, the Battery page is redesigned, and with the CPU page open the
+panel uses about a fifth of the CPU it did before. Settings explain the Helper in plain words, and
+building from source starts with `make setup`.
 
 ### Interface
 - Switching pages, and moving between a page's states (start, scanning, results), now fades the
