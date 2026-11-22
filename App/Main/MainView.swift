@@ -15,17 +15,22 @@ struct MainView: View {
             Sidebar(app: app, setUpHelper: { showHelperSetup = true })
                 .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
         } detail: {
-            // The previous page leaves at once and the new one fades in, rising a few points, so a
-            // switch reads as one movement and two heavy pages are never blended mid-fade.
-            // With Reduce Motion it is a plain fade.
-            ZStack {
-                detail
-                    .id(app.section)
-                    .onAppear { PageLoadProbe.mark(app.section, "render") }
-                    .transition(Motion.pageIn)
+            VStack(spacing: 0) {
+                HelperRecoveryBanner()
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+                // The previous page leaves at once and the new one fades in, rising a few points, so a
+                // switch reads as one movement and two heavy pages are never blended mid-fade.
+                // With Reduce Motion it is a plain fade.
+                ZStack {
+                    detail
+                        .id(app.section)
+                        .onAppear { PageLoadProbe.mark(app.section, "render") }
+                        .transition(Motion.pageIn)
+                }
+                .animation(Motion.reduced ? .easeOut(duration: 0.15) : .smooth(duration: 0.32), value: app.section)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .animation(Motion.reduced ? .easeOut(duration: 0.15) : .smooth(duration: 0.32), value: app.section)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Palette.base)
             .navigationTitle(Text(app.section.title))
             .modifier(SteadyTitleBar())
@@ -108,7 +113,9 @@ private struct Sidebar: View {
 private struct SidebarFooter: View {
     let app: AppModel
     var setUpHelper: () -> Void
-    @State private var status = HelperClient.shared.status
+    /// The verified health state, not the raw Login Items registration: a job can be
+    /// marked enabled in BTM while the Helper behind it is gone or answers an old protocol.
+    @Bindable private var health = HelperHealthMonitor.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -116,20 +123,7 @@ private struct SidebarFooter: View {
             UpdateAvailableButton()
                 .padding(.horizontal, 12)
             HStack(spacing: 8) {
-                if status == .enabled {
-                    Circle().fill(Theme.mint).frame(width: 8, height: 8)
-                    Text("Helper running").font(.mhCaption).foregroundStyle(Palette.textMuted)
-                } else {
-                    // Not running: the line opens the setup guide.
-                    Button(action: setUpHelper) {
-                        HStack(spacing: 8) {
-                            Circle().fill(Theme.amber).frame(width: 8, height: 8)
-                            Text("Set up Helper…").font(.mhCaption).foregroundStyle(Palette.text)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .help("Helper not enabled")
-                }
+                helperStatus
                 Spacer()
                 SettingsLink { Image(systemName: "gearshape") }
                     .buttonStyle(.borderless)
@@ -138,14 +132,28 @@ private struct SidebarFooter: View {
             .padding(.horizontal, 12)
             .padding(.bottom, 10)
         }
-        .task {
-            while !Task.isCancelled {
-                // The status only changes when the user turns the Helper on or off; check sooner
-                // while it is off so the footer follows the setup guide.
-                let now = HelperClient.shared.status
-                if now != status { status = now }
-                try? await Task.sleep(for: .seconds(status == .enabled ? 30 : 3))
-            }
+    }
+
+    @ViewBuilder private var helperStatus: some View {
+        let row = HStack(spacing: 8) {
+            Circle().fill(dotColor).frame(width: 8, height: 8)
+            Text(health.summaryLabel).font(.mhCaption).foregroundStyle(Palette.text)
+        }
+        if health.isHealthy {
+            row.help("Helper running")
+        } else {
+            Button(action: setUpHelper) { row }
+                .buttonStyle(.plain)
+                .help("Open Helper setup and repair options")
+        }
+    }
+
+    private var dotColor: Color {
+        switch health.footerTone {
+        case .healthy: Theme.mint
+        case .warning: Theme.amber
+        case .alert: Theme.rose
+        case .neutral: Palette.textMuted
         }
     }
 }

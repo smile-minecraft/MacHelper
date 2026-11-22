@@ -127,9 +127,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             AppModel.applyDockPreference()
             self.app.hasVisibleMainWindow = AppModel.mainWindowIsVisible()
         }
-        // Ad-hoc builds: launchd pins the helper's cdhash, so an updated bundle must re-register.
-        _ = try? HelperClient.shared.refreshRegistrationIfNeeded()
         startHeartbeat()
+        // Verify the Helper over XPC after launch (and after any update), repair it when
+        // safe, and alert the user when it cannot be fixed. Snapshot, measurement and CLI
+        // runs are short-lived and must not touch a real Helper.
+        if !CommandLine.arguments.contains(where: { $0.hasPrefix("--snapshot") || $0 == "--measure-pages" || $0 == "--selftest" }) {
+            HelperHealthMonitor.shared.startAfterLaunch()
+        }
         // The health score (overview, health page, menu bar) re-checks the last 24 hours every few minutes.
         app.healthModel.startScoreUpdates { [weak self] in self?.store.persistentHistory }
         let args = CommandLine.arguments

@@ -22,6 +22,10 @@ private final class UpdaterDelegate: NSObject, @preconcurrency SPUUpdaterDelegat
         let box = InstallHandlerBox(installHandler)
         Task { @MainActor in
             await AppModel.shared.backgroundRecording.suspendForUpdate()
+            // Snapshot the Helper before Sparkle replaces the bundle, and drop the XPC
+            // connection so the old daemon is not held open across replacement. The
+            // relaunched app uses this to recover a Helper that worked before the update.
+            HelperHealthMonitor.shared.prepareForUpdate()
             box.handler()
         }
         return true
@@ -35,6 +39,9 @@ private final class UpdaterDelegate: NSObject, @preconcurrency SPUUpdaterDelegat
         guard error != nil else { return }
         Task { @MainActor in
             AppModel.shared.backgroundRecording.resumeAfterUpdateIfNeeded()
+            // No bundle was replaced: drop the handoff so a later failure is not blamed
+            // on an update that never happened, and re-observe the current Helper.
+            HelperHealthMonitor.shared.clearPendingUpdateHandoff()
         }
     }
 }
