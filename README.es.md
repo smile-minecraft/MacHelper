@@ -110,6 +110,7 @@ También puedes descargar `MacHelper-<versión>.dmg` desde [Releases](https://gi
 | **Avisos** | Notificaciones configurables por temperatura alta de la CPU, presión de memoria crítica y poco espacio en disco. |
 | **Historial opcional** | El historial de procesos, sensores y núcleos está desactivado por defecto. El de procesos guarda solo nombre, CPU y memoria (sin rutas, argumentos ni nombres de usuario), con retención de 1 a 30 días. |
 | **El slime** | La mascota refleja el estado del Mac (azul, amarillo, rojo), reacciona a clics, puntero, arrastre, calor y limpiezas completadas, y respeta Reducir movimiento y VoiceOver. |
+| **Temas y materiales** | Modo Claro, Oscuro o Sistema; materiales de superficie Sólido, Esmerilado o Liquid Glass; ajustes predefinidos Instrument y Pixel Retro; importación de temas de VS Code; y legibilidad verificada por contraste. |
 | **Idiomas** | Inglés, chino tradicional, chino simplificado, japonés, coreano y español. Configurable de forma independiente a macOS en **Ajustes → General → Idioma**. |
 
 ## Privacidad y telemetría
@@ -120,10 +121,11 @@ También puedes descargar `MacHelper-<versión>.dmg` desde [Releases](https://gi
 
 ## Primer inicio
 
-MacHelper te guía paso a paso por dos permisos opcionales. El resto de las funciones trabaja sin ellos:
+MacHelper abre una **Guía de bienvenida** guiada de 6 pasos (que puedes volver a abrir en cualquier momento desde **Ayuda → Guía de bienvenida…**) para configurar tus preferencias, el **Acceso total al disco** opcional, el **Helper** y las **skills para agentes de IA**. El resto de las funciones trabaja sin los permisos opcionales:
 
-1. **Acceso total al disco** permite al análisis de disco y la limpieza inspeccionar ubicaciones protegidas como las descargas de Mail y cachés de otras apps. Activa MacHelper en **Ajustes del Sistema → Privacidad y seguridad → Acceso total al disco**; el asistente detecta el cambio automáticamente. Las carpetas protegidas por SIP siguen siendo ilegibles y se muestran aparte.
-2. **El Helper** es un ligero daemon con privilegios de root para controlar los ventiladores, limpiar cachés y registros del sistema, leer ítems en segundo plano del sistema y consultar el uso de procesos del sistema. La guía lo instala, abre **Ajustes del Sistema → General → Ítems de inicio y extensiones** para que lo apruebes y verifica su respuesta. Valida la firma de código de cada llamada. Si está apagado, **Configurar Helper…** al pie de la barra lateral vuelve a abrir la guía.
+1. **Acceso total al disco** permite al análisis de disco y la limpieza inspeccionar ubicaciones protegidas como las descargas de Mail y cachés de otras apps. Activa MacHelper en **Ajustes del Sistema → Privacidad y seguridad → Acceso total al disco**; la Guía de bienvenida detecta el cambio automáticamente. Las carpetas protegidas por SIP siguen siendo ilegibles y se muestran aparte.
+2. **El Helper** es un ligero daemon con privilegios de root para controlar los ventiladores, limpiar cachés y registros del sistema, leer ítems en segundo plano del sistema y consultar el uso de procesos del sistema. La guía lo instala, abre **Ajustes del Sistema → General → Ítems de inicio y extensiones** para que lo apruebes y verifica su respuesta. Valida la firma de código de cada llamada. Si está apagado, **Configurar Helper…** al pie de la barra lateral vuelve a abrir la configuración.
+3. **Skills para agentes de IA** se pueden instalar para los agentes detectados (como Claude Code y Codex) directamente desde la guía, sin sobrescribir ningún `SKILL.md` personalizado existente.
 
 ## Línea de comandos
 

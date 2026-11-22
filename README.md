@@ -110,6 +110,7 @@ Or download `MacHelper-<version>.dmg` from [Releases](https://github.com/smile-m
 | **Alerts** | Configurable notifications for high CPU temperature, critical memory pressure, and low disk space. |
 | **Optional history** | Process, sensor, and core history are off by default. Process history keeps only name, CPU, and memory (no paths, arguments, or user names) with 1–30 days retention. |
 | **The slime** | The mascot reflects your Mac's state (blue, yellow, red), reacts to clicks, hovering, dragging, heat, and completed cleanups, and respects Reduce Motion and VoiceOver. |
+| **Themes & Materials** | Light, Dark, or System mode; Solid, Frosted, or Liquid Glass surface materials; Instrument and Pixel Retro presets; VS Code theme import; and contrast-checked readability across every surface. |
 | **Languages** | English, Traditional Chinese, Simplified Chinese, Japanese, Korean, and Spanish. Set independently of macOS under **Settings → General → Language**. |
 
 ## Privacy and Telemetry
@@ -120,10 +121,11 @@ Or download `MacHelper-<version>.dmg` from [Releases](https://github.com/smile-m
 
 ## First Launch
 
-MacHelper walks you through two optional permissions one at a time. Every other feature works without them:
+MacHelper opens a guided 6-step **Welcome Guide** (replayable anytime via **Help → Welcome Guide…**) that walks through your preferences, optional **Full Disk Access**, **the Helper**, and **AI Agent skills**. Every other feature works without the optional permissions:
 
-1. **Full Disk Access** lets disk analysis and cleanup inspect protected locations such as Mail downloads and other apps' caches. Enable MacHelper in **System Settings → Privacy & Security → Full Disk Access**; the onboarding sheet detects the change automatically. Folders protected by System Integrity Protection (SIP) remain unreadable and are listed separately.
-2. **The Helper** is a lightweight root daemon for fan control, system cache and log cleanup, system background items, and system process usage. The guide installs it, opens **System Settings → General → Login Items & Extensions** for approval, and verifies it responds. Every caller's code signature is verified. If disabled, **Set up Helper…** at the bottom of the sidebar reopens the guide.
+1. **Full Disk Access** lets disk analysis and cleanup inspect protected locations such as Mail downloads and other apps' caches. Enable MacHelper in **System Settings → Privacy & Security → Full Disk Access**; the Welcome Guide detects the change automatically. Folders protected by System Integrity Protection (SIP) remain unreadable and are listed separately.
+2. **The Helper** is a lightweight root daemon for fan control, system cache and log cleanup, system background items, and system process usage. The guide installs it, opens **System Settings → General → Login Items & Extensions** for approval, and verifies it responds. Every caller's code signature is verified. If disabled, **Set up Helper…** at the bottom of the sidebar reopens the Helper setup.
+3. **AI Agent Skills** can be installed for detected agents (such as Claude Code and Codex) directly from the guide without overwriting existing custom `SKILL.md` files.
 
 ## Command Line
 
@@ -229,7 +231,7 @@ CODE_SIGN_IDENTITY = Apple Development
 
 ### Regenerating README Images
 
-`MacHelper --snapshot-window DIR --dark` renders every page, `--snapshot DIR` renders the menu bar, and `--export-mascot-gif FILE` exports the slime animation.
+Run `make screenshots` (or `MacHelper --snapshot-demo DIR` in Debug builds) to render synthetic fake-data screenshots for `overview`, `monitor`, `health`, `disk`, and `menubar.png`, and `--export-mascot-gif FILE` to export the slime animation.
 
 ### Releasing
 
