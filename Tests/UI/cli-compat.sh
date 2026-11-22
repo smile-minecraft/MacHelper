@@ -6,7 +6,7 @@
 # MACHELPER_BREW override, so the CLI would run the user's real Homebrew. sandbox-exec on this
 # machine did not block a self-created canary, so it cannot be used as isolation either.
 #
-# Previous Debug-only results, kept in SmileWork evidence and not rerun in this version:
+# Previous Debug-only results (from an earlier manual run; not rerun in this version):
 #   info success: ok; info failure fallback: ok.
 #
 # Do not add a bypass here without an independently proven way to force every brew invocation to
