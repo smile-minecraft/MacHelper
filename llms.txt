@@ -10,7 +10,7 @@ Install: `brew install --cask smile-minecraft/tap/machelper`, or download the si
 
 Agent rules: every `machelper` command previews and changes nothing until `--yes` is added. Show the user the plan and get a clear yes before running with `--yes`. Removed items go to the Trash unless `--permanent`, and protected paths (Keychains, Mail, Photos, `~/.ssh`, `~/Documents`, …) are never removed. Add `--json` for machine-readable output. Run `machelper guide` first.
 
-Whole-Mac overview: `machelper report --json` returns one redacted diagnostic report (health, resources, disk, security, background items). User names, home paths, host names, IP and MAC addresses are masked. Its `suggestedActions` list names the `machelper` commands to preview next; each still needs the user's yes before `--yes`.
+Whole-Mac overview: `machelper report --json` returns one redacted diagnostic report (`schemaVersion` 1: `system`, `liveMetrics`, `health`, `storage`, `cleanupPreview`, `security`, `startup`, `findings`, `suggestedActions`, `availableTools`). User names, home paths, host names, IP and MAC addresses are masked. Each `suggestedActions` entry has a `command`, `reason`, `risk`, `previewOnly` and `requiresUserApproval`; each still needs the user's yes before `--yes`.
 
 Agent skill: `machelper skill install claude` or `machelper skill install codex` installs a skill that tells the agent to preview first and ask before applying. Other agents (OpenCode and any agent that can run shell commands) should read `machelper guide`.
 
@@ -18,7 +18,7 @@ Agent skill: `machelper skill install claude` or `machelper skill install codex`
 
 - [Website](https://smile-minecraft.github.io/MacHelper/): overview, features, privacy, FAQ
 - [README](https://github.com/smile-minecraft/MacHelper/blob/main/README.md): features, install, first launch, FAQ
-- [CLI reference](https://github.com/smile-minecraft/MacHelper/blob/main/docs/CLI.md): every command, safety model, JSON schema notes, exit codes, recipes
+- [CLI reference](https://github.com/smile-minecraft/MacHelper/blob/main/README.md#command-line): every command, safety model, JSON schema notes, exit codes, recipes
 - [Changelog](https://github.com/smile-minecraft/MacHelper/blob/main/CHANGELOG.md): what changed in each release
 
 ## Releases

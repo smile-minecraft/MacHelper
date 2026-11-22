@@ -479,8 +479,8 @@
         </article>
         <article class="card reveal">
           <div class="ico" aria-hidden="true"><svg><use href="#i-sparkle"/></svg></div>
-          <h3>Liquid Glass</h3>
-          <p>On macOS 26, floating controls and panel cards use Liquid Glass.</p>
+          <h3>Solid, Frosted or Liquid Glass</h3>
+          <p>Pick a material in Settings, in Light or Dark. On macOS 26, Liquid Glass covers floating controls and panel cards.</p>
         </article>
       </div>
     </div>
@@ -539,31 +539,32 @@
 {
   <span class="k">"schemaVersion"</span>: <span class="n">1</span>,
   <span class="k">"redacted"</span>: <span class="n">true</span>,
+  <span class="k">"generatedAt"</span>: <span class="s">"2026-11-10T09:30:00Z"</span>,
   <span class="k">"system"</span>: {
-    <span class="k">"chip"</span>: <span class="s">"Apple M-series"</span>, <span class="k">"macOS"</span>: <span class="s">"15.x"</span>,
-    <span class="k">"hostName"</span>: <span class="m">"&lt;host&gt;"</span>, <span class="k">"userName"</span>: <span class="m">"&lt;user&gt;"</span>,
-    <span class="k">"ip"</span>: <span class="m">"&lt;ip&gt;"</span>, <span class="k">"mac"</span>: <span class="m">"&lt;mac&gt;"</span>
+    <span class="k">"host"</span>: <span class="m">"&lt;redacted-host&gt;"</span>, <span class="k">"chip"</span>: <span class="s">"Apple M4"</span>,
+    <span class="k">"macOSVersion"</span>: <span class="s">"15.0.0"</span>, <span class="k">"architecture"</span>: <span class="s">"arm64"</span>
   },
-  <span class="k">"health"</span>: { <span class="k">"score"</span>: <span class="n">82</span>, <span class="k">"lowers"</span>: [<span class="s">"freeSpace"</span>] },
-  <span class="k">"resources"</span>: {
-    <span class="k">"cpuPercent"</span>: <span class="n">14</span>, <span class="k">"cpuTempC"</span>: <span class="n">53</span>,
-    <span class="k">"memoryPressure"</span>: <span class="s">"normal"</span>
+  <span class="k">"liveMetrics"</span>: { … },
+  <span class="k">"health"</span>: { <span class="k">"score"</span>: <span class="n">82</span>, <span class="k">"summary"</span>: <span class="s">"Low free space"</span> },
+  <span class="k">"storage"</span>: { … },
+  <span class="k">"cleanupPreview"</span>: {
+    <span class="k">"candidateCount"</span>: <span class="n">412</span>, <span class="k">"reclaimableBytes"</span>: <span class="n">10523000000</span>,
+    <span class="k">"categories"</span>: [ … ]
   },
-  <span class="k">"disk"</span>: {
-    <span class="k">"freeGB"</span>: <span class="n">41.2</span>,
-    <span class="k">"largest"</span>: [
-      { <span class="k">"path"</span>: <span class="m">"~/Library/Developer/Xcode"</span>, <span class="k">"gb"</span>: <span class="n">9.8</span> }
-    ]
-  },
-  <span class="k">"security"</span>: { <span class="k">"fileVault"</span>: <span class="n">true</span>, <span class="k">"firewall"</span>: <span class="n">false</span> },
+  <span class="k">"security"</span>: { … }, <span class="k">"startup"</span>: { … },
+  <span class="k">"findings"</span>: [
+    { <span class="k">"id"</span>: <span class="s">"storage.low-free-space"</span>, <span class="k">"severity"</span>: <span class="s">"warning"</span>,
+      <span class="k">"area"</span>: <span class="s">"storage"</span>, <span class="k">"title"</span>: <span class="s">"Free space is low"</span>,
+      <span class="k">"detail"</span>: <span class="s">"41 GB free on the startup disk"</span> }
+  ],
   <span class="k">"suggestedActions"</span>: [
-    { <span class="k">"command"</span>: <span class="s">"machelper clean --max-risk low"</span>,
-      <span class="k">"risk"</span>: <span class="s">"low"</span> },
-    { <span class="k">"command"</span>: <span class="s">"machelper purge --path ~/Developer"</span>,
-      <span class="k">"risk"</span>: <span class="s">"medium"</span> },
-    { <span class="k">"command"</span>: <span class="s">"machelper uninstall --orphans"</span>,
-      <span class="k">"risk"</span>: <span class="s">"medium"</span> }
-  ]
+    { <span class="k">"id"</span>: <span class="s">"clean.low-risk"</span>,
+      <span class="k">"command"</span>: <span class="s">"machelper clean --max-risk low"</span>,
+      <span class="k">"reason"</span>: <span class="s">"Reclaims caches and logs"</span>,
+      <span class="k">"previewOnly"</span>: <span class="n">true</span>, <span class="k">"risk"</span>: <span class="s">"low"</span>,
+      <span class="k">"requiresUserApproval"</span>: <span class="n">true</span> }
+  ],
+  <span class="k">"availableTools"</span>: [ … ]
 }</pre>
 <pre class="term-body" role="tabpanel" id="tp-clean" aria-labelledby="tt-clean" tabindex="0" hidden><span class="p">$</span> <span class="hl">machelper clean</span>
 <span class="w">Preview only. Nothing has been changed.</span>
@@ -609,7 +610,7 @@
               </button>
             </div>
           </div>
-          <p class="agent-list"><strong>Works with</strong> Claude Code, Codex, OpenCode and any agent that can run a shell command. See the <a href="https://github.com/smile-minecraft/MacHelper/blob/main/docs/CLI.md">CLI reference</a> and <a href="llms.txt">llms.txt</a>.</p>
+          <p class="agent-list"><strong>Works with</strong> Claude Code, Codex, OpenCode and any agent that can run a shell command. See the <a href="https://github.com/smile-minecraft/MacHelper/blob/main/README.md#command-line">CLI reference</a> and <a href="llms.txt">llms.txt</a>.</p>
         </div>
       </div>
     </div>
@@ -663,9 +664,25 @@
             <span class="state" data-demo-state>Not sending</span>
           </div>
 <pre><code>{
-  <span class="k">"app"</span>: <span class="s">"0.4.x"</span>, <span class="k">"macOS"</span>: <span class="s">"15"</span>, <span class="k">"chip"</span>: <span class="s">"M-series"</span>,
-  <span class="k">"event"</span>: <span class="s">"diskScan.finished"</span>,
-  <span class="k">"durationMs"</span>: <span class="n">8420</span>, <span class="k">"items"</span>: <span class="n">412000</span>
+  <span class="k">"appVersion"</span>: <span class="s">"0.4.0"</span>,
+  <span class="k">"buildNumber"</span>: <span class="s">"1"</span>,
+  <span class="k">"chipFamily"</span>: <span class="s">"apple-silicon"</span>,
+  <span class="k">"events"</span>: [
+    {
+      <span class="k">"name"</span>: <span class="s">"app_launch"</span>,
+      <span class="k">"properties"</span>: { <span class="k">"cold_start_ms"</span>: <span class="s">"450"</span> },
+      <span class="k">"timestampBucket"</span>: <span class="s">"2026-11-10T00:00:00Z"</span>
+    },
+    {
+      <span class="k">"name"</span>: <span class="s">"section_view"</span>,
+      <span class="k">"properties"</span>: { <span class="k">"section"</span>: <span class="s">"monitor"</span> },
+      <span class="k">"timestampBucket"</span>: <span class="s">"2026-11-10T00:00:00Z"</span>
+    }
+  ],
+  <span class="k">"installId"</span>: <span class="s">"00000000-0000-0000-0000-000000000000"</span>,
+  <span class="k">"localeLanguage"</span>: <span class="s">"en"</span>,
+  <span class="k">"osVersion"</span>: <span class="s">"15.0.0"</span>,
+  <span class="k">"schemaVersion"</span>: <span class="n">1</span>
 }</code></pre>
         </div>
       </div>
@@ -771,7 +788,7 @@
         <h4>Developers</h4>
         <ul>
           <li><a href="https://github.com/smile-minecraft/MacHelper">Source on GitHub</a></li>
-          <li><a href="https://github.com/smile-minecraft/MacHelper/blob/main/docs/CLI.md">CLI reference</a></li>
+          <li><a href="https://github.com/smile-minecraft/MacHelper/blob/main/README.md#command-line">CLI reference</a></li>
           <li><a href="https://github.com/smile-minecraft/homebrew-tap">Homebrew tap</a></li>
           <li><a href="llms.txt">llms.txt</a></li>
         </ul>
