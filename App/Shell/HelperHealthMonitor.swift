@@ -33,6 +33,12 @@ final class HelperHealthMonitor {
     @ObservationIgnored private let handoffURL = HelperUpdateHandoffStore.defaultURL()
     @ObservationIgnored private var started = false
     @ObservationIgnored private var periodicTask: Task<Void, Never>?
+    /// The one automatic pass that currently owns the Helper probe and any SMAppService
+    /// mutation. Its handle also lets a manual repair wait for that pass to finish.
+    @ObservationIgnored private var activeCheckTask: Task<Void, Never>?
+    /// A trigger arrived while another pass or a manual repair owned SMAppService. One
+    /// follow-up pass is enough, however many triggers piled up.
+    @ObservationIgnored private var pendingRecheck = false
     @ObservationIgnored private var activationObserver: NSObjectProtocol?
     @ObservationIgnored private var lastNotifiedState: HelperHealthState?
 
@@ -109,11 +115,45 @@ final class HelperHealthMonitor {
         HelperUpdateHandoffStore.load(from: handoffURL) ?? client.detectedManualUpdateHandoff()
     }
 
+    /// True while one automatic pass owns the Helper check. The in-flight task is the
+    /// gate; this name keeps the guards below readable.
+    private var isChecking: Bool { activeCheckTask != nil }
+
+    /// Entry point for every automatic probe: launch, activation, the periodic timer and
+    /// a cancelled update. Only one pass may run at a time, because a pass can call
+    /// `softRepair()` or `reinstall()` and two overlapping passes would mutate
+    /// SMAppService on top of each other.
+    func check(allowRecovery: Bool) async {
+        guard !Self.isNonInteractiveRun else { return }
+
+        // A manual repair owns SMAppService until it finishes. Starting a recovery pass
+        // now could reinstall over it; remember the trigger instead.
+        if isRepairing || isChecking {
+            if allowRecovery { pendingRecheck = true }
+            return
+        }
+
+        let task = Task { @MainActor [weak self] in
+            guard let self else { return }
+            await self.runCheckLoop(allowRecovery: allowRecovery)
+            self.activeCheckTask = nil
+        }
+        activeCheckTask = task
+        await task.value
+
+        // A trigger arrived during the pass. Run exactly one clean follow-up, unless a
+        // manual repair took over in the meantime — it performs its own observation.
+        if pendingRecheck, !isRepairing {
+            pendingRecheck = false
+            await check(allowRecovery: true)
+        }
+    }
+
     /// One bounded recovery pass. Each iteration re-observes from scratch: an action can
     /// change the registration (`.reinstall`) or the user can approve during a retry, so
     /// a cached status would make the next decision wrong.
-    func check(allowRecovery: Bool) async {
-        guard !Self.isNonInteractiveRun else { return }
+    /// Callers must hold the `activeCheckTask` gate or be the manual repair owner.
+    private func runCheckLoop(allowRecovery: Bool) async {
         var attempt = 0
 
         while !Task.isCancelled {
@@ -196,7 +236,17 @@ final class HelperHealthMonitor {
     /// already been tried automatically by then.
     func repairNow() async {
         guard !Self.isNonInteractiveRun else { return }
+        // Two taps on Repair must not start two reinstalls.
+        guard !isRepairing else { return }
         isRepairing = true
+
+        // An automatic pass started before the tap may still be probing or retrying.
+        // Wait it out before touching SMAppService. New triggers now only set
+        // pendingRecheck, so no second pass can start while we are repairing.
+        while let inFlight = activeCheckTask {
+            await inFlight.value
+        }
+
         repairError = nil
         state = .recovering
         do {
@@ -205,9 +255,15 @@ final class HelperHealthMonitor {
             repairError = error.localizedDescription
             HelperClient.logger.error("Manual Helper repair failed: \(error.localizedDescription, privacy: .public)")
         }
-        // Observe the outcome without another automatic repair loop.
-        await check(allowRecovery: false)
+        // Observe the outcome ourselves. The gate rejects a normal check while
+        // isRepairing is true, so use the pass directly.
+        await runCheckLoop(allowRecovery: false)
+
         isRepairing = false
+        if pendingRecheck {
+            pendingRecheck = false
+            await check(allowRecovery: true)
+        }
     }
 
     func reinstallNow() async { await repairNow() }

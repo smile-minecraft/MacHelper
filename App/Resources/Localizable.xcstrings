@@ -41409,6 +41409,36 @@
             "state": "translated",
             "value": "After the recent update, macOS paused the MacHelper Helper. Re-enable it in System Settings → General → Login Items & Extensions to restore fan control and system cleanup."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tras la actualización reciente, macOS pausó el Helper de MacHelper. Vuelve a activarlo en Ajustes del Sistema → General → Ítems de inicio y extensiones para restaurar el control de ventiladores y la limpieza del sistema."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近のアップデート後、macOS が MacHelper Helper を一時停止しました。「システム設定 → 一般 → ログイン項目と機能拡張」で再度有効にすると、ファン制御とシステムのクリーンアップが復元されます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최근 업데이트 후 macOS가 MacHelper Helper를 일시 정지했습니다. 팬 제어와 시스템 정리를 복원하려면 시스템 설정 → 일반 → 로그인 항목 및 확장 프로그램에서 다시 켜십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近更新后，macOS 暂停了 MacHelper Helper。请到「系统设置 → 通用 → 登录项与扩展」重新启用，以恢复风扇控制与系统清理。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近更新後，macOS 暫停了 MacHelper Helper。請到「系統設定 → 一般 → 登入項目與延伸功能」重新啟用，以恢復風扇控制與系統清理。"
+          }
         }
       }
     },
@@ -41418,6 +41448,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "After the recent update, the MacHelper Helper isn’t responding. Repair it to restore fan control and system cleanup."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tras la actualización reciente, el Helper de MacHelper no responde. Repáralo para restaurar el control de ventiladores y la limpieza del sistema."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近のアップデート後、MacHelper Helper が応答しません。修復してファン制御とシステムのクリーンアップを復元してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최근 업데이트 후 MacHelper Helper가 응답하지 않습니다. 복구하여 팬 제어와 시스템 정리를 복원하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近更新后，MacHelper Helper 没有响应。请修复它以恢复风扇控制与系统清理。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近更新後，MacHelper Helper 沒有回應。請修復它以恢復風扇控制與系統清理。"
           }
         }
       }
@@ -41429,6 +41489,36 @@
             "state": "translated",
             "value": "After the recent update, the MacHelper Helper lost its permission. Repair it to restore fan control and system cleanup."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tras la actualización reciente, el Helper de MacHelper perdió su permiso. Repáralo para restaurar el control de ventiladores y la limpieza del sistema."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近のアップデート後、MacHelper Helper が権限を失いました。修復してファン制御とシステムのクリーンアップを復元してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최근 업데이트 후 MacHelper Helper가 권한을 잃었습니다. 복구하여 팬 제어와 시스템 정리를 복원하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近更新后，MacHelper Helper 失去了权限。请修复它以恢复风扇控制与系统清理。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近更新後，MacHelper Helper 失去了權限。請修復它以恢復風扇控制與系統清理。"
+          }
         }
       }
     },
@@ -41438,6 +41528,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Checking Helper…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobando el Helper…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper を確認中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 확인 중…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在检查 Helper…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在檢查 Helper…"
           }
         }
       }
@@ -41449,6 +41569,36 @@
             "state": "translated",
             "value": "Dismiss"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閉じる"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "닫기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉"
+          }
         }
       }
     },
@@ -41458,6 +41608,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Helper needs approval"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper necesita aprobación"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper の許可が必要"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 승인 필요"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 需要批准"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 需要核准"
           }
         }
       }
@@ -41469,6 +41649,36 @@
             "state": "translated",
             "value": "Helper needs repair"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper necesita reparación"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper の修復が必要"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 복구 필요"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 需要修复"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 需要修復"
+          }
         }
       }
     },
@@ -41478,6 +41688,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Helper unresponsive"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper no responde"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper が応答しません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 응답 없음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 无响应"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 沒有回應"
           }
         }
       }
@@ -41489,6 +41729,36 @@
             "state": "translated",
             "value": "MacHelper Helper could not be verified"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo verificar el Helper de MacHelper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper を確認できませんでした"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper를 확인할 수 없습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法验证 MacHelper Helper"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法驗證 MacHelper Helper"
+          }
         }
       }
     },
@@ -41498,6 +41768,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "MacHelper Helper is out of date"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper de MacHelper está desactualizado"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper が古くなっています"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper가 오래되었습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 版本过旧"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 版本過舊"
           }
         }
       }
@@ -41509,6 +41809,36 @@
             "state": "translated",
             "value": "MacHelper Helper isn’t responding"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper de MacHelper no responde"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper が応答しません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper가 응답하지 않습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 没有响应"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 沒有回應"
+          }
         }
       }
     },
@@ -41518,6 +41848,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "MacHelper Helper lost permission after the update"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper de MacHelper perdió su permiso tras la actualización"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アップデート後、MacHelper Helper が権限を失いました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트 후 MacHelper Helper가 권한을 잃었습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新后 MacHelper Helper 失去权限"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新後 MacHelper Helper 失去權限"
           }
         }
       }
@@ -41529,6 +41889,36 @@
             "state": "translated",
             "value": "MacHelper Helper needs attention"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper de MacHelper requiere atención"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper に確認が必要です"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper에 확인이 필요합니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 需要处理"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 需要處理"
+          }
         }
       }
     },
@@ -41538,6 +41928,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "MacHelper Helper needs your approval"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper de MacHelper necesita tu aprobación"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper にはあなたの許可が必要です"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper에 승인이 필요합니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 需要你批准"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 需要你核准"
           }
         }
       }
@@ -41549,6 +41969,36 @@
             "state": "translated",
             "value": "Open Helper setup and repair options"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir las opciones de configuración y reparación del Helper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper の設定と修復のオプションを開く"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 설정 및 복구 옵션 열기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 Helper 设置与修复选项"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開啟 Helper 設定與修復選項"
+          }
         }
       }
     },
@@ -41558,6 +42008,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Repair / Reinstall Helper"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reparar / Reinstalar el Helper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper を修復／再インストール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 복구／다시 설치"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修复／重新安装 Helper"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修復／重新安裝 Helper"
           }
         }
       }
@@ -41569,6 +42049,36 @@
             "state": "translated",
             "value": "Repair Helper"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reparar el Helper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper を修復"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 복구"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修复 Helper"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修復 Helper"
+          }
         }
       }
     },
@@ -41578,6 +42088,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "The MacHelper Helper is out of date after the update. Repair it to restore fan control and system cleanup."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tras la actualización, el Helper de MacHelper está desactualizado. Repáralo para restaurar el control de ventiladores y la limpieza del sistema."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アップデート後、MacHelper Helper が古くなっています。修復してファン制御とシステムのクリーンアップを復元してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트 후 MacHelper Helper가 오래되었습니다. 복구하여 팬 제어와 시스템 정리를 복원하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新后，MacHelper Helper 版本过旧。请修复它以恢复风扇控制与系统清理。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新後，MacHelper Helper 版本過舊。請修復它以恢復風扇控制與系統清理。"
           }
         }
       }
@@ -41589,6 +42129,36 @@
             "state": "translated",
             "value": "The MacHelper Helper isn’t responding. Repair it to restore fan control and system cleanup."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper de MacHelper no responde. Repáralo para restaurar el control de ventiladores y la limpieza del sistema."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper が応答しません。修復してファン制御とシステムのクリーンアップを復元してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper가 응답하지 않습니다. 복구하여 팬 제어와 시스템 정리를 복원하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 没有响应。请修复它以恢复风扇控制与系统清理。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper 沒有回應。請修復它以恢復風扇控制與系統清理。"
+          }
         }
       }
     },
@@ -41599,6 +42169,36 @@
             "state": "translated",
             "value": "The MacHelper Helper’s signature could not be verified. Reinstall MacHelper to restore it."
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo verificar la firma del Helper de MacHelper. Vuelve a instalar MacHelper para recuperarlo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper の署名を確認できませんでした。MacHelper を再インストールして復元してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper의 서명을 확인할 수 없습니다. MacHelper를 다시 설치하여 복원하십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法验证 MacHelper Helper 的签名。请重新安装 MacHelper 来还原它。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法驗證 MacHelper Helper 的簽章。請重新安裝 MacHelper 來還原它。"
+          }
         }
       }
     },
@@ -41608,6 +42208,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS is waiting for you to allow the MacHelper Helper in System Settings → General → Login Items & Extensions."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS está esperando que permitas el Helper de MacHelper en Ajustes del Sistema → General → Ítems de inicio y extensiones."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS は「システム設定 → 一般 → ログイン項目と機能拡張」で MacHelper Helper を許可するのを待っています。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS가 시스템 설정 → 일반 → 로그인 항목 및 확장 프로그램에서 MacHelper Helper를 허용하기를 기다리고 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 正在等你在「系统设置 → 通用 → 登录项与扩展」中允许 MacHelper Helper。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 正在等你到「系統設定 → 一般 → 登入項目與延伸功能」允許 MacHelper Helper。"
           }
         }
       }
