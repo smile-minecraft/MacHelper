@@ -15,7 +15,10 @@ enum Theme {
     static var slate: Color { ThemeStore.shared.color(.slate) }
     static var accent: Color { ThemeStore.shared.color(.accent) }
 
-    static var cardRadius: CGFloat { ThemeStore.shared.isPixel ? 6 : 12 }
+    static var cardRadius: CGFloat {
+        if ThemeStore.shared.isPixel { return 6 }
+        return ThemeStore.shared.isSoft ? 16 : 12
+    }
     /// Big numbers use the display face (pixel font by default) with fixed-width digits, so values
     /// don't jitter as they change.
     static var numeral: Font { .display(24).monospacedDigit() }
@@ -59,6 +62,9 @@ enum Palette {
     static var frostedPanelScrim: Color { ThemeStore.shared.color(.frostedPanelScrim) }
     static var panelCardFill: Color { ThemeStore.shared.color(.panelCardFill) }
     static var cardShadow: Color { ThemeStore.shared.color(.cardShadow) }
+    static var softHighlight: Color { ThemeStore.shared.color(.softHighlight) }
+    static var softShadow: Color { ThemeStore.shared.color(.softShadow) }
+    static var softWell: Color { ThemeStore.shared.color(.softWell) }
 }
 
 /// An interface icon by asset name (`px.<id>`). What it draws follows Settings → Appearance →
@@ -91,37 +97,129 @@ struct PixelIcon: View {
     }
 }
 
+/// Reusable neumorphic (Soft UI) extruded and recessed surface primitives, lit consistently from
+/// the top-left. Shadows live on the static shape layer rather than on content, so live-updating
+/// text and charts never pay to re-blur shadows.
+enum SoftSurface {
+    enum Elevation {
+        case card, control, pill
+
+        var lightOffset: CGFloat {
+            switch self { case .card: 4; case .control: 2; case .pill: 1.5 }
+        }
+        var darkOffset: CGFloat {
+            switch self { case .card: 4.5; case .control: 2.5; case .pill: 2 }
+        }
+        var lightRadius: CGFloat {
+            switch self { case .card: 6; case .control: 3.5; case .pill: 2.5 }
+        }
+        var darkRadius: CGFloat {
+            switch self { case .card: 7; case .control: 4; case .pill: 3 }
+        }
+    }
+
+    enum Depth {
+        case track, meter, pressed
+
+        var offset: CGFloat {
+            switch self { case .track: 2; case .meter: 1.5; case .pressed: 2 }
+        }
+        var radius: CGFloat {
+            switch self { case .track: 3; case .meter: 2; case .pressed: 3 }
+        }
+    }
+
+    static var rimGradient: LinearGradient {
+        LinearGradient(colors: [Palette.softHighlight.opacity(0.65), .clear, Palette.softShadow.opacity(0.25)],
+                       startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    @ViewBuilder
+    static func raised<S: InsettableShape>(_ shape: S, fill: Color = Palette.base, elevation: Elevation = .card) -> some View {
+        shape
+            .fill(fill)
+            .shadow(color: Palette.softHighlight, radius: elevation.lightRadius, x: -elevation.lightOffset, y: -elevation.lightOffset)
+            .shadow(color: Palette.softShadow, radius: elevation.darkRadius, x: elevation.darkOffset, y: elevation.darkOffset)
+            .overlay(shape.strokeBorder(rimGradient, lineWidth: 0.75))
+    }
+
+    @ViewBuilder
+    static func recessed<S: InsettableShape>(_ shape: S, fill: Color = Palette.softWell, depth: Depth = .track) -> some View {
+        shape
+            .fill(
+                fill
+                    .shadow(.inner(color: Palette.softShadow, radius: depth.radius, x: depth.offset, y: depth.offset))
+                    .shadow(.inner(color: Palette.softHighlight, radius: depth.radius, x: -depth.offset, y: -depth.offset))
+            )
+    }
+
+    /// Recessed circular channel for ring gauges in soft style.
+    static var ringTrackStyle: some ShapeStyle {
+        Palette.softWell
+            .shadow(.inner(color: Palette.softShadow, radius: 2.5, x: 1.5, y: 1.5))
+            .shadow(.inner(color: Palette.softHighlight, radius: 2.5, x: -1.5, y: -1.5))
+    }
+}
+
+/// Tactile raised-to-recessed capsule button in soft style; plain pass-through otherwise.
+struct SoftCapsuleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        if ThemeStore.shared.isSoft {
+            configuration.label
+                .background {
+                    if configuration.isPressed {
+                        SoftSurface.recessed(SurfaceShape.capsule, depth: .pressed)
+                    } else {
+                        SoftSurface.raised(SurfaceShape.capsule, fill: Palette.base, elevation: .control)
+                    }
+                }
+                .scaleEffect(configuration.isPressed ? 0.97 : 1)
+                .animation(Motion.press, value: configuration.isPressed)
+        } else {
+            configuration.label
+        }
+    }
+}
+
 struct CardStyle: ViewModifier {
     var padding: CGFloat = 14
+    var fillHeight = false
     func body(content: Content) -> some View {
         content
             .padding(padding)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: fillHeight ? .infinity : nil, alignment: fillHeight ? .topLeading : .leading)
             .surface()
     }
 }
 
 /// Card background, by style and material:
 /// - pixel: a notched block with a 2 pt border and a hard drop shadow (like a game UI window);
+/// - soft: a rounded card in the canvas color raised by top-left light and bottom-right shadow;
 /// - solid (and anywhere outside a translucent container): a rounded card in `fill` with a hairline;
 /// - frosted, inside a translucent container: an opaque raised card with a hairline and a soft shadow;
 /// - Liquid Glass, inside a translucent container: a glass pane under a strong theme tint (bright
 ///   in light, deep in dark) with a rim, so ink never depends on the wallpaper behind the panel.
 /// `wash` is a color laid over the card in every look (a soft hue for a highlighted tile).
 struct SurfaceBackground: ViewModifier {
-    var fill: Color = Palette.card
+    var fill: Color?
     var wash: Color?
     @Environment(\.frostedSurfaces) private var translucentContainer
 
     func body(content: Content) -> some View {
         let shape = SurfaceShape(cornerRadius: Theme.cardRadius)
         let store = ThemeStore.shared
+        let resolvedFill = fill ?? Palette.card
         if store.isPixel {
             content
                 .background { washLayer(shape) }
-                .background(shape.fill(fill))
+                .background(shape.fill(resolvedFill))
                 .overlay(shape.strokeBorder(Palette.stroke, lineWidth: 2))
                 .background(shape.fill(Color.black.opacity(0.28)).offset(x: 0, y: 3))
+        } else if store.isSoft {
+            content
+                .background { washLayer(shape) }
+                .background { if let fill { shape.fill(fill) } }
+                .background { SoftSurface.raised(shape, fill: Palette.base, elevation: .card) }
         } else if translucentContainer && store.material == .liquidGlass {
             content
                 .background { washLayer(shape) }
@@ -139,7 +237,7 @@ struct SurfaceBackground: ViewModifier {
         } else {
             content
                 .background { washLayer(shape) }
-                .background(fill, in: shape)
+                .background(resolvedFill, in: shape)
                 .overlay(shape.strokeBorder(Palette.stroke, lineWidth: 1))
         }
     }
@@ -151,7 +249,14 @@ struct SurfaceBackground: ViewModifier {
 
 extension View {
     func card(padding: CGFloat = 14) -> some View { modifier(CardStyle(padding: padding)) }
-    func surface(_ fill: Color = Palette.card, wash: Color? = nil) -> some View {
+    @ViewBuilder func softCard(padding: CGFloat = 14, fillHeight: Bool = false) -> some View {
+        if ThemeStore.shared.isSoft {
+            modifier(CardStyle(padding: padding, fillHeight: fillHeight))
+        } else {
+            self
+        }
+    }
+    func surface(_ fill: Color? = nil, wash: Color? = nil) -> some View {
         modifier(SurfaceBackground(fill: fill, wash: wash))
     }
 
@@ -263,7 +368,16 @@ struct Pill: View {
         Text(text)
             .font(.mhCaption.weight(.semibold))
             .padding(.horizontal, 8).padding(.vertical, 3)
-            .background(color.opacity(0.15), in: SurfaceShape.capsule)
+            .background {
+                if ThemeStore.shared.isSoft {
+                    ZStack {
+                        SoftSurface.recessed(SurfaceShape.capsule, depth: .meter)
+                        SurfaceShape.capsule.fill(color.opacity(0.12))
+                    }
+                } else {
+                    SurfaceShape.capsule.fill(color.opacity(0.15))
+                }
+            }
             .foregroundStyle(color)
     }
 }

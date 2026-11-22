@@ -172,12 +172,16 @@ struct MonitorPanel: View {
                     // A tinted glass capsule, or the same capsule in the control fill: never a
                     // pale lens under pale text.
                     .glassSurface(in: Capsule(style: .continuous), interactive: true) { label in
-                        label
-                            .background(Palette.controlFill, in: SurfaceShape.capsule)
-                            .overlay(SurfaceShape.capsule.strokeBorder(Palette.controlBorder, lineWidth: 1))
+                        if ThemeStore.shared.isSoft {
+                            label
+                        } else {
+                            label
+                                .background(Palette.controlFill, in: SurfaceShape.capsule)
+                                .overlay(SurfaceShape.capsule.strokeBorder(Palette.controlBorder, lineWidth: 1))
+                        }
                     }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SoftCapsuleButtonStyle())
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
@@ -223,9 +227,21 @@ private struct QuickBar: View {
 private struct QuickItemStyle: ButtonStyle {
     @State private var hover = false
     func makeBody(configuration: Configuration) -> some View {
+        let soft = ThemeStore.shared.isSoft
+        let shape = SurfaceShape(cornerRadius: soft ? 10 : 8, style: .continuous)
         configuration.label
-            .background(hover ? Palette.controlFill : .clear, in: SurfaceShape(cornerRadius: 8, style: .continuous))
-            .scaleEffect(configuration.isPressed ? 0.95 : 1)
+            .background {
+                if soft {
+                    if configuration.isPressed {
+                        SoftSurface.recessed(shape, depth: .pressed)
+                    } else if hover {
+                        SoftSurface.raised(shape, fill: Palette.base, elevation: .control)
+                    }
+                } else if hover {
+                    shape.fill(Palette.controlFill)
+                }
+            }
+            .scaleEffect(configuration.isPressed ? (soft ? 0.97 : 0.95) : 1)
             .animation(Motion.hover, value: hover)
             .animation(Motion.press, value: configuration.isPressed)
             .onHover { hover = $0 }
@@ -1154,11 +1170,10 @@ extension Host {
 }
 
 extension View {
-    /// One section of a panel page on its own card (the panel's "tables") with the frosted and
-    /// Liquid Glass materials. With the solid material the section stays flat, as the panel
-    /// always looked.
+    /// One section of a panel page on its own card (the panel's "tables") with the frosted,
+    /// Liquid Glass or soft (neumorphic) look. With solid smooth/pixel the section stays flat.
     @ViewBuilder func panelCard() -> some View {
-        if ThemeStore.shared.material.isTranslucent {
+        if ThemeStore.shared.material.isTranslucent || ThemeStore.shared.isSoft {
             padding(14)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .environment(\.insideGlassCard, true)
@@ -1169,14 +1184,14 @@ extension View {
     }
 }
 
-/// A titled section of a panel page: a glass card with the title inside, or the flat hairline
-/// header and content without glass.
+/// A titled section of a panel page: a card with the title inside, or the flat hairline
+/// header and content without cards.
 struct PanelSection<Content: View>: View {
     var title: LocalizedStringKey?
     @ViewBuilder var content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: ThemeStore.shared.material.isTranslucent ? 10 : 12) {
+        VStack(alignment: .leading, spacing: (ThemeStore.shared.material.isTranslucent || ThemeStore.shared.isSoft) ? 10 : 12) {
             if let title { HairlineHeader(text: title) }
             content
         }

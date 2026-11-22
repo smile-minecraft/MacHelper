@@ -52,7 +52,13 @@ struct OptimizeView: View {
         PixelEmptyState(art: "px.empty.clean", title: "Optimize",
                         message: "Scan first to list what can be cleaned.") {
             VStack(spacing: 8) {
-                Button("Start Scan") { category = nil; Task { await model.scan() } }.buttonStyle(.borderedProminent).controlSize(.large)
+                if ThemeStore.shared.isSoft {
+                    Button("Start Scan") { category = nil; Task { await model.scan() } }
+                        .buttonStyle(PrimaryButtonStyle(large: true))
+                        .padding(.bottom, 4)
+                } else {
+                    Button("Start Scan") { category = nil; Task { await model.scan() } }.buttonStyle(.borderedProminent).controlSize(.large)
+                }
                 deepEntry
                 if model.scanStopped { Text("Scan stopped before any results were ready.").font(.mhCaption).foregroundStyle(Palette.textMuted) }
                 if let e = model.loadError { Text(e).font(.mhCaption).foregroundStyle(Theme.rose) }
@@ -316,7 +322,13 @@ struct OptimizeView: View {
             }
         }
         .padding(.horizontal, 8).padding(.vertical, 5)
-        .background(Palette.card, in: SurfaceShape(cornerRadius: 6))
+        .background {
+            if ThemeStore.shared.isSoft {
+                SoftSurface.recessed(SurfaceShape(cornerRadius: 9), depth: .track)
+            } else {
+                SurfaceShape(cornerRadius: 6).fill(Palette.card)
+            }
+        }
     }
 
     private var sizePicker: some View {

@@ -34,10 +34,16 @@ struct TabStrip<Value: Hashable>: View {
                 .buttonStyle(SelectableButtonStyle(selected: selected))
             }
         }
-        .padding(3)
+        .padding(ThemeStore.shared.isSoft ? 4 : 3)
         // An opaque recessed track in every material: a see-through track let a bright wallpaper
         // wash out the unselected labels.
-        .background(Palette.selectionTrack, in: SurfaceShape(cornerRadius: 9, style: .continuous))
+        .background {
+            if ThemeStore.shared.isSoft {
+                SoftSurface.recessed(SurfaceShape(cornerRadius: 11, style: .continuous), depth: .track)
+            } else {
+                SurfaceShape(cornerRadius: 9, style: .continuous).fill(Palette.selectionTrack)
+            }
+        }
         .animation(Motion.snappy, value: selection)
     }
 }
@@ -61,7 +67,13 @@ struct ChipBar<Value: Hashable>: View {
                         }
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(SelectableButtonStyle(selected: selected, onTrack: false))
+                .buttonStyle(SelectableButtonStyle(selected: selected, onTrack: ThemeStore.shared.isSoft))
+            }
+        }
+        .padding(ThemeStore.shared.isSoft ? 4 : 0)
+        .background {
+            if ThemeStore.shared.isSoft {
+                SoftSurface.recessed(SurfaceShape(cornerRadius: 10, style: .continuous), depth: .track)
             }
         }
         .animation(Motion.snappy, value: selection)
@@ -85,6 +97,8 @@ private struct SelectionPill: View {
                 Color.clear
                     .glassSurface(in: glass, tint: Palette.glassSelectionTint) { $0 }
                     .overlay(glass.strokeBorder(Palette.selectionBorder, lineWidth: 1))
+            } else if ThemeStore.shared.isSoft {
+                SoftSurface.raised(shape, fill: Palette.base, elevation: .pill)
             } else {
                 shape.fill(Palette.selectionFill)
                     .overlay(shape.strokeBorder(bordered ? Palette.selectionBorder : Palette.selectionBorder.opacity(0.6), lineWidth: 1))
@@ -185,6 +199,20 @@ struct Meter: View {
     var body: some View {
         if ThemeStore.shared.isPixel {
             PixelBlocks(fraction: fraction, color: color, track: Palette.inset).frame(height: 8)
+        } else if ThemeStore.shared.isSoft {
+            GeometryReader { geo in
+                let clamped = min(max(fraction, 0), 1)
+                let fillWidth = max((geo.size.width - 3) * clamped, clamped > 0 ? 5 : 0)
+                ZStack(alignment: .leading) {
+                    SoftSurface.recessed(SurfaceShape.capsule, depth: .meter)
+                    SurfaceShape.capsule
+                        .fill(color.gradient)
+                        .frame(width: fillWidth, height: max(geo.size.height - 3, 4))
+                        .padding(.leading, 1.5)
+                }
+            }
+            .frame(height: 10)
+            .animation(animatesReadings ? Motion.meter(0.35) : nil, value: fraction)
         } else {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
@@ -246,13 +274,25 @@ private struct IconButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
+        let soft = ThemeStore.shared.isSoft
         configuration.label
             .foregroundStyle(hover && isEnabled ? Palette.text : Palette.controlText)
             .glassSurface(in: Circle(), interactive: isEnabled) { label in
-                label.background(hover && isEnabled ? Palette.controlFill : .clear, in: SurfaceShape(cornerRadius: 7, style: .continuous))
+                if soft {
+                    let shape = SurfaceShape(cornerRadius: 8, style: .continuous)
+                    label.background {
+                        if configuration.isPressed && isEnabled {
+                            SoftSurface.recessed(shape, depth: .pressed)
+                        } else {
+                            SoftSurface.raised(shape, fill: Palette.base, elevation: .control)
+                        }
+                    }
+                } else {
+                    label.background(hover && isEnabled ? Palette.controlFill : .clear, in: SurfaceShape(cornerRadius: 7, style: .continuous))
+                }
             }
             .opacity(isEnabled ? 1 : 0.5)
-            .scaleEffect(configuration.isPressed ? 0.92 : 1)
+            .scaleEffect(configuration.isPressed ? (soft ? 0.96 : 0.92) : 1)
             .animation(Motion.hover, value: hover)
             .animation(Motion.press, value: configuration.isPressed)
             .onHover { hover = $0 }
@@ -341,6 +381,17 @@ struct RingGauge: View {
             ZStack {
                 if ThemeStore.shared.isPixel {
                     PixelRing(fraction: fraction, color: color, track: Palette.inset, lineWidth: lineWidth)
+                } else if ThemeStore.shared.isSoft {
+                    // Carved recessed channel with a sculpted progress arc resting inside it.
+                    Circle().stroke(SoftSurface.ringTrackStyle, lineWidth: lineWidth)
+                    Circle()
+                        .trim(from: 0, to: min(max(fraction, 0.001), 1))
+                        .stroke(AngularGradient(colors: [color.opacity(0.82), color], center: .center,
+                                                startAngle: .degrees(0), endAngle: .degrees(360 * max(fraction, 0.01))),
+                                style: StrokeStyle(lineWidth: max(lineWidth - 2.5, 4), lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .shadow(color: color.opacity(0.28), radius: 2, y: 1)
+                        .animation(animatesReadings ? Motion.meter(0.5) : nil, value: fraction)
                 } else {
                     // Recessed track.
                     Circle().stroke(Palette.inset, lineWidth: lineWidth)
@@ -480,7 +531,11 @@ struct SegmentedRing: View {
 
     var body: some View {
         ZStack {
-            Circle().stroke(Palette.inset, style: ringStyle)
+            if ThemeStore.shared.isSoft {
+                Circle().stroke(SoftSurface.ringTrackStyle, style: ringStyle)
+            } else {
+                Circle().stroke(Palette.inset, style: ringStyle)
+            }
             ForEach(Array(starts.enumerated()), id: \.offset) { i, start in
                 Circle()
                     .trim(from: start, to: min(start + segments[i].0, 1))
@@ -515,7 +570,13 @@ struct StackedBar: View {
                 }
                 Spacer(minLength: 0)
             }
-            .background(Palette.inset)
+            .background {
+                if ThemeStore.shared.isSoft {
+                    SoftSurface.recessed(SurfaceShape(cornerRadius: height / 2, style: .continuous), depth: .meter)
+                } else {
+                    Palette.inset
+                }
+            }
             .clipShape(SurfaceShape(cornerRadius: height / 2, style: .continuous))
         }
         .frame(height: height)
@@ -550,8 +611,14 @@ struct MirroredHistory: View, Equatable {
             draw(down, downColor, above: false)
             ctx.fill(Path(CGRect(x: 0, y: mid - 0.5, width: size.width, height: 1)), with: .color(Palette.textFaint.opacity(0.4)))
         }
-        .background(Palette.inset.opacity(0.5))
-        .clipShape(SurfaceShape(cornerRadius: 6, style: .continuous))
+        .background {
+            if ThemeStore.shared.isSoft {
+                SoftSurface.recessed(SurfaceShape(cornerRadius: 8, style: .continuous), depth: .track)
+            } else {
+                Palette.inset.opacity(0.5)
+            }
+        }
+        .clipShape(SurfaceShape(cornerRadius: ThemeStore.shared.isSoft ? 8 : 6, style: .continuous))
     }
 }
 
@@ -573,8 +640,14 @@ struct HistoryArea: View, Equatable {
             AreaSparkline(values: values, maxValue: maxValue, color: color, lineWidth: 2)
         }
         .padding(.top, 1)
-        .background(Palette.inset.opacity(0.5))
-        .clipShape(SurfaceShape(cornerRadius: 6, style: .continuous))
+        .background {
+            if ThemeStore.shared.isSoft {
+                SoftSurface.recessed(SurfaceShape(cornerRadius: 8, style: .continuous), depth: .track)
+            } else {
+                Palette.inset.opacity(0.5)
+            }
+        }
+        .clipShape(SurfaceShape(cornerRadius: ThemeStore.shared.isSoft ? 8 : 6, style: .continuous))
     }
 }
 

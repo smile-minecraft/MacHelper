@@ -64,7 +64,7 @@ extension EnvironmentValues {
 struct PanelBackdrop: View {
     var body: some View {
         switch ThemeStore.shared.material {
-        case .solid: Palette.card
+        case .solid: ThemeStore.shared.isSoft ? Palette.base : Palette.card
         case .frosted: Palette.frostedPanelScrim
         case .liquidGlass: Palette.glassPanelScrim
         }
@@ -88,6 +88,16 @@ struct ActionBar<Content: View>: View {
                 .overlay(shape.strokeBorder(Palette.glassCardBorder, lineWidth: 1))
                 .shadow(color: Palette.glassShadow, radius: 8, y: 3)
                 .padding(.horizontal, 14).padding(.bottom, 12).padding(.top, 6)
+        } else if ThemeStore.shared.isSoft {
+            HStack(spacing: 12) { content }
+                .padding(.horizontal, 16).padding(.vertical, 11)
+                .background(Palette.base)
+                .overlay(alignment: .top) {
+                    VStack(spacing: 0) {
+                        Rectangle().fill(Palette.softShadow.opacity(0.35)).frame(height: 1)
+                        Rectangle().fill(Palette.softHighlight.opacity(0.75)).frame(height: 1)
+                    }
+                }
         } else {
             HStack(spacing: 12) { content }
                 .padding(.horizontal, 14).padding(.vertical, 10)

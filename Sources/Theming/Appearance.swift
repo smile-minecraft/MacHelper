@@ -8,6 +8,8 @@ public struct AppearanceSettings: Codable, Sendable, Equatable {
         case pixel
         /// Rounded cards and continuous rings.
         case smooth
+        /// Neumorphic surfaces raised from and pressed into the background with dual shadows.
+        case soft
     }
 
     /// Font for page titles, card headings and big numbers.
@@ -109,6 +111,9 @@ public enum AppearancePreset: String, CaseIterable, Sendable {
     /// Instrument panel: neutral aluminum / graphite (follows light / dark), rounded shapes,
     /// system rounded numbers; color only for state.
     case standard
+    /// Soft tactile look: low-saturation monochromatic surfaces extruded from and pressed into the
+    /// background with top-left light and bottom-right shadow.
+    case neumorphic
     /// Retro game look: pixel night colors, notched shapes, the Cubic 11 pixel font.
     case pixelRetro
 
@@ -116,6 +121,8 @@ public enum AppearancePreset: String, CaseIterable, Sendable {
         switch self {
         case .standard:
             s.themeID = BuiltInThemes.instrument.id; s.style = .smooth; s.displayFont = .rounded; s.bodyFont = .system; s.iconSet = .pixel
+        case .neumorphic:
+            s.themeID = BuiltInThemes.soft.id; s.style = .soft; s.displayFont = .rounded; s.bodyFont = .system; s.iconSet = .symbols
         case .pixelRetro:
             s.themeID = BuiltInThemes.pixelNight.id; s.style = .pixel; s.displayFont = .pixel; s.bodyFont = .system; s.iconSet = .pixel
         }
