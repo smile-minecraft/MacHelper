@@ -40,6 +40,8 @@ struct AppearanceSettingsView: View {
                     .settingsCaption()
             } header: { Text("Look") }
 
+            SurfaceSettingsSection(store: store)
+
             Section {
                 ThemeGallery(store: store)
                 HStack {
@@ -441,46 +443,188 @@ private struct ThemeGallery: View {
     }
 }
 
-/// A miniature of the theme drawn in its own colors (so it reads right whatever is selected).
+/// A miniature of the theme drawn in its own colors (so it reads right whatever is selected):
+/// light and dark halves side by side for adaptive themes, one pane for single-variant ones.
+/// Below: the name, where it came from, its polarity and the result of the contrast audit.
 private struct ThemeSwatch: View {
     let theme: ThemeDefinition
     let selected: Bool
-    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        let c = theme.colors(dark: scheme == .dark)
-        VStack(alignment: .leading, spacing: 6) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(verbatim: "42%").font(.display(16)).foregroundStyle(c.text.color)
-                HStack(spacing: 3) {
-                    ForEach([c.blue, c.mint, c.amber, c.rose, c.violet], id: \.self) { col in
-                        Rectangle().fill(col.color).frame(width: 12, height: 6)
-                    }
-                }
-                Rectangle().fill(c.textMuted.color).frame(width: 60, height: 3)
+        let variants = ResolvedTheme.variants(of: theme)
+        let shape = SurfaceShape(cornerRadius: 8)
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 0) {
+                ForEach(variants, id: \.isDark) { ThemeMiniPreview(resolved: $0) }
             }
-            .padding(8)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(c.card.color)
-            .overlay(Rectangle().strokeBorder(c.stroke.color, lineWidth: 1))
-            .padding(8)
-            .background(c.base.color)
-            .clipShape(SurfaceShape(cornerRadius: 8))
-            .overlay(SurfaceShape(cornerRadius: 8).strokeBorder(selected ? Theme.accent : Palette.stroke, lineWidth: selected ? 3 : 1))
+            .clipShape(shape)
+            .overlay(shape.strokeBorder(selected ? Theme.accent : Palette.stroke, lineWidth: selected ? 3 : 1))
+            .overlay(alignment: .topTrailing) {
+                if selected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.mh(size: 14, weight: .bold))
+                        .foregroundStyle(Palette.base, Theme.accent)
+                        .padding(5)
+                        .accessibilityHidden(true)
+                }
+            }
             HStack(spacing: 4) {
                 Text(theme.displayName).font(.mhCallout.weight(selected ? .semibold : .regular)).foregroundStyle(Palette.text).lineLimit(1)
                 Spacer(minLength: 0)
-                Text(originLabel).font(.mhCaption2).foregroundStyle(Palette.textFaint)
+                Text(originLabel).font(.mhCaption2).foregroundStyle(Palette.textMuted)
             }
+            HStack(spacing: 6) {
+                Label { Text(polarityLabel) } icon: { Image(systemName: polaritySymbol) }
+                Spacer(minLength: 0)
+                contrastLabel(variants)
+            }
+            .font(.mhCaption2)
+            .foregroundStyle(Palette.textMuted)
+            .labelStyle(CompactLabelStyle())
         }
     }
 
     private var originLabel: String {
         switch theme.origin {
-        case .builtIn: theme.followsSystemAppearance ? String(localized: "Light & Dark") : String(localized: "Built-in")
+        case .builtIn: String(localized: "Built-in")
         case .custom: String(localized: "Custom")
         case .vscode: "VS Code"
         }
+    }
+
+    private var polarityLabel: String {
+        if theme.followsSystemAppearance { return String(localized: "Light & Dark") }
+        return theme.isDark ? String(localized: "theme.polarity.dark", defaultValue: "Dark only")
+                            : String(localized: "theme.polarity.light", defaultValue: "Light only")
+    }
+
+    private var polaritySymbol: String {
+        theme.followsSystemAppearance ? "circle.lefthalf.filled" : (theme.isDark ? "moon.fill" : "sun.max.fill")
+    }
+
+    /// The audit result: high contrast as designed, readable after MacHelper adjusted the text
+    /// colors (imported themes), or low contrast where no adjustment could reach the minimums.
+    @ViewBuilder private func contrastLabel(_ variants: [ResolvedTheme]) -> some View {
+        let passes = variants.allSatisfy { ThemeContrastAudit($0).passes }
+        let adjusted = variants.contains { $0.colors != theme.colors(dark: $0.isDark) }
+        if !passes {
+            Label { Text("Low contrast") } icon: { Image(systemName: "exclamationmark.triangle.fill") }
+                .foregroundStyle(Theme.amber)
+                .help("Some text in this theme stays below the WCAG contrast minimums.")
+        } else if adjusted {
+            Label { Text("Contrast adjusted") } icon: { Image(systemName: "wand.and.stars") }
+                .help("MacHelper darkened or lightened some text colors of this theme so they stay readable.")
+        } else {
+            Label { Text("High contrast") } icon: { Image(systemName: "checkmark.seal.fill") }
+                .help("Text, selections and charts meet the WCAG contrast minimums on solid, frosted and glass surfaces, in light and dark.")
+        }
+    }
+}
+
+private struct CompactLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 3) { configuration.icon; configuration.title }.lineLimit(1)
+    }
+}
+
+/// One variant of a theme in miniature: a tab track with its selected pill, a big number, data
+/// colors and a muted line, all in the variant's own resolved colors.
+private struct ThemeMiniPreview: View {
+    let resolved: ResolvedTheme
+
+    var body: some View {
+        let c = resolved.colors, s = resolved.surfaces
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 2) {
+                Text(verbatim: "Aa")
+                    .font(.mh(size: 9, weight: .semibold)).foregroundStyle(s.selectionText.color)
+                    .padding(.horizontal, 6).padding(.vertical, 1.5)
+                    .background(s.selectionFill.color, in: SurfaceShape(cornerRadius: 4))
+                    .overlay(SurfaceShape(cornerRadius: 4).strokeBorder(s.selectionBorder.color, lineWidth: 1))
+                Text(verbatim: "Aa")
+                    .font(.mh(size: 9, weight: .medium)).foregroundStyle(s.selectionTrackText.color)
+                    .padding(.horizontal, 6).padding(.vertical, 1.5)
+            }
+            .padding(2)
+            .background(s.selectionTrack.color, in: SurfaceShape(cornerRadius: 5))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(verbatim: "42%").font(.display(15)).foregroundStyle(c.text.color)
+                HStack(spacing: 2) {
+                    ForEach([c.blue, c.mint, c.amber, c.rose], id: \.self) { col in
+                        Rectangle().fill(col.color).frame(width: 9, height: 5)
+                    }
+                }
+                Rectangle().fill(c.textMuted.color).frame(width: 40, height: 3)
+            }
+            .padding(6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(s.panelCardFill.color)
+            .overlay(Rectangle().strokeBorder(c.stroke.color, lineWidth: 1))
+        }
+        .padding(7)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(c.base.color)
+        .environment(\.colorScheme, resolved.isDark ? .dark : .light)
+    }
+}
+
+/// Light / dark and the surface material, with what the system actually allows.
+private struct SurfaceSettingsSection: View {
+    @Bindable var store: ThemeStore
+
+    var body: some View {
+        Section {
+            Picker("Appearance", selection: $store.settings.appearanceMode) {
+                Text(String(localized: "appearance.mode.system", defaultValue: "System")).tag(AppearanceMode.system)
+                Text(String(localized: "appearance.mode.light", defaultValue: "Light")).tag(AppearanceMode.light)
+                Text(String(localized: "appearance.mode.dark", defaultValue: "Dark")).tag(AppearanceMode.dark)
+            }
+            .pickerStyle(.segmented)
+            .disabled(!store.theme.followsSystemAppearance)
+            Text(appearanceCaption).settingsCaption()
+
+            Picker("Material", selection: $store.settings.surfaceMaterial) {
+                Text("Solid").tag(SurfaceMaterial.solid)
+                Text("Frosted").tag(SurfaceMaterial.frosted)
+                Text("Liquid Glass").tag(SurfaceMaterial.liquidGlass)
+            }
+            .pickerStyle(.segmented)
+            Text(materialCaption).settingsCaption()
+            if let note = fallbackNote { Text(note).settingsCaption(Theme.amber) }
+        } header: { Text("Light, Dark and Material") }
+    }
+
+    private var appearanceCaption: String {
+        let t = store.theme
+        guard t.followsSystemAppearance else {
+            return t.isDark
+                ? String(localized: "“\(t.displayName)” is a dark-only theme, so MacHelper stays dark. Themes marked Light & Dark follow this setting.")
+                : String(localized: "“\(t.displayName)” is a light-only theme, so MacHelper stays light. Themes marked Light & Dark follow this setting.")
+        }
+        switch store.settings.appearanceMode {
+        case .system: return String(localized: "Follows the macOS appearance.")
+        case .light: return String(localized: "Always light, whatever macOS uses.")
+        case .dark: return String(localized: "Always dark, whatever macOS uses.")
+        }
+    }
+
+    private var materialCaption: String {
+        switch store.settings.surfaceMaterial {
+        case .solid: String(localized: "Opaque surfaces everywhere: the most legible, classic instrument look.")
+        case .frosted: String(localized: "The menu bar panel lets a hint of the desktop through; its cards stay opaque and crisp.")
+        case .liquidGlass: String(localized: "Liquid Glass cards and controls, tinted bright in light and deep in dark so text stays readable on any wallpaper. Needs macOS 26.")
+        }
+    }
+
+    /// Why the material drawn differs from the one chosen, if it does.
+    private var fallbackNote: String? {
+        let chosen = store.settings.surfaceMaterial
+        guard store.material != chosen else { return nil }
+        if store.reduceTransparency { return String(localized: "Reduce Transparency is on in System Settings, so surfaces are solid.") }
+        if !ThemeStore.glassSupported { return String(localized: "Liquid Glass needs macOS 26; frosted surfaces are used instead.") }
+        if store.isPixel { return String(localized: "Pixel shapes keep their flat blocks; frosted surfaces are used instead of Liquid Glass.") }
+        if store.increaseContrast { return String(localized: "Increase Contrast is on in System Settings; frosted surfaces are used instead of Liquid Glass.") }
+        return nil
     }
 }
 

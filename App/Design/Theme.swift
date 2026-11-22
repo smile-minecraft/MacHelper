@@ -37,6 +37,28 @@ enum Palette {
     static var text: Color { ThemeStore.shared.color(.text) }
     static var textMuted: Color { ThemeStore.shared.color(.textMuted) }
     static var textFaint: Color { ThemeStore.shared.color(.textFaint) }
+
+    // Semantic tokens (see `SurfaceTokens`): derived per theme variant with contrast guarantees,
+    // so controls and charts never pick raw colors that might vanish on glass.
+    static var selectionTrack: Color { ThemeStore.shared.color(.selectionTrack) }
+    static var selectionTrackText: Color { ThemeStore.shared.color(.selectionTrackText) }
+    static var selectionFill: Color { ThemeStore.shared.color(.selectionFill) }
+    static var selectionBorder: Color { ThemeStore.shared.color(.selectionBorder) }
+    static var selectionText: Color { ThemeStore.shared.color(.selectionText) }
+    static var controlFill: Color { ThemeStore.shared.color(.controlFill) }
+    static var controlBorder: Color { ThemeStore.shared.color(.controlBorder) }
+    static var controlText: Color { ThemeStore.shared.color(.controlText) }
+    static var chartAxisText: Color { ThemeStore.shared.color(.chartAxisText) }
+    static var chartGridLine: Color { ThemeStore.shared.color(.chartGridLine) }
+    static var glassPanelScrim: Color { ThemeStore.shared.color(.glassPanelScrim) }
+    static var glassCardTint: Color { ThemeStore.shared.color(.glassCardTint) }
+    static var glassCardBorder: Color { ThemeStore.shared.color(.glassCardBorder) }
+    static var glassShadow: Color { ThemeStore.shared.color(.glassShadow) }
+    static var glassControlTint: Color { ThemeStore.shared.color(.glassControlTint) }
+    static var glassSelectionTint: Color { ThemeStore.shared.color(.glassSelectionTint) }
+    static var frostedPanelScrim: Color { ThemeStore.shared.color(.frostedPanelScrim) }
+    static var panelCardFill: Color { ThemeStore.shared.color(.panelCardFill) }
+    static var cardShadow: Color { ThemeStore.shared.color(.cardShadow) }
 }
 
 /// An interface icon by asset name (`px.<id>`). What it draws follows Settings → Appearance →
@@ -79,38 +101,73 @@ struct CardStyle: ViewModifier {
     }
 }
 
-/// Card background: in the pixel style a notched block with a 2 pt border and a hard drop shadow
-/// (like a game UI window); otherwise a rounded card with a hairline border.
+/// Card background, by style and material:
+/// - pixel: a notched block with a 2 pt border and a hard drop shadow (like a game UI window);
+/// - solid (and anywhere outside a translucent container): a rounded card in `fill` with a hairline;
+/// - frosted, inside a translucent container: an opaque raised card with a hairline and a soft shadow;
+/// - Liquid Glass, inside a translucent container: a glass pane under a strong theme tint (bright
+///   in light, deep in dark) with a rim, so ink never depends on the wallpaper behind the panel.
+/// `wash` is a color laid over the card in every look (a soft hue for a highlighted tile).
 struct SurfaceBackground: ViewModifier {
     var fill: Color = Palette.card
-    @Environment(\.frostedSurfaces) private var frosted
+    var wash: Color?
+    @Environment(\.frostedSurfaces) private var translucentContainer
 
     func body(content: Content) -> some View {
         let shape = SurfaceShape(cornerRadius: Theme.cardRadius)
-        if ThemeStore.shared.isPixel {
+        let store = ThemeStore.shared
+        if store.isPixel {
             content
+                .background { washLayer(shape) }
                 .background(shape.fill(fill))
                 .overlay(shape.strokeBorder(Palette.stroke, lineWidth: 2))
                 .background(shape.fill(Color.black.opacity(0.28)).offset(x: 0, y: 3))
-        } else if frosted && LiquidGlass.isAvailable {
-            // A Liquid Glass pane tinted with the card color, so it refracts what is behind it
-            // and catches light on its edges, lifted off the panel by a soft shadow underneath.
+        } else if translucentContainer && store.material == .liquidGlass {
             content
-                .glassSurface(in: shape, tint: fill.opacity(0.45)) { $0 }
-                .background {
-                    shape.fill(Color.black.opacity(0.28)).blur(radius: 9).offset(y: 5).padding(.horizontal, 6)
-                }
+                .background { washLayer(shape) }
+                .glassSurface(in: shape, tint: Palette.glassCardTint) { $0 }
+                .overlay(shape.strokeBorder(Palette.glassCardBorder, lineWidth: 1))
+                // A tight shadow on the pane itself: a blurred shape underneath would be refracted
+                // into the glass and grey it out.
+                .shadow(color: Palette.glassShadow, radius: 6, y: 3)
+        } else if translucentContainer && store.material == .frosted {
+            content
+                .background { washLayer(shape) }
+                .background(Palette.panelCardFill, in: shape)
+                .overlay(shape.strokeBorder(Palette.stroke, lineWidth: 1))
+                .shadow(color: Palette.cardShadow, radius: 5, y: 2)
         } else {
             content
+                .background { washLayer(shape) }
                 .background(fill, in: shape)
                 .overlay(shape.strokeBorder(Palette.stroke, lineWidth: 1))
         }
+    }
+
+    @ViewBuilder private func washLayer(_ shape: SurfaceShape) -> some View {
+        if let wash { shape.fill(wash) }
     }
 }
 
 extension View {
     func card(padding: CGFloat = 14) -> some View { modifier(CardStyle(padding: padding)) }
-    func surface(_ fill: Color = Palette.card) -> some View { modifier(SurfaceBackground(fill: fill)) }
+    func surface(_ fill: Color = Palette.card, wash: Color? = nil) -> some View {
+        modifier(SurfaceBackground(fill: fill, wash: wash))
+    }
+
+    /// Applies the color scheme the theme or the Appearance setting forces (single-variant
+    /// themes, Light / Dark), so `.primary`, materials and controls agree with the theme's ink.
+    func themeColorScheme() -> some View { modifier(ThemeColorScheme()) }
+}
+
+private struct ThemeColorScheme: ViewModifier {
+    func body(content: Content) -> some View {
+        if let forced = ThemeStore.shared.forcedColorScheme {
+            content.environment(\.colorScheme, forced)
+        } else {
+            content
+        }
+    }
 }
 
 /// Title row shown at the top of every page.
@@ -201,7 +258,7 @@ struct ScanningArt: View {
 /// Small rounded label, e.g. a status.
 struct Pill: View {
     let text: String
-    var color: Color = .secondary
+    var color: Color = Palette.textMuted
     var body: some View {
         Text(text)
             .font(.mhCaption.weight(.semibold))

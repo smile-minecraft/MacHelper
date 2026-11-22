@@ -6,6 +6,7 @@ import Metrics
 import SMCKit
 import Storage
 import SwiftUI
+import Theming
 
 enum HistoryRange: Int, CaseIterable, Identifiable {
     case fiveMinutes = 300, fifteenMinutes = 900, hour = 3600
@@ -90,11 +91,17 @@ struct MonitorPanel: View {
             footer
         }
         .frame(width: 460)
-        // With Liquid Glass the panel is frosted: the popover's own glass shows through a thin
-        // wash of the theme color, cards inside are frosted too, and the controls on top
-        // (tab pill, header buttons, tool tiles, Quit) are Liquid Glass.
-        .background(LiquidGlass.isAvailable ? Palette.card.opacity(0.5) : Palette.card)
+        // Any text that doesn't pick a color takes the theme's ink: inside glass, `.primary`
+        // would follow the wallpaper instead (black digits beside white names).
+        .foregroundStyle(Palette.text)
+        // The backdrop follows Settings → Appearance → Material: opaque, a frosted scrim, or a
+        // stronger scrim under Liquid Glass cards and controls. Scrims are bright in light and
+        // deep in dark, so the wallpaper never decides how text reads.
+        .background(PanelBackdrop())
         .environment(\.frostedSurfaces, true)
+        // Single-variant themes (Pixel Night) and the Light / Dark setting force their scheme,
+        // so controls and materials agree with the theme's ink.
+        .themeColorScheme()
         // Readings arrive every second here; gliding to each one kept the popover redrawing.
         .environment(\.animatesReadings, false)
         .onAppear { store.watchProcesses(true) }
@@ -112,7 +119,7 @@ struct MonitorPanel: View {
             .buttonStyle(.plain)
             .help("Open MacHelper")
             Spacer()
-            Text(Host.uptimeShort).font(.mh(size: 10.5)).foregroundStyle(Palette.textFaint)
+            Text(Host.uptimeShort).font(.mh(size: 10.5).monospacedDigit()).foregroundStyle(Palette.textMuted)
             IconButton(symbol: "macwindow", help: "Open MacHelper", action: actions.openMain)
             IconButton(symbol: "gearshape", help: "Settings", action: actions.openSettings)
         }
@@ -141,6 +148,8 @@ struct MonitorPanel: View {
                                 detail: "Choose at least one page in Settings → Menu Bar.")
                 Button("Open Settings", action: actions.openSettings)
                     .buttonStyle(.borderedProminent)
+                    .tint(Theme.accent)
+                    .foregroundStyle(Palette.base)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 32)
@@ -157,15 +166,21 @@ struct MonitorPanel: View {
             Button(action: actions.quit) {
                 Text("Quit")
                     .font(.mh(size: 11.5, weight: .medium))
-                    .foregroundStyle(Palette.textMuted)
-                    .padding(.horizontal, LiquidGlass.isAvailable ? 11 : 0)
-                    .padding(.vertical, LiquidGlass.isAvailable ? 4 : 0)
-                    .glassSurface(in: Capsule(style: .continuous), interactive: true) { $0 }
+                    .foregroundStyle(Palette.controlText)
+                    .padding(.horizontal, 11)
+                    .padding(.vertical, 4)
+                    // A tinted glass capsule, or the same capsule in the control fill: never a
+                    // pale lens under pale text.
+                    .glassSurface(in: Capsule(style: .continuous), interactive: true) { label in
+                        label
+                            .background(Palette.controlFill, in: SurfaceShape.capsule)
+                            .overlay(SurfaceShape.capsule.strokeBorder(Palette.controlBorder, lineWidth: 1))
+                    }
             }
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, LiquidGlass.isAvailable ? 8 : 9)
+        .padding(.vertical, 8)
         .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
     }
 }
@@ -184,8 +199,9 @@ private struct QuickBar: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        // See-through over the frosted panel with glass, solid otherwise.
-        .background(Palette.base.opacity(LiquidGlass.isAvailable ? 0.55 : 1))
+        // Solid: its own strip in the page color. Translucent: it shares the panel's scrim, so the
+        // labels sit on the same tested backdrop as the header and footer.
+        .background(ThemeStore.shared.material == .solid ? Palette.base : Color.clear)
         .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
     }
 
@@ -208,7 +224,7 @@ private struct QuickItemStyle: ButtonStyle {
     @State private var hover = false
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .background(hover ? Palette.inset : .clear, in: SurfaceShape(cornerRadius: 8, style: .continuous))
+            .background(hover ? Palette.controlFill : .clear, in: SurfaceShape(cornerRadius: 8, style: .continuous))
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .animation(Motion.hover, value: hover)
             .animation(Motion.press, value: configuration.isPressed)
@@ -1138,10 +1154,11 @@ extension Host {
 }
 
 extension View {
-    /// One section of a panel page on its own Liquid Glass card (the panel's "tables"). Without
-    /// glass the section stays flat, as the panel always looked.
+    /// One section of a panel page on its own card (the panel's "tables") with the frosted and
+    /// Liquid Glass materials. With the solid material the section stays flat, as the panel
+    /// always looked.
     @ViewBuilder func panelCard() -> some View {
-        if LiquidGlass.isAvailable {
+        if ThemeStore.shared.material.isTranslucent {
             padding(14)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .environment(\.insideGlassCard, true)
@@ -1159,7 +1176,7 @@ struct PanelSection<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: LiquidGlass.isAvailable ? 10 : 12) {
+        VStack(alignment: .leading, spacing: ThemeStore.shared.material.isTranslucent ? 10 : 12) {
             if let title { HairlineHeader(text: title) }
             content
         }

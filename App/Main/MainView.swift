@@ -32,6 +32,8 @@ struct MainView: View {
             .modifier(SteadyTitleBar())
         }
         .frame(minWidth: 980, minHeight: 640)
+        // Single-variant themes and the Light / Dark setting force their scheme on the window.
+        .themeColorScheme()
         .onAppear { app.openMainWindow = { openWindow(id: "main") } }
         .onChange(of: app.section) { _, section in
             // The timing probe is inert unless `--measure-pages` is running.

@@ -144,10 +144,10 @@ struct PanelTrendChart: View {
         .chartLegend(.hidden)
         .chartYAxis {
             AxisMarks(position: .leading, values: ticks) { value in
-                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])).foregroundStyle(Palette.hairline)
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])).foregroundStyle(Palette.chartGridLine)
                 AxisValueLabel {
                     if let v = value.as(Double.self) {
-                        Text(format(v)).font(.mh(size: 9.5).monospacedDigit()).foregroundStyle(Palette.textFaint)
+                        Text(format(v)).font(.mh(size: 9.5).monospacedDigit()).foregroundStyle(Palette.chartAxisText)
                     }
                 }
             }
@@ -155,7 +155,7 @@ struct PanelTrendChart: View {
                 AxisMarks(position: .trailing, values: ticks) { value in
                     AxisValueLabel {
                         if let v = value.as(Double.self) {
-                            Text(secondary.format(unscaled(v))).font(.mh(size: 9.5).monospacedDigit()).foregroundStyle(Palette.textFaint)
+                            Text(secondary.format(unscaled(v))).font(.mh(size: 9.5).monospacedDigit()).foregroundStyle(Palette.chartAxisText)
                         }
                     }
                 }
@@ -163,10 +163,10 @@ struct PanelTrendChart: View {
         }
         .chartXAxis {
             AxisMarks(values: .automatic(desiredCount: 5)) { _ in
-                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])).foregroundStyle(Palette.hairline)
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])).foregroundStyle(Palette.chartGridLine)
                 AxisValueLabel(format: .dateTime.hour().minute())
                     .font(.mh(size: 9.5))
-                    .foregroundStyle(Palette.textFaint)
+                    .foregroundStyle(Palette.chartAxisText)
             }
         }
         .chartOverlay { proxy in
@@ -209,7 +209,7 @@ struct PanelTrendChart: View {
         .frame(minWidth: 120)
         .background(Palette.raised, in: SurfaceShape(cornerRadius: 7, style: .continuous))
         .overlay(SurfaceShape(cornerRadius: 7, style: .continuous).strokeBorder(Palette.stroke, lineWidth: 1))
-        .shadow(color: .black.opacity(0.18), radius: 4, y: 2)
+        .shadow(color: Palette.glassShadow, radius: 4, y: 2)
     }
 
     /// The point closest to `date`, if it lies within one gap of it (no readout across a gap).

@@ -141,7 +141,7 @@ private struct FanSpeedCard: View {
         }
         .padding(10)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .surface(Theme.violet.opacity(0.12))
+        .surface(Palette.base, wash: Theme.violet.opacity(0.12))
         .accessibilityElement(children: .combine)
     }
 }

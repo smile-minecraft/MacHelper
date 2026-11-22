@@ -2,7 +2,8 @@ import AppKit
 import SwiftUI
 
 /// Top-level tabs: the selected one sits on a raised pill (magpie-style) that slides to the new
-/// tab. With Liquid Glass the pill is a glass lens over the recessed track.
+/// tab. With Liquid Glass the pill is a tinted glass lens over the recessed track. The track and
+/// the pill are theme tokens with contrast guarantees, so labels read on any wallpaper.
 struct TabStrip<Value: Hashable>: View {
     let items: [(Value, LocalizedStringKey)]
     var icons: [Value: String] = [:]
@@ -34,9 +35,9 @@ struct TabStrip<Value: Hashable>: View {
             }
         }
         .padding(3)
-        // With glass the track is recessed but see-through, so the strip belongs to the
-        // translucent panel around it.
-        .background(Palette.inset.opacity(LiquidGlass.isAvailable ? 0.55 : 1), in: SurfaceShape(cornerRadius: 9, style: .continuous))
+        // An opaque recessed track in every material: a see-through track let a bright wallpaper
+        // wash out the unselected labels.
+        .background(Palette.selectionTrack, in: SurfaceShape(cornerRadius: 9, style: .continuous))
         .animation(Motion.snappy, value: selection)
     }
 }
@@ -60,7 +61,7 @@ struct ChipBar<Value: Hashable>: View {
                         }
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(SelectableButtonStyle(selected: selected))
+                .buttonStyle(SelectableButtonStyle(selected: selected, onTrack: false))
             }
         }
         .animation(Motion.snappy, value: selection)
@@ -68,7 +69,9 @@ struct ChipBar<Value: Hashable>: View {
 }
 
 /// The highlight under the selected tab or chip. One per strip, matched across items, so it
-/// slides instead of blinking from one place to the next.
+/// slides instead of blinking from one place to the next. Never untinted glass: with Liquid Glass
+/// it is a lens tinted with the opaque selection fill (white-ish in light, raised graphite in
+/// dark), otherwise that fill itself, always with a fine border.
 private struct SelectionPill: View {
     var cornerRadius: CGFloat
     var bordered = false
@@ -78,26 +81,31 @@ private struct SelectionPill: View {
         let shape = SurfaceShape(cornerRadius: cornerRadius, style: .continuous)
         Group {
             if LiquidGlass.isAvailable {
-                Color.clear.glassSurface(in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)) { $0 }
+                let glass = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                Color.clear
+                    .glassSurface(in: glass, tint: Palette.glassSelectionTint) { $0 }
+                    .overlay(glass.strokeBorder(Palette.selectionBorder, lineWidth: 1))
             } else {
-                shape.fill(Palette.raised)
-                    .overlay { if bordered { shape.strokeBorder(Palette.stroke) } }
-                    .shadow(color: .black.opacity(bordered ? 0 : 0.12), radius: 1, y: 0.5)
+                shape.fill(Palette.selectionFill)
+                    .overlay(shape.strokeBorder(bordered ? Palette.selectionBorder : Palette.selectionBorder.opacity(0.6), lineWidth: 1))
+                    .shadow(color: Palette.cardShadow, radius: 1.5, y: 0.5)
             }
         }
         .matchedGeometryEffect(id: "selection", in: namespace)
     }
 }
 
-/// Label color for strip items: full text color when selected or under the pointer, muted
-/// otherwise, fading between the two; a slight press-in.
+/// Label color for strip items: the selection ink on the pill, full text under the pointer and
+/// the track's muted ink otherwise, fading between them; a slight press-in.
 private struct SelectableButtonStyle: ButtonStyle {
     let selected: Bool
+    /// Items sit on the recessed track (tab strip) rather than on the card (chips).
+    var onTrack = true
     @State private var hover = false
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundStyle(selected || hover ? Palette.text : Palette.textMuted)
+            .foregroundStyle(selected ? Palette.selectionText : hover ? Palette.text : onTrack ? Palette.selectionTrackText : Palette.controlText)
             .scaleEffect(configuration.isPressed && !selected ? 0.97 : 1)
             .animation(Motion.hover, value: hover)
             .animation(Motion.press, value: configuration.isPressed)
@@ -231,17 +239,17 @@ struct IconButton: View {
     }
 }
 
-/// A round glass button with Liquid Glass (it reacts to the pointer itself); otherwise a quiet
-/// glyph that gains a recessed square under the pointer.
+/// A round glass button with Liquid Glass (tinted with the control token, it reacts to the
+/// pointer itself); otherwise a quiet glyph that gains a control-filled square under the pointer.
 private struct IconButtonStyle: ButtonStyle {
     @State private var hover = false
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundStyle(hover && isEnabled ? Palette.text : Palette.textMuted)
+            .foregroundStyle(hover && isEnabled ? Palette.text : Palette.controlText)
             .glassSurface(in: Circle(), interactive: isEnabled) { label in
-                label.background(hover && isEnabled ? Palette.inset : .clear, in: SurfaceShape(cornerRadius: 7, style: .continuous))
+                label.background(hover && isEnabled ? Palette.controlFill : .clear, in: SurfaceShape(cornerRadius: 7, style: .continuous))
             }
             .opacity(isEnabled ? 1 : 0.5)
             .scaleEffect(configuration.isPressed ? 0.92 : 1)
