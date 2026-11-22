@@ -63,7 +63,7 @@ struct HealthView: View {
     // MARK: Findings
 
     private func findings(_ report: HealthReport) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: ThemeStore.shared.isSoft ? 14 : 8) {
             if report.findings.isEmpty {
                 Label("No problems found in this period.", systemImage: "checkmark.seal.fill")
                     .foregroundStyle(Theme.mint).font(.mhHeadline)

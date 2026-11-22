@@ -251,6 +251,26 @@ public enum BuiltInThemes {
             amber: HexColor(0xE6A63E), rose: HexColor(0xF26B60), violet: HexColor(0xB4B9C1), orange: HexColor(0xD9A16A),
             slate: HexColor(0x8A9099)))
 
-    public static let all = [instrument, pixelNight, pixelDay, classic]
+    /// Soft UI / Neumorphism: low-saturation cool porcelain clay in light and matte graphite-slate
+    /// in dark. Cards share the canvas color so depth comes from dual top-left light and
+    /// bottom-right shadow rather than borders; state hues (amber / red) stay clear.
+    public static let soft = ThemeDefinition(
+        id: "builtin.soft", name: "Soft Clay", origin: .builtIn,
+        colors: ThemeColors(
+            base: HexColor(0xE6E9EF), card: HexColor(0xE6E9EF), inset: HexColor(0xD9DEE8), raised: HexColor(0xEEF0F5),
+            stroke: HexColor(0x222732, alpha: 0.08), hairline: HexColor(0x222732, alpha: 0.08),
+            text: HexColor(0x222732), textMuted: HexColor(0x4B5363), textFaint: HexColor(0x535B6B),
+            accent: HexColor(0x386488), blue: HexColor(0x336592), cyan: HexColor(0x247282), mint: HexColor(0x2A7658),
+            amber: HexColor(0x9E5E0E), rose: HexColor(0xB8323B), violet: HexColor(0x4C607B), orange: HexColor(0xAC5024),
+            slate: HexColor(0x5E6778)),
+        dark: ThemeColors(
+            base: HexColor(0x282C34), card: HexColor(0x282C34), inset: HexColor(0x1F2229), raised: HexColor(0x333843),
+            stroke: HexColor(0xFFFFFF, alpha: 0.08), hairline: HexColor(0xFFFFFF, alpha: 0.07),
+            text: HexColor(0xEAECEF), textMuted: HexColor(0xA8B0BE), textFaint: HexColor(0x97A0B0),
+            accent: HexColor(0x7EB0D6), blue: HexColor(0x7AAEE0), cyan: HexColor(0x6CC0CC), mint: HexColor(0x6BC29B),
+            amber: HexColor(0xE5A946), rose: HexColor(0xEA6C73), violet: HexColor(0x95ACC9), orange: HexColor(0xE08B5A),
+            slate: HexColor(0x8E97A8)))
+
+    public static let all = [instrument, soft, pixelNight, pixelDay, classic]
     public static let defaultID = instrument.id
 }

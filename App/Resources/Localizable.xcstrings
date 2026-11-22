@@ -1,6 +1,60 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Neumorphic": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Neumórfico" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ニューモーフィズム" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "뉴모피즘" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "新拟物" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "新擬物" } }
+      }
+    },
+    "Soft": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Suave" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ソフト" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "소프트" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "柔和立体" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "柔和立體" } }
+      }
+    },
+    "Soft Clay": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Arcilla suave" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ソフトクレイ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "소프트 클레이" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "柔和陶土" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "柔和陶土" } }
+      }
+    },
+    "Soft clay surfaces raised from and pressed into the background with gentle light and shadow.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Superficies suaves elevadas y hundidas en el fondo con luz y sombra delicadas." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "やわらかな質感の面を穏やかな光と影で浮かび上がらせたデザイン。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "부드러운 빛과 그림자로 배경에서 도드라지고 눌리는 입체 스타일입니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "柔和陶土般的立体界面，以一亮一暗柔光表现浮起与凹陷。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "柔和陶土般的立體介面，以一亮一暗柔光表現浮起與凹陷。" } }
+      }
+    },
+    "Soft shapes need solid surfaces so their light and shadow stay crisp.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Las formas suaves requieren superficies sólidas para que la luz y las sombras se mantengan nítidas." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ソフトな形状では光と影をはっきり見せるため、不透明な面を使います。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "소프트 모양은 빛과 그림자가 선명하도록 불투명한 표면을 사용합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "柔和立体造型需要不透明底面，光影层次才会清晰。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "柔和立體造型需要不透明底面，光影層次才會清晰。" } }
+      }
+    },
+    "Soft: surfaces raised from and pressed into the background, lit from the top left.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Suave: superficies elevadas y hundidas en el fondo, iluminadas desde arriba a la izquierda." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ソフト：背景から浮き上がり、押し込まれるような面を左上からのやわらかな光で表現します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "소프트: 배경에서 도드라지거나 눌린 표면을 왼쪽 위의 부드러운 빛으로 표현합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "柔和立体：卡片与控件从底面浮起或凹陷，由左上柔和打光。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "柔和立體：卡片與控制項從底面浮起或凹陷，由左上柔和打光。" } }
+      }
+    },
     "Preview Sample Payload": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Ver carga útil de ejemplo" } },

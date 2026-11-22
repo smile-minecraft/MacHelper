@@ -53,7 +53,7 @@ final class ThemeStore: @unchecked Sendable {
             if UserDefaults.standard.data(forKey: MonitorSettingsStore.key) != nil { fresh.mode = .advanced }
             settings = fresh
         }
-        // Snapshot previews only (never saved): `--snapshot-symbols`, `--snapshot-preset standard|pixel`, `--snapshot-simple`.
+        // Snapshot previews only (never saved): `--snapshot-symbols`, `--snapshot-preset standard|pixel|neumorphic`, `--snapshot-simple`.
         // The synthetic README screenshots always use the standard look, every page included.
         if DemoData.snapshot {
             var fresh = AppearanceSettings()
@@ -64,8 +64,16 @@ final class ThemeStore: @unchecked Sendable {
         if let i = CommandLine.arguments.firstIndex(of: "--snapshot-preset"), i + 1 < CommandLine.arguments.count {
             var fresh = AppearanceSettings()
             fresh.mode = .advanced
-            if CommandLine.arguments[i + 1] == "pixel" { AppearancePreset.pixelRetro.apply(to: &fresh) }
+            switch CommandLine.arguments[i + 1] {
+            case "pixel": AppearancePreset.pixelRetro.apply(to: &fresh)
+            case "neumorphic", "soft": AppearancePreset.neumorphic.apply(to: &fresh)
+            default: break
+            }
             settings = fresh
+        }
+        if !persists {
+            if CommandLine.arguments.contains("--dark") { settings.appearanceMode = .dark }
+            else if CommandLine.arguments.contains("--light") { settings.appearanceMode = .light }
         }
         if CommandLine.arguments.contains("--snapshot-simple") { settings.mode = .simple }
         // Snapshot previews only: `--snapshot-material solid|frosted|liquidGlass`.
@@ -95,6 +103,7 @@ final class ThemeStore: @unchecked Sendable {
     var theme: ThemeDefinition { allThemes.first { $0.id == settings.themeID } ?? BuiltInThemes.pixelNight }
 
     var isPixel: Bool { settings.style == .pixel }
+    var isSoft: Bool { settings.style == .soft }
     var isSimple: Bool { settings.mode == .simple }
 
     func color(_ role: ThemeColors.Role) -> Color { palette[role] ?? .primary }
@@ -109,9 +118,9 @@ final class ThemeStore: @unchecked Sendable {
     }
 
     /// The material actually drawn: the user's choice after the system, style and accessibility
-    /// fallbacks (Reduce Transparency → solid; glass without macOS 26 / in pixel style → frosted).
+    /// fallbacks (Reduce Transparency / soft style → solid; glass without macOS 26 / in pixel style → frosted).
     var material: SurfaceMaterial {
-        settings.surfaceMaterial.effective(glassSupported: Self.glassSupported, isPixel: isPixel,
+        settings.surfaceMaterial.effective(glassSupported: Self.glassSupported, isPixel: isPixel, isSoft: isSoft,
                                            reduceTransparency: reduceTransparency, increaseContrast: increaseContrast)
     }
 
@@ -443,6 +452,7 @@ extension ThemeDefinition {
     var displayName: String {
         switch id {
         case BuiltInThemes.instrument.id: String(localized: "Instrument")
+        case BuiltInThemes.soft.id: String(localized: "Soft Clay")
         case BuiltInThemes.pixelNight.id: String(localized: "Pixel Night")
         case BuiltInThemes.pixelDay.id: String(localized: "Pixel Day")
         case BuiltInThemes.classic.id: String(localized: "Classic")
