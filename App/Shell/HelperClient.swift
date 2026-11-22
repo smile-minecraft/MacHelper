@@ -1,9 +1,11 @@
 import FanControl
 import Foundation
 import HelperProtocol
+import OSLog
 import PrivilegedOps
 import ServiceManagement
 import SMCKit
+import Storage
 
 enum HelperClientError: Error, CustomStringConvertible {
     case notEnabled(SMAppService.Status)
@@ -54,6 +56,7 @@ final class HelperClient: @unchecked Sendable {
     static let shared = HelperClient()
 
     let service = SMAppService.daemon(plistName: HelperConstants.daemonPlistName)
+    static let logger = Logger(subsystem: "com.machelper.MacHelper", category: "helper")
     private let lock = NSLock()
     private var connection: NSXPCConnection?
     private var cachedStatus: (value: SMAppService.Status, at: Date)?
@@ -76,6 +79,14 @@ final class HelperClient: @unchecked Sendable {
     }
 
     private static let registeredHashKey = "helper.registeredCDHash"
+    /// App/helper pair for which a handshake last succeeded. Written only after real XPC
+    /// success, so it means "this combination worked" rather than "we hoped it would".
+    private static let fingerprintKey = "helper.lastKnownWorkingFingerprint"
+
+    /// The app's marketing version, used to notice a manual DMG update.
+    var appVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
+    }
 
     /// cdhash of the helper embedded in this app bundle.
     var embeddedHelperHash: String? {
@@ -89,10 +100,100 @@ final class HelperClient: @unchecked Sendable {
         UserDefaults.standard.string(forKey: Self.registeredHashKey)
     }
 
-    /// With a Team ID the constraint follows the team, so updates need no re-registration.
+    var lastKnownWorkingFingerprint: HelperInstallFingerprint? {
+        guard let data = UserDefaults.standard.data(forKey: Self.fingerprintKey) else { return nil }
+        return try? JSONDecoder().decode(HelperInstallFingerprint.self, from: data)
+    }
+
+    /// The last helper cdhash that actually answered over XPC.
+    var lastKnownWorkingHash: String? { lastKnownWorkingFingerprint?.helperHash }
+
+    /// The last app version whose embedded helper actually answered over XPC.
+    var lastKnownAppVersion: String? { lastKnownWorkingFingerprint?.appVersion }
+
+    /// True once the Helper has really worked on this Mac. Drives both auto-recovery and
+    /// the decision to alert: a Helper that never worked is a setup case, not a failure.
+    var hadPreviouslyWorked: Bool { lastKnownWorkingFingerprint != nil }
+
+    /// `SMAppService.Status` reduced to the pure model used by the recovery planner.
+    var pureStatus: HelperServiceStatus {
+        switch currentStatus {
+        case .enabled: return .enabled
+        case .requiresApproval: return .requiresApproval
+        case .notFound: return .notFound
+        default: return .notRegistered
+        }
+    }
+
+    /// A drag-and-drop DMG update never calls Sparkle, so no update handoff is written.
+    /// Compare the current bundle with the last known-good fingerprint and synthesise the
+    /// same handoff the Sparkle path would have written.
+    func detectedManualUpdateHandoff() -> HelperUpdateHandoff? {
+        HelperRecoveryPlanner.detectUpdate(lastKnownWorking: lastKnownWorkingFingerprint,
+                                           currentAppVersion: appVersion,
+                                           currentHelperHash: embeddedHelperHash,
+                                           wasEnabled: hadPreviouslyWorked,
+                                           now: Date())
+    }
+
+    /// After any update — ad-hoc or signed, Sparkle or DMG — the pinned job and the
+    /// embedded helper can drift. A hash change covers ad-hoc LWCR and manual replacements;
+    /// an app version change covers signed builds where the team constraint survives but the
+    /// daemon still needs republishing. Registration must be verified by a handshake next.
     var needsReregistration: Bool {
-        guard status == .enabled, CodeSigning.currentProcess()?.isAdHoc ?? true else { return false }
-        return registeredHelperHash != embeddedHelperHash
+        guard status == .enabled else { return false }
+        if registeredHelperHash != embeddedHelperHash { return true }
+        if let last = lastKnownWorkingHash, let embedded = embeddedHelperHash, last != embedded { return true }
+        if let last = lastKnownAppVersion, last != appVersion { return true }
+        return false
+    }
+
+    /// Records a verified handshake. Clears update detection: the current app/helper pair
+    /// is now known good, so a later launch will not mistake it for another update.
+    func markWorking(protocolVersion: Int, helperVersion: String) {
+        let fingerprint = HelperInstallFingerprint(appVersion: appVersion,
+                                                   helperHash: embeddedHelperHash,
+                                                   recordedAt: Date())
+        if let data = try? JSONEncoder().encode(fingerprint) {
+            UserDefaults.standard.set(data, forKey: Self.fingerprintKey)
+        }
+        if let hash = embeddedHelperHash {
+            UserDefaults.standard.set(hash, forKey: Self.registeredHashKey)
+        }
+        Self.logger.info("Helper verified: protocol v\(protocolVersion, privacy: .public), version \(helperVersion, privacy: .public)")
+    }
+
+    /// Maps a concrete client error onto the pure outcome the planner consumes.
+    func handshakeOutcome(_ error: Error) -> HelperHandshakeOutcome {
+        guard let clientError = error as? HelperClientError else {
+            return .connectionFailed(error.localizedDescription)
+        }
+        switch clientError {
+        case .versionMismatch(let helper, let app): return .versionMismatch(helper: helper, app: app)
+        case .timedOut: return .timedOut
+        case .connection(let message): return .connectionFailed(message)
+        case .remote(let message): return .connectionFailed(message)
+        case .untrustedHelper: return .untrustedSignature(clientError.description)
+        case .notEnabled: return .notEnabled
+        }
+    }
+
+    /// One bounded probe for the health monitor. Always returns a value; failures are
+    /// logged here so neither the monitor nor the caller can silently drop them.
+    func probeHandshake() async -> HelperHandshakeOutcome {
+        guard status == .enabled else {
+            Self.logger.warning("Handshake skipped: Helper is \(self.status.label, privacy: .public)")
+            return .notEnabled
+        }
+        do {
+            let result = try await handshake()
+            markWorking(protocolVersion: result.protocolVersion, helperVersion: result.helperVersion)
+            return .success(protocolVersion: result.protocolVersion, helperVersion: result.helperVersion)
+        } catch {
+            let outcome = handshakeOutcome(error)
+            Self.logger.warning("Handshake failed: \(error.localizedDescription, privacy: .public)")
+            return outcome
+        }
     }
 
     /// For a not-yet-approved daemon, `register()` throws "Operation not permitted" even though
@@ -101,11 +202,17 @@ final class HelperClient: @unchecked Sendable {
         do {
             try service.register()
         } catch where currentStatus == .requiresApproval {
-            UserDefaults.standard.set(embeddedHelperHash, forKey: Self.registeredHashKey)
+            if let hash = embeddedHelperHash {
+                UserDefaults.standard.set(hash, forKey: Self.registeredHashKey)
+            }
+            Self.logger.notice("Helper submitted for approval in Login Items")
             return
         }
-        UserDefaults.standard.set(embeddedHelperHash, forKey: Self.registeredHashKey)
+        if let hash = embeddedHelperHash {
+            UserDefaults.standard.set(hash, forKey: Self.registeredHashKey)
+        }
         lock.withLock { cachedStatus = nil }
+        Self.logger.notice("Helper registration refreshed")
     }
 
     func unregister() async throws {
@@ -113,21 +220,48 @@ final class HelperClient: @unchecked Sendable {
         try await service.unregister()
         lock.withLock { cachedStatus = nil }
         UserDefaults.standard.removeObject(forKey: Self.registeredHashKey)
+        Self.logger.notice("Helper unregistered")
     }
 
-    /// After an app update (ad-hoc signing), re-register so launchd's constraint matches the new
-    /// helper. Tries an in-place `register()` first; if that leaves the old constraint in place the
-    /// caller sees a timeout and can fall back to `reinstall()`.
+    /// In-place re-registration used by the CLI self-test. The app's launch path verifies
+    /// the result with `softRepair()` / the health monitor instead of assuming success.
     @discardableResult
     func refreshRegistrationIfNeeded() throws -> Bool {
         guard needsReregistration else { return false }
         resetConnection()
         try register()
+        Self.logger.notice("Re-registered Helper after an app/helper change")
         return true
     }
 
+    /// Non-destructive repair: drop the stale XPC connection, republish the existing
+    /// registration, then verify with bounded backoff. Never unregisters, so a Helper the
+    /// user approved stays approved.
+    func softRepair() async throws {
+        Self.logger.notice("Soft repair: resetting XPC connection and re-registering")
+        resetConnection()
+        try register()
+        var lastError: Error = HelperClientError.timedOut
+        for attempt in 0..<3 {
+            do {
+                let result = try await handshake()
+                markWorking(protocolVersion: result.protocolVersion, helperVersion: result.helperVersion)
+                Self.logger.notice("Soft repair succeeded on attempt \(attempt + 1, privacy: .public)")
+                return
+            } catch {
+                lastError = error
+                Self.logger.warning("Soft repair attempt \(attempt + 1, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
+                resetConnection()
+                if attempt < 2 { try await Task.sleep(for: .milliseconds(300 * (attempt + 1))) }
+            }
+        }
+        throw lastError
+    }
+
     /// Full unregister + register. May require approving the helper again in System Settings.
+    /// Verifies the result with a handshake so a "registered" job that never starts is a failure.
     func reinstall() async throws {
+        Self.logger.notice("Reinstalling Helper")
         try? await unregister()
         // unregister() returns before launchd/BTM finish removing the job; registering too early
         // fails and leaves the service unregistered.
@@ -135,6 +269,21 @@ final class HelperClient: @unchecked Sendable {
             try await Task.sleep(for: .milliseconds(100))
         }
         try register()
+        var lastError: Error = HelperClientError.timedOut
+        for attempt in 0..<3 {
+            do {
+                let result = try await handshake()
+                markWorking(protocolVersion: result.protocolVersion, helperVersion: result.helperVersion)
+                Self.logger.notice("Helper reinstalled and verified on attempt \(attempt + 1, privacy: .public)")
+                return
+            } catch {
+                lastError = error
+                Self.logger.warning("Post-reinstall verification \(attempt + 1, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
+                resetConnection()
+                if attempt < 2 { try await Task.sleep(for: .milliseconds(300 * (attempt + 1))) }
+            }
+        }
+        throw lastError
     }
 
     func openLoginItemsSettings() { SMAppService.openSystemSettingsLoginItems() }
@@ -146,6 +295,7 @@ final class HelperClient: @unchecked Sendable {
             proxy.handshake { v, s in done(.success((v, s))) }
         }
         guard result.0 == HelperConstants.protocolVersion else {
+            Self.logger.error("Helper protocol v\(result.0, privacy: .public) does not match app v\(HelperConstants.protocolVersion, privacy: .public)")
             throw HelperClientError.versionMismatch(helper: result.0, app: HelperConstants.protocolVersion)
         }
         return result
@@ -254,15 +404,24 @@ final class HelperClient: @unchecked Sendable {
         do {
             return try await callOnce(timeout: timeout, body)
         } catch HelperClientError.timedOut {
+            Self.logger.error("XPC call timed out after \(timeout)")
             throw HelperClientError.timedOut
-        } catch HelperClientError.connection {
+        } catch HelperClientError.connection(let message) {
+            // One retry on connection failure: after an app update the old helper exits on
+            // first contact and launchd starts the new one, so the second attempt reaches it.
+            Self.logger.warning("XPC connection failed, retrying once: \(message, privacy: .public)")
             resetConnection()
             try await Task.sleep(for: .milliseconds(600))
             return try await callOnce(timeout: timeout, body)
+        } catch {
+            Self.logger.warning("XPC call failed: \(error.localizedDescription, privacy: .public)")
+            throw error
         }
     }
 
-    private func resetConnection() {
+    /// Drops the cached XPC connection. Called before Sparkle swaps the bundle so the old
+    /// daemon is not held open across replacement, and before every repair attempt.
+    func resetConnection() {
         lock.withLock {
             connection?.invalidate()
             connection = nil
@@ -318,7 +477,10 @@ final class HelperClient: @unchecked Sendable {
             let helperURL = Bundle.main.bundleURL.appending(path: "Contents/MacOS/\(HelperConstants.helperExecutableName)")
             guard let requirement = CodeSigning.requirement(
                 identifier: HelperConstants.helperBundleIdentifier, expected: CodeSigning.info(at: helperURL))
-            else { throw HelperClientError.untrustedHelper }
+            else {
+                Self.logger.fault("Could not read the embedded helper signature; refusing to connect")
+                throw HelperClientError.untrustedHelper
+            }
 
             let conn = NSXPCConnection(machServiceName: HelperConstants.machServiceName, options: .privileged)
             conn.remoteObjectInterface = NSXPCInterface(with: HelperXPC.self)

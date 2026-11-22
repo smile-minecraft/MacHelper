@@ -11,6 +11,9 @@ struct HelperDiagnosticsView: View {
     @State private var fans: [FanReading] = []
     @State private var showSetup = false
     @State private var showDiagnostics = false
+    /// Verified health, shared with the banner and sidebar: "enabled" in Login Items does
+    /// not prove the Helper answers, so this view must show what XPC actually observed.
+    @Bindable private var health = HelperHealthMonitor.shared
 
     private let client = HelperClient.shared
 
@@ -29,7 +32,7 @@ struct HelperDiagnosticsView: View {
                 LabeledContent("Status") {
                     HStack(spacing: 6) {
                         Circle().fill(statusColor).frame(width: 8, height: 8)
-                        Text(status.localizedLabel).foregroundStyle(Palette.text)
+                        Text(health.summaryLabel).foregroundStyle(Palette.text)
                     }
                 }
                 switch status {
@@ -44,6 +47,28 @@ struct HelperDiagnosticsView: View {
                         .settingsCaption(Theme.amber)
                 default:
                     Button("Set up Helper…") { showSetup = true }
+                }
+                if health.state.needsAttention {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(health.bannerMessage).settingsCaption(Theme.amber)
+                        HStack(spacing: 8) {
+                            if health.state.isRepairable {
+                                Button {
+                                    Task { await health.reinstallNow() }
+                                } label: {
+                                    HStack(spacing: 5) {
+                                        if health.isRepairing { ProgressView().controlSize(.small) }
+                                        Text("Repair / Reinstall Helper")
+                                    }
+                                }
+                                .disabled(health.isRepairing)
+                            }
+                            Button("Open Login Items") { health.openLoginItems() }
+                        }
+                        if let error = health.repairError {
+                            Text(error).settingsCaption(Theme.rose)
+                        }
+                    }
                 }
             } header: { Text("Helper") }
 
@@ -106,10 +131,17 @@ struct HelperDiagnosticsView: View {
     }
 
     private var statusColor: Color {
-        switch status {
-        case .enabled: Theme.mint
-        case .requiresApproval, .notFound: Theme.amber
-        default: Palette.textMuted
+        if health.state.needsAttention {
+            switch health.footerTone {
+            case .alert: Theme.rose
+            case .warning, .healthy, .neutral: Theme.amber
+            }
+        } else {
+            switch status {
+            case .enabled: Theme.mint
+            case .requiresApproval, .notFound: Theme.amber
+            default: Palette.textMuted
+            }
         }
     }
 

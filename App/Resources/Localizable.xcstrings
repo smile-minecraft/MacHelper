@@ -41401,6 +41401,216 @@
           }
         }
       }
+    },
+    "After the recent update, macOS paused the MacHelper Helper. Re-enable it in System Settings → General → Login Items & Extensions to restore fan control and system cleanup.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After the recent update, macOS paused the MacHelper Helper. Re-enable it in System Settings → General → Login Items & Extensions to restore fan control and system cleanup."
+          }
+        }
+      }
+    },
+    "After the recent update, the MacHelper Helper isn’t responding. Repair it to restore fan control and system cleanup.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After the recent update, the MacHelper Helper isn’t responding. Repair it to restore fan control and system cleanup."
+          }
+        }
+      }
+    },
+    "After the recent update, the MacHelper Helper lost its permission. Repair it to restore fan control and system cleanup.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After the recent update, the MacHelper Helper lost its permission. Repair it to restore fan control and system cleanup."
+          }
+        }
+      }
+    },
+    "Checking Helper…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking Helper…"
+          }
+        }
+      }
+    },
+    "Dismiss": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dismiss"
+          }
+        }
+      }
+    },
+    "Helper needs approval": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper needs approval"
+          }
+        }
+      }
+    },
+    "Helper needs repair": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper needs repair"
+          }
+        }
+      }
+    },
+    "Helper unresponsive": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper unresponsive"
+          }
+        }
+      }
+    },
+    "MacHelper Helper could not be verified": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper could not be verified"
+          }
+        }
+      }
+    },
+    "MacHelper Helper is out of date": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper is out of date"
+          }
+        }
+      }
+    },
+    "MacHelper Helper isn’t responding": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper isn’t responding"
+          }
+        }
+      }
+    },
+    "MacHelper Helper lost permission after the update": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper lost permission after the update"
+          }
+        }
+      }
+    },
+    "MacHelper Helper needs attention": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper needs attention"
+          }
+        }
+      }
+    },
+    "MacHelper Helper needs your approval": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper Helper needs your approval"
+          }
+        }
+      }
+    },
+    "Open Helper setup and repair options": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Helper setup and repair options"
+          }
+        }
+      }
+    },
+    "Repair / Reinstall Helper": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repair / Reinstall Helper"
+          }
+        }
+      }
+    },
+    "Repair Helper": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repair Helper"
+          }
+        }
+      }
+    },
+    "The MacHelper Helper is out of date after the update. Repair it to restore fan control and system cleanup.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The MacHelper Helper is out of date after the update. Repair it to restore fan control and system cleanup."
+          }
+        }
+      }
+    },
+    "The MacHelper Helper isn’t responding. Repair it to restore fan control and system cleanup.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The MacHelper Helper isn’t responding. Repair it to restore fan control and system cleanup."
+          }
+        }
+      }
+    },
+    "The MacHelper Helper’s signature could not be verified. Reinstall MacHelper to restore it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The MacHelper Helper’s signature could not be verified. Reinstall MacHelper to restore it."
+          }
+        }
+      }
+    },
+    "macOS is waiting for you to allow the MacHelper Helper in System Settings → General → Login Items & Extensions.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS is waiting for you to allow the MacHelper Helper in System Settings → General → Login Items & Extensions."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

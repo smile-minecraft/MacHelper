@@ -21,6 +21,9 @@ struct HelperSetupSheet: View {
     @State private var responding = false
     @State private var working = false
     @State private var error: String?
+    /// Real health state, shared with the banner and the sidebar. A job that is enabled
+    /// in Login Items can still be dead, so the guide must show what XPC actually saw.
+    @Bindable private var health = HelperHealthMonitor.shared
 
     private var installed: Bool { status == .requiresApproval || status == .enabled }
     private var approved: Bool { status == .enabled }
@@ -35,6 +38,41 @@ struct HelperSetupSheet: View {
                     Text("A few features need a small helper that runs with administrator rights: fan control, cleaning system caches and logs, turning system background items on or off, and reading the usage of system processes. Everything else works without it, and you can set it up later from the sidebar.")
                         .font(.mhCallout).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
                 }
+            }
+
+            if health.state.needsAttention {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label(health.summaryLabel, systemImage: "exclamationmark.triangle.fill")
+                        .font(.mhCallout.weight(.semibold))
+                        .foregroundStyle(Theme.amber)
+                    Text(health.bannerMessage)
+                        .font(.mhCaption)
+                        .foregroundStyle(Palette.textMuted)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 8) {
+                        if health.state.isRepairable {
+                            Button {
+                                Task { await health.reinstallNow() }
+                            } label: {
+                                HStack(spacing: 5) {
+                                    if health.isRepairing { ProgressView().controlSize(.small) }
+                                    Text("Repair / Reinstall Helper")
+                                }
+                            }
+                            .disabled(health.isRepairing)
+                        }
+                        Button("Open Login Items") { health.openLoginItems() }
+                    }
+                    if let repairError = health.repairError {
+                        Text(repairError)
+                            .font(.mhCaption)
+                            .foregroundStyle(Theme.rose)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .padding(12)
+                .background(Palette.card)
+                .surface()
             }
 
             VStack(alignment: .leading, spacing: 12) {
@@ -81,7 +119,13 @@ struct HelperSetupSheet: View {
             while !Task.isCancelled && !responding {
                 status = HelperClient.shared.status
                 if status == .enabled {
-                    responding = (try? await HelperClient.shared.handshake()) != nil
+                    // The shared monitor's verified state counts too: no need to wait for
+                    // this sheet's own probe when launch has already confirmed the Helper.
+                    if health.isHealthy {
+                        responding = true
+                    } else {
+                        responding = (try? await HelperClient.shared.handshake()) != nil
+                    }
                 }
                 if !responding { try? await Task.sleep(for: .seconds(1.5)) }
             }
