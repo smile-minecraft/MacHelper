@@ -1,6 +1,42 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Preview Sample Payload": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ver carga útil de ejemplo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "サンプルペイロードを表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "샘플 페이로드 미리보기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "预览示例数据" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "預覽範例資料" } }
+      }
+    },
+    "Privacy & Diagnostics": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Privacidad y diagnósticos" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "プライバシーと診断" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "개인 정보 및 진단" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "隐私与诊断" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "隱私與診斷" } }
+      }
+    },
+    "Share anonymous usage & performance diagnostics": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Compartir diagnósticos de uso y rendimiento anónimos" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "匿名の使用状況とパフォーマンスの診断を共有する" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "익명 사용 및 성능 진단 공유" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "分享匿名使用与性能诊断" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "分享匿名使用與效能診斷" } }
+      }
+    },
+    "Stays off unless you turn it on. Sends your app version, macOS version, chip family, feature counts and coarse performance buckets. Never sends file paths, process names, disk contents or personal data. Turning it off clears the anonymous ID and the pending queue.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Permanece desactivado hasta que lo actives. Envía la versión de la app, la versión de macOS, la familia del chip, recuentos de uso y rangos amplios de rendimiento. Nunca envía rutas de archivos, nombres de procesos, contenidos del disco ni datos personales. Al desactivarlo se borran el ID anónimo y la cola pendiente." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オンにしない限り送信されません。送信するのはアプリのバージョン、macOS のバージョン、チップの種類、機能の使用回数、大まかなパフォーマンスの区分だけです。ファイルパス、プロセス名、ディスクの内容、個人情報は送信しません。オフにすると匿名 ID と送信待ちのキューをすぐに消去します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "켜지 않으면 전송되지 않습니다. 앱 버전, macOS 버전, 칩 종류, 기능 사용 횟수, 대략적인 성능 구간만 전송합니다. 파일 경로, 프로세스 이름, 디스크 내용, 개인 정보는 절대 전송하지 않습니다. 끄면 익명 ID와 대기 중인 큐를 즉시 지웁니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "除非你开启，否则一律关闭。只发送 app 版本、macOS 版本、芯片类型、功能使用次数与粗略的性能区间；绝不发送文件路径、进程名称、磁盘内容或个人数据。关闭时会立即清除匿名 ID 与待发送队列。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "除非你開啟，否則一律關閉。只傳送 app 版本、macOS 版本、晶片類型、功能使用次數與粗略的效能區間；絕不傳送檔案路徑、程序名稱、磁碟內容或個人資料。關閉時會立即清除匿名 ID 與待傳送佇列。" } }
+      }
+    },
     "%@ files": {
       "localizations": {
         "es": {

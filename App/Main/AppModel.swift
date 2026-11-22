@@ -2,6 +2,7 @@ import AppKit
 import Observation
 import SettingsPortability
 import SwiftUI
+import Telemetry
 
 enum AppSection: String, CaseIterable, Identifiable, Hashable {
     case overview, monitor, health, fans, optimize, disk, uninstall, updates, startup
@@ -72,6 +73,16 @@ final class AppModel {
     let startupModel = StartupModel()
     let healthModel = HealthModel()
 
+    /// Opt-in telemetry. Creating the client never reads anything or sends anything; only an
+    /// explicit opt-in queues events, and only a configured endpoint can transmit them.
+    let telemetry: AppTelemetryClient = {
+        let preferences = TelemetryPreferences()
+        return AppTelemetryClient(
+            preferences: preferences,
+            transport: DefaultTelemetryTransport(
+                base: URLSessionTelemetryTransport(endpointResolver: { preferences.configuredEndpoint })))
+    }()
+
     var section: AppSection = .overview {
         didSet {
             // Restored scan trees are large; keep only the location on screen once the page closes.
@@ -115,6 +126,9 @@ final class AppModel {
 
     func show(_ section: AppSection) {
         self.section = section
+        if !TelemetryRuntime.isNonProduction() {
+            Task { await telemetry.recordSectionView(section.rawValue) }
+        }
         if DockPreference.migrate(.standard) != .never {
             NSApp.setActivationPolicy(.regular)
         }

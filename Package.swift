@@ -15,6 +15,7 @@ let package = Package(
         .library(name: "DiskScan", targets: ["DiskScan"]),
         .library(name: "CleanEngine", targets: ["CleanEngine"]),
         .library(name: "Storage", targets: ["Storage"]),
+        .library(name: "Telemetry", targets: ["Telemetry"]),
         .library(name: "SettingsPortability", targets: ["SettingsPortability"]),
         .library(name: "Diagnostics", targets: ["Diagnostics"]),
         .executable(name: "machelper", targets: ["machelper"]),
@@ -37,10 +38,13 @@ let package = Package(
         .target(name: "SMCKit", dependencies: ["CSystemBridge"]),
         .target(name: "Metrics", dependencies: ["CSystemBridge", "SMCKit"]),
         .target(name: "FanControl"),
-        .target(name: "DiskScan", dependencies: ["CSystemBridge"]),
+        .target(name: "DiskScan", dependencies: ["CSystemBridge", "Telemetry"]),
         .target(name: "CleanEngine", dependencies: ["DiskScan", "PrivilegedOps"], resources: [.copy("Rules"), .copy("Artifacts"), .copy("UninstallRules"),
                                                                   .process("Localizable.xcstrings"), .process("Rules.xcstrings")]),
-        .target(name: "Storage", dependencies: [.product(name: "GRDB", package: "GRDB.swift")]),
+        .target(name: "Storage", dependencies: [.product(name: "GRDB", package: "GRDB.swift"), "Telemetry"]),
+        // No third-party dependencies: Foundation, OSLog and os_signpost only. DiskScan and
+        // Storage use its PerfSignpost without dragging in a separate instrumentation target.
+        .target(name: "Telemetry"),
         .target(name: "SettingsPortability", dependencies: ["CleanEngine", "FanControl"]),
         .target(name: "Diagnostics", dependencies: ["CleanEngine", "Storage"], resources: [.process("Localizable.xcstrings")]),
         .executableTarget(
@@ -62,6 +66,7 @@ let package = Package(
         .testTarget(name: "MetricsTests", dependencies: ["Metrics"]),
         .testTarget(name: "ThemingTests", dependencies: ["Theming"]),
         .testTarget(name: "StorageTests", dependencies: ["Storage"]),
+        .testTarget(name: "TelemetryTests", dependencies: ["Telemetry"]),
         .testTarget(name: "DiagnosticsTests", dependencies: ["Diagnostics", "Storage"]),
         .testTarget(name: "SettingsPortabilityTests", dependencies: ["SettingsPortability", "CleanEngine", "FanControl"]),
     ]

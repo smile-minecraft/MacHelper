@@ -5,6 +5,10 @@ import DiskScan
 import HelperProtocol
 import Storage
 import SwiftUI
+import Telemetry
+
+/// Captured at process start so the launch event can report one coarse duration bucket.
+private let processLaunchStart = CFAbsoluteTimeGetCurrent()
 
 /// Menu bar app shell. NSStatusItem + NSHostingView rather than MenuBarExtra,
 /// because MenuBarExtra's label cannot host custom drawn content like sparklines.
@@ -100,6 +104,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             return
         }
         #endif
+        // Telemetry runs only in a normal user session. Snapshot, measurement and self-test
+        // invocations are diagnostic tools and must never queue or transmit an event.
+        if !TelemetryRuntime.isNonProduction() {
+            let client = app.telemetry
+            Task.detached(priority: .utility) {
+                guard await client.isEnabled else { return }
+                await client.startPeriodicFlush()
+                let elapsed = CFAbsoluteTimeGetCurrent() - processLaunchStart
+                await client.recordAppLaunch(coldStartMsBucket: Int(elapsed * 1000))
+            }
+        }
         setUpStatusItem()
         setUpPopover()
         // Sparkle stops the background recorder before replacing the app; restore it if this

@@ -1,6 +1,7 @@
 import Darwin
 import Foundation
 import GRDB
+import Telemetry
 
 /// Errors from opening the shared history database.
 public enum HistoryDatabaseError: Error, LocalizedError, Equatable {
@@ -227,6 +228,8 @@ public final class MetricsHistory: Sendable {
     /// or before the last clear of this kind is dropped whole: it was accumulating in
     /// memory when the user cleared the history.
     public func recordMinute(_ minute: FinishedMinute, now: Date = Date()) throws {
+        let interval = PerfSignpost.storage.beginInterval("history.write.minute")
+        defer { PerfSignpost.storage.endInterval("history.write.minute", interval) }
         try db.write { db in
             let stored: String? = try String.fetchOne(db, sql: "SELECT value FROM history_setting WHERE key = 'retentionSeconds'")
             let effectiveRetention = stored.flatMap { Double($0) } ?? retention
@@ -271,6 +274,8 @@ public final class MetricsHistory: Sendable {
 
     /// Samples since `since`, averaged into buckets of `bucket` seconds (one row per bucket).
     public func samples(since: Date, bucket: TimeInterval = 60) throws -> [MetricSample] {
+        let interval = PerfSignpost.storage.beginInterval("history.read.samples")
+        defer { PerfSignpost.storage.endInterval("history.read.samples", interval) }
         let averages = MetricSample.metricColumns.map { "AVG(\($0)) AS \($0)" }.joined(separator: ", ")
         // Dates are stored as "YYYY-MM-DD HH:MM:SS.SSS" text; bucket on the unix time.
         let sql = """
@@ -463,6 +468,8 @@ public final class MetricsHistory: Sendable {
     public func seriesBuckets(_ series: [String], since: Date, until: Date = Date(),
                               bucket: TimeInterval = 60) throws -> [String: [SeriesBucket]] {
         guard !series.isEmpty else { return [:] }
+        let interval = PerfSignpost.storage.beginInterval("history.read.seriesBuckets")
+        defer { PerfSignpost.storage.endInterval("history.read.seriesBuckets", interval) }
         let seconds = max(Int(bucket), 60)
         return try db.read { db in
             let placeholders = Array(repeating: "?", count: series.count).joined(separator: ", ")

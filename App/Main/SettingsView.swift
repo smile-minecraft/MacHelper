@@ -1,6 +1,7 @@
 import ServiceManagement
 import SettingsPortability
 import SwiftUI
+import Telemetry
 
 struct SettingsView: View {
     let app: AppModel
@@ -75,6 +76,7 @@ private struct GeneralSettings: View {
                     }
                     .onAppear { autoCheckUpdates = UpdaterController.shared.automaticallyChecksForUpdates }
             }
+            TelemetrySettingsView(client: app.telemetry)
             BackgroundRecordingSection(model: app.backgroundRecording)
             HistoryManagementSection()
             Section("General") {
