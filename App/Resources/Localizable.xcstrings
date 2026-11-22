@@ -40383,6 +40383,988 @@
           }
         }
       }
+    },
+    "Light, Dark and Material": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro, oscuro y material"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ライト、ダーク、マテリアル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "라이트, 다크 및 재질"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浅色、深色与材质"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "淺色、深色與材質"
+          }
+        }
+      }
+    },
+    "appearance.mode.system": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システム"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟随系统"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟隨系統"
+          }
+        }
+      }
+    },
+    "appearance.mode.light": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ライト"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "라이트"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浅色"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "淺色"
+          }
+        }
+      }
+    },
+    "appearance.mode.dark": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuro"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダーク"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다크"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "深色"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "深色"
+          }
+        }
+      }
+    },
+    "Material": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Material"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マテリアル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재질"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "材质"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "材質"
+          }
+        }
+      }
+    },
+    "Solid": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sólido"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ソリッド"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "불투명"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实色"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "實色"
+          }
+        }
+      }
+    },
+    "Frosted": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esmerilado"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すりガラス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "반투명"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磨砂"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "霧面"
+          }
+        }
+      }
+    },
+    "Liquid Glass": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "液态玻璃"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "液態玻璃"
+          }
+        }
+      }
+    },
+    "“%@” is a dark-only theme, so MacHelper stays dark. Themes marked Light & Dark follow this setting.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» es un tema solo oscuro, así que MacHelper se mantiene oscuro. Los temas marcados como Claro y oscuro siguen este ajuste."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「%@」はダーク専用のテーマなので、MacHelper はダークのままです。「ライトとダーク」と表示されたテーマはこの設定に従います。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‘%@’은(는) 다크 전용 테마라서 MacHelper는 다크로 유지됩니다. ‘라이트 및 다크’ 테마는 이 설정을 따릅니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”是仅深色主题，因此 MacHelper 保持深色。标有“浅色与深色”的主题会跟随此设置。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「%@」是僅深色的主題，所以 MacHelper 會維持深色。標示「淺色與深色」的主題才會跟隨這個設定。"
+          }
+        }
+      }
+    },
+    "“%@” is a light-only theme, so MacHelper stays light. Themes marked Light & Dark follow this setting.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» es un tema solo claro, así que MacHelper se mantiene claro. Los temas marcados como Claro y oscuro siguen este ajuste."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「%@」はライト専用のテーマなので、MacHelper はライトのままです。「ライトとダーク」と表示されたテーマはこの設定に従います。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‘%@’은(는) 라이트 전용 테마라서 MacHelper는 라이트로 유지됩니다. ‘라이트 및 다크’ 테마는 이 설정을 따릅니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@”是仅浅色主题，因此 MacHelper 保持浅色。标有“浅色与深色”的主题会跟随此设置。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「%@」是僅淺色的主題，所以 MacHelper 會維持淺色。標示「淺色與深色」的主題才會跟隨這個設定。"
+          }
+        }
+      }
+    },
+    "Follows the macOS appearance.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sigue la apariencia de macOS."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS の外観に従います。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 화면 모드를 따릅니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟随 macOS 外观。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟隨 macOS 的外觀。"
+          }
+        }
+      }
+    },
+    "Always light, whatever macOS uses.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siempre claro, use lo que use macOS."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS の設定にかかわらず常にライト。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 설정과 관계없이 항상 라이트."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "始终浅色，不论 macOS 使用哪种外观。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一律淺色，不論 macOS 用哪種外觀。"
+          }
+        }
+      }
+    },
+    "Always dark, whatever macOS uses.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siempre oscuro, use lo que use macOS."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS の設定にかかわらず常にダーク。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS 설정과 관계없이 항상 다크."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "始终深色，不论 macOS 使用哪种外观。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一律深色，不論 macOS 用哪種外觀。"
+          }
+        }
+      }
+    },
+    "Opaque surfaces everywhere: the most legible, classic instrument look.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Superficies opacas en todas partes: lo más legible, el aspecto clásico de instrumento."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべて不透明な面：最も読みやすい、クラシックな計器の見た目。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 면이 불투명: 가장 읽기 쉬운 클래식 계기판 스타일."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有表面都不透明：最易读，经典仪表外观。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有表面都不透明：最好讀，經典儀表外觀。"
+          }
+        }
+      }
+    },
+    "The menu bar panel lets a hint of the desktop through; its cards stay opaque and crisp.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El panel de la barra de menús deja entrever el escritorio; sus tarjetas siguen opacas y nítidas."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーのパネルにデスクトップがほのかに透け、カードは不透明でくっきりしたままです。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "메뉴 막대 패널에 데스크탑이 살짝 비치고, 카드는 불투명하고 선명하게 유지됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "菜单栏面板隐约透出桌面，卡片保持不透明且清晰。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選單列面板會隱約透出桌面，卡片維持不透明、清晰。"
+          }
+        }
+      }
+    },
+    "Liquid Glass cards and controls, tinted bright in light and deep in dark so text stays readable on any wallpaper. Needs macOS 26.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarjetas y controles de Liquid Glass, tintados claros en modo claro y profundos en oscuro para que el texto se lea sobre cualquier fondo. Requiere macOS 26."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass のカードとコントロール。ライトでは明るく、ダークでは深く色付けされ、どの壁紙でも文字が読めます。macOS 26 が必要です。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass 카드와 컨트롤. 라이트에서는 밝게, 다크에서는 깊게 색을 입혀 어떤 배경 화면에서도 글자가 잘 보입니다. macOS 26 필요."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "液态玻璃卡片与控件，浅色时着亮色、深色时着深色，任何壁纸上文字都清晰可读。需要 macOS 26。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "液態玻璃卡片與控制項，淺色時染上明亮色調、深色時染上深色調，任何桌布上文字都看得清楚。需要 macOS 26。"
+          }
+        }
+      }
+    },
+    "Reduce Transparency is on in System Settings, so surfaces are solid.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reducir transparencia está activado en Ajustes del Sistema, así que las superficies son opacas."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システム設定で「透明度を下げる」がオンのため、不透明な面を使います。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 설정에서 '투명도 줄이기'가 켜져 있어 불투명한 면을 사용합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统设置中已打开“降低透明度”，因此使用实色表面。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統設定已開啟「減少透明度」，所以使用實色表面。"
+          }
+        }
+      }
+    },
+    "Liquid Glass needs macOS 26; frosted surfaces are used instead.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass requiere macOS 26; se usan superficies esmeriladas."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass には macOS 26 が必要です。代わりにすりガラスを使います。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass는 macOS 26이 필요합니다. 대신 반투명 면을 사용합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "液态玻璃需要 macOS 26，改用磨砂表面。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "液態玻璃需要 macOS 26，改用霧面表面。"
+          }
+        }
+      }
+    },
+    "Pixel shapes keep their flat blocks; frosted surfaces are used instead of Liquid Glass.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las formas de píxel mantienen sus bloques planos; se usan superficies esmeriladas en lugar de Liquid Glass."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ピクセルの形はフラットなブロックのままです。Liquid Glass の代わりにすりガラスを使います。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "픽셀 모양은 평평한 블록을 유지합니다. Liquid Glass 대신 반투명 면을 사용합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素形状保留平面方块，改用磨砂表面而非液态玻璃。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "像素形狀維持平面方塊，改用霧面表面而非液態玻璃。"
+          }
+        }
+      }
+    },
+    "Increase Contrast is on in System Settings; frosted surfaces are used instead of Liquid Glass.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aumentar contraste está activado en Ajustes del Sistema; se usan superficies esmeriladas en lugar de Liquid Glass."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システム設定で「コントラストを上げる」がオンのため、Liquid Glass の代わりにすりガラスを使います。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 설정에서 '대비 증가'가 켜져 있어 Liquid Glass 대신 반투명 면을 사용합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统设置中已打开“增强对比度”，改用磨砂表面而非液态玻璃。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統設定已開啟「增加對比」，改用霧面表面而非液態玻璃。"
+          }
+        }
+      }
+    },
+    "theme.polarity.dark": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark only"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo oscuro"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダークのみ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다크 전용"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅深色"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅深色"
+          }
+        }
+      }
+    },
+    "theme.polarity.light": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light only"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo claro"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ライトのみ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "라이트 전용"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅浅色"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅淺色"
+          }
+        }
+      }
+    },
+    "Low contrast": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contraste bajo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "低コントラスト"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "낮은 대비"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对比度低"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "對比偏低"
+          }
+        }
+      }
+    },
+    "Contrast adjusted": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contraste ajustado"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コントラスト調整済み"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "대비 조정됨"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已调整对比度"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已調整對比"
+          }
+        }
+      }
+    },
+    "High contrast": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contraste alto"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高コントラスト"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "높은 대비"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高对比度"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高對比"
+          }
+        }
+      }
+    },
+    "Some text in this theme stays below the WCAG contrast minimums.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parte del texto de este tema queda por debajo de los mínimos de contraste WCAG."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このテーマの一部の文字は WCAG のコントラスト基準を下回ります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 테마의 일부 글자는 WCAG 최소 대비에 미치지 못합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此主题中有些文字低于 WCAG 最低对比度。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個主題有些文字低於 WCAG 的最低對比。"
+          }
+        }
+      }
+    },
+    "MacHelper darkened or lightened some text colors of this theme so they stay readable.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper oscureció o aclaró algunos colores de texto de este tema para que sigan siendo legibles."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "読みやすさを保つため、MacHelper がこのテーマの一部の文字色を暗く、または明るくしました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "읽기 쉽도록 MacHelper가 이 테마의 일부 글자 색을 어둡게 또는 밝게 조정했습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 将此主题的部分文字颜色调深或调浅，以保持可读。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 把這個主題的部分文字顏色調深或調淺，讓它們維持好讀。"
+          }
+        }
+      }
+    },
+    "Text, selections and charts meet the WCAG contrast minimums on solid, frosted and glass surfaces, in light and dark.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El texto, las selecciones y los gráficos cumplen los mínimos de contraste WCAG en superficies opacas, esmeriladas y de cristal, en claro y oscuro."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文字、選択項目、グラフは、ソリッド・すりガラス・ガラスのどの面でも、ライトとダークの両方で WCAG のコントラスト基準を満たします。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "글자, 선택 항목, 차트가 불투명·반투명·유리 면 모두에서, 라이트와 다크 모두 WCAG 최소 대비를 충족합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文字、选中项与图表在实色、磨砂与玻璃表面上，浅色与深色下都符合 WCAG 最低对比度。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文字、選取項目與圖表在實色、霧面與玻璃表面上，淺色和深色都符合 WCAG 最低對比。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -308,6 +308,7 @@ struct NetworkTrafficSources: View {
                 Meter(fraction: share, color: sort == .upload ? Theme.rose : Theme.blue)
                     .frame(width: 32)
                 Text(verbatim: Fmt.percent(share)).frame(width: 34, alignment: .trailing)
+                    .foregroundStyle(Palette.text)
             }
             .frame(width: 78, alignment: .trailing)
         }

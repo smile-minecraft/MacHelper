@@ -56,6 +56,10 @@ public struct AppearanceSettings: Codable, Sendable, Equatable {
     /// Tint values that need attention with a pale version of the level color (close to white).
     /// Off: every value uses the menu bar's own text color.
     public var menuBarColored: Bool = false
+    /// Solid, frosted or Liquid Glass surfaces (glass falls back where it isn't drawn).
+    public var surfaceMaterial: SurfaceMaterial = .default
+    /// Light or dark for themes with both variants; single-variant themes keep their own.
+    public var appearanceMode: AppearanceMode = .system
 
     public static let textScaleRange: ClosedRange<Double> = 0.8...1.5
 
@@ -75,6 +79,8 @@ public struct AppearanceSettings: Codable, Sendable, Equatable {
         menuBarFont = (try? c.decode(MenuBarFont.self, forKey: .menuBarFont)) ?? d.menuBarFont
         menuBarLabel = (try? c.decode(MenuBarLabel.self, forKey: .menuBarLabel)) ?? d.menuBarLabel
         menuBarColored = (try? c.decode(Bool.self, forKey: .menuBarColored)) ?? d.menuBarColored
+        surfaceMaterial = (try? c.decode(SurfaceMaterial.self, forKey: .surfaceMaterial)) ?? d.surfaceMaterial
+        appearanceMode = (try? c.decode(AppearanceMode.self, forKey: .appearanceMode)) ?? d.appearanceMode
     }
 }
 

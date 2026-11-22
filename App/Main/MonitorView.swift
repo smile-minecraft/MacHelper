@@ -172,15 +172,18 @@ struct MonitorView: View {
             .chartLegend(data.count > 1 ? .visible : .hidden)
             .chartYAxis {
                 AxisMarks(position: .trailing) { value in
-                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3]))
-                    AxisValueLabel { if let v = value.as(Double.self) { Text(label(v, m.format)) } }
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])).foregroundStyle(Palette.chartGridLine)
+                    AxisValueLabel { if let v = value.as(Double.self) { Text(label(v, m.format)) } }.foregroundStyle(Palette.chartAxisText)
                 }
             }
             .chartXAxis {
                 if chartRange == .live {
-                    AxisMarks(values: .stride(by: .minute)) { _ in AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])); AxisValueLabel(format: xFormat) }
+                    AxisMarks(values: .stride(by: .minute)) { _ in
+                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3])).foregroundStyle(Palette.chartGridLine)
+                        AxisValueLabel(format: xFormat).foregroundStyle(Palette.chartAxisText)
+                    }
                 } else {
-                    AxisMarks(values: .automatic(desiredCount: 5)) { _ in AxisValueLabel(format: xFormat) }
+                    AxisMarks(values: .automatic(desiredCount: 5)) { _ in AxisValueLabel(format: xFormat).foregroundStyle(Palette.chartAxisText) }
                 }
             }
             .modifier(ThresholdYScale(top: m.module.chartThresholds.map(\.value).max(),

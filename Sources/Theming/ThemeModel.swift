@@ -198,7 +198,7 @@ public enum BuiltInThemes {
         colors: ThemeColors(
             base: HexColor(0x1A1C2C), card: HexColor(0x23263A), inset: HexColor(0x2D3149), raised: HexColor(0x363D5C),
             stroke: HexColor(0x566C86, alpha: 0.75), hairline: HexColor(0x94B0C2, alpha: 0.14),
-            text: HexColor(0xF4F4F4), textMuted: HexColor(0xA9BDCB), textFaint: HexColor(0x7C8FA8),
+            text: HexColor(0xF4F4F4), textMuted: HexColor(0xA9BDCB), textFaint: HexColor(0x7E91AA),
             accent: HexColor(0x5BD080), blue: HexColor(0x41A6F6), cyan: HexColor(0x73EFF7), mint: HexColor(0x5BD080),
             amber: HexColor(0xFFCD75), rose: HexColor(0xF0607A), violet: HexColor(0x7FA7C9), orange: HexColor(0xEF7D57),
             slate: HexColor(0x94B0C2)))
@@ -208,7 +208,7 @@ public enum BuiltInThemes {
         colors: ThemeColors(
             base: HexColor(0xF2EEE3), card: HexColor(0xFFFCF4), inset: HexColor(0xE7E1D2), raised: HexColor(0xFFFFFF),
             stroke: HexColor(0x29366F, alpha: 0.45), hairline: HexColor(0x29366F, alpha: 0.12),
-            text: HexColor(0x1A1C2C), textMuted: HexColor(0x48506B), textFaint: HexColor(0x6B7390),
+            text: HexColor(0x1A1C2C), textMuted: HexColor(0x48506B), textFaint: HexColor(0x636A86),
             accent: HexColor(0x23885A), blue: HexColor(0x3B5DC9), cyan: HexColor(0x1F7F8C), mint: HexColor(0x23885A),
             amber: HexColor(0xB37400), rose: HexColor(0xB13E53), violet: HexColor(0x4C6A92), orange: HexColor(0xC4522B),
             slate: HexColor(0x566C86)))
@@ -239,14 +239,14 @@ public enum BuiltInThemes {
         colors: ThemeColors(
             base: HexColor(0xE8E9EB), card: HexColor(0xF4F5F6), inset: HexColor(0xDCDEE1), raised: HexColor(0xFFFFFF),
             stroke: HexColor(0x1C1E22, alpha: 0.10), hairline: HexColor(0x1C1E22, alpha: 0.08),
-            text: HexColor(0x1C1E22), textMuted: HexColor(0x575C64), textFaint: HexColor(0x6E737B),
+            text: HexColor(0x1C1E22), textMuted: HexColor(0x575C64), textFaint: HexColor(0x63676F),
             accent: HexColor(0x24272C), blue: HexColor(0x3A3F47), cyan: HexColor(0x5E646D), mint: HexColor(0x3D6B5A),
             amber: HexColor(0xA86A12), rose: HexColor(0xC0362D), violet: HexColor(0x4A5059), orange: HexColor(0x8A5A2B),
             slate: HexColor(0x6E737B)),
         dark: ThemeColors(
             base: HexColor(0x1E2024), card: HexColor(0x26292E), inset: HexColor(0x30343A), raised: HexColor(0x373B42),
             stroke: HexColor(0xFFFFFF, alpha: 0.10), hairline: HexColor(0xFFFFFF, alpha: 0.07),
-            text: HexColor(0xECEDEF), textMuted: HexColor(0xA6ABB3), textFaint: HexColor(0x8A9099),
+            text: HexColor(0xECEDEF), textMuted: HexColor(0xA6ABB3), textFaint: HexColor(0x8C929B),
             accent: HexColor(0xE4E6E9), blue: HexColor(0xC9CDD3), cyan: HexColor(0x9BA1AA), mint: HexColor(0x8FC2AE),
             amber: HexColor(0xE6A63E), rose: HexColor(0xF26B60), violet: HexColor(0xB4B9C1), orange: HexColor(0xD9A16A),
             slate: HexColor(0x8A9099)))

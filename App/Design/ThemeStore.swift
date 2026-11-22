@@ -29,6 +29,12 @@ final class ThemeStore: @unchecked Sendable {
     @ObservationIgnored private let persists = !CommandLine.arguments.contains { $0.hasPrefix("--snapshot") || $0 == "--export-icon-template" }
     /// Resolved colors for the current theme (dynamic for themes with light and dark variants).
     private(set) var palette: [ThemeColors.Role: Color] = [:]
+    /// Semantic control, chart and glass colors derived from the theme (dynamic like `palette`).
+    private(set) var surfaces: [SurfaceTokens.Role: Color] = [:]
+    /// System accessibility settings that change how surfaces are drawn.
+    private(set) var reduceTransparency = NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
+    private(set) var increaseContrast = NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast
+    @ObservationIgnored private var accessibilityObserver: NSObjectProtocol?
     @ObservationIgnored let library = ThemeLibrary(directory: MacHelperPaths.supportDirectory.appending(path: "themes"))
     @ObservationIgnored let iconLibrary = IconPackLibrary(root: MacHelperPaths.supportDirectory.appending(path: "icons"))
     private(set) var iconPacks: [IconPack] = []
@@ -62,6 +68,9 @@ final class ThemeStore: @unchecked Sendable {
             settings = fresh
         }
         if CommandLine.arguments.contains("--snapshot-simple") { settings.mode = .simple }
+        // Snapshot previews only: `--snapshot-material solid|frosted|liquidGlass`.
+        if let i = CommandLine.arguments.firstIndex(of: "--snapshot-material"), i + 1 < CommandLine.arguments.count,
+           let m = SurfaceMaterial(rawValue: CommandLine.arguments[i + 1]) { settings.surfaceMaterial = m }
         // Debug aid: `--export-icon-template DIR` writes the template and quits (used to check the export).
         if let i = CommandLine.arguments.firstIndex(of: "--export-icon-template"), i + 1 < CommandLine.arguments.count {
             exportTemplateOnLaunch = URL(fileURLWithPath: CommandLine.arguments[i + 1])
@@ -70,6 +79,13 @@ final class ThemeStore: @unchecked Sendable {
         Self.registerFonts()
         loadIcons()
         rebuild()
+        accessibilityObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            reduceTransparency = NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
+            increaseContrast = NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast
+        }
     }
 
     // MARK: Themes
@@ -82,6 +98,27 @@ final class ThemeStore: @unchecked Sendable {
     var isSimple: Bool { settings.mode == .simple }
 
     func color(_ role: ThemeColors.Role) -> Color { palette[role] ?? .primary }
+    func color(_ role: SurfaceTokens.Role) -> Color { surfaces[role] ?? .primary }
+
+    // MARK: Appearance and material
+
+    /// Whether this system can draw Liquid Glass at all.
+    static var glassSupported: Bool {
+        if #available(macOS 26, *) { return true }
+        return false
+    }
+
+    /// The material actually drawn: the user's choice after the system, style and accessibility
+    /// fallbacks (Reduce Transparency → solid; glass without macOS 26 / in pixel style → frosted).
+    var material: SurfaceMaterial {
+        settings.surfaceMaterial.effective(glassSupported: Self.glassSupported, isPixel: isPixel,
+                                           reduceTransparency: reduceTransparency, increaseContrast: increaseContrast)
+    }
+
+    /// The appearance forced by the theme or the Appearance setting; nil follows the system.
+    var forcedDark: Bool? { theme.forcedDarkAppearance(mode: settings.appearanceMode) }
+
+    var forcedColorScheme: ColorScheme? { forcedDark.map { $0 ? .dark : .light } }
 
     /// Saves (adds or replaces) a custom theme and selects it.
     func saveCustom(_ theme: ThemeDefinition, select: Bool = true) throws {
@@ -373,18 +410,26 @@ final class ThemeStore: @unchecked Sendable {
 
     private func rebuild() {
         let t = theme
-        let light = t.colors, dark = t.dark
-        var p: [ThemeColors.Role: Color] = [:]
-        for role in ThemeColors.Role.allCases {
-            let l = light[role], d = dark?[role]
-            p[role] = Color(nsColor: NSColor(name: nil) { appearance in
-                let isDark = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-                return (isDark ? (d ?? l) : l).nsColor
+        // Both variants resolved once (readable text, derived surface tokens); a single-variant
+        // theme uses the same one for either appearance.
+        let light = ResolvedTheme(theme: t, variantDark: false)
+        let dark = t.followsSystemAppearance ? ResolvedTheme(theme: t, variantDark: true) : light
+        func dynamic(_ l: HexColor, _ d: HexColor) -> Color {
+            if l == d { return l.color }
+            return Color(nsColor: NSColor(name: nil) { appearance in
+                appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? d.nsColor : l.nsColor
             })
         }
+        var p: [ThemeColors.Role: Color] = [:]
+        for role in ThemeColors.Role.allCases { p[role] = dynamic(light.colors[role], dark.colors[role]) }
         palette = p
+        var s: [SurfaceTokens.Role: Color] = [:]
+        for role in SurfaceTokens.Role.allCases { s[role] = dynamic(light.surfaces[role], dark.surfaces[role]) }
+        surfaces = s
         applyDockIcon()
-        let appearance: NSAppearance? = t.followsSystemAppearance ? nil : NSAppearance(named: t.isDark ? .darkAqua : .aqua)
+        // Single-variant themes force their own polarity; adaptive themes follow the Appearance
+        // setting (System leaves it to macOS). Popovers and windows inherit this appearance.
+        let appearance: NSAppearance? = forcedDark.map { NSAppearance(named: $0 ? .darkAqua : .aqua)! }
         if Thread.isMainThread {
             MainActor.assumeIsolated { NSApp?.appearance = appearance }
         } else {
