@@ -48,6 +48,12 @@ final class ThemeStore: @unchecked Sendable {
             settings = fresh
         }
         // Snapshot previews only (never saved): `--snapshot-symbols`, `--snapshot-preset standard|pixel`, `--snapshot-simple`.
+        // The synthetic README screenshots always use the standard look, every page included.
+        if DemoData.snapshot {
+            var fresh = AppearanceSettings()
+            fresh.mode = .advanced
+            settings = fresh
+        }
         if CommandLine.arguments.contains("--snapshot-symbols") { settings.iconSet = .symbols }
         if let i = CommandLine.arguments.firstIndex(of: "--snapshot-preset"), i + 1 < CommandLine.arguments.count {
             var fresh = AppearanceSettings()

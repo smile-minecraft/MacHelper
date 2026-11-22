@@ -235,7 +235,9 @@ final class MonitorSettingsStore {
     }
 
     init() {
-        configuration = Self.load()
+        // The synthetic `--snapshot-demo` run shows the default menu bar (CPU sparkline, memory,
+        // temperature) whatever this Mac's settings are, and never saves.
+        configuration = DemoData.snapshot ? .default : Self.load()
     }
 
     subscript(module: MonitorModule) -> ModuleConfig {
@@ -260,6 +262,7 @@ final class MonitorSettingsStore {
     }
 
     private func save() {
+        guard !DemoData.snapshot else { return }
         if let data = try? JSONEncoder().encode(configuration) {
             UserDefaults.standard.set(data, forKey: Self.key)
         }
