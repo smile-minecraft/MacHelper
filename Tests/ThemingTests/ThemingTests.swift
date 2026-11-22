@@ -41,6 +41,10 @@ import Testing
             }
         }
         #expect(BuiltInThemes.classic.followsSystemAppearance && BuiltInThemes.instrument.followsSystemAppearance)
+        #expect(BuiltInThemes.soft.followsSystemAppearance)
+        #expect(BuiltInThemes.all.contains { $0.id == "builtin.soft" })
+        #expect(BuiltInThemes.soft.colors.base == BuiltInThemes.soft.colors.card)
+        #expect(BuiltInThemes.soft.dark?.base == BuiltInThemes.soft.dark?.card)
         // No violet or lavender in our own themes (hue 250–300°, noticeably saturated).
         for t in BuiltInThemes.all where t.id != BuiltInThemes.classic.id {
             for c in [t.colors] + (t.dark.map { [$0] } ?? []) {
@@ -181,6 +185,15 @@ import Testing
         #expect(AppearancePreset.matching(s) == .pixelRetro, "text size and menu bar choices don't break a preset")
         s.bodyFont = .family("Menlo")
         #expect(AppearancePreset.matching(s) == nil, "changing a preset's own field makes the look custom")
+
+        var soft = AppearanceSettings()
+        AppearancePreset.neumorphic.apply(to: &soft)
+        #expect(soft.themeID == BuiltInThemes.soft.id && soft.style == .soft && soft.displayFont == .rounded && soft.bodyFont == .system)
+        #expect(AppearancePreset.matching(soft) == .neumorphic)
+        soft.textScale = 1.15
+        #expect(AppearancePreset.matching(soft) == .neumorphic)
+        soft.style = .smooth
+        #expect(AppearancePreset.matching(soft) == nil)
     }
 
     @Test func partialAndOldSettingsDecode() throws {
@@ -188,7 +201,12 @@ import Testing
         #expect(partial.style == .smooth)
         #expect(partial.textScale == AppearanceSettings.textScaleRange.upperBound, "out-of-range scale is clamped")
         #expect(partial.mode == .simple, "unknown values fall back to defaults")
+        let unknownStyle = try JSONDecoder().decode(AppearanceSettings.self, from: Data(##"{"style":"clay3d"}"##.utf8))
+        #expect(unknownStyle.style == .smooth, "an unknown style falls back to the default smooth style")
+        let softStyle = try JSONDecoder().decode(AppearanceSettings.self, from: Data(##"{"style":"soft"}"##.utf8))
+        #expect(softStyle.style == .soft)
         var s = AppearanceSettings()
+        s.style = .soft
         s.displayFont = .family("Menlo")
         s.bodyFont = .family("Avenir Next")
         s.mode = .advanced

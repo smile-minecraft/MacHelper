@@ -63,12 +63,11 @@ struct AppearanceSettingsView: View {
                 DisclosureGroup("Fonts, text size and shapes", isExpanded: $showDetails) {
                     Picker("Shapes", selection: $store.settings.style) {
                         Text("Rounded").tag(AppearanceSettings.Style.smooth)
+                        Text("Soft").tag(AppearanceSettings.Style.soft)
                         Text("Pixel").tag(AppearanceSettings.Style.pixel)
                     }
                     .pickerStyle(.segmented)
-                    Text(store.settings.style == .pixel
-                         ? "Pixel: stepped corners and block borders, like a retro game."
-                         : "Rounded: soft corners and smooth rings.")
+                    Text(styleCaption)
                         .settingsCaption()
                     Picker("Titles and numbers", selection: displayFont) {
                         Text("System Rounded").tag("rounded")
@@ -154,6 +153,14 @@ struct AppearanceSettingsView: View {
     }
 
     // MARK: Font pickers (string tags keep the menus simple)
+
+    private var styleCaption: String {
+        switch store.settings.style {
+        case .smooth: String(localized: "Rounded: soft corners and smooth rings.")
+        case .soft: String(localized: "Soft: surfaces raised from and pressed into the background, lit from the top left.")
+        case .pixel: String(localized: "Pixel: stepped corners and block borders, like a retro game.")
+        }
+    }
 
     private var displayFont: Binding<String> {
         Binding(get: {
@@ -275,6 +282,7 @@ private struct PresetCard: View {
     let preset: AppearancePreset
     let selected: Bool
     let action: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Button(action: action) {
@@ -305,6 +313,7 @@ private struct PresetCard: View {
     private var title: String {
         switch preset {
         case .standard: String(localized: "Standard")
+        case .neumorphic: String(localized: "Neumorphic")
         case .pixelRetro: String(localized: "Pixel Retro")
         }
     }
@@ -312,28 +321,67 @@ private struct PresetCard: View {
     private var subtitle: String {
         switch preset {
         case .standard: String(localized: "A calm instrument panel: neutral grays, and color only when something needs attention.")
+        case .neumorphic: String(localized: "Soft clay surfaces raised from and pressed into the background with gentle light and shadow.")
         case .pixelRetro: String(localized: "Retro game look with a pixel font and stepped corners.")
         }
     }
 
     /// Drawn in the preset's own colors and font, whatever is selected now.
     @ViewBuilder private var preview: some View {
-        let theme = preset == .standard ? BuiltInThemes.instrument : BuiltInThemes.pixelNight
-        let c = theme.colors(dark: true)
-        HStack(spacing: 8) {
-            Text(verbatim: "42%")
-                .font(preset == .standard ? .system(size: 22, weight: .semibold, design: .rounded) : .custom(ThemeStore.pixelFontName, fixedSize: 22))
-                .foregroundStyle(c.text.color)
-            VStack(alignment: .leading, spacing: 4) {
-                ForEach([c.blue, c.mint, c.amber], id: \.self) { col in
-                    Rectangle().fill(col.color).frame(width: 46, height: 5)
-                        .clipShape(RoundedRectangle(cornerRadius: preset == .standard ? 2.5 : 0))
+        switch preset {
+        case .neumorphic:
+            let resolved = ResolvedTheme(theme: BuiltInThemes.soft, variantDark: colorScheme == .dark)
+            let c = resolved.colors, s = resolved.surfaces
+            let pillShape = RoundedRectangle(cornerRadius: 10, style: .continuous)
+            HStack(spacing: 8) {
+                Text(verbatim: "42%")
+                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .foregroundStyle(c.text.color)
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach([c.blue, c.mint, c.amber], id: \.self) { col in
+                        ZStack(alignment: .leading) {
+                            Capsule(style: .continuous)
+                                .fill(
+                                    s.softWell.color
+                                        .shadow(.inner(color: s.softShadow.color, radius: 1.5, x: 1, y: 1))
+                                        .shadow(.inner(color: s.softHighlight.color, radius: 1.5, x: -1, y: -1))
+                                )
+                            Capsule(style: .continuous)
+                                .fill(col.color)
+                                .frame(width: 28, height: 3)
+                                .padding(.leading, 1)
+                        }
+                        .frame(width: 44, height: 5)
+                    }
                 }
             }
+            .padding(.horizontal, 12).padding(.vertical, 8)
+            .background {
+                pillShape
+                    .fill(c.base.color)
+                    .shadow(color: s.softHighlight.color, radius: 4, x: -2.5, y: -2.5)
+                    .shadow(color: s.softShadow.color, radius: 4.5, x: 3, y: 3)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(c.base.color)
+        case .standard, .pixelRetro:
+            let theme = preset == .standard ? BuiltInThemes.instrument : BuiltInThemes.pixelNight
+            let c = theme.colors(dark: true)
+            HStack(spacing: 8) {
+                Text(verbatim: "42%")
+                    .font(preset == .standard ? .system(size: 22, weight: .semibold, design: .rounded) : .custom(ThemeStore.pixelFontName, fixedSize: 22))
+                    .foregroundStyle(c.text.color)
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach([c.blue, c.mint, c.amber], id: \.self) { col in
+                        Rectangle().fill(col.color).frame(width: 46, height: 5)
+                            .clipShape(RoundedRectangle(cornerRadius: preset == .standard ? 2.5 : 0))
+                    }
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(c.card.color)
         }
-        .padding(10)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(c.card.color)
     }
 }
 
@@ -621,6 +669,7 @@ private struct SurfaceSettingsSection: View {
         let chosen = store.settings.surfaceMaterial
         guard store.material != chosen else { return nil }
         if store.reduceTransparency { return String(localized: "Reduce Transparency is on in System Settings, so surfaces are solid.") }
+        if store.isSoft { return String(localized: "Soft shapes need solid surfaces so their light and shadow stay crisp.") }
         if !ThemeStore.glassSupported { return String(localized: "Liquid Glass needs macOS 26; frosted surfaces are used instead.") }
         if store.isPixel { return String(localized: "Pixel shapes keep their flat blocks; frosted surfaces are used instead of Liquid Glass.") }
         if store.increaseContrast { return String(localized: "Increase Contrast is on in System Settings; frosted surfaces are used instead of Liquid Glass.") }
