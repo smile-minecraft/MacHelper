@@ -32,9 +32,7 @@ struct MonitorSettingsView: View {
                      ? "Values that need attention get a pale yellow or red, close to white, so they stay easy to read."
                      : "Every value uses the menu bar’s own text color."
                 Text(valueColorCaption).settingsCaption()
-                    .id(valueColorCaption)
-                    .transition(Motion.stateSwap)
-                    .animatesStateChanges(valueColorCaption)
+                    .animatesTextChanges(valueColorCaption)
                 Toggle("Two lines (name above value, saves width)", isOn: $settings.configuration.compact)
                     .disabled(look.settings.menuBarLabel != .text)
             } header: { Text("How Values Look") }

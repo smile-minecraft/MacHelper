@@ -80,7 +80,12 @@ private struct GeneralSettings: View {
             BackgroundRecordingSection(model: app.backgroundRecording)
             HistoryManagementSection()
             Section("General") {
-                Picker("Dock icon", selection: $dockMode) {
+                Picker("Dock icon", selection: Binding(
+                    get: { dockMode },
+                    set: { newValue in
+                        withAnimation(Motion.stateChange) { dockMode = newValue }
+                    }
+                )) {
                     Text("Always").tag(DockMode.always)
                     Text("While a window is open").tag(DockMode.whileWindowOpen)
                     Text("Never").tag(DockMode.never)

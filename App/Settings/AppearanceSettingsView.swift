@@ -24,9 +24,7 @@ struct AppearanceSettingsView: View {
                      ? "Shows the essentials in plain language: how your Mac is doing, free space, and one-click cleanup. Monitoring charts, fan curves and startup items are hidden."
                      : "Shows every page, chart and technical detail: monitoring history, fan curves, launch agents and per-process numbers."
                 Text(modeCaption).settingsCaption()
-                    .id(modeCaption)
-                    .transition(Motion.stateSwap)
-                    .animatesStateChanges(modeCaption)
+                    .animatesTextChanges(modeCaption)
             } header: { Text("Interface Mode") }
 
             Section {
@@ -41,9 +39,7 @@ struct AppearanceSettingsView: View {
                      ? "Custom: you changed details below. Pick a look to start over from it."
                      : "A ready-made look sets the colors, shapes, title font and icons together. Change any detail below to make it your own."
                 Text(lookCaption).settingsCaption()
-                    .id(lookCaption)
-                    .transition(Motion.stateSwap)
-                    .animatesStateChanges(lookCaption)
+                    .animatesTextChanges(lookCaption)
             } header: { Text("Look") }
 
             SurfaceSettingsSection(store: store)
@@ -80,9 +76,7 @@ struct AppearanceSettingsView: View {
                          ? "Pixel: stepped corners and block borders, like a retro game."
                          : "Rounded: soft corners and smooth rings."
                     Text(shapeCaption).settingsCaption()
-                        .id(shapeCaption)
-                        .transition(Motion.stateSwap)
-                        .animatesStateChanges(shapeCaption)
+                        .animatesTextChanges(shapeCaption)
                     Picker("Titles and numbers", selection: displayFont) {
                         Text("System Rounded").tag("rounded")
                         Text("System").tag("system")
@@ -599,9 +593,7 @@ private struct SurfaceSettingsSection: View {
             .pickerStyle(.segmented)
             .disabled(!store.theme.followsSystemAppearance)
             Text(appearanceCaption).settingsCaption()
-                .id(appearanceCaption)
-                .transition(Motion.stateSwap)
-                .animatesStateChanges(appearanceCaption)
+                .animatesTextChanges(appearanceCaption)
 
             Picker("Material", selection: $store.settings.surfaceMaterial) {
                 Text("Solid").tag(SurfaceMaterial.solid)
@@ -610,9 +602,7 @@ private struct SurfaceSettingsSection: View {
             }
             .pickerStyle(.segmented)
             Text(materialCaption).settingsCaption()
-                .id(materialCaption)
-                .transition(Motion.stateSwap)
-                .animatesStateChanges(materialCaption)
+                .animatesTextChanges(materialCaption)
             Group {
                 if let note = fallbackNote { Text(note).settingsCaption(Theme.amber) }
             }

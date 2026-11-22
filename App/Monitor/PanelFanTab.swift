@@ -132,7 +132,6 @@ private struct FanSpeedCard: View {
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(verbatim: Fmt.rpm(fan.actualRPM)).font(.display(count > 1 ? 18 : 24, weight: .bold).monospacedDigit())
                     .foregroundStyle(Palette.text)
-
                 Text("rpm").font(.mh(size: 11)).foregroundStyle(Palette.textMuted)
             }
             Meter(fraction: fraction, color: Theme.violet)
@@ -169,7 +168,6 @@ private struct HottestCard: View {
                     Text(verbatim: celsius.map { String(format: "%.1f", $0) } ?? "–")
                         .font(.display(26, weight: .bold).monospacedDigit())
                         .foregroundStyle(Palette.text)
-    
                     Text(verbatim: "°C").font(.mh(size: 12, weight: .semibold)).foregroundStyle(Palette.textMuted)
                 }
                 .lineLimit(1).minimumScaleFactor(0.7)

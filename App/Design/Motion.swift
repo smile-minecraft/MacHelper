@@ -90,4 +90,12 @@ extension View {
     func animatesStateChanges<V: Equatable>(_ value: V) -> some View {
         animation(Motion.stateChange, value: value)
     }
+
+    /// A caption whose wording changes with a setting: cross-fade the glyphs in place. Text identity
+    /// must stay stable here, so this avoids `.id` / `.transition` (a replaced view cannot animate
+    /// its own removal inside a Form row).
+    func animatesTextChanges<V: Equatable>(_ value: V) -> some View {
+        contentTransition(.opacity)
+        .animation(Motion.stateChange, value: value)
+    }
 }

@@ -39,9 +39,7 @@ struct AlertSettingsSection: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("At most one notification of each kind every \(Int(alerts.settings.cooldownMinutes)) minutes.")
                         .settingsCaption()
-                        .id(alerts.settings.cooldownMinutes)
-                        .transition(Motion.stateSwap)
-                        .animatesStateChanges(alerts.settings.cooldownMinutes)
+                        .animatesTextChanges(alerts.settings.cooldownMinutes)
                     Spacer()
                     Button("Send Test Notification") { alerts.sendTest() }
                 }
