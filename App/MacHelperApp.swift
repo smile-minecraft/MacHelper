@@ -43,6 +43,10 @@ struct MacHelperApp: App {
                     .keyboardShortcut("0", modifiers: .command)
                 Divider()
             }
+            // Help → Welcome Guide replays the first-launch guide at any time.
+            CommandGroup(after: .help) {
+                Button(onboardingText("Welcome Guide…")) { OnboardingCenter.shared.present() }
+            }
         }
 
         Settings {

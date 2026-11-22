@@ -5,15 +5,14 @@ import SwiftUI
 struct MainView: View {
     @Bindable var app: AppModel
     @Environment(\.openWindow) private var openWindow
-    /// First-launch sheets, one at a time: Full Disk Access, then the Helper, then the agent skill.
-    @State private var onboarding = OnboardingStep.next(after: nil)
-    @State private var lastOnboarding: OnboardingStep?
-    /// False once the Helper guide is opened by hand from the sidebar: closing it shows nothing else.
-    @State private var chainOnboarding = true
+    /// The welcome guide: opens by itself on first launch and again from Help → Welcome Guide.
+    @Bindable private var onboarding = OnboardingCenter.shared
+    /// The Helper setup guide, opened by hand from the sidebar footer.
+    @State private var showHelperSetup = false
 
     var body: some View {
         NavigationSplitView {
-            Sidebar(app: app, setUpHelper: { chainOnboarding = false; onboarding = .helper })
+            Sidebar(app: app, setUpHelper: { showHelperSetup = true })
                 .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
         } detail: {
             // The previous page leaves at once and the new one fades in, rising a few points, so a
@@ -34,22 +33,19 @@ struct MainView: View {
         .frame(minWidth: 980, minHeight: 640)
         // Single-variant themes and the Light / Dark setting force their scheme on the window.
         .themeColorScheme()
-        .onAppear { app.openMainWindow = { openWindow(id: "main") } }
+        .onAppear {
+            app.openMainWindow = { openWindow(id: "main") }
+            onboarding.presentIfNeeded()
+        }
         .onChange(of: app.section) { _, section in
             // The timing probe is inert unless `--measure-pages` is running.
             guard PageLoadProbe.active else { return }
             DispatchQueue.main.async { PageLoadProbe.mark(section, "render") }
         }
-        .sheet(item: $onboarding, onDismiss: { onboarding = chainOnboarding ? OnboardingStep.next(after: lastOnboarding) : nil }) { step in
-            Group {
-                switch step {
-                case .fullDiskAccess: FullDiskAccessSheet()
-                case .helper: HelperSetupSheet()
-                case .agentSkill: AgentSkillSheet()
-                }
-            }
-            .onAppear { lastOnboarding = step }
+        .sheet(isPresented: $onboarding.isPresented, onDismiss: { OnboardingLifecycle.markCompleted() }) {
+            OnboardingFlowView(finish: { onboarding.dismissed() })
         }
+        .sheet(isPresented: $showHelperSetup) { HelperSetupSheet() }
         // Switching to simple mode while on an advanced page goes back to the overview.
         .onChange(of: ThemeStore.shared.settings.mode) { if !app.section.isVisible { app.section = .overview } }
     }
@@ -86,25 +82,6 @@ private struct SteadyTitleBar: ViewModifier {
         } else {
             content
         }
-    }
-}
-
-/// The sheets offered on first launch, in order.
-private enum OnboardingStep: Int, CaseIterable, Identifiable {
-    case fullDiskAccess, helper, agentSkill
-    var id: Int { rawValue }
-
-    var shouldOffer: Bool {
-        switch self {
-        case .fullDiskAccess: FullDiskAccess.shouldOfferOnboarding
-        case .helper: HelperSetup.shouldOfferOnboarding
-        case .agentSkill: AgentSkillSetup.shouldOffer
-        }
-    }
-
-    /// The first step after `previous` that still applies.
-    static func next(after previous: OnboardingStep?) -> OnboardingStep? {
-        allCases.first { $0.rawValue > (previous?.rawValue ?? -1) && $0.shouldOffer }
     }
 }
 
