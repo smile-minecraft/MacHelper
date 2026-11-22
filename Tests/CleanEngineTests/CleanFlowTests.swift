@@ -261,11 +261,20 @@ import Testing
         #expect(!FileManager.default.fileExists(atPath: claude.file.deletingLastPathComponent().path))
     }
 
+    @Test func skillStartsWithTheRedactedWholeMacReport() {
+        #expect(AgentSkill.version == 3)
+        let md = AgentSkill.markdown(command: "machelper")
+        #expect(md.contains("`machelper report --json`"))
+        #expect(md.contains("suggestedActions[]") && md.contains("availableTools[]"))
+        #expect(md.contains("--no-redact"))
+        #expect(md.contains("`machelper guide --json`"))
+    }
+
     @Test func everyCommandInTheGuideExists() {
         // Guards against the skill drifting from the CLI: each `machelper <command>` it mentions is real.
         let known: Set<String> = ["clean", "purge", "optimize", "uninstall", "autoclean", "startup", "analyze", "insights", "duplicates",
                                   "guide", "skill", "status", "docker", "login-items", "doctor", "stats", "rules", "ignore", "updates",
-                                  "security", "history", "monitor"]
+                                  "security", "history", "monitor", "report"]
         let md = AgentSkill.markdown(command: "machelper")
         let used = md.components(separatedBy: "`machelper ").dropFirst().compactMap { $0.split(separator: " ").first.map { String($0).trimmingCharacters(in: CharacterSet(charactersIn: "`")) } }
         #expect(!used.isEmpty)

@@ -19,7 +19,7 @@ struct MacHelperCLI: ParsableCommand {
         version: (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String).map {
             "\($0) (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"))"
         } ?? "dev",
-        subcommands: [Clean.self, Purge.self, Optimize.self, Uninstall.self, AutoCleanCommand.self, Startup.self, Analyze.self, Insights.self, Duplicates.self, Guide.self, SkillCommand.self, Status.self, DockerCommand.self, LoginItemsCommand.self, DoctorCommand.self, Stats.self, Rules.self, Ignore.self, Updates.self, Security.self, History.self, MonitorCommand.self]
+        subcommands: [Clean.self, Purge.self, Optimize.self, Uninstall.self, AutoCleanCommand.self, Startup.self, Analyze.self, Insights.self, Duplicates.self, Guide.self, SkillCommand.self, Status.self, DockerCommand.self, LoginItemsCommand.self, DoctorCommand.self, Stats.self, Rules.self, Ignore.self, Updates.self, Security.self, History.self, MonitorCommand.self, Report.self]
     )
 
     static func main() {
