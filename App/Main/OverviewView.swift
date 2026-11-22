@@ -473,33 +473,39 @@ struct PrimaryButtonStyle: ButtonStyle {
     var large = false
 
     func makeBody(configuration: Configuration) -> some View {
-        let fill = Theme.accent
-        let soft = ThemeStore.shared.isSoft
-        configuration.label
-            .font(.mh(size: large ? 14 : 13, weight: .semibold))
-            .foregroundStyle(fill.isDarkForeground ? Color.white : Color.black)
-            .padding(.horizontal, large ? 22 : 16).padding(.vertical, large ? 10 : 8)
-            // Liquid Glass tinted with the accent; it brightens under the pointer by itself.
-            .glassSurface(in: Capsule(style: .continuous), tint: fill, interactive: true) { label in
-                if soft {
-                    let shape = SurfaceShape(cornerRadius: large ? 13 : 11, style: .continuous)
-                    label.background {
-                        if configuration.isPressed {
-                            shape.fill(
-                                fill.opacity(0.92)
-                                    .shadow(.inner(color: Color.black.opacity(0.32), radius: 3, x: 2, y: 2))
-                                    .shadow(.inner(color: Color.white.opacity(0.22), radius: 3, x: -2, y: -2))
-                            )
-                        } else {
-                            SoftSurface.raised(shape, fill: fill, elevation: .control)
+        Content(configuration: configuration, large: large)
+    }
+
+    private struct Content: View {
+        let configuration: Configuration
+        let large: Bool
+        @Environment(\.colorScheme) private var colorScheme
+
+        var body: some View {
+            let fill = Theme.accent
+            let soft = ThemeStore.shared.isSoft
+            configuration.label
+                .font(.mh(size: large ? 14 : 13, weight: .semibold))
+                .foregroundStyle(fill.isDarkForeground(in: colorScheme) ? Color.white : Color.black)
+                .padding(.horizontal, large ? 22 : 16).padding(.vertical, large ? 10 : 8)
+                // Liquid Glass tinted with the accent; it brightens under the pointer by itself.
+                .glassSurface(in: Capsule(style: .continuous), tint: fill, interactive: true) { label in
+                    if soft {
+                        let shape = SurfaceShape(cornerRadius: large ? 13 : 11, style: .continuous)
+                        label.background {
+                            if configuration.isPressed {
+                                SoftSurface.recessed(shape, fill: fill.opacity(0.92), depth: .pressed)
+                            } else {
+                                SoftSurface.raised(shape, fill: fill, elevation: .control)
+                            }
                         }
+                    } else {
+                        label.background(fill.opacity(configuration.isPressed ? 0.8 : 1), in: SurfaceShape(cornerRadius: 8))
                     }
-                } else {
-                    label.background(fill.opacity(configuration.isPressed ? 0.8 : 1), in: SurfaceShape(cornerRadius: 8))
                 }
-            }
-            .scaleEffect(configuration.isPressed ? (soft ? 0.985 : 0.97) : 1)
-            .animation(Motion.press, value: configuration.isPressed)
+                .scaleEffect(configuration.isPressed ? (soft ? 0.985 : 0.97) : 1)
+                .animation(Motion.press, value: configuration.isPressed)
+        }
     }
 }
 
@@ -507,23 +513,45 @@ struct PixelButtonStyle: ButtonStyle {
     var color: Color = Theme.accent
 
     func makeBody(configuration: Configuration) -> some View {
-        let shape = SurfaceShape(cornerRadius: 6)
-        configuration.label
-            .foregroundStyle(color.isDarkForeground ? Color.white : Color.black)
-            .padding(.horizontal, 14).padding(.vertical, 7)
-            .background(shape.fill(color))
-            .background(shape.fill(Color.black.opacity(0.35)).offset(y: configuration.isPressed ? 0 : 3))
-            .offset(y: configuration.isPressed ? 3 : 0)
-            .animation(.easeOut(duration: 0.06), value: configuration.isPressed)
+        Content(configuration: configuration, color: color)
+    }
+
+    private struct Content: View {
+        let configuration: Configuration
+        let color: Color
+        @Environment(\.colorScheme) private var colorScheme
+
+        var body: some View {
+            let shape = SurfaceShape(cornerRadius: 6)
+            configuration.label
+                .foregroundStyle(color.isDarkForeground(in: colorScheme) ? Color.white : Color.black)
+                .padding(.horizontal, 14).padding(.vertical, 7)
+                .background(shape.fill(color))
+                .background(shape.fill(Color.black.opacity(0.35)).offset(y: configuration.isPressed ? 0 : 3))
+                .offset(y: configuration.isPressed ? 3 : 0)
+                .animation(.easeOut(duration: 0.06), value: configuration.isPressed)
+        }
     }
 }
 
 extension Color {
-    /// Whether white text reads better than black on this color.
-    var isDarkForeground: Bool {
-        let c = NSColor(self).usingColorSpace(.sRGB) ?? .gray
-        let l = 0.2126 * c.redComponent + 0.7152 * c.greenComponent + 0.0722 * c.blueComponent
-        return l < 0.55
+    /// Whether white text reads better than black on this color in the given color scheme.
+    /// Dynamic colors (themes that follow system light / dark mode) are resolved against
+    /// `colorScheme` rather than the ambient drawing appearance, which may not match the view.
+    func isDarkForeground(in colorScheme: ColorScheme) -> Bool {
+        let appearance = NSAppearance(named: colorScheme == .dark ? .darkAqua : .aqua)
+        var isDark = false
+        let evaluate = {
+            let c = NSColor(self).usingColorSpace(.sRGB) ?? .gray
+            let l = 0.2126 * c.redComponent + 0.7152 * c.greenComponent + 0.0722 * c.blueComponent
+            isDark = l < 0.55
+        }
+        if let appearance {
+            appearance.performAsCurrentDrawingAppearance(evaluate)
+        } else {
+            evaluate()
+        }
+        return isDark
     }
 }
 
