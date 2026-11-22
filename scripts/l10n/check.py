@@ -41,7 +41,8 @@ for cat, pattern in TARGETS.items():
 # which keys the code uses. Every key must carry every shipped language and keep its placeholders.
 DEDICATED = ['App/Resources/DiskCapacityHistory.xcstrings',
              'App/Resources/NetworkDetails.xcstrings',
-             'App/Resources/DiskVolumeSelection.xcstrings']
+             'App/Resources/DiskVolumeSelection.xcstrings',
+             'App/Onboarding/Onboarding.xcstrings']
 for cat in DEDICATED:
     if ONLY and ONLY not in cat:
         continue
