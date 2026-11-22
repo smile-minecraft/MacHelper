@@ -465,7 +465,11 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.025em; margin:
 }
 .menubar .mb-left { margin-right: auto; display: flex; gap: 18px; opacity: 0.92; }
 .menubar .mb-left b { font-weight: 700; }
-.menubar img { height: 24px; width: auto; border-radius: 5px; }
+.menubar .mb-stats { display: flex; align-items: center; gap: 9px; background: transparent; line-height: 1; }
+.menubar .mb-stat { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+.menubar .mb-stat small { font-size: 7.5px; font-weight: 600; letter-spacing: 0.04em; opacity: 0.62; }
+.menubar .mb-stat b { font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.menubar .mb-spark { width: 30px; height: 12px; margin-top: 7px; opacity: 0.85; }
 .menubar .mb-glyph { width: 15px; height: 15px; opacity: 0.9; }
 .menubar .mb-clock { font-variant-numeric: tabular-nums; opacity: 0.95; }
 
@@ -1033,7 +1037,8 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.025em; margin:
   .float-chip { display: none; }
   .menubar .mb-left { display: none; }
   .menubar .mb-glyph { display: none; }
-  .menubar img { height: 20px; }
+  .menubar .mb-stats { gap: 7px; }
+  .menubar .mb-spark { width: 22px; }
   .window-title { transform: none; margin: 0 0 0 auto; }
   .tabs { justify-content: flex-start; width: 100%; margin-left: 0; }
   .bento { grid-template-columns: 1fr; }
