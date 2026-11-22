@@ -51,6 +51,18 @@ import Testing
         #expect(!out.contains("0011.2233.4455"))
     }
 
+    @Test func scrubsSpacedVolumeNamesWithoutHidingTheSystemVolume() {
+        let text = "src /Volumes/Alice Backup/docs, quoted \"/Volumes/My Drive\", " +
+                   "system /Volumes/Macintosh HD/Applications"
+        let out = redactor.redact(text)
+        #expect(out.contains("/Volumes/<redacted-volume>/docs"))
+        #expect(!out.contains("Alice Backup"))
+        #expect(out.contains("\"/Volumes/<redacted-volume>\""))
+        #expect(!out.contains("My Drive"))
+        #expect(out.contains("/Volumes/Macintosh HD/Applications"))
+        #expect(redactor.redact(out) == out)
+    }
+
     @Test func redactionIsIdempotentAndKeepsTechnicalNumbers() {
         let text = "chip Apple M4 Pro, macOS 15.2 (24C101), CPU 87.5%, temp 92.3 C, fan 1840 rpm, " +
                    "power 21.7 W, battery 83%, disk 512.5 GB free, score 74, coverage 0.83, " +
@@ -189,6 +201,44 @@ import Testing
         #expect(payload.health == nil)
         #expect(payload.cleanupPreview == nil)
         #expect(payload.availableTools.isEmpty)
+    }
+
+    @Test func externalVolumeNamesAreRedactedOnlyWhenRequested() {
+        var input = baseInput()
+        input.includeDiskDetail = true
+        input.volumes = [
+            .init(name: "Macintosh HD", role: "startup", mountPoint: "/",
+                  totalBytes: 1_000_000_000_000, availableBytes: 500_000_000_000),
+            .init(name: "ClientSSD", role: "external", mountPoint: "/Volumes/ClientSSD",
+                  totalBytes: 2_000_000_000_000, availableBytes: 1_000_000_000_000),
+            .init(name: "Alice Backup", role: "external", mountPoint: "/Volumes/Alice Backup",
+                  totalBytes: 3_000_000_000_000, availableBytes: 1_500_000_000_000),
+        ]
+
+        let redacted = SystemReport.build(input, redactor: redactor, now: now)
+        let volumes = redacted.diskDetail?.volumes
+        #expect(volumes?.count == 3)
+        #expect(volumes?[0].name == "Macintosh HD")
+        #expect(volumes?[1].name == "<redacted-volume>")
+        #expect(volumes?[2].name == "<redacted-volume>")
+        #expect(volumes?[1].mountPoint == "/Volumes/<redacted-volume>")
+        #expect(volumes?[2].mountPoint == "/Volumes/<redacted-volume>")
+
+        input.redacted = false
+        let plain = SystemReport.build(input, redactor: redactor, now: now)
+        #expect(plain.diskDetail?.volumes[1].name == "ClientSSD")
+        #expect(plain.diskDetail?.volumes[2].name == "Alice Backup")
+        #expect(plain.diskDetail?.volumes[2].mountPoint == "/Volumes/Alice Backup")
+    }
+
+    @Test func commandNamePathIsRedactedInActionsAndTools() {
+        var input = baseInput()
+        input.commandName = "/Users/alice/Apps/MacHelper.app/Contents/MacOS/machelper"
+        let payload = SystemReport.build(input, redactor: redactor, now: now)
+        #expect(payload.suggestedActions.allSatisfy { !$0.command.contains("alice") })
+        #expect(payload.availableTools.allSatisfy { !$0.example.contains("alice") })
+        #expect(payload.suggestedActions.allSatisfy { $0.command.hasPrefix("~/Apps/MacHelper.app/") })
+        #expect(payload.availableTools.allSatisfy { $0.example.hasPrefix("~/Apps/MacHelper.app/") })
     }
 
     @Test func absentHistoryDegradesWithoutFindings() {

@@ -59,6 +59,8 @@ struct Report: ParsableCommand {
         input.commandName = AgentCommand.onPath ? "machelper" : (AgentCommand.appCopy ?? "machelper")
         input.redacted = !noRedact
         input.selectedSections = sections.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+        let selectedSections = Set(input.selectedSections)
+        let wants: (String) -> Bool = { selectedSections.contains("all") || selectedSections.contains($0) }
         input.rangeSeconds = seconds
         input.includeDiskDetail = includeDisk
 
@@ -85,7 +87,11 @@ struct Report: ParsableCommand {
         input.performanceCores = cores.filter { $0 == .performance }.count
         input.efficiencyCores = cores.filter { $0 == .efficiency }.count
 
-        input.cpuTotal = cpuSampler.sample()?.total
+        if let cpu = cpuSampler.sample() {
+            input.cpuTotal = cpu.total
+            input.cpuPerformance = cpu.performance
+            input.cpuEfficiency = cpu.efficiency
+        }
         input.gpu = GPUSampler.sample().map { SystemReport.GPUSample(name: $0.name, utilization: $0.utilization) }
         input.memoryUsedBytes = memory?.usedBytes
         input.memoryTotalBytes = memory?.totalBytes
@@ -135,28 +141,38 @@ struct Report: ParsableCommand {
             queue.async { work(); group.leave() }
         }
 
-        launch {
-            guard FileManager.default.fileExists(atPath: MetricsHistory.defaultURL.path),
-                  let history = try? MetricsHistory(readOnly: true) else { return }
-            healthBox.value = try? HealthCheck.run(history: history, hours: hours, system: system)
-            countBox.value = try? history.count()
-        }
-        launch { snapshotsBox.value = LocalSnapshots.query(for: URL(fileURLWithPath: "/")) }
-        launch { cleanupBox.value = Self.collectCleanup() }
-        launch {
-            securityBox.value = SecurityAudit.run().map {
-                SystemReport.SecurityInput(id: $0.id, state: $0.state.rawValue, detail: $0.detail)
+        if wants("health") {
+            launch {
+                guard FileManager.default.fileExists(atPath: MetricsHistory.defaultURL.path),
+                      let history = try? MetricsHistory(readOnly: true) else { return }
+                healthBox.value = try? HealthCheck.run(history: history, hours: hours, system: system)
+                countBox.value = try? history.count()
             }
         }
-        launch {
-            let items = StartupItems.list(installed: [])
-            startupBox.value = items.map {
-                SystemReport.StartupItemInput(label: $0.label, scope: $0.scope.rawValue,
-                                              programMissing: $0.programMissing)
-            }
-            unsignedBox.value = Self.unsignedLabels(items)
+        if wants("storage") {
+            launch { snapshotsBox.value = LocalSnapshots.query(for: URL(fileURLWithPath: "/")) }
         }
-        let wantsUpdates = input.selectedSections.contains("all") || input.selectedSections.contains("updates")
+        if wants("clean") {
+            launch { cleanupBox.value = Self.collectCleanup() }
+        }
+        if wants("security") {
+            launch {
+                securityBox.value = SecurityAudit.run().map {
+                    SystemReport.SecurityInput(id: $0.id, state: $0.state.rawValue, detail: $0.detail)
+                }
+            }
+        }
+        if wants("startup") {
+            launch {
+                let items = StartupItems.list(installed: [])
+                startupBox.value = items.map {
+                    SystemReport.StartupItemInput(label: $0.label, scope: $0.scope.rawValue,
+                                                  programMissing: $0.programMissing)
+                }
+                unsignedBox.value = Self.unsignedLabels(items)
+            }
+        }
+        let wantsUpdates = wants("updates")
         if wantsUpdates {
             launch {
                 let result = HomebrewUpdates.outdated(
@@ -195,7 +211,8 @@ struct Report: ParsableCommand {
         if wantsUpdates { input.updates = updatesBox.value ?? [] }
         if includeDisk { input.volumes = volumesBox.value ?? [] }
 
-        let payload = SystemReport.build(input, redactor: ReportRedactor(), now: Date())
+        let redactor = ReportRedactor()
+        let payload = SystemReport.build(input, redactor: redactor, now: Date())
         let kind: String = output.json ? "json" : format
         let data: Data
         switch kind {
@@ -212,6 +229,7 @@ struct Report: ParsableCommand {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
                                                 withIntermediateDirectories: true)
         try data.write(to: url, options: .atomic)
+        let shownPath = payload.redacted ? redactor.redact(url.path) : url.path
         if kind == "json" {
             struct Written: Encodable {
                 let schemaVersion = 1
@@ -219,9 +237,9 @@ struct Report: ParsableCommand {
                 let bytes: Int
                 let redacted: Bool
             }
-            try Output.json(Written(output: url.path, bytes: data.count, redacted: payload.redacted))
+            try Output.json(Written(output: shownPath, bytes: data.count, redacted: payload.redacted))
         } else {
-            Output.line("Report written to \(url.path) (\(data.count) bytes\(payload.redacted ? ", redacted" : "")).")
+            Output.line("Report written to \(shownPath) (\(data.count) bytes\(payload.redacted ? ", redacted" : "")).")
         }
     }
 
@@ -246,17 +264,25 @@ struct Report: ParsableCommand {
         return Double(max(Int64(all) - important, 0))
     }
 
-    /// A whole clean preview can be slow on a big cache folder. The caller shares a deadline with
-    /// the other collectors; `CleanScanner` can stop between rules, leaving a coherent partial plan.
+    /// A whole clean preview can be slow on a big cache folder. The scan checks a shared, thread-safe
+    /// deadline between rules and stops early, so a timed-out report does not leave it running.
     private static func collectCleanup() -> [SystemReport.CleanupRuleInput] {
         let rules = (try? RuleSet.load()) ?? []
         let box = ResultBox<CleanPlan>()
         let done = DispatchSemaphore(value: 0)
+        let deadline = Date().addingTimeInterval(1.8)
+        let stop = StopFlag()
         DispatchQueue.global(qos: .userInitiated).async {
-            box.value = CleanScanner(rules: rules).scan(progress: { _, _ in }, shouldStop: { false })
+            box.value = CleanScanner(rules: rules).scan(progress: { _, _ in }, shouldStop: {
+                stop.isSet || Date() >= deadline
+            })
             done.signal()
         }
-        _ = done.wait(timeout: .now() + 1.8)
+        if done.wait(timeout: .now() + 1.8) != .success {
+            stop.stop()
+            // Give the scanner a moment to publish the rules it already finished.
+            _ = done.wait(timeout: .now() + 0.25)
+        }
         return (box.value?.results ?? []).map {
             SystemReport.CleanupRuleInput(ruleID: $0.rule.id, category: $0.rule.category,
                                           risk: $0.rule.risk.rawValue,
@@ -283,6 +309,14 @@ struct Report: ParsableCommand {
     /// Scripts and interpreters are never signed, and shell jobs are expected here.
     private static let ignoredPaths: Set<String> = ["/bin/sh", "/bin/bash", "/usr/bin/osascript",
                                                     "/usr/bin/python3", "/usr/bin/ruby", "/usr/bin/perl"]
+
+    /// One-way stop signal shared between the report thread and the cleanup scan.
+    private final class StopFlag: @unchecked Sendable {
+        private let lock = NSLock()
+        private var stopped = false
+        var isSet: Bool { lock.withLock { stopped } }
+        func stop() { lock.withLock { stopped = true } }
+    }
 
     private final class ResultBox<T>: @unchecked Sendable {
         private let lock = NSLock()

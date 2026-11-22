@@ -76,11 +76,11 @@ public struct ReportRedactor: Sendable {
     }
 
     private func redactVolumes(_ text: String) -> String {
-        // "Macintosh HD" contains a space and is deliberately not matched. macOS system volume
-        // names are not personal; an external volume name usually is.
-        // A system volume name contains a space and must stay readable.
-        mapMatches(#"(?i)/Volumes/(?!Macintosh HD(?:/|\s|$))([^/\s"'<>]+)"#, in: text) { groups in
-            groups[1] == "Macintosh HD" ? groups[0] : "/Volumes/<redacted-volume>"
+        // A system volume name is not personal; an external volume name usually is. Capture the
+        // whole name (spaces included) up to the next separator, quote or end of string, so a name
+        // such as "Alice Backup" never leaves a readable fragment behind.
+        mapMatches(#"(?i)/Volumes/(?!Macintosh HD(?:/|["']|$))([^/"'<>]+)"#, in: text) { groups in
+            groups[1].caseInsensitiveCompare("Macintosh HD") == .orderedSame ? groups[0] : "/Volumes/<redacted-volume>"
         }
     }
 

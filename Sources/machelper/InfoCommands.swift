@@ -457,7 +457,7 @@ struct Guide: ParsableCommand {
                 let guide: String
             }
             try Output.json(Out(skillVersion: AgentSkill.version,
-                                 tools: SystemReport.toolCatalog,
+                                 tools: SystemReport.toolCatalog(),
                                  guide: AgentSkill.markdown(command: AgentCommand.command, fallback: AgentCommand.fallback)))
             return
         }

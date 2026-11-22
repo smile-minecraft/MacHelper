@@ -446,9 +446,12 @@ public enum SystemReport {
             Updates(outdatedCount: $0.count, apps: $0.map { cleaned($0.name) })
         } : nil
         let diskDetail: DiskDetail? = input.includeDiskDetail && !input.volumes.isEmpty ? DiskDetail(
-            volumes: input.volumes.map {
-                VolumeSummary(name: cleaned($0.name), role: $0.role, mountPoint: cleaned($0.mountPoint),
-                              totalBytes: $0.totalBytes, availableBytes: $0.availableBytes)
+            volumes: input.volumes.map { volume in
+                let name = input.redacted && volume.mountPoint != "/"
+                    && volume.name.caseInsensitiveCompare("Macintosh HD") != .orderedSame
+                    ? "<redacted-volume>" : cleaned(volume.name)
+                return VolumeSummary(name: name, role: volume.role, mountPoint: cleaned(volume.mountPoint),
+                                     totalBytes: volume.totalBytes, availableBytes: volume.availableBytes)
             }) : nil
 
         let findings = buildFindings(input, cleanup, security, startup, cleaned)
@@ -466,8 +469,8 @@ public enum SystemReport {
             updates: updates,
             diskDetail: diskDetail,
             findings: findings,
-            suggestedActions: buildActions(input, cleanup, findings),
-            availableTools: includes("tools") ? toolCatalog : [])
+            suggestedActions: buildActions(input, cleanup, findings, cleaned),
+            availableTools: includes("tools") ? toolCatalog(command: cleaned(input.commandName)) : [])
     }
 
     private static func buildHealth(_ input: Inputs, _ cleaned: (String) -> String) -> Health? {
@@ -629,8 +632,9 @@ public enum SystemReport {
 
     // MARK: - Suggested actions
 
-    private static func buildActions(_ input: Inputs, _ cleanup: CleanupPreview?, _ findings: [Finding]) -> [SuggestedAction] {
-        let c = input.commandName
+    private static func buildActions(_ input: Inputs, _ cleanup: CleanupPreview?, _ findings: [Finding],
+                                     _ cleaned: (String) -> String) -> [SuggestedAction] {
+        let c = cleaned(input.commandName)
         var actions: [SuggestedAction] = []
         func add(_ id: String, _ reason: String, _ command: String, _ previewOnly: Bool,
                  _ risk: String, _ approval: Bool) {
@@ -674,52 +678,55 @@ public enum SystemReport {
     }
 
     /// Machine-readable catalog so an agent can chain tools without reading the whole SKILL.md.
-    public static let toolCatalog: [ToolCapability] = [
-        ToolCapability(command: "report", purpose: "Redacted whole-Mac diagnostic report in one call",
-                       safety: "read-only", example: "machelper report --json"),
-        ToolCapability(command: "status", purpose: "Live CPU, GPU, memory, disk, network, temperatures, fans, power, battery",
-                       safety: "read-only", example: "machelper status --json"),
-        ToolCapability(command: "doctor", purpose: "Health check from recorded history plus live swap and uptime",
-                       safety: "read-only", example: "machelper doctor --json"),
-        ToolCapability(command: "stats", purpose: "Recorded per-minute metric history and peaks",
-                       safety: "read-only", example: "machelper stats --range 24h --json"),
-        ToolCapability(command: "analyze", purpose: "Where disk space goes in a folder or volume",
-                       safety: "read-only", example: "machelper analyze ~ --json --depth 2"),
-        ToolCapability(command: "insights", purpose: "Large unused files and folders that grew",
-                       safety: "read-only", example: "machelper insights ~ --json"),
-        ToolCapability(command: "duplicates", purpose: "Duplicate files in a folder",
-                       safety: "read-only", example: "machelper duplicates ~/Downloads --json"),
-        ToolCapability(command: "clean", purpose: "Preview or remove items matched by declarative rules",
-                       safety: "preview-by-default", example: "machelper clean --max-risk low --json"),
-        ToolCapability(command: "purge", purpose: "Preview or remove rebuildable project build artifacts",
-                       safety: "preview-by-default", example: "machelper purge --json"),
-        ToolCapability(command: "optimize", purpose: "Preview or run maintenance tasks",
-                       safety: "preview-by-default", example: "machelper optimize --json"),
-        ToolCapability(command: "uninstall", purpose: "Preview or remove an app and its leftovers",
-                       safety: "preview-by-default", example: "machelper uninstall \"App Name\" --json"),
-        ToolCapability(command: "updates", purpose: "List or upgrade outdated Homebrew casks",
-                       safety: "preview-by-default", example: "machelper updates --json"),
-        ToolCapability(command: "startup", purpose: "List or switch launch agents and daemons",
-                       safety: "preview-by-default", example: "machelper startup --json"),
-        ToolCapability(command: "login-items", purpose: "List macOS-registered login and background items",
-                       safety: "read-only", example: "machelper login-items --json"),
-        ToolCapability(command: "security", purpose: "Read Gatekeeper, FileVault, firewall, SIP, XProtect, auto-updates",
-                       safety: "read-only", example: "machelper security --json"),
-        ToolCapability(command: "docker", purpose: "Docker disk use and reclaimable space",
-                       safety: "read-only", example: "machelper docker --json"),
-        ToolCapability(command: "history", purpose: "Past cleanup operations",
-                       safety: "read-only", example: "machelper history --json"),
-        ToolCapability(command: "rules", purpose: "List cleanup rule ids and categories",
-                       safety: "read-only", example: "machelper rules"),
-        ToolCapability(command: "ignore", purpose: "Manage paths that must never be cleaned",
-                       safety: "preview-by-default", example: "machelper ignore add <path>"),
-        ToolCapability(command: "monitor", purpose: "Sample metrics live or record them to history",
-                       safety: "read-only", example: "machelper monitor --json"),
-        ToolCapability(command: "guide", purpose: "Print the full agent skill text",
-                       safety: "read-only", example: "machelper guide"),
-        ToolCapability(command: "skill", purpose: "Install or check the agent skill",
-                       safety: "read-only", example: "machelper skill --json"),
-    ]
+    /// `command` comes from the caller so a redacted app-bundle path never leaks into an example.
+    public static func toolCatalog(command: String = "machelper") -> [ToolCapability] {
+        [
+            ToolCapability(command: "report", purpose: "Redacted whole-Mac diagnostic report in one call",
+                           safety: "read-only", example: "\(command) report --json"),
+            ToolCapability(command: "status", purpose: "Live CPU, GPU, memory, disk, network, temperatures, fans, power, battery",
+                           safety: "read-only", example: "\(command) status --json"),
+            ToolCapability(command: "doctor", purpose: "Health check from recorded history plus live swap and uptime",
+                           safety: "read-only", example: "\(command) doctor --json"),
+            ToolCapability(command: "stats", purpose: "Recorded per-minute metric history and peaks",
+                           safety: "read-only", example: "\(command) stats --range 24h --json"),
+            ToolCapability(command: "analyze", purpose: "Where disk space goes in a folder or volume",
+                           safety: "read-only", example: "\(command) analyze ~ --json --depth 2"),
+            ToolCapability(command: "insights", purpose: "Large unused files and folders that grew",
+                           safety: "read-only", example: "\(command) insights ~ --json"),
+            ToolCapability(command: "duplicates", purpose: "Duplicate files in a folder",
+                           safety: "read-only", example: "\(command) duplicates ~/Downloads --json"),
+            ToolCapability(command: "clean", purpose: "Preview or remove items matched by declarative rules",
+                           safety: "preview-by-default", example: "\(command) clean --max-risk low --json"),
+            ToolCapability(command: "purge", purpose: "Preview or remove rebuildable project build artifacts",
+                           safety: "preview-by-default", example: "\(command) purge --json"),
+            ToolCapability(command: "optimize", purpose: "Preview or run maintenance tasks",
+                           safety: "preview-by-default", example: "\(command) optimize --json"),
+            ToolCapability(command: "uninstall", purpose: "Preview or remove an app and its leftovers",
+                           safety: "preview-by-default", example: "\(command) uninstall \"App Name\" --json"),
+            ToolCapability(command: "updates", purpose: "List or upgrade outdated Homebrew casks",
+                           safety: "preview-by-default", example: "\(command) updates --json"),
+            ToolCapability(command: "startup", purpose: "List or switch launch agents and daemons",
+                           safety: "preview-by-default", example: "\(command) startup --json"),
+            ToolCapability(command: "login-items", purpose: "List macOS-registered login and background items",
+                           safety: "read-only", example: "\(command) login-items --json"),
+            ToolCapability(command: "security", purpose: "Read Gatekeeper, FileVault, firewall, SIP, XProtect, auto-updates",
+                           safety: "read-only", example: "\(command) security --json"),
+            ToolCapability(command: "docker", purpose: "Docker disk use and reclaimable space",
+                           safety: "read-only", example: "\(command) docker --json"),
+            ToolCapability(command: "history", purpose: "Past cleanup operations",
+                           safety: "read-only", example: "\(command) history --json"),
+            ToolCapability(command: "rules", purpose: "List cleanup rule ids and categories",
+                           safety: "read-only", example: "\(command) rules"),
+            ToolCapability(command: "ignore", purpose: "Manage paths that must never be cleaned",
+                           safety: "preview-by-default", example: "\(command) ignore add <path>"),
+            ToolCapability(command: "monitor", purpose: "Sample metrics live or record them to history",
+                           safety: "read-only", example: "\(command) monitor --json"),
+            ToolCapability(command: "guide", purpose: "Print the full agent skill text",
+                           safety: "read-only", example: "\(command) guide"),
+            ToolCapability(command: "skill", purpose: "Install or check the agent skill",
+                           safety: "read-only", example: "\(command) skill --json"),
+        ]
+    }
 
     // MARK: - Rendering
 
