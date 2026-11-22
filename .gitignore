@@ -6,6 +6,7 @@ Helper/Info.plist
 .DS_Store
 xcuserdata/
 Config/Local.xcconfig
+Config/Local.env
 Config/CLI-Info.plist
 .vscode/
 
@@ -28,6 +29,8 @@ AGENTS.md
 .aider*
 .taste-skill/
 design-system/
+# Harness for one machine's agent verification server (kept locally).
+Tests/Verification/
 
 # Local data, logs and scratch
 .env

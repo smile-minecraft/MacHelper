@@ -19,8 +19,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-XCODE_DEFAULT=/Volumes/Smile-Data/Applications/Xcode-27.2.0.app/Contents/Developer
-if [[ -z "${DEVELOPER_DIR:-}" && -d "$XCODE_DEFAULT" ]]; then export DEVELOPER_DIR="$XCODE_DEFAULT"; fi
+# The Xcode to use: xcode-select's, or DEVELOPER_DIR from the environment or Config/Local.env.
+. scripts/lib/env.sh
 
 usage() { echo "usage: scripts/release.sh build|prepare|publish <version>   (e.g. prepare 0.2.0)"; exit 64; }
 [[ $# -eq 2 ]] || usage

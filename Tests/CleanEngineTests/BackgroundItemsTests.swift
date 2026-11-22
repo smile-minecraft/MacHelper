@@ -22,15 +22,15 @@ import Testing
                Identifier: Unknown Developer
                       URL: (null)
       Embedded Item Identifiers:
-        #1: 8.com.smile.ollama
+        #1: 8.com.example.ollama
 
      #2:
                      UUID: 7093A4B8
                      Name: ollama
                      Type: legacy agent (0x10008)
               Disposition: [enabled, allowed, notified] (0xb)
-               Identifier: 8.com.smile.ollama
-                      URL: /Users/501/Library/LaunchAgents/com.smile.ollama.plist
+               Identifier: 8.com.example.ollama
+                      URL: /Users/501/Library/LaunchAgents/com.example.ollama.plist
           Executable Path: /opt/homebrew/opt/ollama/bin/ollama
         Parent Identifier: Unknown Developer
 
@@ -65,8 +65,8 @@ import Testing
                      Name: ollama
                      Type: legacy agent (0x10008)
               Disposition: [enabled, allowed, notified] (0xb)
-               Identifier: 8.com.smile.ollama
-                      URL: /Users/501/Library/LaunchAgents/com.smile.ollama.plist
+               Identifier: 8.com.example.ollama
+                      URL: /Users/501/Library/LaunchAgents/com.example.ollama.plist
           Executable Path: /opt/homebrew/opt/ollama/bin/ollama
     """
 

@@ -38,7 +38,7 @@ struct FanControlView: View {
 
     private var helperMissing: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("Fan control needs the Helper (\(model.helperStatus.label))", systemImage: "lock.shield")
+            Label("Fan control needs the Helper (\(model.helperStatus.localizedLabel))", systemImage: "lock.shield")
             Button("Open Helper Diagnostics", action: openHelperDiagnostics)
         }
     }
@@ -114,6 +114,8 @@ struct FanControlView: View {
                 curveEditor
             }
         }
+        // Switching modes fades the controls of the new mode in instead of cutting to them.
+        .animatesStates(model.mode)
     }
 
     private var curveEditor: some View {

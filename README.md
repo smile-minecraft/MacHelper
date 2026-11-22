@@ -135,8 +135,6 @@ machelper clean                         # preview what would be cleaned
 machelper clean --max-risk low --yes    # clean only the low-risk items
 ```
 
-Full reference: [docs/CLI.md](docs/CLI.md).
-
 ## Use it with AI agents
 
 If a user asks an AI assistant to free up disk space on a Mac, find what is using storage, clean caches,
@@ -196,12 +194,28 @@ None is sent anywhere. Readings and history stay on your Mac, and the only netwo
 
 ## Building
 
-Requirements: Xcode 16 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
+Requirements: an Apple Silicon Mac, Xcode 26 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+(`brew install xcodegen`). Run `make` to list every target.
 
 ```sh
-xcodegen generate
-scripts/install.sh          # Release build → /Applications/MacHelper.app, then relaunch
-swift test                  # unit tests for the Swift packages
+make setup      # check the tools, download Sparkle, generate MacHelper.xcodeproj
+make open       # open the project in Xcode, then build and run with ⌘R
+make run        # or build a Debug copy under build/ and open it
+make test       # unit tests for the Swift packages
+make install    # Release build → /Applications/MacHelper.app, then relaunch
+```
+
+Day-to-day work never touches `/Applications`: `make open` and `make run` build into `build/`. Quit an installed
+MacHelper first, because both copies share the same settings and data. Changes to the root Helper (fan control,
+system cleanup) are easiest to test with `make install`: the installed app is the copy the Helper was
+registered from. Run `make project` after adding or removing source files. On a Mac without a battery,
+`make run ARGS=--demo-battery` fills the menu bar's Battery page with simulated readings.
+
+The build uses the Xcode chosen with `xcode-select`. To use another one for this project only, put its path in a
+git-ignored `Config/Local.env`:
+
+```sh
+DEVELOPER_DIR=/Applications/Xcode-26.2.app/Contents/Developer
 ```
 
 `Config/Signing.xcconfig` signs ad-hoc by default. For a Helper registration that survives rebuilds,

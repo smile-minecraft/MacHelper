@@ -5,22 +5,34 @@ import SwiftUI
 struct SettingsView: View {
     let app: AppModel
 
+    enum Tab: String { case general, appearance, menuBar, alerts, helper, history }
+
+    /// Opens on General. A debug launch argument (`-settings.tab helper`) can pick another tab for
+    /// screenshots; it lives in the volatile argument domain and is never written back.
+    @State private var tab = Tab(rawValue: UserDefaults.standard.string(forKey: "settings.tab") ?? "") ?? .general
+
     var body: some View {
-        TabView {
+        TabView(selection: $tab) {
             GeneralSettings(app: app)
                 .tabItem { Label("General", systemImage: "gearshape") }
+                .tag(Tab.general)
             AppearanceSettingsView()
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
+                .tag(Tab.appearance)
             MonitorSettingsView(settings: app.settings, available: app.store.availableModules)
                 .tabItem { Label("Menu Bar", systemImage: "menubar.rectangle") }
+                .tag(Tab.menuBar)
             Form { AlertSettingsSection(alerts: app.store.alerts) }
                 .formStyle(.grouped)
                 .settingsSurface()
                 .tabItem { Label("Alerts", systemImage: "bell.badge") }
+                .tag(Tab.alerts)
             HelperDiagnosticsView()
                 .tabItem { Label("Helper", systemImage: "lock.shield") }
+                .tag(Tab.helper)
             OperationHistoryView()
                 .tabItem { Label("History", systemImage: "clock.arrow.circlepath") }
+                .tag(Tab.history)
         }
         .frame(minWidth: 760, minHeight: 580)
     }
@@ -47,22 +59,21 @@ private struct GeneralSettings: View {
                         Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""))")
                             .settingsCaption()
                     }
-                }
-                HStack {
+                    Spacer()
                     if UpdaterController.shared.availableVersion != nil {
                         UpdateAvailableButton()
                     } else {
                         Button("Check for Updates") { UpdaterController.shared.checkForUpdates() }
                     }
-                    Toggle("Automatically check for updates", isOn: $autoCheckUpdates)
-                        .onChange(of: autoCheckUpdates) { _, on in
-                            // Writing back persists the preference through Sparkle.
-                            if on != UpdaterController.shared.automaticallyChecksForUpdates {
-                                UpdaterController.shared.automaticallyChecksForUpdates = on
-                            }
-                        }
                 }
-                .onAppear { autoCheckUpdates = UpdaterController.shared.automaticallyChecksForUpdates }
+                Toggle("Automatically check for updates", isOn: $autoCheckUpdates)
+                    .onChange(of: autoCheckUpdates) { _, on in
+                        // Writing back persists the preference through Sparkle.
+                        if on != UpdaterController.shared.automaticallyChecksForUpdates {
+                            UpdaterController.shared.automaticallyChecksForUpdates = on
+                        }
+                    }
+                    .onAppear { autoCheckUpdates = UpdaterController.shared.automaticallyChecksForUpdates }
             }
             BackgroundRecordingSection(model: app.backgroundRecording)
             HistoryManagementSection()

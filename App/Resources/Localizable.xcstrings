@@ -14179,40 +14179,6 @@
         }
       }
     },
-    "When this is on, MacHelper keeps recording history in the background after you quit the app. Process usage history is still recorded even when no menu bar items are selected, as long as Record process usage is on in Data management. macOS may ask you to allow MacHelper in Login Items.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Si lo activas, MacHelper sigue registrando el historial en segundo plano después de cerrar la app. El historial de uso de procesos se registra aunque no haya elementos en la barra de menús, siempre que «Registrar uso de procesos» esté activado en Gestión de datos. macOS puede pedirte que permitas MacHelper en Ítems de inicio."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "これをオンにすると、App を終了したあとも MacHelper がバックグラウンドで履歴を記録し続けます。「データ管理」で「プロセス使用量を記録」がオンなら、メニューバーの項目を選んでいなくてもプロセス使用量の履歴は記録されます。macOS から「ログイン項目」で MacHelper を許可するよう求められることがあります。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "이 기능을 켜면 앱을 종료한 후에도 MacHelper가 백그라운드에서 기록을 계속 남깁니다. 데이터 관리에서 ‘프로세스 사용량 기록’이 켜져 있으면 메뉴 막대 항목을 선택하지 않아도 프로세스 사용량 기록이 남습니다. macOS가 로그인 항목에서 MacHelper를 허용하도록 요청할 수 있습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "打开后，即使退出 MacHelper，仍会在后台继续记录历史。只要「数据管理」中的「记录进程用量」保持打开，即使没有选择任何菜单栏项目，仍会记录进程用量历史。macOS 可能会要求你在「登录项」中允许 MacHelper。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "開啟後，即使結束 MacHelper，仍會在背景繼續記錄歷史。只要「資料管理」中的「記錄程序用量」保持開啟，即使沒有選取任何選單列項目，仍會記錄程序用量歷史。macOS 可能會要求你在「登入項目」中允許 MacHelper。"
-          }
-        }
-      }
-    },
     "While %@ is running": {
       "localizations": {
         "es": {
@@ -16219,40 +16185,6 @@
         }
       }
     },
-    "Records one average per minute for every temperature sensor and CPU core cluster from the CPU and temperature samples. This adds several dozen rows per minute, so leave it off unless you need the detail. The switch applies to MacHelper and to background recording, but it needs the matching CPU or temperature menu bar item to be on. Turning this off stops new sensor and core sampling. Stored history stays until the next recording removes samples past the retention, or until you clear it.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Registra un promedio por minuto de cada sensor de temperatura y grupo de núcleos de la CPU a partir de las muestras de CPU y temperatura. Esto añade varias decenas de filas por minuto, así que déjalo desactivado salvo que necesites el detalle. El interruptor se aplica a MacHelper y al registro en segundo plano, pero necesita que el elemento de CPU o temperatura correspondiente esté activado en la barra de menús. Al desactivarlo se detiene el muestreo nuevo de sensores y núcleos. El historial guardado se mantiene hasta que el siguiente registro elimine las muestras fuera de la retención o hasta que lo borres."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "CPU と温度のサンプルから、すべての温度センサーと CPU コアクラスタについて 1 分ごとに平均値を 1 件記録します。1 分あたり数十行増えるため、詳細が必要なとき以外はオフのままにしてください。このスイッチは MacHelper とバックグラウンド記録の両方に適用されますが、対応する CPU または温度のメニューバー項目がオンになっている必要があります。オフにすると新しいセンサーとコアのサンプリングは止まります。保存済みの履歴は、次の記録で保存期間を過ぎたサンプルが削除されるか、自分で消去するまで残ります。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "CPU 및 온도 샘플에서 모든 온도 센서와 CPU 코어 클러스터마다 1분에 평균 하나를 기록합니다. 1분마다 수십 행이 추가되므로 자세한 정보가 필요하지 않다면 꺼 두십시오. 이 스위치는 MacHelper와 백그라운드 기록에 모두 적용되지만, 해당하는 CPU 또는 온도 메뉴 막대 항목이 켜져 있어야 합니다. 끄면 새 센서 및 코어 샘플링이 중지됩니다. 저장된 기록은 다음 기록 때 보관 기간이 지난 샘플이 제거되거나 직접 지울 때까지 남아 있습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每分钟从 CPU 与温度采样中，为每个温度传感器与 CPU 核心集群记录一条平均值。打开后每分钟会增加数十行数据，不需要细节时请保持关闭。这个开关同时适用于 MacHelper 与后台记录，但需要打开对应的 CPU 或温度菜单栏项目。关闭后会停止新的传感器与核心采样。已保存的历史会保留到下一次记录移除超过保留期限的数据，或由你清除。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每分鐘從 CPU 與溫度取樣中，為每個溫度感測器與 CPU 核心群組記錄一筆平均值。開啟後每分鐘會增加數十列資料，不需要細節時請保持關閉。這個開關同時適用於 MacHelper 與背景記錄，但需要開啟對應的 CPU 或溫度選單列項目。關閉後會停止新的感測器與核心取樣。已儲存的歷史會保留到下一次記錄移除超過保留期限的資料，或由你清除。"
-          }
-        }
-      }
-    },
     "This permanently deletes every stored sensor temperature and CPU core cluster history. It can’t be undone. Monitoring history, process history, settings, and the operation history are not affected.": {
       "localizations": {
         "es": {
@@ -16657,40 +16589,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld / %lld 分鐘"
-          }
-        }
-      }
-    },
-    "Only the process name, CPU use, and memory are recorded. Paths, command-line arguments, and user names are never saved. Process history follows the retention above and can be cleared at any time. The switch applies to MacHelper and to background recording; background recording keeps collecting process history even when no menu bar items are selected. Turning this off stops new process history sampling. Stored history stays until the next recording removes samples past the retention, or until you clear it. This switch only controls history recording; the live process list on the Monitor screen is not affected.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Solo se registran el nombre del proceso, el uso de CPU y la memoria. Nunca se guardan rutas, argumentos de línea de comandos ni nombres de usuario. El historial de procesos sigue la retención de arriba y se puede borrar en cualquier momento. El interruptor se aplica a MacHelper y al registro en segundo plano; el registro en segundo plano sigue recogiendo historial de procesos aunque no haya elementos en la barra de menús. Al desactivarlo se detiene el historial nuevo de procesos. El historial guardado se mantiene hasta que el siguiente registro elimine las muestras fuera de la retención o hasta que lo borres. Este interruptor solo controla el registro del historial; la lista de procesos en tiempo real de la pantalla Monitor no se ve afectada."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "記録するのはプロセス名、CPU 使用率、メモリだけです。パス、コマンドライン引数、ユーザ名は一切保存しません。プロセス履歴は上の保存期間に従い、いつでも消去できます。このスイッチは MacHelper とバックグラウンド記録の両方に適用され、バックグラウンド記録はメニューバーの項目を選んでいなくてもプロセス履歴を集め続けます。オフにすると新しいプロセス履歴の取得は止まります。保存済みの履歴は、次の記録で保存期間を過ぎたサンプルが削除されるか、自分で消去するまで残ります。このスイッチが制御するのは履歴の記録だけで、モニタ画面のリアルタイムのプロセス一覧には影響しません。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "프로세스 이름, CPU 사용량, 메모리만 기록하며 경로, 명령줄 인수, 사용자 이름은 절대 저장하지 않습니다. 프로세스 기록은 위의 보관 기간을 따르며 언제든지 지울 수 있습니다. 이 스위치는 MacHelper와 백그라운드 기록에 모두 적용되며, 백그라운드 기록은 메뉴 막대 항목을 선택하지 않아도 프로세스 기록을 계속 수집합니다. 끄면 새 프로세스 기록 수집이 중지됩니다. 저장된 기록은 다음 기록 때 보관 기간이 지난 샘플이 제거되거나 직접 지울 때까지 남아 있습니다. 이 스위치는 기록만 제어하며 모니터 화면의 실시간 프로세스 목록에는 영향을 주지 않습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "只记录进程名称、CPU 用量与内存用量，不会保存路径、命令行参数或用户名。进程历史与上方设置的保留期限相同，而且可以随时清除。这个开关同时适用于 MacHelper 与后台记录；即使没有选择任何菜单栏项目，后台记录仍会收集进程历史。关闭后会停止新的进程历史采样。已保存的历史会保留到下一次记录移除超过保留期限的数据，或由你清除。这个开关只控制历史记录；监控画面的实时进程列表不受影响。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "只記錄程序名稱、CPU 用量與記憶體用量，不會儲存路徑、命令列參數或使用者名稱。程序歷史與上方設定的保留期限相同，而且可以隨時清除。這個開關同時適用於 MacHelper 與背景記錄；即使沒有選取任何選單列項目，背景記錄仍會收集程序歷史。關閉後會停止新的程序歷史取樣。已儲存的歷史會保留到下一次記錄移除超過保留期限的資料，或由你清除。這個開關只控制歷史記錄；監控畫面的即時程序列表不受影響。"
           }
         }
       }
@@ -40176,6 +40074,312 @@
           "stringUnit": {
             "state": "translated",
             "value": "項目會立即直接刪除並釋放空間：快取、日誌和（啟用時）過期的暫存檔案。使用中的項目和由系統管理的項目不會被動。"
+          }
+        }
+      }
+    },
+    "Diagnostics": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnóstico"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "診断"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "진단"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "诊断"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "診斷"
+          }
+        }
+      }
+    },
+    "History keeps being written once a minute after you quit MacHelper, so Health Check and the history charts have no gaps. macOS may ask you to allow MacHelper in Login Items.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El historial se sigue guardando cada minuto después de cerrar MacHelper, así la Revisión de estado y las gráficas no tienen huecos. macOS puede pedirte que permitas MacHelper en Ítems de inicio."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper を終了しても 1 分ごとに履歴を書き込み続けるので、ヘルスチェックと履歴グラフに空白ができません。macOS から「ログイン項目」で MacHelper を許可するよう求められることがあります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper를 종료해도 1분마다 기록을 계속 남기므로 상태 점검과 기록 차트에 빈 구간이 생기지 않습니다. macOS가 로그인 항목에서 MacHelper를 허용하라고 요청할 수 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出 MacHelper 后，仍会每分钟写入一次历史，健康检查和历史图表就不会缺数据。macOS 可能会要求你在「登录项」中允许 MacHelper。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結束 MacHelper 後，仍會每分鐘寫入一次歷史，健康檢查和歷史圖表才不會缺資料。macOS 可能會要你在「登入項目」允許 MacHelper。"
+          }
+        }
+      }
+    },
+    "Missing from the app": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No está en la app"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 内に見つかりません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱에 없음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 中缺失"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 內找不到"
+          }
+        }
+      }
+    },
+    "Not set up": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin configurar"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未設定"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설정되지 않음"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未设置"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未設定"
+          }
+        }
+      }
+    },
+    "Notify me when": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisarme cuando"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "次のときに通知"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다음 경우에 알림"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在以下情况通知我"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在這些情況通知我"
+          }
+        }
+      }
+    },
+    "Saves a per-minute average for every temperature sensor and CPU core cluster. It adds dozens of rows a minute, so turn it on only when you need that detail. It needs the CPU or Temperature menu bar item to be on.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guarda una media por minuto de cada sensor de temperatura y grupo de núcleos de la CPU. Añade decenas de filas por minuto, así que actívalo solo cuando necesites ese detalle. Requiere que el elemento CPU o Temperatura de la barra de menús esté activado."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "温度センサーと CPU コアクラスタごとに 1 分間の平均を保存します。1 分あたり数十行増えるので、詳しいデータが必要なときだけオンにしてください。メニューバーの CPU または温度の項目がオンになっている必要があります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "온도 센서와 CPU 코어 클러스터마다 1분 평균을 저장합니다. 1분에 수십 행이 늘어나므로 자세한 데이터가 필요할 때만 켜세요. 메뉴 막대의 CPU 또는 온도 항목이 켜져 있어야 합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每分钟记录一次每个温度传感器和 CPU 核心簇的平均值。每分钟会多出几十条数据，需要这么细的数据时再打开。需要先打开菜单栏的 CPU 或温度项目。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每分鐘記錄一次每個溫度感測器和 CPU 核心群組的平均值。每分鐘會多出幾十筆資料，需要這麼細的資料時再開啟。需要先開啟選單列的 CPU 或溫度項目。"
+          }
+        }
+      }
+    },
+    "Saves each process’s name, CPU and memory use once a minute, also from background recording. Paths, command-line arguments and user names are never saved. Turning it off stops new records; what is stored stays until it is older than the retention above or you clear it. Live process lists are not affected.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guarda cada minuto el nombre, el uso de CPU y de memoria de cada proceso, también durante el registro en segundo plano. Nunca se guardan rutas, argumentos de línea de comandos ni nombres de usuario. Al desactivarlo se dejan de añadir registros; lo guardado se conserva hasta que supera la retención de arriba o lo borras. Las listas de procesos en vivo no cambian."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "各プロセスの名前、CPU とメモリの使用量を 1 分ごとに保存します。バックグラウンド記録中も保存されます。パス、コマンドライン引数、ユーザ名は保存しません。オフにすると新しい記録は止まり、保存済みのデータは上の保存期間を過ぎるか、消去するまで残ります。リアルタイムのプロセス一覧には影響しません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "각 프로세스의 이름, CPU와 메모리 사용량을 1분마다 저장하며, 백그라운드 기록 중에도 저장합니다. 경로, 명령줄 인수, 사용자 이름은 저장하지 않습니다. 끄면 새 기록이 중단되고, 저장된 데이터는 위의 보관 기간이 지나거나 지울 때까지 남습니다. 실시간 프로세스 목록에는 영향이 없습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每分钟记录一次各进程的名称、CPU 和内存用量，后台记录也会记录。不会保存路径、命令行参数或用户名。关闭后不再新增记录；已保存的数据会保留到超过上面的保留天数，或你手动清除为止。实时进程列表不受影响。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每分鐘記錄一次各程序的名稱、CPU 和記憶體用量，背景記錄也會記。不會儲存路徑、命令列參數或使用者名稱。關閉後不再新增紀錄；已存的資料會保留到超過上面的保留天數，或你手動清除為止。即時的程序清單不受影響。"
+          }
+        }
+      }
+    },
+    "The Helper is missing from this copy of MacHelper. Reinstall the app to restore it.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta copia de MacHelper no incluye el Helper. Vuelve a instalar la app para recuperarlo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この MacHelper には Helper が含まれていません。App を再インストールしてください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 MacHelper에 Helper가 없습니다. 앱을 다시 설치하세요."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这份 MacHelper 中找不到 Helper，请重新安装 App。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這份 MacHelper 裡找不到 Helper，請重新安裝 App。"
+          }
+        }
+      }
+    },
+    "Turn Off Helper": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactivar Helper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper をオフにする"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 끄기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭 Helper"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉 Helper"
           }
         }
       }

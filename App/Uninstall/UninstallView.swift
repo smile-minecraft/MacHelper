@@ -15,10 +15,14 @@ struct UninstallView: View {
             .padding(.horizontal, 12).padding(.vertical, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
-            switch model.tab {
-            case .apps: appsTab
-            case .orphans: OrphansTab(model: model)
+            ZStack {
+                switch model.tab {
+                case .apps: appsTab.transition(Motion.swap)
+                case .orphans: OrphansTab(model: model).transition(Motion.swap)
+                }
             }
+            .frame(maxHeight: .infinity)
+            .animatesStates(model.tab)
         }
         .frame(minWidth: 700, minHeight: 520)
         .task { await model.loadApps() }
@@ -66,12 +70,16 @@ struct UninstallView: View {
             Group {
                 if let app = model.selectedApp {
                     AppDetail(model: model, app: app)
+                        .id(app.id)
+                        .transition(.opacity)
                 } else {
                     PixelEmptyState(art: "px.empty.box", title: "Choose an App to Uninstall",
                                     message: "MacHelper also finds the caches, settings and data it left behind, and you decide item by item what to delete.") { EmptyView() }
                 }
             }
             .frame(minWidth: 480, maxWidth: .infinity, maxHeight: .infinity)
+            // A short cross-fade when another app is picked, so the details don't flash.
+            .animation(Motion.fade, value: model.selectedAppID)
         }
     }
 }
@@ -175,7 +183,7 @@ private struct AppDetail: View {
                     }
                 }
                 .scrollContentBackground(.hidden)
-                HStack(spacing: 12) {
+                .actionBar {
                     if let m = model.message { Text(m).font(.mhCaption).foregroundStyle(Palette.textMuted).lineLimit(2) }
                     Spacer(minLength: 8)
                     Text("\(Fmt.bytes(Int64(clamping: plan.selectedSize))) selected").monospacedDigit().foregroundStyle(Palette.text)
@@ -183,9 +191,6 @@ private struct AppDetail: View {
                         .buttonStyle(.borderedProminent)
                         .disabled(!app.canUninstall || app.isRunning || plan.selectedSize == 0)
                 }
-                .padding(.horizontal, 14).padding(.vertical, 10)
-                .background(Palette.card)
-                .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
                 .confirmationDialog("Uninstall \(app.name)?", isPresented: $confirm, titleVisibility: .visible) {
                     Button("Move to Trash", role: .destructive) { Task { await model.uninstall() } }
                 } message: {
@@ -197,6 +202,8 @@ private struct AppDetail: View {
                 Spacer()
             }
         }
+        // The leftover list fades in once it is found instead of replacing the spinner in one frame.
+        .animatesStates(model.loadingPlan)
     }
 }
 
@@ -226,7 +233,7 @@ private struct OrphansTab: View {
                     }
                 }
                 .scrollContentBackground(.hidden)
-                HStack(spacing: 12) {
+                .actionBar {
                     if let m = model.message { Text(m).font(.mhCaption).foregroundStyle(Palette.textMuted) }
                     Spacer(minLength: 8)
                     Button("Search Again") { Task { await model.loadOrphans() } }
@@ -234,9 +241,6 @@ private struct OrphansTab: View {
                         .buttonStyle(.borderedProminent)
                         .disabled(model.selectedOrphanBytes == 0)
                 }
-                .padding(.horizontal, 14).padding(.vertical, 10)
-                .background(Palette.card)
-                .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
             } else {
                 VStack(spacing: 10) {
                     if model.loadingOrphans { ProgressView() } else {
@@ -246,6 +250,7 @@ private struct OrphansTab: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .animatesStates(model.loadingOrphans)
         .confirmationDialog("Move the selected leftovers (\(Fmt.bytes(Int64(clamping: model.selectedOrphanBytes)))) to the Trash?",
                             isPresented: $confirm, titleVisibility: .visible) {
             Button("Move to Trash", role: .destructive) { Task { await model.removeSelectedOrphans() } }

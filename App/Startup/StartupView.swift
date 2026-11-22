@@ -31,50 +31,54 @@ struct StartupView: View {
             }
             .padding(.horizontal, 12).padding(.vertical, 10)
             .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
-            if model.tab == .background {
-                BackgroundItemsList(model: model)
-            } else if model.loading && model.items.isEmpty {
-                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                // Two panes: a compact list on the left, everything about the selected item on the right.
-                HStack(spacing: 0) {
-                    List(selection: $selectedID) {
-                        ForEach(StartupItem.Scope.allCases, id: \.self) { scope in
-                            let group = model.visible.filter { $0.scope == scope }
-                            if !group.isEmpty {
-                                Section {
-                                    ForEach(group) { item in compactRow(item).tag(item.id) }
-                                } header: {
-                                    Text(scope.title).font(.mh(size: 12, weight: .semibold)).foregroundStyle(Palette.textMuted)
+            ZStack {
+                if model.tab == .background {
+                    BackgroundItemsList(model: model)
+                        .transition(Motion.swap)
+                } else if model.loading && model.items.isEmpty {
+                    ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Two panes: a compact list on the left, everything about the selected item on the right.
+                    HStack(spacing: 0) {
+                        List(selection: $selectedID) {
+                            ForEach(StartupItem.Scope.allCases, id: \.self) { scope in
+                                let group = model.visible.filter { $0.scope == scope }
+                                if !group.isEmpty {
+                                    Section {
+                                        ForEach(group) { item in compactRow(item).tag(item.id) }
+                                    } header: {
+                                        Text(scope.title).font(.mh(size: 12, weight: .semibold)).foregroundStyle(Palette.textMuted)
+                                    }
                                 }
                             }
                         }
-                    }
-                    .scrollContentBackground(.hidden)
-                    .frame(minWidth: 320, idealWidth: 380, maxWidth: 440)
-                    Rectangle().fill(Palette.hairline).frame(width: 1)
-                    Group {
-                        if let item = model.items.first(where: { $0.id == selectedID }) {
-                            detail(item)
-                        } else {
-                            Text("Select an item to see what it runs and when.")
-                                .font(.mhCallout).foregroundStyle(Palette.textMuted)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .scrollContentBackground(.hidden)
+                        .frame(minWidth: 320, idealWidth: 380, maxWidth: 440)
+                        Rectangle().fill(Palette.hairline).frame(width: 1)
+                        Group {
+                            if let item = model.items.first(where: { $0.id == selectedID }) {
+                                detail(item)
+                            } else {
+                                Text("Select an item to see what it runs and when.")
+                                    .font(.mhCallout).foregroundStyle(Palette.textMuted)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            }
                         }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .transition(Motion.swap)
                 }
             }
-            HStack(spacing: 12) {
+            .frame(maxHeight: .infinity)
+            .animatesStates(model.tab)
+            .animatesStates(model.loading && model.items.isEmpty)
+            .actionBar {
                 if let m = model.message { Text(m).font(.mhCaption).foregroundStyle(Theme.orange).lineLimit(2) }
                 Spacer(minLength: 8)
                 Text("Background items that apps register themselves are managed in Login Items.")
                     .font(.mhCaption).foregroundStyle(Palette.textMuted)
                 Button("Open Login Items") { model.openLoginItems() }
             }
-            .padding(.horizontal, 14).padding(.vertical, 10)
-            .background(Palette.card)
-            .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
         }
         .frame(minWidth: 680, minHeight: 480)
         .task { await model.load() }

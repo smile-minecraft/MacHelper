@@ -6,24 +6,29 @@ struct UpdatesView: View {
     @State private var confirm = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    PageHeader(section: .updates, subtitle: String(localized: "Apps you installed with Homebrew that have a newer version.")) {
-                        Toggle("Include apps that update themselves", isOn: $model.includeSelfUpdating)
-                            .toggleStyle(.checkbox).font(.mhCallout)
-                            .disabled(model.phase == .checking || model.phase == .updating || model.isRefreshingIndex)
-                            .help("Also list apps such as browsers that normally install their own updates")
-                        IconButton(symbol: "arrow.clockwise", help: "Check Again") { Task { await model.check(refresh: true) } }
-                            .disabled(model.phase == .checking || model.phase == .updating || model.isRefreshingIndex)
-                    }
-                    content
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                PageHeader(section: .updates, subtitle: String(localized: "Apps you installed with Homebrew that have a newer version.")) {
+                    Toggle("Include apps that update themselves", isOn: $model.includeSelfUpdating)
+                        .toggleStyle(.checkbox).font(.mhCallout)
+                        .disabled(model.phase == .checking || model.phase == .updating || model.isRefreshingIndex)
+                        .help("Also list apps such as browsers that normally install their own updates")
+                    IconButton(symbol: "arrow.clockwise", help: "Check Again") { Task { await model.check(refresh: true) } }
+                        .disabled(model.phase == .checking || model.phase == .updating || model.isRefreshingIndex)
                 }
-                .padding(.horizontal, 28).padding(.vertical, 22)
-                .frame(maxWidth: 1000).frame(maxWidth: .infinity)
+                content
             }
-            if !model.casks.isEmpty { bottomBar }
+            .padding(.horizontal, 28).padding(.vertical, 22)
+            .frame(maxWidth: 1000).frame(maxWidth: .infinity)
+            // The list, notices and results fade in as Homebrew answers instead of popping in.
+            .animatesStates(model.phase)
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !model.casks.isEmpty {
+                bottomBar.transition(Motion.reduced ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(Motion.standard, value: model.casks.isEmpty)
         // The previous list stays on screen while the check runs, so re-opening the page shows the
         // previous result and replaces it when Homebrew answers.
         .task { await model.check() }
@@ -203,7 +208,7 @@ struct UpdatesView: View {
     }
 
     private var bottomBar: some View {
-        HStack(spacing: 14) {
+        ActionBar {
             if let p = model.progress, let current = model.current {
                 ProgressView().controlSize(.small)
                 Text("Updating \(model.casks.first { $0.token == current }?.name ?? current) (\(p.done + 1) of \(p.total))…")
@@ -217,9 +222,6 @@ struct UpdatesView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(model.selectedCasks.isEmpty || model.phase != .ready)
         }
-        .padding(.horizontal, 14).padding(.vertical, 10)
-        .background(Palette.card)
-        .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
     }
 
     private var confirmTitle: String { String(localized: "Update \(model.selectedCasks.count) apps?") }

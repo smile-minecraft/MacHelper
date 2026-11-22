@@ -49,6 +49,9 @@ struct HealthView: View {
             }
             .padding(.horizontal, 28).padding(.vertical, 22)
             .frame(maxWidth: 1100).frame(maxWidth: .infinity)
+            // The report replaces the "Checking…" art with a fade; the updating hint fades too.
+            .animatesStates(model.report == nil)
+            .animation(Motion.hover, value: model.updating)
         }
         .task(id: model.window) { await reload() }
         .task { await model.loadSecurity() }

@@ -12,10 +12,21 @@ public struct BatteryReading: Sendable, Hashable, Codable {
     /// Current full-charge capacity / design capacity.
     public var health: Double?
     public var celsius: Double?
+
+    public init(charge: Double, isCharging: Bool, externalPower: Bool, watts: Double, cycleCount: Int,
+                health: Double?, celsius: Double?) {
+        self.charge = charge
+        self.isCharging = isCharging
+        self.externalPower = externalPower
+        self.watts = watts
+        self.cycleCount = cycleCount
+        self.health = health
+        self.celsius = celsius
+    }
 }
 
 /// Reads `AppleSmartBattery`. Returns nil on desktops (no battery service).
-/// Note: not yet verified on hardware (the dev machine is a Mac mini).
+/// Note: not yet verified on a Mac with a built-in battery.
 public enum BatterySampler {
     public static func sample() -> BatteryReading? {
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))

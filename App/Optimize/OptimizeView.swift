@@ -10,15 +10,20 @@ struct OptimizeView: View {
     @State private var category: String?
 
     var body: some View {
-        VStack(spacing: 0) {
-            switch model.phase {
-            case .idle: start
-            case .scanning: scanning
-            case .running: progress(String(localized: "Cleaning…"))
-            case .ready: preview
-            case .finished: results
+        ZStack {
+            // Each step replaces the last with a short fade instead of a cut.
+            Group {
+                switch model.phase {
+                case .idle: start
+                case .scanning: scanning
+                case .running: progress(String(localized: "Cleaning…"))
+                case .ready: preview
+                case .finished: results
+                }
             }
+            .transition(Motion.swap)
         }
+        .animatesStates(model.phase)
         .frame(minWidth: 680, minHeight: 520)
         .toolbar {
             ToolbarItem {
@@ -95,7 +100,7 @@ struct OptimizeView: View {
                 categoryDetail
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            HStack(spacing: 16) {
+            .actionBar {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(selectionSummary)
                         .font(Theme.smallNumeral)
@@ -108,9 +113,6 @@ struct OptimizeView: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(model.selectedBytes == 0 && model.selectedTaskCount == 0)
             }
-            .padding(.horizontal, 14).padding(.vertical, 10)
-            .background(Palette.card)
-            .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
         }
         .confirmationDialog("Clean the selected \(Fmt.bytes(Int64(clamping: model.selectedBytes)))?", isPresented: $confirm,
                             titleVisibility: .visible) {
@@ -528,14 +530,11 @@ struct OptimizeView: View {
             }
             .padding(.horizontal, 20).padding(.vertical, 18)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            HStack(spacing: 12) {
+            ActionBar {
                 Text("All operations are logged in ~/Library/Logs/MacHelper/operations.jsonl").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 Spacer(minLength: 12)
                 Button("Scan Again") { Task { await model.scan() } }
             }
-            .padding(.horizontal, 14).padding(.vertical, 10)
-            .background(Palette.card)
-            .overlay(alignment: .top) { Rectangle().fill(Palette.hairline).frame(height: 1) }
         }
     }
 }
@@ -594,8 +593,8 @@ private struct AutoCleanEntryButtonStyle: ButtonStyle {
             .overlay(SurfaceShape(cornerRadius: Theme.cardRadius)
                 .strokeBorder(Theme.accent.opacity(hover ? 0.55 : 0), lineWidth: 1.5))
             .scaleEffect(configuration.isPressed ? 0.985 : 1)
-            .animation(.easeOut(duration: 0.12), value: hover)
-            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+            .animation(Motion.hover, value: hover)
+            .animation(Motion.press, value: configuration.isPressed)
             .onHover { hover = $0 }
     }
 }
