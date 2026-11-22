@@ -61,6 +61,9 @@ final class OptimizeModel {
     /// Why system cleanup can't be previewed (Helper off, older Helper, XPC error); nil when it worked.
     private(set) var systemError: String?
     private(set) var systemReport: SystemCleanupResult?
+    /// The last scan was a deep scan: it previewed the deep system targets (which include what the
+    /// standard ones cover), whose deletion asks for an administrator password.
+    private(set) var deep = false
 
     @ObservationIgnored nonisolated static let rootsKey = "optimize.artifactRoots"
 
@@ -77,7 +80,10 @@ final class OptimizeModel {
 
     func stopScan() { stopFlag.withLock { $0 = true } }
 
-    func scan() async {
+    /// `deep` also previews the system caches, logs and temporary files that only an administrator
+    /// may delete (see `SystemCleanup.deepTargets`). Previewing never asks for a password.
+    func scan(deep: Bool = false) async {
+        self.deep = deep
         phase = .scanning
         scanProgress = nil
         scanStopped = false
@@ -125,7 +131,7 @@ final class OptimizeModel {
             self.tasks = tasks
             self.dockerUsage = await docker
             if stopped {
-                systemRows = SystemCleanupCatalog.all.map { SystemRow(info: $0, preview: nil, selected: false) }
+                systemRows = (deep ? SystemCleanupCatalog.deep : SystemCleanupCatalog.standard).map { SystemRow(info: $0, preview: nil, selected: false) }
                 systemError = String(localized: "Scan stopped")
             } else {
                 await previewSystemCleanup(helperEnabled: helperEnabled)
@@ -138,7 +144,9 @@ final class OptimizeModel {
     }
 
     private func previewSystemCleanup(helperEnabled: Bool) async {
-        let infos = SystemCleanupCatalog.all
+        // The deep targets cover the standard ones (same folders, deeper, younger files), so a deep
+        // scan previews only them and no file is counted twice.
+        let infos = deep ? SystemCleanupCatalog.deep : SystemCleanupCatalog.standard
         guard helperEnabled else {
             systemRows = infos.map { SystemRow(info: $0, preview: nil, selected: false) }
             systemError = String(localized: "Helper not enabled")
@@ -158,6 +166,11 @@ final class OptimizeModel {
     }
 
     var selectedSystemBytes: UInt64 { systemRows.filter(\.selected).reduce(0) { $0 + $1.bytes } }
+    /// The part of `selectedSystemBytes` that deep clean deletes after the administrator password.
+    var selectedDeepBytes: UInt64 { systemRows.filter { $0.selected && $0.info.deep }.reduce(0) { $0 + $1.bytes } }
+    /// Deep targets that will be sent for deletion (and so ask for the password), even when
+    /// their files add up to zero bytes.
+    var selectedDeepCount: Int { systemRows.filter { $0.selected && $0.info.deep && $0.count > 0 }.count }
 
     // MARK: Selection
 
@@ -294,7 +307,7 @@ final class OptimizeModel {
         let now = FullDiskAccess.isGranted
         defer { fullDiskAccess = now }
         if now, !fullDiskAccess, phase == .ready {
-            Task { await scan() }
+            Task { await scan(deep: deep) }
         }
     }
 
@@ -316,7 +329,9 @@ final class OptimizeModel {
         let artifactRoots = artifacts?.roots ?? []
         let userTasks = tasks.filter { $0.selected && !$0.task.requiresRoot }.map(\.task)
         let rootTasks = tasks.filter { $0.selected && $0.task.requiresRoot }.map(\.task)
-        let systemIDs = systemRows.filter { $0.selected && $0.count > 0 }.map(\.id)
+        let chosen = systemRows.filter { $0.selected && $0.count > 0 }
+        let systemIDs = chosen.filter { !$0.info.deep }.map(\.id)
+        let deepIDs = chosen.filter(\.info.deep).map(\.id)
 
         let (report, artifactReport, userResults) = await Task.detached(priority: .userInitiated) {
             var report = CleanExecutor(safety: .forCleaning()).execute(items, dryRun: false, command: "clean")
@@ -346,13 +361,13 @@ final class OptimizeModel {
                 results.append(TaskResult(id: t.id, title: t.title, ok: false, output: "\(error)"))
             }
         }
-        var systemReport: SystemCleanupResult?
+        var systemTargets: [SystemCleanupResult.Target] = []
         if !systemIDs.isEmpty {
             do {
                 // The Helper scans again with the same fixed rules; only what is still old enough goes.
                 let r = try await HelperClient.shared.systemCleanup(SystemCleanupRequest(targetIDs: systemIDs, dryRun: false))
                 SystemCleanupCatalog.record(r)
-                systemReport = r
+                systemTargets += r.targets
                 if let f = r.targets.flatMap(\.failures).first {
                     results.append(TaskResult(id: "system", title: String(localized: "System logs"), ok: false, output: "\(f.path): \(f.message)"))
                 }
@@ -360,11 +375,42 @@ final class OptimizeModel {
                 results.append(TaskResult(id: "system", title: String(localized: "System logs"), ok: false, output: "\(error)"))
             }
         }
+        if !deepIDs.isEmpty {
+            // A separate request, so cancelling the password dialog never holds back the rest.
+            let title = String(localized: "Deep Clean")
+            do {
+                let session = try DeepCleanAuthorization.Session()
+                let request = SystemCleanupRequest(targetIDs: deepIDs, dryRun: false, authorization: session.externalForm)
+                let r = try await HelperClient.shared.systemCleanup(request, timeout: .seconds(300))
+                withExtendedLifetime(session) {}
+                SystemCleanupCatalog.record(r)
+                systemTargets += r.targets
+                let failures = r.targets.flatMap(\.failures)
+                results.append(TaskResult(id: "deep", title: title, ok: failures.isEmpty,
+                                          output: failures.first.map { "\($0.path): \($0.message)" + (failures.count > 1 ? String(localized: " (+\(failures.count - 1) more)") : "") }
+                                              ?? String(localized: "Deleted \(r.count) files as administrator, \(Fmt.bytes(Int64(clamping: r.bytes))).")))
+            } catch {
+                results.append(TaskResult(id: "deep", title: title, ok: false, output: Self.deepFailureText(error)))
+            }
+        }
+        let systemReport = systemTargets.isEmpty ? nil : SystemCleanupResult(targets: systemTargets)
         self.report = report
         self.artifactReport = artifactReport
         self.systemReport = systemReport
         self.taskResults = results
         phase = .finished
+    }
+
+    /// What to tell the user when deep clean didn't run; a cancelled password dialog deleted nothing.
+    static func deepFailureText(_ error: Error) -> String {
+        let text = "\(error)"
+        if text.contains(SystemCleanupError.authorizationCancelled.description) {
+            return String(localized: "Cancelled: the administrator password wasn’t entered, so nothing was deleted.")
+        }
+        if text.contains("administrator authorization failed") || text.contains(SystemCleanupError.authorizationRequired.description) {
+            return String(localized: "The administrator password wasn’t accepted, so nothing was deleted.")
+        }
+        return text
     }
 
     var trashedBytes: UInt64 { (report?.trashedBytes ?? 0) + (artifactReport?.trashedBytes ?? 0) }

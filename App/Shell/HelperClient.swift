@@ -337,10 +337,14 @@ final class HelperClient: @unchecked Sendable {
         }
     }
 
-    /// Old system logs and diagnostic reports (fixed folders, older than 30 days). Deleting is permanent.
-    func systemCleanup(_ request: SystemCleanupRequest) async throws -> SystemCleanupResult {
+    /// Old system logs and diagnostic reports, and the deep targets (fixed folders and age limits).
+    /// Deleting is permanent. Deleting deep targets waits for the administrator password dialog the
+    /// Helper shows, so callers pass a longer `timeout`.
+    func systemCleanup(_ request: SystemCleanupRequest, timeout: Duration = .seconds(60)) async throws -> SystemCleanupResult {
         let json = try JSONEncoder().encode(request)
-        let data: Data = try await call(timeout: .seconds(60)) { proxy, done in
+        // A request that carries an authorization is never resent: a retry could show the
+        // password dialog twice or repeat a deletion the first attempt already made.
+        let data: Data = try await call(timeout: timeout, retryOnConnectionFailure: request.authorization == nil) { proxy, done in
             proxy.systemCleanup(json) { data, error in
                 if let data { done(.success(data)) } else { done(.failure(HelperClientError.remote(error ?? "unknown"))) }
             }
@@ -398,6 +402,7 @@ final class HelperClient: @unchecked Sendable {
     /// and launchd starts the new one, so the second attempt reaches the right binary.
     private func call<T: Sendable>(
         timeout: Duration = .seconds(4),
+        retryOnConnectionFailure: Bool = true,
         _ body: @escaping @Sendable (HelperXPC, @escaping @Sendable (Result<T, Error>) -> Void) -> Void
     ) async throws -> T {
         guard status == .enabled else { throw HelperClientError.notEnabled(status) }
@@ -406,7 +411,7 @@ final class HelperClient: @unchecked Sendable {
         } catch HelperClientError.timedOut {
             Self.logger.error("XPC call timed out after \(timeout)")
             throw HelperClientError.timedOut
-        } catch HelperClientError.connection(let message) {
+        } catch HelperClientError.connection(let message) where retryOnConnectionFailure {
             // One retry on connection failure: after an app update the old helper exits on
             // first contact and launchd starts the new one, so the second attempt reaches it.
             Self.logger.warning("XPC connection failed, retrying once: \(message, privacy: .public)")

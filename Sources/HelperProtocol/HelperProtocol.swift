@@ -9,7 +9,7 @@ public enum HelperConstants {
     /// Name of the helper executable inside `MacHelper.app/Contents/MacOS/`.
     public static let helperExecutableName = "MacHelperHelper"
     /// Bump when the XPC interface changes; the app refuses to talk to a mismatched helper.
-    public static let protocolVersion = 6
+    public static let protocolVersion = 7
 }
 
 /// XPC interface exported by the root Helper daemon.
@@ -53,6 +53,9 @@ public enum HelperConstants {
     func moveSystemLeftovers(_ request: Data, reply: @escaping @Sendable (_ json: Data?, _ error: String?) -> Void)
     /// Encoded `[ProcessCounter]` for every process: CPU time and memory only, no names or arguments.
     func processCounters(reply: @escaping @Sendable (_ json: Data?, _ error: String?) -> Void)
+
+    // v7: `systemCleanup` also accepts the deep targets; deleting them needs the request's
+    // `authorization` and an administrator password entered in the dialog the Helper asks for.
 }
 
 public enum HelperTiming {

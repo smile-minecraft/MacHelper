@@ -7,7 +7,10 @@ struct OptimizeView: View {
     @State private var confirm = false
     @State private var showAutoClean = false
     @State private var showExclusions = false
+    @State private var showHelperSetup = false
     @State private var category: String?
+    /// The verified Helper state (running, outdated, unresponsive…), not just its registration.
+    @Bindable private var helperHealth = HelperHealthMonitor.shared
 
     var body: some View {
         ZStack {
@@ -39,6 +42,7 @@ struct OptimizeView: View {
         }
         .sheet(isPresented: $showAutoClean) { AutoCleanView(model: autoClean) }
         .sheet(isPresented: $showExclusions) { ExclusionsView(model: model) }
+        .sheet(isPresented: $showHelperSetup) { HelperSetupSheet() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             model.recheckFullDiskAccess()
         }
@@ -49,12 +53,13 @@ struct OptimizeView: View {
                         message: "Scan first to list what can be cleaned.") {
             VStack(spacing: 8) {
                 if ThemeStore.shared.isSoft {
-                    Button("Start Scan") { Task { await model.scan() } }
+                    Button("Start Scan") { category = nil; Task { await model.scan() } }
                         .buttonStyle(PrimaryButtonStyle(large: true))
                         .padding(.bottom, 4)
                 } else {
-                    Button("Start Scan") { Task { await model.scan() } }.buttonStyle(.borderedProminent).controlSize(.large)
+                    Button("Start Scan") { category = nil; Task { await model.scan() } }.buttonStyle(.borderedProminent).controlSize(.large)
                 }
+                deepEntry
                 if model.scanStopped { Text("Scan stopped before any results were ready.").font(.mhCaption).foregroundStyle(Palette.textMuted) }
                 if let e = model.loadError { Text(e).font(.mhCaption).foregroundStyle(Theme.rose) }
                 if !model.fullDiskAccess {
@@ -66,6 +71,34 @@ struct OptimizeView: View {
                     .padding(.top, 8)
             }
         }
+    }
+
+    /// Deep clean: the same scan plus system caches, rotated logs and temporary files that only an
+    /// administrator may delete. Needs the Helper; the password is asked right before deleting.
+    @ViewBuilder private var deepEntry: some View {
+        let helperOn = helperHealth.isHealthy
+        VStack(spacing: 4) {
+            Button { category = "deep"; Task { await model.scan(deep: true) } } label: {
+                Label("Deep Optimize…", systemImage: "lock.shield")
+            }
+            .controlSize(.large)
+            .disabled(!helperOn)
+            .help("Also cleans system caches, old system logs and temporary files. Asks for an administrator password before deleting.")
+            if helperOn {
+                Text("Goes deeper into system folders. You review everything first; deleting asks for your administrator password.")
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center).frame(maxWidth: 400)
+            } else {
+                Text("Deep Optimize needs the MacHelper Helper, which works on system folders as administrator.")
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center).frame(maxWidth: 400)
+                // Not set up, waiting for approval, outdated after an update or not answering:
+                // the setup sheet explains the state and offers the matching fix.
+                if helperHealth.state.needsAttention {
+                    Text(helperHealth.summaryLabel).font(.mhCaption).foregroundStyle(Theme.amber)
+                }
+                Button("Set Up or Repair the Helper…") { showHelperSetup = true }.buttonStyle(.link).font(.mhCaption)
+            }
+        }
+        .padding(.top, 2)
     }
 
     private var scanning: some View {
@@ -114,10 +147,10 @@ struct OptimizeView: View {
                     Text("Low-risk items are deleted directly, medium and high risk go to the Trash.").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
                 Spacer(minLength: 12)
-                Button("Rescan") { Task { await model.scan() } }
-                Button("Clean…") { confirm = true }
+                Button("Rescan") { Task { await model.scan(deep: model.deep) } }
+                Button(model.selectedDeepCount > 0 ? "Authorize and Clean…" : "Clean…") { confirm = true }
                     .buttonStyle(.borderedProminent)
-                    .disabled(model.selectedBytes == 0 && model.selectedTaskCount == 0)
+                    .disabled(model.selectedBytes == 0 && model.selectedTaskCount == 0 && model.selectedDeepCount == 0)
             }
         }
         .confirmationDialog("Clean the selected \(Fmt.bytes(Int64(clamping: model.selectedBytes)))?", isPresented: $confirm,
@@ -142,7 +175,7 @@ struct OptimizeView: View {
     @ViewBuilder private var notices: some View {
         if model.scanStopped {
             NoticeBar(icon: "pause.circle", text: String(localized: "Scan stopped early. Only the places checked before that are listed."),
-                      action: String(localized: "Scan Everything")) { Task { await model.scan() } }
+                      action: String(localized: "Scan Everything")) { Task { await model.scan(deep: model.deep) } }
         }
         if model.hiddenByFullDiskAccess > 0 {
             NoticeBar(icon: "lock", text: String(localized: "\(model.hiddenByFullDiskAccess) places can’t be checked without Full Disk Access. MacHelper scans again once it’s on."),
@@ -171,10 +204,17 @@ struct OptimizeView: View {
         }
         out.append(Category(id: "artifacts", title: String(localized: "Project Build Artifacts"), icon: "hammer",
                             detail: model.artifacts.map { selectedText($0.selectedSize, of: $0.totalSize) } ?? String(localized: "Add project folders")))
-        out.append(Category(id: "system", title: String(localized: "System Logs"), icon: "lock.doc",
-                            detail: model.systemError == nil
-                                ? selectedText(model.selectedSystemBytes, of: model.systemRows.reduce(0) { $0 + $1.bytes })
-                                : String(localized: "Needs Helper")))
+        if !model.deep {
+            out.append(Category(id: "system", title: String(localized: "System Logs"), icon: "lock.doc",
+                                detail: model.systemError == nil
+                                    ? selectedText(model.selectedSystemBytes, of: model.systemRows.reduce(0) { $0 + $1.bytes })
+                                    : String(localized: "Needs Helper")))
+        } else {
+            out.append(Category(id: "deep", title: String(localized: "Deep Clean"), icon: "lock.shield",
+                                detail: model.systemError == nil
+                                    ? selectedText(model.selectedDeepBytes, of: model.systemRows.reduce(0) { $0 + $1.bytes })
+                                    : String(localized: "Needs Helper")))
+        }
         out.append(Category(id: "maintenance", title: String(localized: "Maintenance"), icon: "wrench.and.screwdriver",
                             detail: String(localized: "\(model.selectedTaskCount) of \(model.tasks.filter(\.available).count) tasks")))
         return out
@@ -200,7 +240,13 @@ struct OptimizeView: View {
         }
     }
 
-    private var selectedCategory: String { category ?? categories.first?.id ?? "maintenance" }
+    /// The chosen category, or the first one when the choice no longer exists (a deep scan's
+    /// "deep" category after a normal rescan, say).
+    private var selectedCategory: String {
+        let ids = categories.map(\.id)
+        if let category, ids.contains(category) { return category }
+        return ids.first ?? "maintenance"
+    }
 
     private var categoryList: some View {
         List(selection: Binding(get: { selectedCategory }, set: { category = $0 })) {
@@ -221,7 +267,7 @@ struct OptimizeView: View {
         .background(Palette.card)
     }
 
-    private var isRuleCategory: Bool { !["artifacts", "system", "maintenance"].contains(selectedCategory) }
+    private var isRuleCategory: Bool { !["artifacts", "system", "deep", "maintenance"].contains(selectedCategory) }
 
     @ViewBuilder private var categoryDetail: some View {
         VStack(spacing: 0) {
@@ -337,6 +383,8 @@ struct OptimizeView: View {
                 if let a = model.artifacts { artifactSection(a) } else { rootsOnlySection }
             case "system":
                 systemSection
+            case "deep":
+                deepSection
             case "maintenance":
                 maintenanceSection
             default:
@@ -389,8 +437,12 @@ struct OptimizeView: View {
         if directBytes > 0 {
             lines.append(String(localized: "Delete directly: \(Fmt.bytes(Int64(clamping: directBytes))) of low-risk caches and logs that apps rebuild themselves. They don’t go to the Trash."))
         }
-        if model.selectedSystemBytes > 0 {
-            lines.append(String(localized: "Delete old system logs and diagnostic reports as administrator: \(Fmt.bytes(Int64(clamping: model.selectedSystemBytes))). Only files older than 30 days in the fixed system log folders."))
+        let standardSystemBytes = model.selectedSystemBytes - model.selectedDeepBytes
+        if standardSystemBytes > 0 {
+            lines.append(String(localized: "Delete old system logs and diagnostic reports as administrator: \(Fmt.bytes(Int64(clamping: standardSystemBytes))). Only files older than 30 days in the fixed system log folders."))
+        }
+        if model.selectedDeepCount > 0 {
+            lines.append(String(localized: "Deep clean: delete \(Fmt.bytes(Int64(clamping: model.selectedDeepBytes))) of system caches, logs and temporary files as administrator. macOS asks for your administrator password first; cancelling deletes none of them."))
         }
         if model.selectedEmptyTrashBytes > 0 {
             lines.append(String(localized: "Empty the Trash: \(Fmt.bytes(Int64(clamping: model.selectedEmptyTrashBytes))). This can’t be undone."))
@@ -403,7 +455,36 @@ struct OptimizeView: View {
 
     private var systemSection: some View {
         Section {
-            ForEach($model.systemRows) { $row in
+            systemRows(deep: false)
+        } header: {
+            HStack(spacing: 8) {
+                Text("System Logs")
+                if let e = model.systemError {
+                    Text(e).font(.mhCaption).foregroundStyle(Theme.amber).lineLimit(1).truncationMode(.tail).help(e).textCase(nil)
+                }
+            }
+        }
+    }
+
+    private var deepSection: some View {
+        Section {
+            systemRows(deep: true)
+        } header: {
+            HStack(spacing: 8) {
+                Text("Deep Clean")
+                if let e = model.systemError {
+                    Text(e).font(.mhCaption).foregroundStyle(Theme.amber).lineLimit(1).truncationMode(.tail).help(e).textCase(nil)
+                }
+            }
+        } footer: {
+            Text("Files are deleted directly, as administrator, after you enter your password. Items protected by macOS, Apple’s own caches and anything used in the last days are always left alone.")
+                .font(.mhCaption).foregroundStyle(Palette.textMuted)
+        }
+    }
+
+    @ViewBuilder private func systemRows(deep: Bool) -> some View {
+        ForEach($model.systemRows) { $row in
+            if row.info.deep == deep {
                 HStack(alignment: .top) {
                     Toggle(isOn: $row.selected) { EmptyView() }
                         .labelsHidden()
@@ -414,14 +495,15 @@ struct OptimizeView: View {
                             Text(row.info.title).foregroundStyle(Palette.text)
                             RiskBadge(risk: row.info.risk)
                             Text("Deleted directly").font(.mhCaption2).foregroundStyle(Palette.textMuted)
-                            Text("Needs Helper").font(.mhCaption2).foregroundStyle(Palette.textMuted)
+                            Text(row.info.deep ? "Needs password" : "Needs Helper").font(.mhCaption2).foregroundStyle(Palette.textMuted)
                         }
                         Text(row.info.description).font(.mhCaption).foregroundStyle(Palette.textMuted)
                         if let p = row.preview {
                             if let why = p.unavailable {
                                 Text("Can’t read \(row.info.folder): \(why)").font(.mhCaption2).foregroundStyle(Theme.amber)
                             } else {
-                                Text(p.count == 0 ? String(localized: "Nothing older than 30 days") : String(localized: "\(p.count) files"))
+                                Text(p.count == 0 ? (row.info.deep ? String(localized: "Nothing to clean") : String(localized: "Nothing older than 30 days"))
+                                     : String(localized: "\(p.count) files"))
                                     .font(.mhCaption2).foregroundStyle(Palette.textFaint)
                             }
                         }
@@ -432,13 +514,6 @@ struct OptimizeView: View {
                     }
                 }
                 .opacity(row.preview == nil ? 0.5 : 1)
-            }
-        } header: {
-            HStack(spacing: 8) {
-                Text("System Logs")
-                if let e = model.systemError {
-                    Text(e).font(.mhCaption).foregroundStyle(Theme.amber).lineLimit(1).truncationMode(.tail).help(e).textCase(nil)
-                }
             }
         }
     }
@@ -545,7 +620,7 @@ struct OptimizeView: View {
             ActionBar {
                 Text("All operations are logged in ~/Library/Logs/MacHelper/operations.jsonl").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 Spacer(minLength: 12)
-                Button("Scan Again") { Task { await model.scan() } }
+                Button("Scan Again") { Task { await model.scan(deep: model.deep) } }
             }
         }
     }

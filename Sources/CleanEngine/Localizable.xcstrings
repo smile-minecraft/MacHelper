@@ -2448,6 +2448,550 @@
           }
         }
       }
+    },
+    "System caches": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés del sistema"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システムキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統快取"
+          }
+        }
+      }
+    },
+    "Third-party caches shared by all users in /Library/Caches, untouched for 7 days. Apple’s own caches are left alone; apps rebuild theirs when needed.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés de terceros compartidas por todos los usuarios en /Library/Caches, sin usar en 7 días. Las cachés de Apple no se tocan; las apps reconstruyen las suyas cuando hace falta."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Caches にある全ユーザー共通のサードパーティ製キャッシュのうち、7 日間使われていないもの。Apple 自身のキャッシュはそのままで、アプリは必要なときに再作成します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Caches에 있는 모든 사용자가 공유하는 타사 캐시 중 7일간 사용되지 않은 것. Apple 자체 캐시는 그대로 두며, 앱은 필요할 때 다시 만듭니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Caches 里所有用户共享、7 天没动过的第三方缓存。Apple 自己的缓存不动；App 需要时会自己重建。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Caches 裡所有使用者共用、7 天沒動過的第三方快取。Apple 自己的快取不動；App 需要時會自己重建。"
+          }
+        }
+      }
+    },
+    "Caches of system services": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés de servicios del sistema"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システムサービスのキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 서비스 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统服务的缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統服務的快取"
+          }
+        }
+      }
+    },
+    "Caches of processes that run as the system administrator (root), untouched for 7 days.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés de procesos que se ejecutan como administrador del sistema (root), sin usar en 7 días."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システム管理者（root）として動くプロセスのキャッシュのうち、7 日間使われていないもの。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 관리자(root)로 실행되는 프로세스의 캐시 중 7일간 사용되지 않은 것."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以系统管理员（root）身份运行的程序留下、7 天没动过的缓存。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以系統管理員（root）身分執行的程式所留下、7 天沒動過的快取。"
+          }
+        }
+      }
+    },
+    "Rotated system logs": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros del sistema rotados"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ローテーション済みのシステムログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "순환된 시스템 로그"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已轮替的系统日志"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已輪替的系統日誌"
+          }
+        }
+      }
+    },
+    "Older, already rotated or compressed logs in /private/var/log (system.log.3.gz and the like). The current logs stay.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros antiguos ya rotados o comprimidos en /private/var/log (system.log.3.gz y similares). Los registros actuales se quedan."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/log にあるローテーション済み・圧縮済みの古いログ（system.log.3.gz など）。現在のログは残します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/log에 있는 이미 순환되거나 압축된 오래된 로그(system.log.3.gz 등). 현재 로그는 남깁니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/log 里已轮替或压缩的旧日志（如 system.log.3.gz）。当前正在写的日志会保留。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/log 裡已輪替或壓縮的舊日誌（像 system.log.3.gz）。目前正在寫的日誌會保留。"
+          }
+        }
+      }
+    },
+    "All system diagnostic reports": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los informes de diagnóstico del sistema"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてのシステム診断レポート"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모든 시스템 진단 보고서"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有系统诊断报告"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有系統診斷報告"
+          }
+        }
+      }
+    },
+    "Every crash, hang and resource report in /Library/Logs/DiagnosticReports older than a day, not only the ones past 30 days.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los informes de fallos, bloqueos y recursos en /Library/Logs/DiagnosticReports con más de un día, no solo los de más de 30 días."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs/DiagnosticReports にある 1 日以上前のクラッシュ、応答なし、リソースのレポートすべて（30 日以上前のものに限りません）。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs/DiagnosticReports에 있는 하루 이상 지난 모든 충돌, 응답 없음 및 리소스 보고서(30일 지난 것만이 아님)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs/DiagnosticReports 里超过一天的所有崩溃、无响应与资源报告，不只 30 天以上的。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs/DiagnosticReports 裡超過一天的所有當機、沒有回應與資源報告，不只 30 天以上的。"
+          }
+        }
+      }
+    },
+    "App logs in /Library/Logs": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registros de apps en /Library/Logs"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs 内のアプリのログ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs의 앱 로그"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs 里的 App 日志"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs 裡的 App 日誌"
+          }
+        }
+      }
+    },
+    "Log files in the app folders of /Library/Logs, untouched for 7 days.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos de registro en las carpetas de apps de /Library/Logs, sin usar en 7 días."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs のアプリ別フォルダにある、7 日間使われていないログファイル。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs의 앱 폴더에 있는 7일간 사용되지 않은 로그 파일."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs 各 App 文件夹里 7 天没动过的日志文件。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Logs 各 App 資料夾裡 7 天沒動過的日誌檔。"
+          }
+        }
+      }
+    },
+    "System temporary files": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos temporales del sistema"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システムの一時ファイル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 임시 파일"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统临时文件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統暫存檔"
+          }
+        }
+      }
+    },
+    "Shared temporary files": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos temporales compartidos"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共有の一時ファイル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "공유 임시 파일"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共享临时文件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共用暫存檔"
+          }
+        }
+      }
+    },
+    "Simulator system caches": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés del sistema de los simuladores"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "シミュレータのシステムキャッシュ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시뮬레이터 시스템 캐시"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模拟器系统缓存"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模擬器系統快取"
+          }
+        }
+      }
+    },
+    "Shared caches of the iOS simulators in /Library/Developer/CoreSimulator/Caches. Rebuilt the next time a simulator starts, which then takes longer.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cachés compartidas de los simuladores de iOS en /Library/Developer/CoreSimulator/Caches. Se reconstruyen la próxima vez que arranca un simulador, que entonces tarda más."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Developer/CoreSimulator/Caches にある iOS シミュレータの共有キャッシュ。次回シミュレータ起動時に再作成され、そのときは時間がかかります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Developer/CoreSimulator/Caches에 있는 iOS 시뮬레이터 공유 캐시. 다음에 시뮬레이터를 시작할 때 다시 만들어지며, 그때는 더 오래 걸립니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Developer/CoreSimulator/Caches 里 iOS 模拟器的共享缓存。下次启动模拟器时会重建，那一次会比较久。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/Developer/CoreSimulator/Caches 裡 iOS 模擬器的共用快取。下次啟動模擬器時會重建，那一次會比較久。"
+          }
+        }
+      }
+    },
+    "Files in /tmp that haven’t changed for 7 days. An app that keeps a file open without writing to it can still need it, so leave this off if you aren’t sure.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos en /tmp que no cambian desde hace 7 días. Una app que mantiene un archivo abierto sin escribir en él aún puede necesitarlo; déjalo desmarcado si no estás seguro."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/tmp にある、7 日間変更されていないファイル。書き込まずに開いたままにしているアプリがまだ必要としている場合があるので、迷ったらオフのままにしてください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/tmp에서 7일간 변경되지 않은 파일. 쓰지 않고 열어 둔 앱이 아직 필요로 할 수 있으니 확실하지 않으면 끈 채로 두세요."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/tmp 里 7 天没有变动的文件。有些 App 会一直开着文件却不写入，仍可能需要它，不确定的话就别勾选。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/tmp 裡 7 天沒有變動的檔案。有些 App 會一直開著檔案卻不寫入，仍可能需要它，不確定的話就別勾選。"
+          }
+        }
+      }
+    },
+    "Files in /private/var/tmp that haven’t changed for 7 days.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivos en /private/var/tmp que no cambian desde hace 7 días."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/tmp にある、7 日間変更されていないファイル。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/tmp에서 7일간 변경되지 않은 파일."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/tmp 里 7 天没有变动的文件。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/private/var/tmp 裡 7 天沒有變動的檔案。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

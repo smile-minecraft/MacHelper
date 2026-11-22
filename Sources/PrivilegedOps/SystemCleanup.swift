@@ -1,12 +1,14 @@
 import Darwin
 import Foundation
 
-/// Old system-wide diagnostics and logs that only root can delete.
+/// System-wide files that only root can delete: old diagnostics and logs (standard), and system
+/// caches, rotated logs and temporary files (deep, behind an administrator password).
 ///
 /// The root Helper runs this. The app can only name a target by id; the folders, file name
-/// patterns, depth and the 30-day age limit are fixed here. Every file is checked and deleted
-/// through directory file descriptors opened with `O_NOFOLLOW`, so a folder swapped for a
-/// symbolic link between the scan and the delete cannot redirect a deletion elsewhere.
+/// patterns, depth and age limits are fixed here. Every file is checked and deleted through
+/// directory file descriptors opened with `O_NOFOLLOW`, so a folder swapped for a symbolic link
+/// between the scan and the delete cannot redirect a deletion elsewhere. Items protected by System
+/// Integrity Protection or marked immutable / append-only are never touched.
 public struct SystemCleanupTarget: Sendable {
     public let id: String
     /// Absolute folder the target is confined to.
@@ -17,13 +19,21 @@ public struct SystemCleanupTarget: Sendable {
     public let minimumAge: TimeInterval
     /// File name test (no path).
     public let matches: @Sendable (String) -> Bool
+    /// Names directly in `root` (files or folders) that are left alone with everything inside them.
+    public let skipsTopLevel: @Sendable (String) -> Bool
+    /// Deleting needs an administrator password each time (deep clean); previews never do.
+    public let requiresAuthorization: Bool
 
     public init(id: String, root: String, maxDepth: Int, minimumAge: TimeInterval = SystemCleanup.minimumAge,
+                requiresAuthorization: Bool = false,
+                skipsTopLevel: @escaping @Sendable (String) -> Bool = { _ in false },
                 matches: @escaping @Sendable (String) -> Bool) {
         self.id = id
         self.root = root
         self.maxDepth = maxDepth
         self.minimumAge = minimumAge
+        self.requiresAuthorization = requiresAuthorization
+        self.skipsTopLevel = skipsTopLevel
         self.matches = matches
     }
 }
@@ -31,10 +41,15 @@ public struct SystemCleanupTarget: Sendable {
 public struct SystemCleanupRequest: Codable, Sendable, Equatable {
     public var targetIDs: [String]
     public var dryRun: Bool
+    /// `AuthorizationExternalForm` bytes of an authorization reference made by the app in the
+    /// user's session. Required to delete (not to preview) any target that `requiresAuthorization`;
+    /// the Helper asks for the administrator password through it.
+    public var authorization: Data?
 
-    public init(targetIDs: [String], dryRun: Bool) {
+    public init(targetIDs: [String], dryRun: Bool, authorization: Data? = nil) {
         self.targetIDs = targetIDs
         self.dryRun = dryRun
+        self.authorization = authorization
     }
 }
 
@@ -91,10 +106,19 @@ public struct SystemCleanupResult: Codable, Sendable, Equatable {
 
 public enum SystemCleanupError: Error, CustomStringConvertible, Equatable {
     case unknownTarget(String)
+    /// A deep target was to be deleted without an authorization reference.
+    case authorizationRequired
+    /// The administrator password dialog was cancelled.
+    case authorizationCancelled
+    /// The authorization was refused or could not be checked (OSStatus).
+    case authorizationDenied(Int32)
 
     public var description: String {
         switch self {
         case .unknownTarget(let id): "unknown system cleanup target \(id)"
+        case .authorizationRequired: "deep clean needs an administrator authorization"
+        case .authorizationCancelled: "administrator authorization was cancelled"
+        case .authorizationDenied(let status): "administrator authorization failed (\(status))"
         }
     }
 }
@@ -116,6 +140,27 @@ public enum SystemCleanup {
         diagnosticExtensions.contains((name as NSString).pathExtension)
     }
 
+    public static let deepMinimumAgeDays = 7
+    static let deepMinimumAge: TimeInterval = TimeInterval(deepMinimumAgeDays) * 86_400
+
+    /// Rotated or compressed logs: `x.log.0`, `x.log.3.gz`, `x.0.gz`, `x.bz2`, `x.asl`.
+    static func isRotatedLogName(_ name: String) -> Bool {
+        name.range(of: #"(\.log\.[0-9]+|\.(gz|bz2|asl))$"#, options: .regularExpression) != nil
+    }
+
+    static func anyFile(_ name: String) -> Bool { true }
+
+    /// Apple's own system caches in /Library/Caches belong to running daemons (icon store,
+    /// model caches) and rebuild slowly; only third-party caches are cleared.
+    static func isAppleOwned(_ name: String) -> Bool {
+        name.hasPrefix("com.apple.") || ["ColorSync", "Desktop Pictures"].contains(name)
+    }
+
+    /// File flags that mean "leave it": SIP-restricted, data vault, immutable, append-only, no-unlink.
+    static let protectedFlags: UInt32 = 0x0008_0000 /* SF_RESTRICTED */ | 0x0010_0000 /* SF_NOUNLINK */
+        | 0x0002_0000 /* SF_IMMUTABLE */ | 0x0004_0000 /* SF_APPEND */
+        | 0x0000_0002 /* UF_IMMUTABLE */ | 0x0000_0004 /* UF_APPEND */ | 0x0000_0080 /* UF_DATAVAULT */
+
     /// The fixed allowlist. Nothing outside these folders is ever touched.
     public static let targets: [SystemCleanupTarget] = [
         // Crash, hang and resource reports for every user and the system, including Retired/.
@@ -125,10 +170,40 @@ public enum SystemCleanup {
         SystemCleanupTarget(id: "system.logs", root: "/Library/Logs", maxDepth: 1, matches: isLogName),
     ]
 
-    public static func target(_ id: String) -> SystemCleanupTarget? { targets.first { $0.id == id } }
+    /// Deep clean: deeper system folders, shorter age limits. Deleting any of them asks for an
+    /// administrator password each time (`requiresAuthorization`).
+    public static let deepTargets: [SystemCleanupTarget] = [
+        // Third-party caches shared by all users (updaters, installers, app helpers).
+        SystemCleanupTarget(id: "deep.system-caches", root: "/Library/Caches", maxDepth: 5, minimumAge: deepMinimumAge,
+                            requiresAuthorization: true, skipsTopLevel: isAppleOwned, matches: anyFile),
+        // Caches of processes running as root.
+        SystemCleanupTarget(id: "deep.root-caches", root: "/private/var/root/Library/Caches", maxDepth: 5,
+                            minimumAge: deepMinimumAge, requiresAuthorization: true, skipsTopLevel: isAppleOwned, matches: anyFile),
+        // Rotated and compressed system logs (system.log.3.gz, wifi.log.2.bz2, asl).
+        SystemCleanupTarget(id: "deep.var-log", root: "/private/var/log", maxDepth: 3, minimumAge: 86_400,
+                            requiresAuthorization: true, matches: isRotatedLogName),
+        // Every diagnostic report older than a day (the standard target keeps 30 days).
+        SystemCleanupTarget(id: "deep.diagnostic-reports", root: "/Library/Logs/DiagnosticReports", maxDepth: 2,
+                            minimumAge: 86_400, requiresAuthorization: true, matches: isDiagnosticName),
+        // Log files in the app subfolders of /Library/Logs.
+        SystemCleanupTarget(id: "deep.library-logs", root: "/Library/Logs", maxDepth: 3, minimumAge: deepMinimumAge,
+                            requiresAuthorization: true, skipsTopLevel: { $0 == "DiagnosticReports" }, matches: isLogName),
+        // Temporary files nobody touched for a week.
+        SystemCleanupTarget(id: "deep.temp", root: "/private/var/tmp", maxDepth: 4, minimumAge: deepMinimumAge,
+                            requiresAuthorization: true, matches: anyFile),
+        SystemCleanupTarget(id: "deep.tmp", root: "/private/tmp", maxDepth: 4, minimumAge: deepMinimumAge,
+                            requiresAuthorization: true, matches: anyFile),
+        // Simulator system caches (dyld shared caches); rebuilt the next time a simulator boots.
+        SystemCleanupTarget(id: "deep.simulator-caches", root: "/Library/Developer/CoreSimulator/Caches", maxDepth: 6,
+                            minimumAge: 86_400, requiresAuthorization: true, matches: anyFile),
+    ]
+
+    public static let allTargets: [SystemCleanupTarget] = targets + deepTargets
+
+    public static func target(_ id: String) -> SystemCleanupTarget? { allTargets.first { $0.id == id } }
 
     /// Resolves ids against the allowlist; any unknown id rejects the whole request.
-    public static func resolve(_ ids: [String], in allowlist: [SystemCleanupTarget] = targets) throws -> [SystemCleanupTarget] {
+    public static func resolve(_ ids: [String], in allowlist: [SystemCleanupTarget] = allTargets) throws -> [SystemCleanupTarget] {
         var seen = Set<String>()
         return try ids.compactMap { id in
             guard let t = allowlist.first(where: { $0.id == id }) else { throw SystemCleanupError.unknownTarget(id) }
@@ -136,9 +211,21 @@ public enum SystemCleanup {
         }
     }
 
-    public static func run(_ request: SystemCleanupRequest, allowlist: [SystemCleanupTarget] = targets,
-                           now: Date = Date()) throws -> SystemCleanupResult {
+    /// Checks an authorization before deep targets are deleted; throws to refuse.
+    public typealias Authorizer = @Sendable (_ externalForm: Data?) throws -> Void
+
+    /// Refuses every authorization: the default, so nothing deep is ever deleted by accident.
+    public static let refuseAll: Authorizer = { _ in throw SystemCleanupError.authorizationRequired }
+
+    /// Resolves the request, checks the authorization when it deletes a deep target (before any
+    /// file is touched, so a refusal deletes nothing), then scans or deletes each target.
+    public static func run(_ request: SystemCleanupRequest, allowlist: [SystemCleanupTarget] = allTargets,
+                           now: Date = Date(), authorize: Authorizer = refuseAll) throws -> SystemCleanupResult {
         let resolved = try resolve(request.targetIDs, in: allowlist)
+        if !request.dryRun, resolved.contains(where: \.requiresAuthorization) {
+            guard let form = request.authorization, !form.isEmpty else { throw SystemCleanupError.authorizationRequired }
+            try authorize(form)
+        }
         return SystemCleanupResult(targets: resolved.map { process($0, dryRun: request.dryRun, now: now) })
     }
 
@@ -164,8 +251,10 @@ public enum SystemCleanup {
                              dryRun: Bool, into result: inout SystemCleanupResult.Target) {
         for name in entries(dirFD) {
             let full = path + "/" + name
+            if depth == 1, target.skipsTopLevel(name) { continue }
             var st = stat()
             guard fstatat(dirFD, name, &st, AT_SYMLINK_NOFOLLOW) == 0 else { continue }
+            guard st.st_flags & protectedFlags == 0 else { continue }
             switch st.st_mode & S_IFMT {
             case S_IFDIR:
                 guard depth < target.maxDepth else { continue }
