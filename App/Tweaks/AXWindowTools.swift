@@ -9,14 +9,18 @@ import Tweaks
 enum AXWindowTools {
     static func windows(for pid: pid_t) -> [AXUIElement] {
         let app = AXUIElementCreateApplication(pid)
+        // A hung app must not freeze MacHelper's main thread for the default six seconds.
+        AXUIElementSetMessagingTimeout(app, 0.5)
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(app, "AXWindows" as CFString, &value) == .success,
               let windows = value as? [AXUIElement] else { return [] }
         return windows
     }
 
+    /// A window the person minimizes and brings back: document windows and dialog-style app windows
+    /// (Calculator's only window is an AXDialog). Floating palettes and sheets don't count.
     static func isStandardWindow(_ window: AXUIElement) -> Bool {
-        string(window, "AXSubrole") == "AXStandardWindow"
+        TweakRules.isUserWindow(subrole: string(window, "AXSubrole"))
     }
 
     static func isMinimized(_ window: AXUIElement) -> Bool {
@@ -53,6 +57,7 @@ enum AXWindowTools {
         let windows = windows(for: pid).filter(isStandardWindow)
         guard windows.count > 1 else { return false }
         let app = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(app, 0.5)
         var mainValue: CFTypeRef?
         let main = AXUIElementCopyAttributeValue(app, "AXMainWindow" as CFString, &mainValue) == .success
             ? (mainValue as! AXUIElement) : nil
@@ -63,21 +68,23 @@ enum AXWindowTools {
         return true
     }
 
-    /// Hit tests the Dock itself instead of guessing from icon coordinates.
-    static func dockItem(at point: CGPoint) -> (bundleID: String?, role: String?, subrole: String?)? {
-        guard let dockPID = NSWorkspace.shared.runningApplications.first(where: {
-            $0.bundleIdentifier == "com.apple.Dock"
-        })?.processIdentifier else { return nil }
+    /// Hit tests the Dock itself instead of guessing from icon coordinates. Called from the event
+    /// tap's thread, so the Dock gets a short timeout: a Dock that doesn't answer quickly means the
+    /// click is passed on untouched rather than held up.
+    static func dockItem(at point: CGPoint, dockPID: pid_t) -> (bundleID: String?, role: String?, subrole: String?)? {
         let dock = AXUIElementCreateApplication(dockPID)
+        AXUIElementSetMessagingTimeout(dock, 0.1)
         var element: AXUIElement?
         guard AXUIElementCopyElementAtPosition(dock, Float(point.x), Float(point.y), &element) == .success,
               let element else { return nil }
-
+        AXUIElementSetMessagingTimeout(element, 0.1)
         let role = string(element, "AXRole")
         let subrole = string(element, "AXSubrole")
         guard TweakRules.isApplicationDockItem(role: role, subrole: subrole) else { return nil }
-        let title = string(element, "AXTitle")
-        let bundleID = string(element, "AXBundleIdentifier") ?? runningAppID(for: title)
+        // An application Dock item carries the app's URL; the title is only a fallback.
+        var urlValue: CFTypeRef?
+        let url = AXUIElementCopyAttributeValue(element, "AXURL" as CFString, &urlValue) == .success ? urlValue as? URL : nil
+        let bundleID = url.flatMap { Bundle(url: $0)?.bundleIdentifier } ?? runningAppID(for: string(element, "AXTitle"))
         return (bundleID, role, subrole)
     }
 

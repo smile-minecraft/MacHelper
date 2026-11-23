@@ -1,6 +1,24 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Hold ⌘W to close": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Mantén ⌘W para cerrar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "⌘W を長押しして閉じる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "닫으려면 ⌘W를 길게 누르세요" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "按住 ⌘W 以关闭" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "按住 ⌘W 以關閉" } }
+      }
+    },
+    "Press ⌘W twice to close": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Pulsa ⌘W dos veces para cerrar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "⌘W を 2 回押して閉じる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "닫으려면 ⌘W를 두 번 누르세요" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "按两次 ⌘W 以关闭" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "按兩次 ⌘W 以關閉" } }
+      }
+    },
     "Set Up or Repair the Helper…": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Configurar o reparar el Helper…" } },

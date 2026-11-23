@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// Small, side-effect-free rules behind the event-driven behaviours. They live in the shared
@@ -48,6 +49,11 @@ public enum TweakRules {
         return dockBundleID.caseInsensitiveCompare(frontmostBundleID) == .orderedSame
     }
 
+    /// Windows the window tweaks act on: standard document windows and dialog-style app windows.
+    public static func isUserWindow(subrole: String?) -> Bool {
+        subrole == "AXStandardWindow" || subrole == "AXDialog"
+    }
+
     /// An app that already has an ordinary visible window does not need ⌘Tab restoration.
     public static func shouldRestoreWindow(visibleWindows: Int, minimizedWindows: Int) -> Bool {
         visibleWindows == 0 && minimizedWindows > 0
@@ -55,5 +61,55 @@ public enum TweakRules {
 
     public static func shouldTerminateMusic(bundleID: String?, enabled: Bool) -> Bool {
         enabled && bundleID == "com.apple.Music"
+    }
+
+    // MARK: Dock clicks
+
+    /// The Dock lives on the bottom, left or right edge of a display, and a magnified icon reaches at
+    /// most this far in. Clicks further from those edges never touch the Dock, so the event tap
+    /// passes them on without asking the Dock anything.
+    public static let dockEdgeBand: Double = 320
+
+    /// Whether a click (global display coordinates, origin top left, as CGEvent reports it) is close
+    /// enough to a Dock edge of one of `displays` to be worth an accessibility hit test.
+    public static func isNearDockEdge(_ point: CGPoint, displays: [CGRect], band: Double = dockEdgeBand) -> Bool {
+        displays.contains { d in
+            guard d.contains(point) else { return false }
+            return point.y >= d.maxY - band || point.x <= d.minX + band || point.x >= d.maxX - band
+        }
+    }
+
+    /// The hint shown when a guarded shortcut was held back.
+    public enum GuardHint: Equatable, Sendable {
+        case holdToQuit, holdToClose, pressTwiceToQuit, pressTwiceToClose
+    }
+
+    public static func guardHint(keyCode: UInt16, doublePress: Bool) -> GuardHint {
+        switch (keyCode == keyW, doublePress) {
+        case (false, false): .holdToQuit
+        case (true, false): .holdToClose
+        case (false, true): .pressTwiceToQuit
+        case (true, true): .pressTwiceToClose
+        }
+    }
+}
+
+/// Pairs a swallowed Dock mouse-down with its mouse-up. The Dock acts on the release, so letting
+/// the up through after taking the down would make it activate the app that was just hidden.
+public struct DockClickPairing: Equatable, Sendable {
+    private var swallowedDown = false
+
+    public init() {}
+
+    /// Returns whether the mouse-down is swallowed (it was a click on the frontmost app's icon).
+    public mutating func mouseDown(matched: Bool) -> Bool {
+        swallowedDown = matched
+        return matched
+    }
+
+    /// Returns whether the mouse-up is swallowed: only the one that ends a swallowed down.
+    public mutating func mouseUp() -> Bool {
+        defer { swallowedDown = false }
+        return swallowedDown
     }
 }

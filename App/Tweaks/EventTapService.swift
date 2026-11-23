@@ -1,55 +1,80 @@
-@preconcurrency import CoreGraphics
+import CoreGraphics
 import Foundation
 
-/// One session-level tap shared by every event-driven tweak. The tap is installed only while at
-/// least one such tweak is active, and the callback only classifies the event; window and app work
-/// is scheduled back on the main actor.
-/// The tap and its handler are only touched on the main run loop where the tap source is installed;
-/// `@unchecked Sendable` only bridges the C callback back to that actor.
+/// One session-level tap shared by every event-driven tweak.
+///
+/// A session tap sits in front of every keyboard and mouse event of the login session, so whoever
+/// services it decides how quickly the whole Mac responds. The tap therefore runs on a thread of its
+/// own with its own run loop, never on the main thread: a busy MacHelper window must not make typing
+/// or clicking lag elsewhere. The filter it calls is synchronous, thread-safe and cheap; anything
+/// that touches windows or apps is handed to the main queue by the behaviour itself.
 final class EventTapService: @unchecked Sendable {
-    enum Outcome {
-        case pass
-        case suppress
-        case suppressThen(@MainActor () -> Void)
-    }
+    enum Outcome: Sendable { case pass, suppress }
+    typealias Filter = @Sendable (CGEventType, CGEvent) -> Outcome
 
     /// Tags events this service reposts after a long press so they do not trip the tap again.
     static let postedMarker: Int64 = 0x4D48454C50455258
 
-    private let handler: @MainActor @Sendable (CGEvent) -> Outcome
-    nonisolated(unsafe) private var tap: CFMachPort?
-    nonisolated(unsafe) private var source: CFRunLoopSource?
+    private let filter: Filter
+    private let lock = NSLock()
+    // Guarded by `lock`.
+    private var tap: CFMachPort?
+    private var runLoop: CFRunLoop?
+    private var installedMask: CGEventMask = 0
 
-    init(handler: @escaping @MainActor @Sendable (CGEvent) -> Outcome) {
-        self.handler = handler
+    init(filter: @escaping Filter) {
+        self.filter = filter
     }
 
-    var isInstalled: Bool { tap != nil }
+    var isInstalled: Bool { lock.withLock { tap != nil } }
 
-    func install(mask: CGEventMask) {
-        guard tap == nil else { return }
-        let callback: CGEventTapCallBack = { _, type, event, refcon in
-            guard let refcon else { return Unmanaged.passUnretained(event) }
-            let service = Unmanaged<EventTapService>.fromOpaque(refcon).takeUnretainedValue()
-            return service.receive(type: type, event: event)
+    /// Installs the tap for `mask`, replacing one installed for a different mask. Returns false when
+    /// macOS refused the tap (no Accessibility permission).
+    @discardableResult
+    func install(mask: CGEventMask) -> Bool {
+        if lock.withLock({ tap != nil && installedMask == mask }) { return true }
+        remove()
+        let ready = DispatchSemaphore(value: 0)
+        let thread = Thread { [self] in
+            let callback: CGEventTapCallBack = { _, type, event, refcon in
+                guard let refcon else { return Unmanaged.passUnretained(event) }
+                return Unmanaged<EventTapService>.fromOpaque(refcon).takeUnretainedValue().receive(type: type, event: event)
+            }
+            guard let port = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
+                                               eventsOfInterest: mask, callback: callback,
+                                               userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
+                ready.signal()
+                return
+            }
+            let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, port, 0)
+            let loop = CFRunLoopGetCurrent()
+            CFRunLoopAddSource(loop, source, .commonModes)
+            CGEvent.tapEnable(tap: port, enable: true)
+            self.lock.withLock {
+                self.tap = port
+                self.runLoop = loop
+                self.installedMask = mask
+            }
+            ready.signal()
+            CFRunLoopRun()
         }
-        guard let port = CGEvent.tapCreate(tap: .cgSessionEventTap,
-                                           place: CGEventTapPlacement(rawValue: 0)!,
-                                           options: CGEventTapOptions(rawValue: 0)!,
-                                           eventsOfInterest: mask, callback: callback,
-                                           userInfo: Unmanaged.passUnretained(self).toOpaque()) else { return }
-        tap = port
-        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, port, 0)
-        source = runLoopSource
-        CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
-        CGEvent.tapEnable(tap: port, enable: true)
+        thread.name = "MacHelper event tap"
+        thread.qualityOfService = .userInteractive
+        thread.start()
+        _ = ready.wait(timeout: .now() + 2)
+        return isInstalled
     }
 
     func remove() {
-        if let source { CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes) }
-        if let tap { CGEvent.tapEnable(tap: tap, enable: false) }
-        self.source = nil
-        self.tap = nil
+        let (port, loop) = lock.withLock { () -> (CFMachPort?, CFRunLoop?) in
+            defer { tap = nil; runLoop = nil; installedMask = 0 }
+            return (tap, runLoop)
+        }
+        if let port {
+            CGEvent.tapEnable(tap: port, enable: false)
+            CFMachPortInvalidate(port)
+        }
+        if let loop { CFRunLoopStop(loop) }
     }
 
     deinit { remove() }
@@ -61,35 +86,18 @@ final class EventTapService: @unchecked Sendable {
     }
 
     private func receive(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
-        // Values from CGEventTypes.h: the two out-of-band notifications that re-enable a tap.
-        if type.rawValue == 0xFFFFFFFE || type.rawValue == 0xFFFFFFFF, let tap {
-            // macOS stops a tap when its callback took too long; restart it instead of silently
-            // losing the guard.
-            CGEvent.tapEnable(tap: tap, enable: true)
+        // macOS turns a tap off when a callback was too slow or on secure input; turn it back on
+        // instead of silently losing the guard. These two notifications carry no real event.
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            if let port = lock.withLock({ tap }) { CGEvent.tapEnable(tap: port, enable: true) }
+            return Unmanaged.passUnretained(event)
         }
         if event.getIntegerValueField(.eventSourceUserData) == Self.postedMarker {
             return Unmanaged.passUnretained(event)
         }
-        guard Thread.isMainThread else {
-            // Should not happen (the source is on the main run loop), but never swallow an event
-            // on a thread where the main-actor rules cannot be evaluated.
-            return Unmanaged.passUnretained(event)
-        }
-        let boxed = Unmanaged.passUnretained(event)
-        return MainActor.assumeIsolated { decide(boxed) }
-    }
-
-    @MainActor
-    private func decide(_ boxed: Unmanaged<CGEvent>) -> Unmanaged<CGEvent>? {
-        let event = boxed.takeUnretainedValue()
-        switch handler(event) {
-        case .pass:
-            return Unmanaged.passUnretained(event)
-        case .suppress:
-            return nil
-        case .suppressThen(let work):
-            Task { @MainActor in work() }
-            return nil
+        switch filter(type, event) {
+        case .pass: return Unmanaged.passUnretained(event)
+        case .suppress: return nil
         }
     }
 }

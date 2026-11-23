@@ -23,11 +23,14 @@ final class TweakEngine {
     private let quitGuard = QuitGuardBehavior()
     private let dockClick = DockClickBehavior()
 
-    private static var eventMask: CGEventMask {
-        CGEventMask(1 << CGEventType.keyDown.rawValue)
-            | CGEventMask(1 << CGEventType.keyUp.rawValue)
-            | CGEventMask(1 << CGEventType.flagsChanged.rawValue)
-            | CGEventMask(1 << CGEventType.leftMouseDown.rawValue)
+    /// Only the event types an enabled behaviour looks at reach the tap: with just the quit guard
+    /// on, mouse events never pass through MacHelper at all.
+    private static func eventMask(keys: Bool, clicks: Bool) -> CGEventMask {
+        func bit(_ t: CGEventType) -> CGEventMask { CGEventMask(1) << CGEventMask(t.rawValue) }
+        var mask: CGEventMask = 0
+        if keys { mask |= bit(.keyDown) | bit(.keyUp) | bit(.flagsChanged) }
+        if clicks { mask |= bit(.leftMouseDown) | bit(.leftMouseUp) }
+        return mask
     }
 
     func start() {
@@ -52,6 +55,14 @@ final class TweakEngine {
             Task { @MainActor in self?.music.handleLaunch(app) }
         })
         observers.append(workspace.addObserver(
+            forName: NSWorkspace.didLaunchApplicationNotification, object: nil, queue: .main
+        ) { [weak self] note in
+            guard let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                  app.bundleIdentifier == "com.apple.dock" else { return }
+            let pid = app.processIdentifier
+            Task { @MainActor in self?.dockClick.updateDock(pid: pid) }
+        })
+        observers.append(workspace.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
         ) { [weak self] note in
             guard let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
@@ -71,7 +82,7 @@ final class TweakEngine {
     private func applicationActivated(_ app: NSRunningApplication) {
         frontmostBundleID = app.bundleIdentifier
         quitGuard.updateFrontmost(frontmostBundleID)
-        dockClick.updateFrontmost(frontmostBundleID)
+        dockClick.updateFrontmost(app)
         cmdTab.handleActivation(app)
     }
 
@@ -84,30 +95,28 @@ final class TweakEngine {
 
         let quitEnabled = latest.isEnabled(.inputQuitGuard)
         let dockEnabled = latest.isEnabled(.dockClickAction)
+        // Configure the behaviours before the tap can deliver anything to them.
+        music.configure(enabled: latest.isEnabled(.musicBlockAutolaunch), settings: latest)
+        cmdTab.configure(enabled: granted && latest.isEnabled(.windowCmdTabRestore))
+        quitGuard.configure(enabled: quitEnabled, settings: latest, frontmostBundleID: frontmostBundleID)
+        dockClick.configure(enabled: dockEnabled, settings: latest, frontmost: NSWorkspace.shared.frontmostApplication)
+
         if granted && (quitEnabled || dockEnabled) {
             if eventTap == nil {
-                eventTap = EventTapService(handler: { [weak self] event in
-                    self?.handle(event) ?? .pass
-                })
+                // Runs on the tap's own thread: both behaviours are thread-safe and never wait on
+                // the main actor.
+                let quitGuard = quitGuard, dockClick = dockClick
+                eventTap = EventTapService { type, event in
+                    quitGuard.handle(type, event) ?? dockClick.handle(type, event) ?? .pass
+                }
             }
-            eventTap?.install(mask: Self.eventMask)
+            eventTap?.install(mask: Self.eventMask(keys: quitEnabled, clicks: dockEnabled))
         } else {
             eventTap?.remove()
             eventTap = nil
             quitGuard.reset()
         }
-
-        music.configure(enabled: latest.isEnabled(.musicBlockAutolaunch), settings: latest)
-        cmdTab.configure(enabled: granted && latest.isEnabled(.windowCmdTabRestore))
-        quitGuard.configure(enabled: quitEnabled, settings: latest, frontmostBundleID: frontmostBundleID)
-        dockClick.configure(enabled: dockEnabled, settings: latest, frontmostBundleID: frontmostBundleID)
         publishStatus()
-    }
-
-    private func handle(_ event: CGEvent) -> EventTapService.Outcome {
-        if let outcome = quitGuard.handle(event) { return outcome }
-        if let outcome = dockClick.handle(event) { return outcome }
-        return .pass
     }
 
     private func publishStatus() {

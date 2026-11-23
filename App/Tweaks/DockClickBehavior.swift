@@ -3,41 +3,89 @@ import CoreGraphics
 import Foundation
 import Tweaks
 
-/// Handles a click on the Dock icon of the app that is already in the foreground. The Dock item is
-/// found with AX hit testing; the event is suppressed only after a confident match.
-@MainActor
-final class DockClickBehavior {
-    private var settings = TweakSettings()
-    private var enabled = false
-    private var frontmostBundleID: String?
-
-    func configure(enabled: Bool, settings: TweakSettings, frontmostBundleID: String?) {
-        self.enabled = enabled
-        self.settings = settings
-        self.frontmostBundleID = frontmostBundleID
+/// Handles a click on the Dock icon of the app that is already in the foreground.
+///
+/// It runs on the event tap's thread for every left click, so it stays cheap: a click away from the
+/// Dock edges is passed on without any IPC, and the one accessibility hit test against the Dock has
+/// a short messaging timeout. The click is swallowed (down and up together) only after the Dock
+/// itself confirmed it is the frontmost app's icon; hiding or minimizing then runs on the main queue.
+final class DockClickBehavior: @unchecked Sendable {
+    private struct Config {
+        var enabled = false
+        var minimize = false
+        var cycleWindows = false
+        var frontmostBundleID: String?
+        var frontmostPID: pid_t?
+        var dockPID: pid_t?
     }
 
-    func updateFrontmost(_ bundleID: String?) { frontmostBundleID = bundleID }
+    private let lock = NSLock()
+    private var config = Config()
+    private var pairing = DockClickPairing()
 
-    func handle(_ event: CGEvent) -> EventTapService.Outcome? {
-        guard enabled, event.type == .leftMouseDown,
-              event.getIntegerValueField(.mouseEventClickState) == 1 else { return nil }
-        guard let hit = AXWindowTools.dockItem(at: event.location),
-              TweakRules.isApplicationDockItem(role: hit.role, subrole: hit.subrole),
-              TweakRules.shouldActOnDockItem(dockBundleID: hit.bundleID,
-                                             frontmostBundleID: frontmostBundleID) else { return nil }
+    func configure(enabled: Bool, settings: TweakSettings, frontmost: NSRunningApplication?) {
+        let dockPID = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock").first?.processIdentifier
+        lock.withLock {
+            config = Config(enabled: enabled,
+                            minimize: settings.string("action", for: .dockClickAction) == "minimize",
+                            cycleWindows: settings.bool("cycleWindows", for: .dockClickAction),
+                            frontmostBundleID: frontmost?.bundleIdentifier,
+                            frontmostPID: frontmost?.processIdentifier,
+                            dockPID: dockPID)
+            if !enabled { pairing = DockClickPairing() }
+        }
+    }
 
-        let action = settings.string("action", for: .dockClickAction)
-        let cycle = settings.bool("cycleWindows", for: .dockClickAction)
-        let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier
-        return .suppressThen { [weak self] in
-            guard let pid else { return }
-            if cycle && AXWindowTools.cycleWindows(for: pid) { return }
-            if action == "minimize" {
-                _ = AXWindowTools.minimizeAllWindows(for: pid)
+    func updateFrontmost(_ app: NSRunningApplication) {
+        lock.withLock {
+            config.frontmostBundleID = app.bundleIdentifier
+            config.frontmostPID = app.processIdentifier
+        }
+    }
+
+    /// The Dock restarts (and gets a new pid) after a crash or a `killall Dock`.
+    func updateDock(pid: pid_t?) { lock.withLock { config.dockPID = pid } }
+
+    /// Nil: not a Dock click this behaviour acts on.
+    func handle(_ type: CGEventType, _ event: CGEvent) -> EventTapService.Outcome? {
+        if type == .leftMouseUp {
+            return lock.withLock { pairing.mouseUp() } ? .suppress : nil
+        }
+        guard type == .leftMouseDown else { return nil }
+        let config = lock.withLock { self.config }
+        guard config.enabled, let dockPID = config.dockPID, let frontmostPID = config.frontmostPID,
+              event.getIntegerValueField(.mouseEventClickState) == 1 else {
+            lock.withLock { _ = pairing.mouseDown(matched: false) }
+            return nil
+        }
+        let point = event.location
+        var matched = false
+        if TweakRules.isNearDockEdge(point, displays: Self.displayBounds()),
+           let hit = AXWindowTools.dockItem(at: point, dockPID: dockPID) {
+            matched = TweakRules.isApplicationDockItem(role: hit.role, subrole: hit.subrole)
+                && TweakRules.shouldActOnDockItem(dockBundleID: hit.bundleID, frontmostBundleID: config.frontmostBundleID)
+        }
+        guard lock.withLock({ pairing.mouseDown(matched: matched) }) else { return nil }
+
+        let minimize = config.minimize, cycle = config.cycleWindows
+        DispatchQueue.main.async {
+            if cycle && AXWindowTools.cycleWindows(for: frontmostPID) { return }
+            if minimize {
+                _ = AXWindowTools.minimizeAllWindows(for: frontmostPID)
             } else {
-                NSWorkspace.shared.frontmostApplication?.hide()
+                NSRunningApplication(processIdentifier: frontmostPID)?.hide()
             }
         }
+        return .suppress
+    }
+
+    /// Display frames in the same global, top-left-origin space as `CGEvent.location`. A cheap
+    /// window server query, safe on any thread.
+    private static func displayBounds() -> [CGRect] {
+        var count: UInt32 = 0
+        guard CGGetActiveDisplayList(0, nil, &count) == .success, count > 0 else { return [] }
+        var ids = [CGDirectDisplayID](repeating: 0, count: Int(count))
+        guard CGGetActiveDisplayList(count, &ids, &count) == .success else { return [] }
+        return ids.prefix(Int(count)).map { CGDisplayBounds($0) }
     }
 }

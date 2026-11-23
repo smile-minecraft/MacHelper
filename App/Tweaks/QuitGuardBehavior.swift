@@ -69,97 +69,124 @@ private struct QuitGuardHUDView: View {
     }
 }
 
-/// Decides whether a ⌘Q / ⌘W key event is released or swallowed. Timing state lives here; the
-/// event tap only calls this class on the main actor and never performs slow work itself.
-@MainActor
-final class QuitGuardBehavior {
+/// Decides whether a ⌘Q / ⌘W key event is released or swallowed. It runs on the event tap's
+/// thread: configuration and timing state sit behind a lock, the hold timer runs on a private queue
+/// and only the HUD is drawn on the main queue.
+final class QuitGuardBehavior: @unchecked Sendable {
+    private struct Config {
+        var enabled = false
+        var doublePress = false
+        var holdSeconds: Double = 0.6
+        var guardCloseWindow = false
+        var excludedApps: [String] = []
+        var frontmostBundleID: String?
+    }
+
+    /// A swallowed key-down waiting for the hold to complete. `token` tells a late timer apart
+    /// from the press it was started for.
     private struct Press {
         let keyCode: UInt16
         let event: CGEvent
-        var timer: Timer?
+        let token: UInt64
     }
 
-    private var settings = TweakSettings()
-    private var enabled = false
-    private var frontmostBundleID: String?
-    private var press: Press?
-    private var lastPressAt: Date?
+    private struct State {
+        var config = Config()
+        var press: Press?
+        var lastPress: (keyCode: UInt16, at: Date)?
+        var nextToken: UInt64 = 0
+    }
+
+    private let lock = NSLock()
+    private var state = State()
     private let ownBundleID = Bundle.main.bundleIdentifier ?? "com.machelper.MacHelper"
     private let doublePressInterval: TimeInterval = 0.4
+    private let timerQueue = DispatchQueue(label: "MacHelper.quit-guard", qos: .userInteractive)
 
     func configure(enabled: Bool, settings: TweakSettings, frontmostBundleID: String?) {
-        if self.enabled && !enabled { reset() }
-        self.enabled = enabled
-        self.settings = settings
-        self.frontmostBundleID = frontmostBundleID
+        lock.withLock {
+            if state.config.enabled && !enabled { state.press = nil; state.lastPress = nil }
+            state.config = Config(enabled: enabled,
+                                  doublePress: settings.string("mode", for: .inputQuitGuard) == "doublePress",
+                                  holdSeconds: settings.double("holdSeconds", for: .inputQuitGuard),
+                                  guardCloseWindow: settings.bool("guardCloseWindow", for: .inputQuitGuard),
+                                  excludedApps: settings.stringList("excludedApps", for: .inputQuitGuard),
+                                  frontmostBundleID: frontmostBundleID)
+        }
     }
 
-    func updateFrontmost(_ bundleID: String?) { frontmostBundleID = bundleID }
+    func updateFrontmost(_ bundleID: String?) { lock.withLock { state.config.frontmostBundleID = bundleID } }
 
-    func handle(_ event: CGEvent) -> EventTapService.Outcome? {
-        guard enabled else { return nil }
-        if event.type == .flagsChanged {
+    func reset() { lock.withLock { state.press = nil; state.lastPress = nil } }
+
+    /// Nil: not a guarded event, let the next behaviour look at it.
+    func handle(_ type: CGEventType, _ event: CGEvent) -> EventTapService.Outcome? {
+        lock.lock()
+        defer { lock.unlock() }
+        let config = state.config
+        guard config.enabled else { return nil }
+        if type == .flagsChanged {
             // Releasing ⌘ before the hold completes cancels the pending quit.
-            if let active = press, !TweakRules.isCommandHeld(event.flags.rawValue) {
-                active.timer?.invalidate()
-                press = nil
-            }
+            if state.press != nil, !TweakRules.isCommandHeld(event.flags.rawValue) { state.press = nil }
             return nil
         }
-        guard event.type == .keyDown || event.type == .keyUp else { return nil }
+        guard type == .keyDown || type == .keyUp else { return nil }
         let keyCode = UInt16(truncatingIfNeeded: event.getIntegerValueField(.keyboardEventKeycode))
-        let flags = event.flags.rawValue
-        let guardClose = settings.bool("guardCloseWindow", for: .inputQuitGuard)
-        guard TweakRules.isGuardedKey(keyCode: keyCode, flags: flags, guardCloseWindow: guardClose),
-              TweakRules.shouldGuardQuit(bundleID: frontmostBundleID,
-                                         excludedApps: settings.stringList("excludedApps", for: .inputQuitGuard),
+        guard TweakRules.isGuardedKey(keyCode: keyCode, flags: event.flags.rawValue, guardCloseWindow: config.guardCloseWindow),
+              TweakRules.shouldGuardQuit(bundleID: config.frontmostBundleID, excludedApps: config.excludedApps,
                                          ownBundleID: ownBundleID) else { return nil }
 
-        if event.type == .keyUp { return release(keyCode: keyCode) }
+        if type == .keyUp {
+            // The release of a press still waiting means it was let go too early.
+            guard let press = state.press, press.keyCode == keyCode else { return nil }
+            state.press = nil
+            showHint(keyCode: keyCode, doublePress: false)
+            return .suppress
+        }
         // Auto-repeat is not a second deliberate press.
         if event.getIntegerValueField(.keyboardEventAutorepeat) != 0 { return .suppress }
-        return press(keyCode: keyCode, event: event)
-    }
 
-    private func press(keyCode: UInt16, event: CGEvent) -> EventTapService.Outcome {
-        let now = Date()
-        if settings.string("mode", for: .inputQuitGuard) == "doublePress" {
-            if TweakRules.doublePressAllowed(previousPressAt: lastPressAt, now: now, interval: doublePressInterval) {
-                lastPressAt = nil
+        if config.doublePress {
+            let now = Date()
+            if let last = state.lastPress, last.keyCode == keyCode,
+               TweakRules.doublePressAllowed(previousPressAt: last.at, now: now, interval: doublePressInterval) {
+                state.lastPress = nil
                 return .pass
             }
-            lastPressAt = now
-            QuitGuardHUD.show(String(localized: "Press ⌘Q twice to quit"))
+            state.lastPress = (keyCode, now)
+            showHint(keyCode: keyCode, doublePress: true)
             return .suppress
         }
 
-        if press != nil { return .suppress }
-        let required = settings.double("holdSeconds", for: .inputQuitGuard)
-        var current = Press(keyCode: keyCode, event: event)
-        let timer = Timer.scheduledTimer(withTimeInterval: max(required, 0.2), repeats: false) { [weak self] _ in
-            Task { @MainActor in
-                guard let self, let active = self.press, active.keyCode == keyCode else { return }
-                self.press = nil
-                EventTapService.post(active.event)
-            }
+        if state.press != nil { return .suppress }
+        state.nextToken &+= 1
+        let token = state.nextToken
+        // The tap's event is only valid during the callback; keep a copy to post later.
+        guard let copy = event.copy() else { return nil }
+        state.press = Press(keyCode: keyCode, event: copy, token: token)
+        timerQueue.asyncAfter(deadline: .now() + max(config.holdSeconds, 0.2)) { [weak self] in
+            self?.holdElapsed(token: token)
         }
-        current.timer = timer
-        press = current
-        // The initial keydown is swallowed; the timer reposts the same event once held long enough.
+        // The key-down is swallowed; once held long enough the same key-down is posted again.
         return .suppress
     }
 
-    private func release(keyCode: UInt16) -> EventTapService.Outcome? {
-        guard let active = press, active.keyCode == keyCode else { return nil }
-        active.timer?.invalidate()
-        press = nil
-        QuitGuardHUD.show(String(localized: "Hold ⌘Q to quit"))
-        return .suppress
+    private func holdElapsed(token: UInt64) {
+        let event: CGEvent? = lock.withLock {
+            guard let press = state.press, press.token == token else { return nil }
+            state.press = nil
+            return press.event
+        }
+        if let event { EventTapService.post(event) }
     }
 
-    func reset() {
-        press?.timer?.invalidate()
-        press = nil
-        lastPressAt = nil
+    private func showHint(keyCode: UInt16, doublePress: Bool) {
+        let message = switch TweakRules.guardHint(keyCode: keyCode, doublePress: doublePress) {
+        case .holdToQuit: String(localized: "Hold ⌘Q to quit")
+        case .holdToClose: String(localized: "Hold ⌘W to close")
+        case .pressTwiceToQuit: String(localized: "Press ⌘Q twice to quit")
+        case .pressTwiceToClose: String(localized: "Press ⌘W twice to close")
+        }
+        DispatchQueue.main.async { MainActor.assumeIsolated { QuitGuardHUD.show(message) } }
     }
 }
