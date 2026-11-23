@@ -42421,6 +42421,186 @@
           }
         }
       }
+    },
+    "A one-off check of the recorded history and system health.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Una comprobación puntual del historial y el estado del sistema." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "記録済みの履歴とシステムの状態を一度だけ確認します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "기록된 기록과 시스템 상태를 한 번 확인합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "对已记录的历史和健康状况做一次性检查。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "對已記錄的歷史與系統健康做單次檢查。" } }
+      }
+    },
+    "Background recording is paused while this is off.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "La grabación en segundo plano se pausa mientras esté desactivado." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オフの間はバックグラウンド記録が一時停止します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "꺼져 있는 동안 백그라운드 기록이 일시 중지됩니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭期间暂停后台记录。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉期間暫停背景記錄。" } }
+      }
+    },
+    "Check Homebrew casks and upgrade the ones you pick.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Comprueba paquetes Homebrew y actualiza los que elijas." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Homebrew のパッケージを確認し、選んだものを更新します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Homebrew 패키지를 확인하고 선택한 항목을 업데이트합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "检查 Homebrew 包并升级所选项目。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "檢查 Homebrew 套件並升級所選項目。" } }
+      }
+    },
+    "Fan curves and automatic switching rules.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Curvas de ventiladores y reglas de cambio automático." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ファンカーブと自動切り替えルール。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "팬 곡선 및 자동 전환 규칙." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "风扇曲线和自动切换规则。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "風扇曲線與自動切換規則。" } }
+      }
+    },
+    "Fans return to automatic system control while this is off.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Los ventiladores vuelven al control automático del sistema mientras esté desactivado." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オフの間はファンがシステムの自動制御に戻ります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "꺼져 있는 동안 팬이 시스템 자동 제어로 돌아갑니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭期间风扇交回系统自动控制。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉期間風扇交回系統自動控制。" } }
+      }
+    },
+    "Feature Modules": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Módulos de funciones" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "機能モジュール" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "機能モジュール" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "功能模块" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "功能模組" } }
+      }
+    },
+    "Features": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Funciones" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "機能" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "기능" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "功能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "功能" } }
+      }
+    },
+    "Find and remove build artifacts and other low-risk clutter.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Encuentra y elimina artefactos de compilación y otros elementos de bajo riesgo." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ビルド成果物などの低リスクな不要ファイルを見つけて削除します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "빌드 산출물 등 위험이 낮은 불필요한 파일을 찾고 삭제합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "查找并清理构建产物等低风险杂物。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "尋找並清理建立產物等低風險雜物。" } }
+      }
+    },
+    "Homebrew update checks stop while this is off.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Las comprobaciones de Homebrew se detienen mientras esté desactivado." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オフの間は Homebrew の更新確認を停止します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "꺼져 있는 동안 Homebrew 업데이트 확인이 중지됩니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭期间停止 Homebrew 更新检查。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉期間停止 Homebrew 更新檢查。" } }
+      }
+    },
+    "Live monitoring, charts and the background recording agent.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Supervisión en vivo, gráficos y el agente de grabación en segundo plano." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リアルタイムの監視、グラフ、バックグラウンド記録エージェント。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "실시간 모니터링, 차트 및 백그라운드 기록 에이전트." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "实时监控、图表和后台记录代理。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "即時監控、圖表與背景記錄代理程式。" } }
+      }
+    },
+    "Not shown in Simple mode": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No se muestra en modo sencillo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "シンプルモードでは表示されません" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "간단 모드에서는 표시되지 않음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "简略模式下不显示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "簡易模式下不顯示" } }
+      }
+    },
+    "Remove apps together with their leftovers.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Elimina apps junto con sus archivos residuales." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アプリと残存ファイルをまとめて削除します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "앱과 남은 파일을 함께 제거합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "连同残留文件一起移除应用。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "連同殘留檔案一起移除 App。" } }
+      }
+    },
+    "Review login items and background agents.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Revisa los elementos de inicio de sesión y los agentes en segundo plano." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ログイン項目とバックグラウンドエージェントを確認します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "로그인 항목과 백그라운드 에이전트를 확인합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "查看登录项和后台代理。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "查看登入項目與背景代理程式。" } }
+      }
+    },
+    "See which volumes and folders use the most space.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Muestra qué volúmenes y carpetas ocupan más espacio." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "どのボリュームとフォルダが最も容量を使っているか表示します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "어떤 볼륨과 폴더가 가장 많은 공간을 쓰는지 표시합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "查看哪些磁盘和文件夹占用最多空间。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "查看哪些磁碟與資料夾佔用最多空間。" } }
+      }
+    },
+    "This feature is turned off in MacHelper settings.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Esta función está desactivada en la configuración de MacHelper." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この機能は MacHelper の設定でオフになっています。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 기능은 MacHelper 설정에서 꺼져 있습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "此功能已在 MacHelper 设置中关闭。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "此功能已在 MacHelper 設定中關閉。" } }
+      }
+    },
+    "Turn Off": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Desactivar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オフにする" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "끄기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉" } }
+      }
+    },
+    "Turn a tool off to remove its page and shortcuts. Its saved settings are kept.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Desactiva una herramienta para quitar su página y sus accesos directos. Su configuración se conserva." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ツールをオフにすると、そのページとショートカットが消えます。設定は保持されます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "도구를 끄면 해당 페이지와 바로가기가 숨겨집니다. 설정은 유지됩니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭工具会移除其页面和快捷入口。设置会保留。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉工具會移除其頁面與快捷入口。設定會保留。" } }
+      }
+    },
+    "Turn off Fans? Fans return to automatic system control while this is off.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "¿Desactivar Ventiladores? Los ventiladores volverán al control automático del sistema mientras esté desactivado." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ファンをオフにしますか？オフの間はファンがシステムの自動制御に戻ります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "팬을 끄시겠습니까? 꺼져 있는 동안 팬이 시스템 자동 제어로 돌아갑니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "要关闭风扇吗？关闭期间风扇将交回系统自动控制。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "要關閉風扇嗎？關閉期間風扇將交回系統自動控制。" } }
+      }
+    },
+    "Turn off Optimize? Turning this off also pauses scheduled cleanup.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "¿Desactivar Optimizar? Al desactivarlo también se pausa la limpieza programada." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "最適化をオフにしますか？オフにすると定期クリーンアップも停止します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최적화를 끄시겠습니까? 끄면 예약된 정리 작업도 일시 중지됩니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "要关闭一键优化吗？关闭后也会暂停定时清理。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "要關閉一鍵優化嗎？關閉後也會暫停排程清理。" } }
+      }
+    },
+    "Turning this off also pauses scheduled cleanup.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Al desactivarlo también se pausa la limpieza programada." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オフにすると定期クリーンアップも停止します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "끄면 예약된 정리 작업도 일시 중지됩니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭后也会暂停定时清理。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉後也會暫停排程清理。" } }
+      }
     }
   },
   "version": "1.0"

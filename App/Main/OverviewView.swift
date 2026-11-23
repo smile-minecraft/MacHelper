@@ -45,7 +45,9 @@ struct OverviewView: View {
             .onAppear { store.watchProcesses(true) }
             .onDisappear { store.watchProcesses(false) }
             .task {
-                if !ThemeStore.shared.isSimple, app.startupModel.items.isEmpty { await app.startupModel.load() }
+                if AppSection.startup.isVisible, !ThemeStore.shared.isSimple, app.startupModel.items.isEmpty {
+                    await app.startupModel.load()
+                }
             }
         } else {
             Color.clear
@@ -84,24 +86,30 @@ private struct Headline: View {
         if let t = store.cpuCelsius, t >= 95 {
             let v = Fmt.celsius(t)
             return Verdict(sentence: String(localized: "Your Mac is running hot at \(v)"), value: v, level: .critical,
-                           action: ThemeStore.shared.isSimple ? ("Check Health", .health) : ("Open Monitor", .monitor))
+                           action: action(ThemeStore.shared.isSimple ? "Check Health" : "Open Monitor",
+                                          ThemeStore.shared.isSimple ? .health : .monitor))
         }
         if store.memory?.pressure == .critical {
-            return Verdict(sentence: String(localized: "Memory is running out"), value: nil, level: .critical, action: ("Check Health", .health))
+            return Verdict(sentence: String(localized: "Memory is running out"), value: nil, level: .critical, action: action("Check Health", .health))
         }
         let diskLevel = store.diskFreeBytes.map { DiskSpaceLevels.level(freeBytes: Double($0)) }
         if diskLevel == .critical, let free {
             return Verdict(sentence: String(localized: "The disk is almost full, \(free) left"), value: free, level: .critical,
-                           action: ("Free Up Space", .optimize))
+                           action: action("Free Up Space", .optimize))
         }
         if diskLevel == .low, let free {
             return Verdict(sentence: String(localized: "Your Mac runs smoothly, \(free) of space left"), value: free, level: .attention,
-                           action: ("Free Up Space", .optimize))
+                           action: action("Free Up Space", .optimize))
         }
         if store.memory?.pressure == .warning {
-            return Verdict(sentence: String(localized: "Memory is getting tight"), value: nil, level: .attention, action: ("Check Health", .health))
+            return Verdict(sentence: String(localized: "Memory is getting tight"), value: nil, level: .attention, action: action("Check Health", .health))
         }
         return Verdict(sentence: String(localized: "Your Mac runs smoothly"), value: nil, level: .good)
+    }
+
+    /// A suggested action is only useful when its page can actually be opened.
+    private func action(_ title: LocalizedStringKey, _ section: AppSection) -> (LocalizedStringKey, AppSection)? {
+        section.isVisible ? (title, section) : nil
     }
 
     /// The line under the sentence: how long the Mac has been up.
@@ -197,7 +205,7 @@ private struct Headline: View {
                 Text(detail).font(.mh(size: 14)).foregroundStyle(Palette.textMuted)
             }
             Spacer(minLength: 16)
-            if let score = app.healthModel.score(store: store) {
+            if AppSection.health.isVisible, let score = app.healthModel.score(store: store) {
                 HealthScoreBadge(score: score) { app.show(.health) }
             }
             if let (title, section) = v.action {
@@ -370,10 +378,10 @@ private struct CommonTools: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Tools").font(Theme.heading).foregroundStyle(Palette.text).padding(.bottom, 8)
-            tool(.optimize, "Free up space safely. You see everything before it’s cleaned.")
-            tool(.health, "Find out what’s slowing your Mac down.")
-            tool(.disk, "See what takes up the most space.")
-            tool(.uninstall, "Remove apps completely, leftovers included.")
+            if AppSection.optimize.isVisible { tool(.optimize, "Free up space safely. You see everything before it’s cleaned.") }
+            if AppSection.health.isVisible { tool(.health, "Find out what’s slowing your Mac down.") }
+            if AppSection.disk.isVisible { tool(.disk, "See what takes up the most space.") }
+            if AppSection.uninstall.isVisible { tool(.uninstall, "Remove apps completely, leftovers included.") }
         }
     }
 
@@ -421,12 +429,14 @@ private struct ToDoList: View {
             out.append(Item(id: "temp", text: String(localized: "The CPU is at \(Fmt.celsius(t))."),
                             level: t >= 95 ? .critical : .attention, action: "Check Health", section: .health))
         }
-        let broken = app.startupModel.items.filter(\.programMissing).count
-        if broken > 0, !ThemeStore.shared.isSimple {
-            out.append(Item(id: "startup", text: String(localized: "\(broken) startup items point to programs that no longer exist."),
-                            level: .attention, action: "Review Startup Items", section: .startup))
+        if AppSection.startup.isVisible {
+            let broken = app.startupModel.items.filter(\.programMissing).count
+            if broken > 0, !ThemeStore.shared.isSimple {
+                out.append(Item(id: "startup", text: String(localized: "\(broken) startup items point to programs that no longer exist."),
+                                level: .attention, action: "Review Startup Items", section: .startup))
+            }
         }
-        return out
+        return out.filter { $0.section.isVisible }
     }
 
     var body: some View {

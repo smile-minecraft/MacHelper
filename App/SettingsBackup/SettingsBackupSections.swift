@@ -44,9 +44,14 @@ struct GeneralSettingsSection: SettingsSection {
         return AppLanguage.match(first)
     }
 
+    private var currentFeatures: FeatureSet? {
+        defaults.data(forKey: FeatureStore.key).flatMap { try? JSONDecoder().decode(FeatureSet.self, from: $0) }
+    }
+
     private var payload: GeneralSettingsPayload {
         GeneralSettingsPayload(dockMode: DockPreference.migrate(defaults),
-                               language: Self.currentLanguage(defaults: defaults, domainName: domainName))
+                               language: Self.currentLanguage(defaults: defaults, domainName: domainName),
+                               features: currentFeatures)
     }
 
     func snapshot() throws -> Data {
@@ -76,6 +81,11 @@ struct GeneralSettingsSection: SettingsSection {
             defaults.set([language], forKey: "AppleLanguages")
         } else {
             defaults.removeObject(forKey: "AppleLanguages")
+        }
+        if let features = payload.features {
+            defaults.set(try? JSONEncoder().encode(features), forKey: FeatureStore.key)
+        } else {
+            defaults.removeObject(forKey: FeatureStore.key)
         }
     }
 

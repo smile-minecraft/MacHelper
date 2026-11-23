@@ -25,7 +25,8 @@ struct MacHelperApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {}
             CommandGroup(before: .sidebar) {
-                ForEach(Array(AppSection.allCases.enumerated()), id: \.element) { i, s in
+                // Keep the original number for every page; only omit the invisible ones.
+                ForEach(Array(AppSection.allCases.enumerated()).filter { $0.element.isVisible }, id: \.element) { i, s in
                     Button(s.title) { AppModel.shared.show(s) }
                         .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
                 }

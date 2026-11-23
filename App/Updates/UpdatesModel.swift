@@ -156,6 +156,7 @@ final class UpdatesModel {
     private let environment: any UpdatesEnvironment
     /// One check loop owns Homebrew; triggers that arrive meanwhile are coalesced into one follow-up.
     private var runTask: Task<Void, Never>?
+    private var moduleEnabled = true
     private var recheckWhenDone = false
     private var pendingRefresh = false
     private var isUpdating = false
@@ -230,10 +231,21 @@ final class UpdatesModel {
         }
     }
 
+    func applyModuleAvailability(_ available: Bool) {
+        moduleEnabled = available
+        guard !available else { return }
+        runTask?.cancel()
+        runTask = nil
+        recheckWhenDone = false
+        pendingRefresh = false
+        phase = .idle
+    }
+
     /// Reads the list from Homebrew's existing catalog first. When that catalog is older than
     /// Homebrew's own auto-update window, the index is refreshed in the background and the list is
     /// replaced. `refresh` (Check Again) always runs `brew update` first and reports its result.
     func check(refresh: Bool = false, followUp: Bool = false) async {
+        guard moduleEnabled else { return }
         if let runTask {
             // Reopening the page only waits for the result already on its way. A new trigger that
             // changes what is asked (Check Again, the greedy toggle) runs once more afterwards.
@@ -259,13 +271,14 @@ final class UpdatesModel {
     private func runCheckLoop(initialRefresh: Bool) async {
         var refresh = initialRefresh || pendingRefresh
         pendingRefresh = false
-        while true {
+        while moduleEnabled, !Task.isCancelled {
             recheckWhenDone = false
             await performCheck(refresh: refresh)
-            guard recheckWhenDone else { break }
+            guard moduleEnabled, recheckWhenDone else { break }
             refresh = pendingRefresh
             pendingRefresh = false
         }
+        if !moduleEnabled { phase = .idle }
         runTask = nil
     }
 

@@ -24,6 +24,7 @@ final class FanAutoSwitcher {
     @ObservationIgnored private var applying: FanPolicy?
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
     @ObservationIgnored private var timer: Timer?
+    @ObservationIgnored private var moduleEnabled = FeatureStore.shared.isEnabled(.fans)
 
     init() {
         enabled = UserDefaults.standard.bool(forKey: Self.enabledKey)
@@ -44,6 +45,7 @@ final class FanAutoSwitcher {
     }
 
     func start() {
+        guard moduleEnabled, timer == nil else { return }
         let nc = NSWorkspace.shared.notificationCenter
         for name in [NSWorkspace.didLaunchApplicationNotification, NSWorkspace.didTerminateApplicationNotification] {
             observers.append(nc.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
@@ -64,6 +66,21 @@ final class FanAutoSwitcher {
         }
     }
 
+    /// Stops the rule timer and its launch/termination observers. Idempotent, so a repeated
+    /// lifecycle pass can never leave a second timer running.
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+        for observer in observers { NSWorkspace.shared.notificationCenter.removeObserver(observer) }
+        observers.removeAll()
+        activeRule = nil
+    }
+
+    func applyModuleAvailability(_ available: Bool) {
+        moduleEnabled = available
+        if available { start() } else { stop() }
+    }
+
     /// The user applied a policy by hand: it becomes the base, and stays unless a rule matches.
     func userApplied(_ policy: FanPolicy) {
         Self.basePolicy = policy
@@ -77,6 +94,7 @@ final class FanAutoSwitcher {
     }
 
     func evaluate() {
+        guard moduleEnabled else { return }
         let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
         let match = enabled ? FanAutoRule.firstMatch(rules, runningBundleIDs: running, onBattery: Self.onBattery) : nil
         let previous = activeRule

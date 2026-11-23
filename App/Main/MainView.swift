@@ -53,6 +53,8 @@ struct MainView: View {
         .sheet(isPresented: $showHelperSetup) { HelperSetupSheet() }
         // Switching to simple mode while on an advanced page goes back to the overview.
         .onChange(of: ThemeStore.shared.settings.mode) { if !app.section.isVisible { app.section = .overview } }
+        // Turning off the module of the open page does the same, from a toggle or a settings import.
+        .onChange(of: FeatureStore.shared.features) { if !app.section.isVisible { app.section = .overview } }
     }
 
     @ViewBuilder private var detail: some View {

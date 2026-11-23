@@ -2,10 +2,20 @@ import AppIntents
 import CleanEngine
 import Diagnostics
 import Foundation
+import SettingsPortability
 import Storage
 
 // Shortcuts actions. They use the same engine as the app and the CLI and never run in the
 // background on their own: each one runs only when a shortcut calls it.
+
+private enum ModuleAvailability {
+    static func require(_ module: FeatureModule) async throws {
+        let enabled = await MainActor.run { FeatureStore.shared.isEnabled(module) }
+        guard enabled else {
+            throw IntentError.message(String(localized: "This feature is turned off in MacHelper settings."))
+        }
+    }
+}
 
 struct CheckHealthIntent: AppIntent {
     static let title: LocalizedStringResource = "Check Mac Health"
@@ -15,6 +25,7 @@ struct CheckHealthIntent: AppIntent {
     var hours: Int
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+        try await ModuleAvailability.require(.health)
         let history = try MetricsHistory(readOnly: true)
         let report = try HealthCheck.run(history: history, hours: Double(hours), system: .current())
         let text = report.findings.isEmpty
@@ -29,6 +40,7 @@ struct FreeSpaceIntent: AppIntent {
     static let description = IntentDescription("Returns free space on the startup disk.")
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+        try await ModuleAvailability.require(.optimize)
         guard let now = DiskSpaceReader.current() else { throw IntentError.message(String(localized: "The startup disk’s free space couldn’t be read.")) }
         let free = ByteCountFormatter.string(fromByteCount: Int64(now.free), countStyle: .file)
         let text = String(localized: "\(free) free.")
@@ -41,6 +53,7 @@ struct PreviewCleanupIntent: AppIntent {
     static let description = IntentDescription("Measures how much a low-risk cleanup would free, without removing anything.")
 
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog {
+        try await ModuleAvailability.require(.optimize)
         let plan = try LowRiskCleanup.plan()
         let size = ByteCountFormatter.string(fromByteCount: Int64(clamping: plan.selectedSize), countStyle: .file)
         return .result(value: Int(clamping: plan.selectedSize),
@@ -53,6 +66,7 @@ struct RunCleanupIntent: AppIntent {
     static let description = IntentDescription("Deletes low-risk, selected-by-default caches and logs (the same selection as scheduled cleaning); apps rebuild this data themselves. Apps that are running are skipped. Asks before it starts.")
 
     func perform() async throws -> some IntentResult & ReturnsValue<Int> & ProvidesDialog {
+        try await ModuleAvailability.require(.optimize)
         let plan = try LowRiskCleanup.plan()
         let size = ByteCountFormatter.string(fromByteCount: Int64(clamping: plan.selectedSize), countStyle: .file)
         guard plan.selectedSize > 0 else {

@@ -223,6 +223,7 @@ struct SettingsBackupSection: View {
     private func reload(_ ids: Set<String>) {
         if ids.contains(SettingsCategory.general.rawValue) {
             AppModel.applyDockPreference()
+            FeatureStore.shared.reload()
         }
         if ids.contains(SettingsCategory.monitor.rawValue) {
             app.settings.reload()

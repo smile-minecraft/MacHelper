@@ -38,6 +38,8 @@ final class FanControlModel {
 
     @ObservationIgnored private var draftLoaded = false
     @ObservationIgnored private var pollTask: Task<Void, Never>?
+    @ObservationIgnored private var moduleEnabled = FeatureStore.shared.isEnabled(.fans)
+    @ObservationIgnored private var restoreRequested = false
     @ObservationIgnored private let client = HelperClient.shared
     /// Lets automatic switching know which policy the user picked by hand.
     @ObservationIgnored var onUserApplied: ((FanPolicy) -> Void)?
@@ -59,7 +61,7 @@ final class FanControlModel {
     // MARK: Polling
 
     func startPolling() {
-        guard pollTask == nil else { return }
+        guard moduleEnabled, pollTask == nil else { return }
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.refresh()
@@ -73,6 +75,30 @@ final class FanControlModel {
         pollTask = nil
     }
 
+    /// While Fans is off, no live polling remains and the Helper must not keep a manual curve.
+    /// Re-enabling does not reapply a curve: the user's saved `fan.autoEnabled` rules decide later.
+    func applyModuleAvailability(_ available: Bool) {
+        moduleEnabled = available
+        if available {
+            restoreRequested = false
+        } else {
+            stopPolling()
+            // `status` is nil unless the Fans page polled; read the Helper's policy once so a manual
+            // curve set in an earlier session is still handed back to the system.
+            Task { await refresh() }
+        }
+    }
+
+    private func restoreAutomaticIfNeeded() {
+        guard !moduleEnabled, !restoreRequested, !isApplying, let status else { return }
+        if case .automatic = status.policy.mode {
+            restoreRequested = false
+            return
+        }
+        restoreRequested = true
+        Task { await restoreAutomatic() }
+    }
+
     func refresh() async {
         helperStatus = client.status
         guard helperStatus == .enabled else { status = nil; return }
@@ -80,6 +106,7 @@ final class FanControlModel {
             let s = try await client.fanControlStatus()
             status = s
             if !draftLoaded { loadDraft(from: s.policy); draftLoaded = true }
+            restoreAutomaticIfNeeded()
         } catch {
             message = "\(error)"
         }

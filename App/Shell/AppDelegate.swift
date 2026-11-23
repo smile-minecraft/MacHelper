@@ -141,6 +141,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         if !args.contains(where: { $0.hasPrefix("--snapshot") || $0 == "--export-icon-template" }) {
             fanModel.onUserApplied = { [weak self] policy in self?.fanSwitcher.userApplied(policy) }
             fanSwitcher.start()
+            // Converge background work on the module switches: modules that are off stop here.
+            FeatureLifecycle.start(app)
         }
         // After an update, rewrite the agent skills MacHelper installed (never a SKILL.md it didn't write).
         if !args.contains(where: { $0.hasPrefix("--snapshot") || $0 == "--export-icon-template" }) {

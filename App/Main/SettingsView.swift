@@ -1,3 +1,4 @@
+import FanControl
 import ServiceManagement
 import SettingsPortability
 import SwiftUI
@@ -6,7 +7,7 @@ import Telemetry
 struct SettingsView: View {
     let app: AppModel
 
-    enum Tab: String { case general, appearance, menuBar, alerts, helper, history }
+    enum Tab: String { case general, features, appearance, menuBar, alerts, helper, history }
 
     /// Opens on General. A debug launch argument (`-settings.tab helper`) can pick another tab for
     /// screenshots; it lives in the volatile argument domain and is never written back.
@@ -17,6 +18,9 @@ struct SettingsView: View {
             GeneralSettings(app: app)
                 .tabItem { Label("General", systemImage: "gearshape") }
                 .tag(Tab.general)
+            FeatureSettings(app: app)
+                .tabItem { Label("Features", systemImage: "square.grid.2x2") }
+                .tag(Tab.features)
             AppearanceSettingsView()
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
                 .tag(Tab.appearance)
@@ -36,6 +40,117 @@ struct SettingsView: View {
                 .tag(Tab.history)
         }
         .frame(minWidth: 760, minHeight: 580)
+    }
+}
+
+/// Each tool page has one switch here. Turning one off removes its page and every shortcut that
+/// leads to it while keeping the user's settings for that tool intact.
+private struct FeatureSettings: View {
+    let app: AppModel
+    @State private var pending: FeatureModule?
+
+    var body: some View {
+        Form {
+            Section("Feature Modules") {
+                Text("Turn a tool off to remove its page and shortcuts. Its saved settings are kept.")
+                    .settingsCaption()
+                ForEach(FeatureModule.allCases, id: \.self) { module in
+                    row(module)
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .settingsSurface()
+        .task { await app.fanModel.refresh() }
+        .confirmationDialog(Text(verbatim: confirmationText),
+                            isPresented: Binding(get: { pending != nil },
+                                                 set: { if !$0 { pending = nil } }),
+                            titleVisibility: .visible) {
+            Button("Turn Off", role: .destructive) {
+                if let pending { apply(pending, false) }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    private func row(_ module: FeatureModule) -> some View {
+        let section = AppSection(rawValue: module.rawValue) ?? .overview
+        return Toggle(isOn: Binding(
+            get: { FeatureStore.shared.isEnabled(module) },
+            set: { request(module, $0) }
+        )) {
+            HStack(spacing: 12) {
+                PixelIcon(name: section.icon, size: 24)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(section.title).font(.mh(size: 13.5, weight: .semibold))
+                    Text(description(for: module)).settingsCaption()
+                    if let note = sideEffectNote(for: module) {
+                        Text(note).settingsCaption(Theme.amber)
+                    }
+                    if module.hiddenInSimpleMode {
+                        Text("Not shown in Simple mode").settingsCaption()
+                    }
+                }
+            }
+        }
+    }
+
+    private func description(for module: FeatureModule) -> LocalizedStringKey {
+        switch module {
+        case .monitor: "Live monitoring, charts and the background recording agent."
+        case .health: "A one-off check of the recorded history and system health."
+        case .fans: "Fan curves and automatic switching rules."
+        case .optimize: "Find and remove build artifacts and other low-risk clutter."
+        case .disk: "See which volumes and folders use the most space."
+        case .uninstall: "Remove apps together with their leftovers."
+        case .updates: "Check Homebrew casks and upgrade the ones you pick."
+        case .startup: "Review login items and background agents."
+        }
+    }
+
+    private func sideEffectNote(for module: FeatureModule) -> LocalizedStringKey? {
+        switch module {
+        case .monitor: "Background recording is paused while this is off."
+        case .fans: "Fans return to automatic system control while this is off."
+        case .optimize: "Turning this off also pauses scheduled cleanup."
+        case .updates: "Homebrew update checks stop while this is off."
+        case .health, .disk, .uninstall, .startup: nil
+        }
+    }
+
+    private func request(_ module: FeatureModule, _ enabled: Bool) {
+        guard !enabled else { apply(module, true); return }
+        let needsConfirmation: Bool
+        switch module {
+        case .fans:
+            let helperIsNotAutomatic: Bool
+            if let mode = app.fanModel.status?.policy.mode {
+                if case .automatic = mode { helperIsNotAutomatic = false }
+                else { helperIsNotAutomatic = true }
+            } else {
+                helperIsNotAutomatic = false
+            }
+            needsConfirmation = app.fanSwitcher.enabled || helperIsNotAutomatic
+        case .optimize: needsConfirmation = app.autoCleanModel.enabled
+        default: needsConfirmation = false
+        }
+        if needsConfirmation {
+            pending = module
+        } else {
+            apply(module, false)
+        }
+    }
+
+    private var confirmationText: String {
+        switch pending {
+        case .fans: String(localized: "Turn off Fans? Fans return to automatic system control while this is off.")
+        case .optimize: String(localized: "Turn off Optimize? Turning this off also pauses scheduled cleanup.")
+        default: ""
+        }
+    }
+
+    private func apply(_ module: FeatureModule, _ enabled: Bool) {
+        withAnimation(Motion.stateChange) { FeatureStore.shared.setEnabled(module, enabled) }
     }
 }
 

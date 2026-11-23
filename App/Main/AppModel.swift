@@ -38,20 +38,23 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
-    static var groups: [(LocalizedStringKey, [AppSection])] {
-        ThemeStore.shared.isSimple
-            ? [(LocalizedStringKey("This Mac"), simpleSections.filter { $0.isThisMac }),
-               (LocalizedStringKey("Clean Up"), simpleSections.filter { !$0.isThisMac })]
-            : [("This Mac", [.overview, .monitor, .health, .fans]), ("Clean Up", [.optimize, .disk, .uninstall, .updates, .startup])]
+    @MainActor static var groups: [(LocalizedStringKey, [AppSection])] {
+        let visible = allCases.filter(\.isVisible)
+        return [(LocalizedStringKey("This Mac"), visible.filter(\.isThisMac)),
+                (LocalizedStringKey("Clean Up"), visible.filter { !$0.isThisMac })]
     }
-
-    /// Simple mode keeps the everyday tools; monitoring charts, fan curves and launch agents are advanced.
-    static let simpleSections: [AppSection] = [.overview, .health, .optimize, .disk, .uninstall, .updates]
 
     var isThisMac: Bool { [.overview, .monitor, .health, .fans].contains(self) }
 
-    /// Whether the page is shown in the current mode.
-    var isVisible: Bool { !ThemeStore.shared.isSimple || Self.simpleSections.contains(self) }
+    /// Overview is the permanent home page; every other page belongs to one module.
+    var module: FeatureModule? { FeatureModule(rawValue: rawValue) }
+
+    /// Whether the page is currently allowed by both its module switch and the display mode.
+    @MainActor var isVisible: Bool {
+        guard let module else { return true }
+        return module.isVisible(enabled: FeatureStore.shared.isEnabled(module),
+                                simpleMode: ThemeStore.shared.isSimple)
+    }
 }
 
 /// Owns every feature model; shared by the main window, the menu bar panel and Settings.
@@ -125,6 +128,8 @@ final class AppModel {
     }
 
     func show(_ section: AppSection) {
+        // An invisible page has no entry point; ignore stale shortcuts, deep links and imports.
+        guard section.isVisible else { return }
         self.section = section
         if !TelemetryRuntime.isNonProduction() {
             Task { await telemetry.recordSectionView(section.rawValue) }

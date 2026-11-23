@@ -79,7 +79,7 @@ struct HealthView: View {
                     }
                     Spacer(minLength: 0)
                     if let section = action(f.id) {
-                        Button(section.title) { app.section = section }
+                        Button(section.title) { app.show(section) }
                     }
                 }
                 .card()
@@ -89,12 +89,14 @@ struct HealthView: View {
     }
 
     private func action(_ id: String) -> AppSection? {
+        let section: AppSection?
         switch id {
-        case "disk.low": .optimize
-        case "background.many": .startup
-        case "cpu.busy", "cpu.process", "memory.high", "thermal.hot": .monitor
-        default: nil
+        case "disk.low": section = .optimize
+        case "background.many": section = .startup
+        case "cpu.busy", "cpu.process", "memory.high", "thermal.hot": section = .monitor
+        default: section = nil
         }
+        return section?.isVisible == true ? section : nil
     }
 
     private func symbol(_ s: HealthReport.Severity) -> String {
