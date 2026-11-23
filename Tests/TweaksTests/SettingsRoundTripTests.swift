@@ -35,9 +35,9 @@ import Testing
     }
 
     @Test func aTweakNotInThisBuildIsNeverOnFromTheFile() throws {
-        let json = #"{"finder.new-file": {"enabled": true}, "music.block-autolaunch": {"enabled": true}}"#
+        let json = #"{"finder.column-autosize": {"enabled": true}, "music.block-autolaunch": {"enabled": true}}"#
         let settings = try JSONDecoder().decode(TweakSettings.self, from: Data(json.utf8))
-        #expect(!settings.isEnabled(.finderNewFile))
+        #expect(!settings.isEnabled(.finderColumnAutosize))
         #expect(settings.isEnabled(.musicBlockAutolaunch))
     }
 

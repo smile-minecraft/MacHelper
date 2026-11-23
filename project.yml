@@ -70,6 +70,12 @@ targets:
         codeSign: false
         copy:
           destination: executables
+      # The Finder Sync extension only offers menu items; the app performs what they ask for.
+      - target: FinderExtension
+        embed: true
+        codeSign: true
+        copy:
+          destination: plugins
     info:
       path: App/Info.plist
       properties:
@@ -79,6 +85,13 @@ targets:
         LSApplicationCategoryType: public.app-category.utilities
         LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
         NSHumanReadableCopyright: "MIT License"
+        # New file in Finder asks Finder for the folder its front window shows.
+        NSAppleEventsUsageDescription: "MacHelper asks Finder which folder is open so it can create a new file there."
+        # The Finder extension sends its menu actions to this scheme. Anything on the Mac can open
+        # the URL, so the app validates every path before it acts on one.
+        CFBundleURLTypes:
+          - CFBundleURLName: com.machelper.MacHelper.finder
+            CFBundleURLSchemes: [machelper]
         # Self-update feed. The feed URL and ED key below are development test values;
         # the release feed and production key arrive with the appcast work.
         SUFeedURL: "https://smile-minecraft.github.io/MacHelper/appcast.xml"
@@ -153,4 +166,33 @@ targets:
         PROVISIONING_PROFILE_SPECIFIER: ""
         CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
         ENTITLEMENTS_REQUIRED: NO
+        SKIP_INSTALL: YES
+
+  # Finder Sync extension. Sandboxed as required for macOS app extensions; it holds no file access
+  # of its own and only forwards the menu request to the app through the machelper:// scheme.
+  FinderExtension:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: FinderExtension
+    dependencies:
+      # The URL scheme, actions and template names come from the same library the app uses, so the
+      # two sides cannot drift apart.
+      - package: MacHelperKit
+        products: [Tweaks]
+    info:
+      path: FinderExtension/Info.plist
+      properties:
+        CFBundleDisplayName: MacHelper Finder
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSMinimumSystemVersion: "$(MACOSX_DEPLOYMENT_TARGET)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.FinderSync
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).FinderSync"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.machelper.MacHelper.FinderExtension
+        PRODUCT_NAME: FinderExtension
+        CODE_SIGN_ENTITLEMENTS: FinderExtension/FinderExtension.entitlements
         SKIP_INSTALL: YES

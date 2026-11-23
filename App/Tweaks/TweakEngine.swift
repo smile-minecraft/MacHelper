@@ -22,6 +22,8 @@ final class TweakEngine {
     private let cmdTab = CmdTabRestoreBehavior()
     private let quitGuard = QuitGuardBehavior()
     private let dockClick = DockClickBehavior()
+    private let finderCutPaste = FinderCutPasteBehavior()
+    private let finderNewFile = FinderNewFileBehavior()
     private let trafficLights = TrafficLightBehavior()
     private let switcher = WindowSwitcherMenu()
     private let missionControl = MissionControlOverlay()
@@ -41,6 +43,9 @@ final class TweakEngine {
         settings = store.load()
         granted = AccessibilityAuthority.isGranted
         frontmostBundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        // The extension's menu items arrive as URLs; the handler exists exactly while the tweak
+        // engine runs, so a snapshot or measurement instance never answers one.
+        FinderMenuChannel.shared.install()
 
         observers.append(DistributedNotificationCenter.default().addObserver(
             forName: NSNotification.Name(TweakStore.changeNotification), object: nil, queue: .main
@@ -87,6 +92,8 @@ final class TweakEngine {
         quitGuard.updateFrontmost(frontmostBundleID, pid: app.processIdentifier)
         dockClick.updateFrontmost(app)
         cmdTab.handleActivation(app)
+        finderCutPaste.updateFrontmost(app)
+        finderNewFile.updateFrontmost(app)
     }
 
     private func apply(force: Bool = false) {
@@ -99,29 +106,43 @@ final class TweakEngine {
         let quitEnabled = latest.isEnabled(.inputQuitGuard)
         let dockEnabled = latest.isEnabled(.dockClickAction)
         let trafficEnabled = latest.isEnabled(.windowTrafficLights)
+        let cutPasteEnabled = latest.isEnabled(.finderCutPaste)
+        let newFileEnabled = latest.isEnabled(.finderNewFile)
+        let frontmost = NSWorkspace.shared.frontmostApplication
         // Configure the behaviours before the tap can deliver anything to them.
         music.configure(enabled: latest.isEnabled(.musicBlockAutolaunch), settings: latest)
         cmdTab.configure(enabled: granted && latest.isEnabled(.windowCmdTabRestore))
         quitGuard.configure(enabled: quitEnabled, settings: latest, frontmostBundleID: frontmostBundleID)
-        dockClick.configure(enabled: dockEnabled, settings: latest, frontmost: NSWorkspace.shared.frontmostApplication)
+        dockClick.configure(enabled: dockEnabled, settings: latest, frontmost: frontmost)
+        finderCutPaste.configure(enabled: cutPasteEnabled, frontmost: frontmost)
+        finderNewFile.configure(enabled: newFileEnabled, settings: latest, frontmost: frontmost)
         trafficLights.configure(enabled: granted && trafficEnabled, settings: latest,
                                 ownBundleID: Bundle.main.bundleIdentifier ?? "com.machelper.MacHelper")
 
-        if granted && (quitEnabled || dockEnabled || trafficEnabled) {
+        let wantsKeys = quitEnabled || cutPasteEnabled || newFileEnabled
+        let wantsClicks = dockEnabled || trafficEnabled
+        if granted && (wantsKeys || wantsClicks) {
             if eventTap == nil {
                 // Runs on the tap's own thread: the behaviours are thread-safe and never wait on
                 // the main actor.
                 let quitGuard = quitGuard, dockClick = dockClick, trafficLights = trafficLights
+                let finderCutPaste = finderCutPaste, finderNewFile = finderNewFile
                 eventTap = EventTapService { type, event in
-                    trafficLights.handle(type, event) ?? quitGuard.handle(type, event) ?? dockClick.handle(type, event) ?? .pass
+                    trafficLights.handle(type, event)
+                        ?? quitGuard.handle(type, event)
+                        ?? finderCutPaste.handle(type, event)
+                        ?? finderNewFile.handle(type, event)
+                        ?? dockClick.handle(type, event)
+                        ?? .pass
                 }
             }
-            eventTap?.install(mask: Self.eventMask(keys: quitEnabled, clicks: dockEnabled || trafficEnabled))
+            eventTap?.install(mask: Self.eventMask(keys: wantsKeys, clicks: wantsClicks))
         } else {
             eventTap?.remove()
             eventTap = nil
             quitGuard.reset()
             trafficLights.reset()
+            finderCutPaste.reset()
         }
         // These two own what they show (a status item, overlay panels) and only exist while their
         // tweak is on and Accessibility is granted.
@@ -130,18 +151,29 @@ final class TweakEngine {
         publishStatus()
     }
 
+    /// The extension's Cut item: from here on the next ⌘V in Finder moves what is on the clipboard.
+    func armFinderCut(changeCount: Int) { finderCutPaste.armCut(changeCount: changeCount) }
+
     private func publishStatus() {
+        let automation = FinderAutomation.permission
+        let extensionEnabled = FinderExtensionStatus.isEnabled()
         var states: [String: TweakRuntimeStatus.TweakState] = [:]
         for definition in TweakCatalog.all {
             let enabled = settings.isEnabled(definition.id)
             if !definition.implemented {
-                states[definition.id.rawValue] = .unavailable("Coming soon")
+                states[definition.id.rawValue] = .unavailable(definition.unavailableReason ?? "Coming soon")
             } else if !enabled {
                 states[definition.id.rawValue] = .off
             } else if definition.permissions.contains(.accessibility) && !granted {
                 states[definition.id.rawValue] = .needsPermission
             } else if definition.id == .windowSwitcherMenu, let problem = switcher.hotKeyProblem {
                 states[definition.id.rawValue] = TweakRuntimeStatus.TweakState(.active, reason: problem)
+            } else if definition.id == .finderNewFile && automation == .denied {
+                states[definition.id.rawValue] = .needsPermission(
+                    "Allow MacHelper to control Finder in System Settings › Privacy & Security › Automation")
+            } else if definition.id == .finderContextMenu && extensionEnabled == false {
+                states[definition.id.rawValue] = .needsPermission(
+                    "Enable the MacHelper Finder extension in System Settings › General › Login Items & Extensions")
             } else {
                 states[definition.id.rawValue] = .active
             }
@@ -150,6 +182,8 @@ final class TweakEngine {
             appPID: Int32(ProcessInfo.processInfo.processIdentifier),
             accessibilityGranted: granted,
             eventTapInstalled: eventTap?.isInstalled ?? false,
+            automationFinderGranted: automation == .granted,
+            finderExtensionEnabled: extensionEnabled,
             tweaks: states)
         try? status.write(to: store.statusURL)
     }

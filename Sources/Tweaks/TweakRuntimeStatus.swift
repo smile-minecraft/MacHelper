@@ -18,6 +18,8 @@ public struct TweakRuntimeStatus: Codable, Equatable, Sendable {
         public static let active = TweakState(.active)
         public static let off = TweakState(.off)
         public static let needsPermission = TweakState(.needsPermission)
+        /// Needs permission, with the step that grants it.
+        public static func needsPermission(_ reason: String) -> TweakState { TweakState(.needsPermission, reason: reason) }
         public static func unavailable(_ reason: String) -> TweakState { TweakState(.unavailable, reason: reason) }
     }
 
@@ -26,15 +28,22 @@ public struct TweakRuntimeStatus: Codable, Equatable, Sendable {
     public var updatedAt: Date
     public var accessibilityGranted: Bool
     public var eventTapInstalled: Bool
+    /// Nil when this build does not ask Finder for anything (no Apple Events permission needed).
+    public var automationFinderGranted: Bool?
+    /// Whether macOS currently has the Finder extension registered, nil when it was not checked.
+    public var finderExtensionEnabled: Bool?
     public var tweaks: [String: TweakState]
 
     public init(appPID: Int32, updatedAt: Date = Date(), accessibilityGranted: Bool,
-                eventTapInstalled: Bool = false, tweaks: [String: TweakState] = [:]) {
+                eventTapInstalled: Bool = false, automationFinderGranted: Bool? = nil,
+                finderExtensionEnabled: Bool? = nil, tweaks: [String: TweakState] = [:]) {
         self.schemaVersion = 1
         self.appPID = appPID
         self.updatedAt = updatedAt
         self.accessibilityGranted = accessibilityGranted
         self.eventTapInstalled = eventTapInstalled
+        self.automationFinderGranted = automationFinderGranted
+        self.finderExtensionEnabled = finderExtensionEnabled
         self.tweaks = tweaks
     }
 
@@ -45,6 +54,8 @@ public struct TweakRuntimeStatus: Codable, Equatable, Sendable {
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
         accessibilityGranted = (try? c.decode(Bool.self, forKey: .accessibilityGranted)) ?? false
         eventTapInstalled = (try? c.decode(Bool.self, forKey: .eventTapInstalled)) ?? false
+        automationFinderGranted = try? c.decode(Bool.self, forKey: .automationFinderGranted)
+        finderExtensionEnabled = try? c.decode(Bool.self, forKey: .finderExtensionEnabled)
         tweaks = (try? c.decode([String: TweakState].self, forKey: .tweaks)) ?? [:]
     }
 
