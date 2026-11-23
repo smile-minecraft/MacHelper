@@ -73,7 +73,7 @@ enum FinderMenuService {
             return
         }
         // The keyboard tweak owns the cut state: arming it is what turns the next ⌘V into ⌥⌘V.
-        TweakEngine.shared.armFinderCut()
+        TweakEngine.shared.armFinderCut(changeCount: pasteboard.changeCount)
         FinderHUD.show(String(localized: "Cut. Paste in Finder to move the items."))
     }
 

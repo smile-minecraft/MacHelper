@@ -61,14 +61,27 @@ public enum FinderRules {
 public struct FinderCutSession: Equatable, Sendable {
     public static let lifetime: TimeInterval = 30
     private var armedAt: Date?
+    /// The clipboard change counts that still hold what was cut. A paste only moves while the
+    /// clipboard is one of them: anything else (a copy from a menu, a clipboard manager, Universal
+    /// Clipboard, or a ⌘X with nothing selected) means ⌘V would move files the person only copied.
+    private var clipboard: ClosedRange<Int>?
 
     public init() {}
 
     public var isArmed: Bool { armedAt != nil }
 
-    public mutating func arm(at date: Date) { armedAt = date }
+    /// `clipboard` nil leaves the change count unchecked.
+    public mutating func arm(at date: Date, clipboard: ClosedRange<Int>? = nil) {
+        armedAt = date
+        self.clipboard = clipboard
+    }
 
-    public mutating func disarm() { armedAt = nil }
+    public mutating func disarm() { armedAt = nil; clipboard = nil }
+
+    /// Whether the clipboard still holds the cut items.
+    public func holdsCut(changeCount: Int) -> Bool {
+        clipboard.map { $0.contains(changeCount) } ?? true
+    }
 
     public func isArmed(at now: Date) -> Bool {
         guard let armedAt else { return false }
@@ -78,9 +91,10 @@ public struct FinderCutSession: Equatable, Sendable {
 
     /// Takes an armed session for the paste that is about to happen: a move ends the cut, exactly
     /// like moving a file ends a cut in Finder. An expired session is not taken.
-    public mutating func consume(now: Date) -> Bool {
-        guard isArmed(at: now) else { armedAt = nil; return false }
-        armedAt = nil
+    public mutating func consume(now: Date, changeCount: Int? = nil) -> Bool {
+        defer { disarm() }
+        guard isArmed(at: now) else { return false }
+        if let changeCount, !holdsCut(changeCount: changeCount) { return false }
         return true
     }
 }

@@ -115,7 +115,11 @@ enum FinderFileActions {
                                                      existing: existing)
         let file = folder.appendingPathComponent(name, isDirectory: false)
         let contents = template.contents
-        guard FileManager.default.createFile(atPath: file.path, contents: contents) else {
+        // Never replaces a file: when the folder listing was unreadable or every name was taken,
+        // the write fails instead of overwriting what is there.
+        do {
+            try contents.write(to: file, options: .withoutOverwriting)
+        } catch {
             throw Failure.couldNotWrite(file.path)
         }
         return file

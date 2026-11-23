@@ -42962,7 +42962,7 @@
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 Finder 中新增檔案" } }
       }
     },
-    "Create a blank file from the Finder menu.": {
+    "Create a file in the folder the Finder window shows and start renaming it.": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Crea un archivo en la carpeta que muestra la ventana del Finder y empieza a renombrarlo." } },
         "ja": { "stringUnit": { "state": "translated", "value": "Finder ウインドウに表示中のフォルダにファイルを作成し、名前の変更を開始します。" } },
@@ -42980,7 +42980,7 @@
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "Finder 右鍵選單項目" } }
       }
     },
-    "Hide items you never use from Finder's right-click menu.": {
+    "Add New File, Copy Path, Open in Terminal and Cut to Finder's right-click menu.": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Añade Nuevo archivo, Copiar ruta, Abrir en Terminal y Cortar al menú contextual del Finder." } },
         "ja": { "stringUnit": { "state": "translated", "value": "Finder の右クリックメニューに「新規ファイル」「パスをコピー」「ターミナルで開く」「カット」を追加します。" } },
@@ -42998,7 +42998,7 @@
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "調整 Finder 欄寬" } }
       }
     },
-    "Stop Finder from resizing list columns automatically.": {
+    "Size a column view column to fit its longest name.": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Ajusta una columna de la vista en columnas al nombre más largo." } },
         "ja": { "stringUnit": { "state": "translated", "value": "カラム表示の幅を最も長い名前の長さに合わせます。" } },
@@ -43817,7 +43817,6 @@
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "最大電流" } }
       }
     },
-
     "Finder does not let Accessibility set column widths.": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "El Finder no permite que Accesibilidad cambie el ancho de las columnas." } },

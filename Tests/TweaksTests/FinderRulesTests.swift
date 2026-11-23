@@ -64,6 +64,28 @@ import Tweaks
         #expect(!session.isArmed(at: start.addingTimeInterval(51)))
     }
 
+    @Test func aCutOnlyMovesWhileTheClipboardStillHoldsIt() {
+        let start = Date(timeIntervalSinceReferenceDate: 4_000)
+        var session = FinderCutSession()
+        // ⌘X at change count 10: Finder's copy makes it 11.
+        session.arm(at: start, clipboard: 11...11)
+        #expect(!session.holdsCut(changeCount: 10), "nothing was copied: nothing to move")
+        #expect(session.holdsCut(changeCount: 11))
+        #expect(!session.holdsCut(changeCount: 12), "something replaced the copy")
+        let replaced = session.consume(now: start.addingTimeInterval(1), changeCount: 13)
+        #expect(!replaced, "the clipboard was replaced after the cut")
+        #expect(!session.isArmed)
+
+        session.arm(at: start, clipboard: 11...11)
+        let moved = session.consume(now: start.addingTimeInterval(1), changeCount: 11)
+        #expect(moved)
+
+        // Without a recorded count the clipboard is not checked.
+        session.arm(at: start)
+        let unchecked = session.consume(now: start.addingTimeInterval(1), changeCount: 99)
+        #expect(unchecked)
+    }
+
     @Test func anExpiredCutIsNotConsumed() {
         let start = Date(timeIntervalSinceReferenceDate: 3_000)
         var session = FinderCutSession()

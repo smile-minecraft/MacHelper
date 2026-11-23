@@ -139,7 +139,7 @@ final class TweakEngine {
     }
 
     /// The extension's Cut item: from here on the next ⌘V in Finder moves what is on the clipboard.
-    func armFinderCut() { finderCutPaste.armCut() }
+    func armFinderCut(changeCount: Int) { finderCutPaste.armCut(changeCount: changeCount) }
 
     private func publishStatus() {
         let automation = FinderAutomation.permission

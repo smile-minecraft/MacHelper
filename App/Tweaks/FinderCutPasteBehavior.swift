@@ -56,7 +56,8 @@ final class FinderCutPasteBehavior: @unchecked Sendable {
     func reset() { lock.withLock { session.disarm(); focusCache = nil; repeatGuardUntil = .distantPast } }
 
     /// The extension's Cut menu item arms the same session the keyboard does.
-    func armCut() { lock.withLock { session.arm(at: Date()) } }
+    /// The menu wrote the clipboard itself, so it holds the cut exactly while the count is unchanged.
+    func armCut(changeCount: Int) { lock.withLock { session.arm(at: Date(), clipboard: changeCount...changeCount) } }
 
     /// Nil: not a key this behaviour changes.
     func handle(_ type: CGEventType, _ event: CGEvent) -> EventTapService.Outcome? {
@@ -76,7 +77,11 @@ final class FinderCutPasteBehavior: @unchecked Sendable {
             return nil
         case .cut:
             guard isFinderFrontmost(config), !isTextFocus(config) else { return nil }
-            lock.withLock { session.arm(at: Date()) }
+            // Finder's copy bumps the change count by exactly one (measured). No change means
+            // nothing was selected, and any further change means something replaced the copy; in
+            // both cases ⌘V stays a plain paste, the safe direction.
+            let count = NSPasteboard.general.changeCount
+            lock.withLock { session.arm(at: Date(), clipboard: (count + 1)...(count + 1)) }
             // Finder has nothing to do with ⌘X itself; the files reach the clipboard as a copy.
             EventTapService.postKey(keyCode: FinderRules.keyC, flags: TweakRules.commandFlag)
             return .suppress
@@ -93,7 +98,7 @@ final class FinderCutPasteBehavior: @unchecked Sendable {
                 return nil
             }
             let taken = lock.withLock { () -> Bool in
-                guard session.consume(now: Date()) else { return false }
+                guard session.consume(now: Date(), changeCount: NSPasteboard.general.changeCount) else { return false }
                 repeatGuardUntil = Date().addingTimeInterval(2)
                 return true
             }

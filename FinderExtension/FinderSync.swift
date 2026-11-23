@@ -21,19 +21,21 @@ final class FinderSync: FIFinderSync {
         askedKind = menuKind
         switch menuKind {
         case .contextualMenuForItems, .contextualMenuForContainer:
-            return makeMenu()
+            return makeMenu(for: menuKind)
         default:
             return nil
         }
     }
 
-    private func makeMenu() -> NSMenu {
+    private func makeMenu(for menuKind: FIMenuKind) -> NSMenu {
         let menu = NSMenu(title: "")
         menu.addItem(newFileItem())
         menu.addItem(item(String(localized: "Copy Path"), #selector(copyPath(_:))))
         menu.addItem(item(String(localized: "Open in Terminal"), #selector(openTerminal(_:))))
-        // Cut only makes sense on items; on a folder's background it would cut the folder.
-        if !(FIFinderSyncController.default().selectedItemURLs() ?? []).isEmpty {
+        // Cut only makes sense on items; on a folder's background `send` acts on the folder, so
+        // offering Cut there would cut the folder itself.
+        if menuKind == .contextualMenuForItems,
+           !(FIFinderSyncController.default().selectedItemURLs() ?? []).isEmpty {
             menu.addItem(item(String(localized: "Cut"), #selector(cut(_:))))
         }
         return menu
