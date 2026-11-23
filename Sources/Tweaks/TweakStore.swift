@@ -42,7 +42,7 @@ public struct TweakStore: Sendable {
         try data.write(to: temp, options: .atomic)
         do {
             if fm.fileExists(atPath: url.path) {
-                try fm.replaceItemAt(url, withItemAt: temp, backupItemName: nil, options: [])
+                _ = try fm.replaceItemAt(url, withItemAt: temp, backupItemName: nil, options: [])
             } else {
                 try fm.moveItem(at: temp, to: url)
             }

@@ -28,7 +28,8 @@ enum QuitGuardHUD {
 
         hideTask?.cancel()
         hideTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(1600))
+            // A newer hint replaced this one: leave it on screen.
+            guard (try? await Task.sleep(for: .milliseconds(1600))) != nil, !Task.isCancelled else { return }
             NSAnimationContext.beginGrouping()
             NSAnimationContext.current.duration = 0.2
             panel.animator().alphaValue = 0
@@ -115,7 +116,14 @@ final class QuitGuardBehavior: @unchecked Sendable {
         }
     }
 
-    func updateFrontmost(_ bundleID: String?) { lock.withLock { state.config.frontmostBundleID = bundleID } }
+    /// A pending press belongs to the app that was in front when ⌘Q went down; switching apps
+    /// drops it, so the hold can never complete on a different app.
+    func updateFrontmost(_ bundleID: String?) {
+        lock.withLock {
+            if state.config.frontmostBundleID != bundleID { state.press = nil; state.lastPress = nil }
+            state.config.frontmostBundleID = bundleID
+        }
+    }
 
     func reset() { lock.withLock { state.press = nil; state.lastPress = nil } }
 
@@ -126,23 +134,28 @@ final class QuitGuardBehavior: @unchecked Sendable {
         let config = state.config
         guard config.enabled else { return nil }
         if type == .flagsChanged {
-            // Releasing ⌘ before the hold completes cancels the pending quit.
-            if state.press != nil, !TweakRules.isCommandHeld(event.flags.rawValue) { state.press = nil }
+            // Releasing ⌘, or adding ⇧/⌥/⌃, before the hold completes cancels the pending quit:
+            // the shortcut being held is no longer plain ⌘Q / ⌘W.
+            if let press = state.press,
+               !TweakRules.isGuardedKey(keyCode: press.keyCode, flags: event.flags.rawValue, guardCloseWindow: true) {
+                state.press = nil
+            }
             return nil
         }
         guard type == .keyDown || type == .keyUp else { return nil }
         let keyCode = UInt16(truncatingIfNeeded: event.getIntegerValueField(.keyboardEventKeycode))
-        guard TweakRules.isGuardedKey(keyCode: keyCode, flags: event.flags.rawValue, guardCloseWindow: config.guardCloseWindow),
-              TweakRules.shouldGuardQuit(bundleID: config.frontmostBundleID, excludedApps: config.excludedApps,
-                                         ownBundleID: ownBundleID) else { return nil }
-
-        if type == .keyUp {
-            // The release of a press still waiting means it was let go too early.
-            guard let press = state.press, press.keyCode == keyCode else { return nil }
+        // The release of a press still waiting means it was let go too early, whatever the
+        // modifiers or the frontmost app are by now.
+        if type == .keyUp, let press = state.press, press.keyCode == keyCode {
             state.press = nil
             showHint(keyCode: keyCode, doublePress: false)
             return .suppress
         }
+        guard TweakRules.isGuardedKey(keyCode: keyCode, flags: event.flags.rawValue, guardCloseWindow: config.guardCloseWindow),
+              TweakRules.shouldGuardQuit(bundleID: config.frontmostBundleID, excludedApps: config.excludedApps,
+                                         ownBundleID: ownBundleID) else { return nil }
+
+        if type == .keyUp { return nil }
         // Auto-repeat is not a second deliberate press.
         if event.getIntegerValueField(.keyboardEventAutorepeat) != 0 { return .suppress }
 

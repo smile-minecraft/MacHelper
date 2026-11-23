@@ -63,6 +63,14 @@ public struct TweakOptionDefinition: Equatable, Sendable {
         self.allowedValues = allowedValues
     }
 
+    /// JSON has one number type: a Double that happens to be whole (1.0) is written as `1` and
+    /// read back as an int. A whole number is a valid double, so it is converted back here before
+    /// validation instead of being dropped.
+    public func normalized(_ value: TweakValue) -> TweakValue {
+        if kind == .double, case .int(let n) = value { return .double(Double(n)) }
+        return value
+    }
+
     /// The single validation rule for both the UI and the CLI. A value of the wrong Swift type or
     /// outside the declared range is rejected instead of silently changing the tweak's behaviour.
     public func isValid(_ value: TweakValue) -> Bool {

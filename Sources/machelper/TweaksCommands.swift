@@ -230,7 +230,10 @@ struct Tweaks: ParsableCommand {
             }
             guard let parsed = definition.parse(value) else {
                 throw ValidationError("Invalid value \(value) for \(tweak.rawValue).\(option). Expected \(definition.kind.rawValue)"
-                    + (definition.minimum.map { " between \(Int($0)) and \(Int(definition.maximum ?? $0))" } ?? "")
+                    + (definition.minimum.map { min in
+                        let max = definition.maximum ?? min
+                        return definition.kind == .int ? " between \(Int(min)) and \(Int(max))" : " between \(min) and \(max)"
+                    } ?? "")
                     + ".")
             }
             let store = TweakStore()

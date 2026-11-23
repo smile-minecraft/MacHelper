@@ -81,11 +81,11 @@ struct TweaksView: View {
             }
         case .double:
             VStack(alignment: .leading, spacing: 2) {
-                Text("Hold duration: \(model.settings.double(option.id, for: id), specifier: "%lf") s")
+                Text("Hold duration: \(model.settings.double(option.id, for: id), specifier: "%.1f") s")
                     .font(.mhCallout)
                 Slider(value: Binding(get: { model.settings.double(option.id, for: id) },
                                       set: { model.setValue(option.id, for: id, to: .double($0)) }),
-                       in: (option.minimum ?? 0)...(option.maximum ?? 1))
+                       in: (option.minimum ?? 0)...(option.maximum ?? 1), step: 0.1)
             }
         case .string:
             TextField(LocalizedStringKey(optionLabel(option.id)),

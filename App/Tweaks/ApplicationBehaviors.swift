@@ -41,7 +41,8 @@ final class CmdTabRestoreBehavior {
         Task { @MainActor in
             // AX windows are not always published on the first notification after Cmd+Tab.
             try? await Task.sleep(for: .milliseconds(120))
-            guard self.enabled else { return }
+            // The person may have moved on during the wait; only restore the app still in front.
+            guard self.enabled, NSWorkspace.shared.frontmostApplication?.processIdentifier == pid else { return }
             _ = AXWindowTools.restoresLastMinimizedWindow(for: pid)
         }
     }

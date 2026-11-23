@@ -43,8 +43,9 @@ public struct TweakSettings: Codable, Equatable, Sendable {
 
     @discardableResult
     public mutating func setValue(_ option: String, for id: TweakID, to value: TweakValue) -> Bool {
-        guard let definition = TweakCatalog.definition(for: id).option(option),
-              definition.isValid(value) else { return false }
+        guard let definition = TweakCatalog.definition(for: id).option(option) else { return false }
+        let value = definition.normalized(value)
+        guard definition.isValid(value) else { return false }
         var entry = entries[id.rawValue] ?? Entry()
         if value == definition.defaultValue {
             entry.options.removeValue(forKey: option)
@@ -76,12 +77,21 @@ public struct TweakSettings: Codable, Equatable, Sendable {
         let container = try decoder.container(keyedBy: AnyKey.self)
         var decoded: [String: Entry] = [:]
         for key in container.allKeys {
+            // Each value is read on its own: a null, an object or any other value this build
+            // doesn't understand drops only that one key, never the rest of the tweak.
             guard let id = TweakID(rawValue: key.stringValue),
-                  let raw = try? container.decode([String: TweakValue].self, forKey: key) else { continue }
+                  let raw = try? container.nestedContainer(keyedBy: AnyKey.self, forKey: key) else { continue }
             var entry = Entry()
-            if let enabled = raw["enabled"]?.boolValue { entry.enabled = enabled }
+            // A tweak that isn't available in this build is never on, whatever the file says.
+            if TweakCatalog.isAvailable(id), let flag = AnyKey(stringValue: "enabled"),
+               (try? raw.decode(Bool.self, forKey: flag)) == true {
+                entry.enabled = true
+            }
             for option in TweakCatalog.definition(for: id).options {
-                guard let value = raw[option.id], option.isValid(value), value != option.defaultValue else { continue }
+                guard let optionKey = AnyKey(stringValue: option.id),
+                      let stored = try? raw.decode(TweakValue.self, forKey: optionKey) else { continue }
+                let value = option.normalized(stored)
+                guard option.isValid(value), value != option.defaultValue else { continue }
                 entry.options[option.id] = value
             }
             if entry.enabled != nil || !entry.options.isEmpty { decoded[id.rawValue] = entry }

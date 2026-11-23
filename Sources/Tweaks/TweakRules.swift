@@ -6,8 +6,9 @@ import Foundation
 public enum TweakRules {
     public static let commandFlag: UInt64 = 1 << 20
     public static let shiftFlag: UInt64 = 1 << 17
-    public static let alternateFlag: UInt64 = 1 << 18
-    public static let controlFlag: UInt64 = 1 << 19
+    // CGEventFlags: maskControl is bit 18, maskAlternate (Option) bit 19.
+    public static let controlFlag: UInt64 = 1 << 18
+    public static let alternateFlag: UInt64 = 1 << 19
     public static let keyQ: UInt16 = 12
     public static let keyW: UInt16 = 13
 

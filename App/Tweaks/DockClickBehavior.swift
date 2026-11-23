@@ -53,7 +53,11 @@ final class DockClickBehavior: @unchecked Sendable {
         }
         guard type == .leftMouseDown else { return nil }
         let config = lock.withLock { self.config }
+        // ⌃-click (menu), ⌘-click (show in Finder), ⌥-click (hide others) and ⇧-click keep
+        // their Dock meaning.
+        let modifiers = TweakRules.commandFlag | TweakRules.shiftFlag | TweakRules.alternateFlag | TweakRules.controlFlag
         guard config.enabled, let dockPID = config.dockPID, let frontmostPID = config.frontmostPID,
+              event.flags.rawValue & modifiers == 0,
               event.getIntegerValueField(.mouseEventClickState) == 1 else {
             lock.withLock { _ = pairing.mouseDown(matched: false) }
             return nil
@@ -64,6 +68,9 @@ final class DockClickBehavior: @unchecked Sendable {
            let hit = AXWindowTools.dockItem(at: point, dockPID: dockPID) {
             matched = TweakRules.isApplicationDockItem(role: hit.role, subrole: hit.subrole)
                 && TweakRules.shouldActOnDockItem(dockBundleID: hit.bundleID, frontmostBundleID: config.frontmostBundleID)
+                // With nothing on screen (all minimized, or no window at all) the click is the
+                // way back: let the Dock restore or reopen a window.
+                && AXWindowTools.hasVisibleWindow(for: frontmostPID, timeout: 0.1)
         }
         guard lock.withLock({ pairing.mouseDown(matched: matched) }) else { return nil }
 

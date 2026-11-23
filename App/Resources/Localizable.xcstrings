@@ -42764,13 +42764,13 @@
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "無法使用" } }
       }
     },
-    "Hold duration: %lf s": {
+    "Hold duration: %.1f s": {
       "localizations": {
-        "es": { "stringUnit": { "state": "translated", "value": "Duración de pulsación: %lf s" } },
-        "ja": { "stringUnit": { "state": "translated", "value": "長押し時間: %lf 秒" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "길게 누르기 시간: %lf초" } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "长按时长：%lf 秒" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "長按時間：%lf 秒" } }
+        "es": { "stringUnit": { "state": "translated", "value": "Duración de pulsación: %.1f s" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "長押し時間: %.1f 秒" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "길게 누르기 시간: %.1f초" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "长按时长：%.1f 秒" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "長按時間：%.1f 秒" } }
       }
     },
     "Replacement app bundle id": {

@@ -7,10 +7,11 @@ import Tweaks
 /// The AX helpers shared by the window-related tweaks. Everything that can be decided from plain
 /// values lives in TweakRules; this file only talks to the accessibility API.
 enum AXWindowTools {
-    static func windows(for pid: pid_t) -> [AXUIElement] {
+    static func windows(for pid: pid_t, timeout: Float = 0.5) -> [AXUIElement] {
         let app = AXUIElementCreateApplication(pid)
-        // A hung app must not freeze MacHelper's main thread for the default six seconds.
-        AXUIElementSetMessagingTimeout(app, 0.5)
+        // A hung app must not freeze MacHelper for the default six seconds. Elements obtained
+        // from it inherit the application's timeout.
+        AXUIElementSetMessagingTimeout(app, timeout)
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(app, "AXWindows" as CFString, &value) == .success,
               let windows = value as? [AXUIElement] else { return [] }
@@ -19,6 +20,11 @@ enum AXWindowTools {
 
     /// A window the person minimizes and brings back: document windows and dialog-style app windows
     /// (Calculator's only window is an AXDialog). Floating palettes and sheets don't count.
+    /// Whether the app shows at least one ordinary window that isn't minimized.
+    static func hasVisibleWindow(for pid: pid_t, timeout: Float) -> Bool {
+        windows(for: pid, timeout: timeout).contains { isStandardWindow($0) && isVisible($0) }
+    }
+
     static func isStandardWindow(_ window: AXUIElement) -> Bool {
         TweakRules.isUserWindow(subrole: string(window, "AXSubrole"))
     }
@@ -59,8 +65,8 @@ enum AXWindowTools {
         let app = AXUIElementCreateApplication(pid)
         AXUIElementSetMessagingTimeout(app, 0.5)
         var mainValue: CFTypeRef?
-        let main = AXUIElementCopyAttributeValue(app, "AXMainWindow" as CFString, &mainValue) == .success
-            ? (mainValue as! AXUIElement) : nil
+        let main: AXUIElement? = AXUIElementCopyAttributeValue(app, "AXMainWindow" as CFString, &mainValue) == .success
+            && mainValue.map({ CFGetTypeID($0) == AXUIElementGetTypeID() }) == true ? (mainValue as! AXUIElement) : nil
         let index = main.flatMap { m in windows.firstIndex { CFEqual($0, m) } } ?? -1
         let next = windows[(index + 1) % windows.count]
         if isMinimized(next) { AXUIElementSetAttributeValue(next, "AXMinimized" as CFString, false as CFBoolean) }
