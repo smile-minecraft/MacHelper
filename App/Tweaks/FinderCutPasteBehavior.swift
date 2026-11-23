@@ -43,6 +43,9 @@ final class FinderCutPasteBehavior: @unchecked Sendable {
 
     /// Switching apps ends a cut: from then on the clipboard is no longer what the person cut.
     func updateFrontmost(_ app: NSRunningApplication) {
+        // MacHelper itself can come forward for a moment while it handles the extension's URL;
+        // that is not the person leaving Finder, so it neither ends a cut nor changes the app.
+        guard app.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return }
         lock.withLock {
             if config.frontmostBundleID != app.bundleIdentifier { session.disarm() }
             config.frontmostBundleID = app.bundleIdentifier

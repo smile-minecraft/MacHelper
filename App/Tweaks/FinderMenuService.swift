@@ -26,7 +26,7 @@ enum FinderMenuService {
         case .openTerminal:
             openTerminal(with: valid.paths, settings: settings)
         case .cut:
-            cut(valid.paths)
+            cut(valid.paths, moves: settings.isEnabled(.finderCutPaste) && AccessibilityAuthority.isGranted)
         }
     }
 
@@ -61,11 +61,17 @@ enum FinderMenuService {
         NSWorkspace.shared.open(Array(folders), withApplicationAt: app, configuration: NSWorkspace.OpenConfiguration())
     }
 
-    private static func cut(_ paths: [String]) {
+    /// Without the keyboard tweak nothing turns the next ⌘V into a move, so the hint says so
+    /// instead of promising one.
+    private static func cut(_ paths: [String], moves: Bool) {
         let urls = paths.map { URL(fileURLWithPath: $0) }
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.writeObjects(urls as [NSURL])
+        guard moves else {
+            FinderHUD.show(String(localized: "Copied. Turn on Cut and paste files in Finder to move items instead."))
+            return
+        }
         // The keyboard tweak owns the cut state: arming it is what turns the next ⌘V into ⌥⌘V.
         TweakEngine.shared.armFinderCut()
         FinderHUD.show(String(localized: "Cut. Paste in Finder to move the items."))

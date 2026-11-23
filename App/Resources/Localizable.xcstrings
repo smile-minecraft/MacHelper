@@ -43944,6 +43944,15 @@
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "找不到終端機 App。" } }
       }
     },
+    "Copied. Turn on Cut and paste files in Finder to move items instead.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Copiado. Activa Cortar y pegar archivos en el Finder para moverlos." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "コピーしました。移動するには「Finder でファイルをカット＆ペースト」をオンにしてください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "복사했습니다. 이동하려면 'Finder에서 파일 잘라내기 및 붙여넣기'를 켜세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已拷贝。要改为移动，请打开“在 Finder 中剪切和粘贴文件”。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已拷貝。若要改為移動，請開啟「在 Finder 中剪下與貼上檔案」。" } }
+      }
+    },
     "Cut. Paste in Finder to move the items.": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Cortado. Pega en el Finder para mover los elementos." } },

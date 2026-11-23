@@ -87,6 +87,10 @@ final class FinderSync: FIFinderSync {
         guard !paths.isEmpty else { return }
         let request = FinderMenuRequest(action: action, paths: paths, template: template)
         guard let url = FinderMenuURL.make(request) else { return }
-        NSWorkspace.shared.open(url)
+        // The app must not come to the front: the person stays in Finder, and an activation would
+        // also read as switching apps, which ends a cut.
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = false
+        NSWorkspace.shared.open(url, configuration: configuration)
     }
 }
