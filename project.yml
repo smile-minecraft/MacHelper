@@ -55,7 +55,7 @@ targets:
             subpath: Contents/Library/LaunchAgents
     dependencies:
       - package: MacHelperKit
-        products: [HelperProtocol, PrivilegedOps, Theming, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, Telemetry, SettingsPortability, Diagnostics]
+        products: [HelperProtocol, PrivilegedOps, Theming, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, Telemetry, SettingsPortability, Diagnostics, Cable]
       # Xcode 27.2 hangs on Sparkle's SPM binary target; scripts/sparkle/fetch.sh
       # downloads the official release into build/Vendor before xcodegen runs.
       - framework: build/Vendor/Sparkle/Sparkle.xcframework
@@ -133,7 +133,7 @@ targets:
       - path: Sources/machelper
     dependencies:
       - package: MacHelperKit
-        products: [CleanEngine, Diagnostics, DiskScan, Metrics, SMCKit, Storage]
+        products: [CleanEngine, Diagnostics, DiskScan, Metrics, SMCKit, Storage, Cable]
       - package: ArgumentParser
         product: ArgumentParser
     info:

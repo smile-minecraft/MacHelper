@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>Device Speed</key>
+		<integer>2</integer>
+		<key>IOObjectClass</key>
+		<string>IOUSBHostDevice</string>
+		<key>IORegistryEntryName</key>
+		<string>USB2 Hub</string>
+		<key>USB Product Name</key>
+		<string>USB2 Hub</string>
+		<key>USB Vendor Name</key>
+		<string>Apple</string>
+		<key>USBPortType</key>
+		<integer>2</integer>
+		<key>USBSpeed</key>
+		<integer>3</integer>
+		<key>UsbLinkSpeed</key>
+		<integer>480000000</integer>
+		<key>bDeviceClass</key>
+		<integer>9</integer>
+		<key>bcdUSB</key>
+		<integer>528</integer>
+		<key>idProduct</key>
+		<integer>32779</integer>
+		<key>idVendor</key>
+		<integer>1452</integer>
+		<key>locationID</key>
+		<integer>34603008</integer>
+	</dict>
+	<dict>
+		<key>Device Speed</key>
+		<integer>2</integer>
+		<key>IOObjectClass</key>
+		<string>IOUSBHostDevice</string>
+		<key>IORegistryEntryName</key>
+		<string>USB2.0 Hub</string>
+		<key>ParentLocationID</key>
+		<integer>34603008</integer>
+		<key>USB Product Name</key>
+		<string>USB2.0 Hub</string>
+		<key>USB Vendor Name</key>
+		<string>VIA Labs, Inc.</string>
+		<key>USBPortType</key>
+		<integer>5</integer>
+		<key>USBSpeed</key>
+		<integer>3</integer>
+		<key>UsbLinkSpeed</key>
+		<integer>480000000</integer>
+		<key>bDeviceClass</key>
+		<integer>9</integer>
+		<key>bcdUSB</key>
+		<integer>528</integer>
+		<key>idProduct</key>
+		<integer>10274</integer>
+		<key>idVendor</key>
+		<integer>8457</integer>
+		<key>locationID</key>
+		<integer>34668544</integer>
+	</dict>
+	<dict>
+		<key>Device Speed</key>
+		<integer>2</integer>
+		<key>IOObjectClass</key>
+		<string>IOUSBHostDevice</string>
+		<key>IORegistryEntryName</key>
+		<string>USB2.0 Hub</string>
+		<key>ParentLocationID</key>
+		<integer>34668544</integer>
+		<key>USB Product Name</key>
+		<string>USB2.0 Hub</string>
+		<key>USBPortType</key>
+		<integer>0</integer>
+		<key>USBSpeed</key>
+		<integer>3</integer>
+		<key>UsbLinkSpeed</key>
+		<integer>480000000</integer>
+		<key>bDeviceClass</key>
+		<integer>9</integer>
+		<key>bcdUSB</key>
+		<integer>512</integer>
+		<key>idProduct</key>
+		<integer>1560</integer>
+		<key>idVendor</key>
+		<integer>1507</integer>
+		<key>locationID</key>
+		<integer>34672640</integer>
+	</dict>
+	<dict>
+		<key>Device Speed</key>
+		<integer>2</integer>
+		<key>IOObjectClass</key>
+		<string>IOUSBHostDevice</string>
+		<key>IORegistryEntryName</key>
+		<string>USB Storage</string>
+		<key>ParentLocationID</key>
+		<integer>34672640</integer>
+		<key>USB Product Name</key>
+		<string>USB Storage</string>
+		<key>USB Vendor Name</key>
+		<string>Generic</string>
+		<key>USBPortType</key>
+		<integer>1</integer>
+		<key>USBSpeed</key>
+		<integer>3</integer>
+		<key>UsbLinkSpeed</key>
+		<integer>480000000</integer>
+		<key>bDeviceClass</key>
+		<integer>0</integer>
+		<key>bcdUSB</key>
+		<integer>512</integer>
+		<key>idProduct</key>
+		<integer>1874</integer>
+		<key>idVendor</key>
+		<integer>1507</integer>
+		<key>locationID</key>
+		<integer>34672896</integer>
+	</dict>
+	<dict>
+		<key>Device Speed</key>
+		<integer>1</integer>
+		<key>IOObjectClass</key>
+		<string>IOUSBHostDevice</string>
+		<key>IORegistryEntryName</key>
+		<string>Air75 V3 Dongle</string>
+		<key>ParentLocationID</key>
+		<integer>34668544</integer>
+		<key>USB Product Name</key>
+		<string>Air75 V3 Dongle</string>
+		<key>USB Vendor Name</key>
+		<string>NuPhy</string>
+		<key>USBPortType</key>
+		<integer>0</integer>
+		<key>USBSpeed</key>
+		<integer>1</integer>
+		<key>UsbLinkSpeed</key>
+		<integer>12000000</integer>
+		<key>bDeviceClass</key>
+		<integer>0</integer>
+		<key>bcdUSB</key>
+		<integer>272</integer>
+		<key>idProduct</key>
+		<integer>9760</integer>
+		<key>idVendor</key>
+		<integer>6645</integer>
+		<key>locationID</key>
+		<integer>34676736</integer>
+	</dict>
+	<dict>
+		<key>Device Speed</key>
+		<integer>1</integer>
+		<key>IOObjectClass</key>
+		<string>IOUSBHostDevice</string>
+		<key>IORegistryEntryName</key>
+		<string>USB Receiver</string>
+		<key>ParentLocationID</key>
+		<integer>34668544</integer>
+		<key>USB Product Name</key>
+		<string>USB Receiver</string>
+		<key>USB Vendor Name</key>
+		<string>Logitech</string>
+		<key>USBPortType</key>
+		<integer>0</integer>
+		<key>USBSpeed</key>
+		<integer>1</integer>
+		<key>UsbLinkSpeed</key>
+		<integer>12000000</integer>
+		<key>bDeviceClass</key>
+		<integer>0</integer>
+		<key>bcdUSB</key>
+		<integer>512</integer>
+		<key>idProduct</key>
+		<integer>50503</integer>
+		<key>idVendor</key>
+		<integer>1133</integer>
+		<key>locationID</key>
+		<integer>34680832</integer>
+	</dict>
+	<dict>
+		<key>Device Speed</key>
+		<integer>1</integer>
+		<key>IOObjectClass</key>
+		<string>IOUSBHostDevice</string>
+		<key>IORegistryEntryName</key>
+		<string>Air75 V3</string>
+		<key>ParentLocationID</key>
+		<integer>34603008</integer>
+		<key>USB Product Name</key>
+		<string>Air75 V3</string>
+		<key>USB Vendor Name</key>
+		<string>NuPhy</string>
+		<key>USBPortType</key>
+		<integer>5</integer>
+		<key>USBSpeed</key>
+		<integer>1</integer>
+		<key>UsbLinkSpeed</key>
+		<integer>12000000</integer>
+		<key>bDeviceClass</key>
+		<integer>0</integer>
+		<key>bcdUSB</key>
+		<integer>272</integer>
+		<key>idProduct</key>
+		<integer>4136</integer>
+		<key>idVendor</key>
+		<integer>6645</integer>
+		<key>locationID</key>
+		<integer>34734080</integer>
+	</dict>
+	<dict>
+		<key>Device Speed</key>
+		<integer>4</integer>
+		<key>IOObjectClass</key>
+		<string>IOUSBHostDevice</string>
+		<key>IORegistryEntryName</key>
+		<string>USB3 Gen2 Hub</string>
+		<key>USB Product Name</key>
+		<string>USB3 Gen2 Hub</string>
+		<key>USB Vendor Name</key>
+		<string>Apple</string>
+		<key>USBPortType</key>
+		<integer>2</integer>
+		<key>USBSpeed</key>
+		<integer>5</integer>
+		<key>UsbLinkSpeed</key>
+		<integer>10000000000</integer>
+		<key>bDeviceClass</key>
+		<integer>9</integer>
+		<key>bcdUSB</key>
+		<integer>800</integer>
+		<key>idProduct</key>
+		<integer>32780</integer>
+		<key>idVendor</key>
+		<integer>1452</integer>
+		<key>locationID</key>
+		<integer>35651584</integer>
+	</dict>
+	<dict>
+		<key>Device Speed</key>
+		<integer>3</integer>
+		<key>IOObjectClass</key>
+		<string>IOUSBHostDevice</string>
+		<key>IORegistryEntryName</key>
+		<string>USB3.1 Hub</string>
+		<key>ParentLocationID</key>
+		<integer>35651584</integer>
+		<key>USB Product Name</key>
+		<string>USB3.1 Hub</string>
+		<key>USB Vendor Name</key>
+		<string>VIA Labs, Inc.</string>
+		<key>USBPortType</key>
+		<integer>5</integer>
+		<key>USBSpeed</key>
+		<integer>4</integer>
+		<key>UsbLinkSpeed</key>
+		<integer>5000000000</integer>
+		<key>bDeviceClass</key>
+		<integer>9</integer>
+		<key>bcdUSB</key>
+		<integer>800</integer>
+		<key>idProduct</key>
+		<integer>2082</integer>
+		<key>idVendor</key>
+		<integer>8457</integer>
+		<key>locationID</key>
+		<integer>35717120</integer>
+	</dict>
+	<dict>
+		<key>Device Speed</key>
+		<integer>3</integer>
+		<key>IOObjectClass</key>
+		<string>IOUSBHostDevice</string>
+		<key>IORegistryEntryName</key>
+		<string>USB 10/100/1000 LAN</string>
+		<key>ParentLocationID</key>
+		<integer>35717120</integer>
+		<key>USB Product Name</key>
+		<string>USB 10_100_1000 LAN</string>
+		<key>USB Vendor Name</key>
+		<string>Realtek</string>
+		<key>USBPortType</key>
+		<integer>0</integer>
+		<key>USBSpeed</key>
+		<integer>4</integer>
+		<key>UsbLinkSpeed</key>
+		<integer>5000000000</integer>
+		<key>bDeviceClass</key>
+		<integer>0</integer>
+		<key>bcdUSB</key>
+		<integer>800</integer>
+		<key>idProduct</key>
+		<integer>33107</integer>
+		<key>idVendor</key>
+		<integer>3034</integer>
+		<key>locationID</key>
+		<integer>35721216</integer>
+	</dict>
+</array>
+</plist>

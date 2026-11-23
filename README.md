@@ -134,6 +134,8 @@ MacHelper bundles the `machelper` CLI (linked automatically by Homebrew). Every 
 ```sh
 machelper report --json                 # redacted full-system diagnostic report
 machelper status --json                 # live hardware, thermal, fan, and battery snapshot
+machelper cable --json                  # USB-C cables, ports, device tree, displays, charging
+machelper cable charging                # readable charging diagnosis
 machelper clean                         # preview what would be cleaned
 machelper clean --max-risk low --yes    # clean only low-risk items
 ```
@@ -156,6 +158,8 @@ machelper clean --json                   # preview cleanup; confirm with the use
 ```
 
 A machine-friendly index for language models is available in [llms.txt](llms.txt).
+
+`machelper cable` is read-only and needs no administrator rights. It decodes SOP' e-marker VDOs for cable wattage and speed, lists USB-C port activity and the USB/Thunderbolt device tree, reports display links, and explains charging limits. Desktop Macs report charging diagnosis as not applicable. See [Sources/Cable/README.md](Sources/Cable/README.md) for the VDO bit layout and JSON schema notes.
 
 ## FAQ
 

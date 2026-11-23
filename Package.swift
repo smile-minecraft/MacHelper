@@ -18,6 +18,7 @@ let package = Package(
         .library(name: "Telemetry", targets: ["Telemetry"]),
         .library(name: "SettingsPortability", targets: ["SettingsPortability"]),
         .library(name: "Diagnostics", targets: ["Diagnostics"]),
+        .library(name: "Cable", targets: ["Cable"]),
         .executable(name: "machelper", targets: ["machelper"]),
         .executable(name: "mhprobe", targets: ["mhprobe"]),
     ],
@@ -47,9 +48,11 @@ let package = Package(
         .target(name: "Telemetry"),
         .target(name: "SettingsPortability", dependencies: ["CleanEngine", "FanControl"]),
         .target(name: "Diagnostics", dependencies: ["CleanEngine", "Storage"], resources: [.process("Localizable.xcstrings")]),
+        // Read-only USB-C cable, port, device, display and charging diagnostics.
+        .target(name: "Cable", exclude: ["README.md"], linkerSettings: [.linkedFramework("IOKit"), .linkedFramework("CoreGraphics")]),
         .executableTarget(
             name: "machelper",
-            dependencies: ["CleanEngine", "Diagnostics", "DiskScan", "Metrics", "SMCKit", "Storage",
+            dependencies: ["Cable", "CleanEngine", "Diagnostics", "DiskScan", "Metrics", "SMCKit", "Storage",
                            .product(name: "ArgumentParser", package: "swift-argument-parser")]
         ),
         // Fixed allowlists for what the root Helper may delete or switch; no dependencies.
@@ -69,5 +72,6 @@ let package = Package(
         .testTarget(name: "TelemetryTests", dependencies: ["Telemetry"]),
         .testTarget(name: "DiagnosticsTests", dependencies: ["Diagnostics", "Storage"]),
         .testTarget(name: "SettingsPortabilityTests", dependencies: ["SettingsPortability", "CleanEngine", "FanControl"]),
+        .testTarget(name: "CableTests", dependencies: ["Cable"], resources: [.copy("Fixtures")]),
     ]
 )
