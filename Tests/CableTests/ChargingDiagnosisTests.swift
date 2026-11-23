@@ -211,6 +211,22 @@ import Testing
         )) == nil)
     }
 
+    @Test func aDockBesideASeparateChargerOrOnBatteryIsNotReportedAsTheSupply() {
+        let dock = port(number: 2, cable: fiveAmp, partnerVendorID: 1439, transports: [.cc, .cio])
+        // The laptop charges from its own charger on another port.
+        #expect(find("charging.throughHubOrDisplay", in: ChargingDiagnosis.evaluate(
+            power: power(adapter: 96), ports: [dock, chargingPort(number: 3, cable: fiveAmp)]
+        )) == nil)
+        // Running on battery: nothing is supplying power through the dock.
+        #expect(find("charging.throughHubOrDisplay", in: ChargingDiagnosis.evaluate(
+            power: power(adapter: nil, charging: false, external: false), ports: [dock]
+        )) == nil)
+        // The dock is the only power source: reported.
+        #expect(find("charging.throughHubOrDisplay", in: ChargingDiagnosis.evaluate(
+            power: power(adapter: 96), ports: [dock]
+        )) != nil)
+    }
+
     @Test func hotBatteryTriggersOnlyAboveTheThreshold() throws {
         let hot = try #require(find("battery.overheating", in: ChargingDiagnosis.evaluate(power: power(temperature: 46))))
         #expect(hot.severity == .problem)

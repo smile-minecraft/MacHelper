@@ -103,7 +103,12 @@ public enum ChargingDiagnosis {
             guard let number = port.number else { return false }
             return hubPorts.contains(number) || displayPorts.contains(number)
         }
-        if let port = supplyPorts.first {
+        // A dock only explains slow charging when the Mac runs on external power and no
+        // other port has a plain charger on it: a laptop on its own charger with a
+        // Thunderbolt dock beside it is not charging through the dock.
+        let supplyIDs = Set(supplyPorts.map(\.id))
+        let dedicatedChargers = chargingPorts.filter { !supplyIDs.contains($0.id) }
+        if power.externalConnected == true, dedicatedChargers.isEmpty, let port = supplyPorts.first {
             findings.append(ChargingFinding(
                 id: "charging.throughHubOrDisplay",
                 severity: .info,
