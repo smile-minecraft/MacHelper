@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>Active</key>
+		<false/>
+		<key>IOObjectClass</key>
+		<string>IOPortTransportStateCC</string>
+		<key>IORegistryEntryName</key>
+		<string>CC</string>
+		<key>Index</key>
+		<integer>0</integer>
+		<key>Metadata</key>
+		<dict/>
+		<key>ParentBuiltInPortNumber</key>
+		<integer>1</integer>
+		<key>ParentPortNumber</key>
+		<integer>1</integer>
+		<key>ParentPortTypeDescription</key>
+		<string>USB-C</string>
+		<key>TransportDescription</key>
+		<string>Port-USB-C@1/CC</string>
+		<key>TransportTypeDescription</key>
+		<string>CC</string>
+		<key>Tunneled</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>Active</key>
+		<true/>
+		<key>IOObjectClass</key>
+		<string>IOPortTransportStateCC</string>
+		<key>IORegistryEntryChildren</key>
+		<array>
+			<dict>
+				<key>Address Description</key>
+				<string>SOP</string>
+				<key>ComponentName</key>
+				<string>SOP</string>
+				<key>IOObjectClass</key>
+				<string>IOPortTransportComponentCCUSBPDSOP</string>
+				<key>IORegistryEntryName</key>
+				<string>SOP</string>
+				<key>Metadata</key>
+				<dict>
+					<key>Product ID</key>
+					<integer>4321</integer>
+					<key>VDOs</key>
+					<array>
+						<data>
+						nwUAbA==
+						</data>
+						<data>
+						AAAAAA==
+						</data>
+						<data>
+						AADhEA==
+						</data>
+						<data>
+						CgAAAA==
+						</data>
+					</array>
+					<key>Vendor ID</key>
+					<integer>1439</integer>
+					<key>bcdDevice</key>
+					<integer>0</integer>
+				</dict>
+				<key>ParentBuiltInPortNumber</key>
+				<integer>2</integer>
+				<key>ParentPortNumber</key>
+				<integer>2</integer>
+				<key>ParentPortTypeDescription</key>
+				<string>USB-C</string>
+				<key>Product ID</key>
+				<integer>4321</integer>
+				<key>Vendor ID</key>
+				<integer>1439</integer>
+			</dict>
+			<dict>
+				<key>Address Description</key>
+				<string>SOP'</string>
+				<key>ComponentName</key>
+				<string>SOP'</string>
+				<key>IOObjectClass</key>
+				<string>IOPortTransportComponentCCUSBPDSOPp</string>
+				<key>IORegistryEntryName</key>
+				<string>SOP'</string>
+				<key>Metadata</key>
+				<dict>
+					<key>Product ID</key>
+					<integer>12290</integer>
+					<key>Product Type</key>
+					<integer>3</integer>
+					<key>Product Type Description</key>
+					<string>Passive Cable</string>
+					<key>VDOs</key>
+					<array>
+						<data>
+						6TZgHA==
+						</data>
+						<data>
+						RFEBAA==
+						</data>
+						<data>
+						VDsCMA==
+						</data>
+						<data>
+						QyYKJQ==
+						</data>
+					</array>
+					<key>Vendor ID</key>
+					<integer>14057</integer>
+					<key>bcdDevice</key>
+					<integer>15188</integer>
+				</dict>
+				<key>ParentBuiltInPortNumber</key>
+				<integer>2</integer>
+				<key>ParentPortNumber</key>
+				<integer>2</integer>
+				<key>ParentPortTypeDescription</key>
+				<string>USB-C</string>
+				<key>Product ID</key>
+				<integer>12290</integer>
+				<key>Product Type</key>
+				<integer>3</integer>
+				<key>Product Type Description</key>
+				<string>Passive Cable</string>
+				<key>Vendor ID</key>
+				<integer>14057</integer>
+			</dict>
+		</array>
+		<key>IORegistryEntryName</key>
+		<string>CC</string>
+		<key>Index</key>
+		<integer>0</integer>
+		<key>Metadata</key>
+		<dict/>
+		<key>ParentBuiltInPortNumber</key>
+		<integer>2</integer>
+		<key>ParentPortNumber</key>
+		<integer>2</integer>
+		<key>ParentPortTypeDescription</key>
+		<string>USB-C</string>
+		<key>Product ID (SOP)</key>
+		<integer>4321</integer>
+		<key>TransportDescription</key>
+		<string>Port-USB-C@2/CC</string>
+		<key>TransportTypeDescription</key>
+		<string>CC</string>
+		<key>Tunneled</key>
+		<false/>
+		<key>Vendor ID (SOP)</key>
+		<integer>1439</integer>
+	</dict>
+	<dict>
+		<key>Active</key>
+		<false/>
+		<key>IOObjectClass</key>
+		<string>IOPortTransportStateCC</string>
+		<key>IORegistryEntryName</key>
+		<string>CC</string>
+		<key>Index</key>
+		<integer>0</integer>
+		<key>Metadata</key>
+		<dict/>
+		<key>ParentBuiltInPortNumber</key>
+		<integer>4</integer>
+		<key>ParentPortNumber</key>
+		<integer>4</integer>
+		<key>ParentPortTypeDescription</key>
+		<string>USB-C</string>
+		<key>TransportDescription</key>
+		<string>Port-USB-C@4/CC</string>
+		<key>TransportTypeDescription</key>
+		<string>CC</string>
+		<key>Tunneled</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>Active</key>
+		<true/>
+		<key>DataRateDescription</key>
+		<string>480 Mbps (High Speed)</string>
+		<key>Generation</key>
+		<integer>1</integer>
+		<key>GenerationDescription</key>
+		<string>USB 2.0</string>
+		<key>IOObjectClass</key>
+		<string>IOPortTransportStateUSB2</string>
+		<key>IORegistryEntryName</key>
+		<string>USB2</string>
+		<key>Index</key>
+		<integer>0</integer>
+		<key>Manufacturer</key>
+		<string>VIA Labs, Inc.</string>
+		<key>Metadata</key>
+		<dict>
+			<key>Product ID</key>
+			<integer>10274</integer>
+			<key>Vendor ID</key>
+			<integer>8457</integer>
+		</dict>
+		<key>ParentBuiltInPortNumber</key>
+		<integer>5</integer>
+		<key>ParentPortNumber</key>
+		<integer>5</integer>
+		<key>ParentPortTypeDescription</key>
+		<string>USB-C</string>
+		<key>Product</key>
+		<string>USB2.0 Hub</string>
+		<key>Product ID</key>
+		<integer>10274</integer>
+		<key>TransportDescription</key>
+		<string>Port-USB-C@5/USB2</string>
+		<key>TransportTypeDescription</key>
+		<string>USB2</string>
+		<key>Tunneled</key>
+		<false/>
+		<key>Vendor ID</key>
+		<integer>8457</integer>
+	</dict>
+	<dict>
+		<key>Active</key>
+		<true/>
+		<key>DataRateDescription</key>
+		<string>12 Mbps (Full Speed)</string>
+		<key>Generation</key>
+		<integer>1</integer>
+		<key>GenerationDescription</key>
+		<string>USB 2.0</string>
+		<key>IOObjectClass</key>
+		<string>IOPortTransportStateUSB2</string>
+		<key>IORegistryEntryName</key>
+		<string>USB2</string>
+		<key>Index</key>
+		<integer>0</integer>
+		<key>Manufacturer</key>
+		<string>NuPhy</string>
+		<key>Metadata</key>
+		<dict>
+			<key>Product ID</key>
+			<integer>4136</integer>
+			<key>Vendor ID</key>
+			<integer>6645</integer>
+		</dict>
+		<key>ParentBuiltInPortNumber</key>
+		<integer>6</integer>
+		<key>ParentPortNumber</key>
+		<integer>6</integer>
+		<key>ParentPortTypeDescription</key>
+		<string>USB-C</string>
+		<key>Product</key>
+		<string>Air75 V3</string>
+		<key>Product ID</key>
+		<integer>4136</integer>
+		<key>TransportDescription</key>
+		<string>Port-USB-C@6/USB2</string>
+		<key>TransportTypeDescription</key>
+		<string>USB2</string>
+		<key>Tunneled</key>
+		<false/>
+		<key>Vendor ID</key>
+		<integer>6645</integer>
+	</dict>
+	<dict>
+		<key>Active</key>
+		<true/>
+		<key>DataRateDescription</key>
+		<string>5 Gbps</string>
+		<key>Generation</key>
+		<integer>2</integer>
+		<key>GenerationDescription</key>
+		<string>USB 3.x</string>
+		<key>IOObjectClass</key>
+		<string>IOPortTransportStateUSB3</string>
+		<key>IORegistryEntryName</key>
+		<string>USB3</string>
+		<key>Index</key>
+		<integer>0</integer>
+		<key>Manufacturer</key>
+		<string>VIA Labs, Inc.</string>
+		<key>Metadata</key>
+		<dict>
+			<key>Product ID</key>
+			<integer>2082</integer>
+			<key>Vendor ID</key>
+			<integer>8457</integer>
+		</dict>
+		<key>ParentBuiltInPortNumber</key>
+		<integer>5</integer>
+		<key>ParentPortNumber</key>
+		<integer>5</integer>
+		<key>ParentPortTypeDescription</key>
+		<string>USB-C</string>
+		<key>Product</key>
+		<string>USB3.1 Hub</string>
+		<key>Product ID</key>
+		<integer>2082</integer>
+		<key>TransportDescription</key>
+		<string>Port-USB-C@5/USB3</string>
+		<key>TransportTypeDescription</key>
+		<string>USB3</string>
+		<key>Tunneled</key>
+		<false/>
+		<key>Vendor ID</key>
+		<integer>8457</integer>
+	</dict>
+	<dict>
+		<key>Active</key>
+		<false/>
+		<key>DataRateDescription</key>
+		<string>None</string>
+		<key>Generation</key>
+		<integer>2</integer>
+		<key>GenerationDescription</key>
+		<string>USB 3.x</string>
+		<key>IOObjectClass</key>
+		<string>IOPortTransportStateUSB3</string>
+		<key>IORegistryEntryName</key>
+		<string>USB3</string>
+		<key>Index</key>
+		<integer>0</integer>
+		<key>Metadata</key>
+		<dict/>
+		<key>ParentBuiltInPortNumber</key>
+		<integer>6</integer>
+		<key>ParentPortNumber</key>
+		<integer>6</integer>
+		<key>ParentPortTypeDescription</key>
+		<string>USB-C</string>
+		<key>TransportDescription</key>
+		<string>Port-USB-C@6/USB3</string>
+		<key>TransportTypeDescription</key>
+		<string>USB3</string>
+		<key>Tunneled</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>Active</key>
+		<true/>
+		<key>CableGeneration</key>
+		<integer>1</integer>
+		<key>CableSpeed</key>
+		<integer>3</integer>
+		<key>Device ID</key>
+		<integer>5615</integer>
+		<key>Device Model Name</key>
+		<string>TBU405Pro</string>
+		<key>Device Vendor ID</key>
+		<integer>37</integer>
+		<key>Device Vendor Name</key>
+		<string>ACASIS</string>
+		<key>Generation</key>
+		<integer>2</integer>
+		<key>IOObjectClass</key>
+		<string>IOPortTransportStateCIO</string>
+		<key>IORegistryEntryChildren</key>
+		<array>
+			<dict>
+				<key>Active</key>
+				<false/>
+				<key>IOObjectClass</key>
+				<string>IOPortTransportStatePCIe</string>
+				<key>IORegistryEntryName</key>
+				<string>PCIe</string>
+				<key>Index</key>
+				<integer>0</integer>
+				<key>Metadata</key>
+				<dict/>
+				<key>ParentBuiltInPortNumber</key>
+				<integer>2</integer>
+				<key>ParentPortNumber</key>
+				<integer>2</integer>
+				<key>ParentPortTypeDescription</key>
+				<string>USB-C</string>
+				<key>TransportDescription</key>
+				<string>Port-USB-C@2/CIO/PCIe@0</string>
+				<key>TransportTypeDescription</key>
+				<string>PCIe</string>
+				<key>Tunneled</key>
+				<true/>
+			</dict>
+		</array>
+		<key>IORegistryEntryName</key>
+		<string>CIO</string>
+		<key>Index</key>
+		<integer>0</integer>
+		<key>Metadata</key>
+		<dict>
+			<key>Vendor ID</key>
+			<integer>32902</integer>
+		</dict>
+		<key>ParentBuiltInPortNumber</key>
+		<integer>2</integer>
+		<key>ParentPortNumber</key>
+		<integer>2</integer>
+		<key>ParentPortTypeDescription</key>
+		<string>USB-C</string>
+		<key>TransportDescription</key>
+		<string>Port-USB-C@2/CIO</string>
+		<key>TransportTypeDescription</key>
+		<string>CIO</string>
+		<key>Tunneled</key>
+		<false/>
+		<key>Vendor ID</key>
+		<integer>32902</integer>
+	</dict>
+	<dict>
+		<key>Active</key>
+		<true/>
+		<key>IOObjectClass</key>
+		<string>IOPortTransportStateDisplayPort</string>
+		<key>IORegistryEntryName</key>
+		<string>DisplayPort</string>
+		<key>Index</key>
+		<integer>0</integer>
+		<key>LaneCount</key>
+		<integer>4</integer>
+		<key>LinkRateDescription</key>
+		<string>8.1 Gbps (HBR3)</string>
+		<key>ManufacturerName</key>
+		<string>MSI</string>
+		<key>Metadata</key>
+		<dict/>
+		<key>ParentBuiltInPortNumber</key>
+		<integer>1</integer>
+		<key>ParentPortNumber</key>
+		<integer>1</integer>
+		<key>ParentPortTypeDescription</key>
+		<string>HDMI</string>
+		<key>ProductID</key>
+		<integer>15600</integer>
+		<key>ProductName</key>
+		<string>MPG 274U E16M</string>
+		<key>RoleDescription</key>
+		<string>Source</string>
+		<key>TransportDescription</key>
+		<string>Port-HDMI@1/DisplayPort</string>
+		<key>TransportTypeDescription</key>
+		<string>DisplayPort</string>
+		<key>Tunneled</key>
+		<false/>
+	</dict>
+	<dict>
+		<key>Active</key>
+		<false/>
+		<key>IOObjectClass</key>
+		<string>IOPortTransportStatePCIe</string>
+		<key>IORegistryEntryName</key>
+		<string>PCIe</string>
+		<key>Index</key>
+		<integer>0</integer>
+		<key>Metadata</key>
+		<dict/>
+		<key>ParentBuiltInPortNumber</key>
+		<integer>2</integer>
+		<key>ParentPortNumber</key>
+		<integer>2</integer>
+		<key>ParentPortTypeDescription</key>
+		<string>USB-C</string>
+		<key>TransportDescription</key>
+		<string>Port-USB-C@2/CIO/PCIe@0</string>
+		<key>TransportTypeDescription</key>
+		<string>PCIe</string>
+		<key>Tunneled</key>
+		<true/>
+	</dict>
+</array>
+</plist>
