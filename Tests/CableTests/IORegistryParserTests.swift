@@ -31,6 +31,10 @@ import Testing
         #expect(port2.activeTransports.contains(.cio))
         #expect(port2.partner?.vendorID == 1439)
         #expect(port2.partner?.productID == 4321)
+        // The CIO node exposes codes, not rates; never print "Gen2" for 10 Gbps.
+        #expect(port2.negotiatedSpeed?.contains("generation code 2") == true)
+        #expect(port2.negotiatedSpeed?.contains("cable speed code 3") == true)
+        #expect(port2.negotiatedSpeed?.contains("Gen2") == false)
         let cable = try #require(port2.cable)
         #expect(cable.kind == .passive)
         #expect(cable.speed == .usb4Gen3)
@@ -53,6 +57,8 @@ import Testing
         let usb2Root = try #require(roots.first { $0.name == "USB2 Hub" })
         #expect(usb2Root.isHub)
         #expect(usb2Root.negotiatedSpeedMbps == 480)
+        // bcdUSB 0x210 describes the protocol, not a 480 Mbps capability.
+        #expect(usb2Root.maxSpeedMbps == nil)
         let viaHub = try #require(usb2Root.children.first { $0.name == "USB2.0 Hub" })
         #expect(viaHub.isHub)
         #expect(viaHub.vendorID == 8457)
@@ -62,10 +68,85 @@ import Testing
 
         let usb3Root = try #require(roots.first { $0.name == "USB3 Gen2 Hub" })
         #expect(usb3Root.negotiatedSpeedMbps == 10_000)
+        // A 3.x device proves at least 5 Gbps; 10 Gbps negotiated raises the floor.
+        #expect(usb3Root.maxSpeedMbps == 10_000)
         let gen1Hub = try #require(usb3Root.children.first { $0.name == "USB3.1 Hub" })
         #expect(gen1Hub.negotiatedSpeedMbps == 5_000)
-        #expect(gen1Hub.maxSpeedMbps == 10_000)
-        #expect(gen1Hub.children.contains { $0.name == "USB 10_100_1000 LAN" })
+        // bcdUSB 0x320 does not prove Gen2: the hub itself negotiated 5 Gbps.
+        #expect(gen1Hub.maxSpeedMbps == 5_000)
+        let lan = try #require(gen1Hub.children.first { $0.name == "USB 10_100_1000 LAN" })
+        #expect(lan.maxSpeedMbps == 5_000)
+
+        // A USB 2.0 protocol device cannot claim a SuperSpeed maximum.
+        let air75 = try #require(usb2Root.children.first { $0.name == "Air75 V3" })
+        #expect(air75.maxSpeedMbps == nil)
+        let receiver = try #require(viaHub.children.first { $0.name == "USB Receiver" })
+        #expect(receiver.maxSpeedMbps == nil)
+    }
+
+    @Test func fixtureAttributesUSBDevicesToTheirUSBCPorts() throws {
+        let tree = IORegistryParser.attributeUSBPorts(
+            devices: IORegistryParser.parseUSBDevices(devices),
+            states: states
+        )
+        let usb2Root = try #require(tree.first { $0.name == "USB2 Hub" })
+        let usb3Root = try #require(tree.first { $0.name == "USB3 Gen2 Hub" })
+        // The Mac's own root hubs match no port transport state.
+        #expect(usb2Root.portNumber == nil)
+        #expect(usb2Root.isBuiltIn)
+        #expect(usb3Root.portNumber == nil)
+        #expect(usb3Root.isBuiltIn)
+
+        let viaUSB2Hub = try #require(usb2Root.children.first { $0.name == "USB2.0 Hub" && $0.vendorID == 8457 })
+        #expect(viaUSB2Hub.portNumber == 5)
+        #expect(!viaUSB2Hub.isBuiltIn)
+        // Every descendant of a matched hub inherits the port.
+        let downstreamHub = try #require(viaUSB2Hub.children.first { $0.name == "USB2.0 Hub" })
+        #expect(downstreamHub.portNumber == 5)
+        #expect(downstreamHub.children.first { $0.name == "USB Storage" }?.portNumber == 5)
+        #expect(viaUSB2Hub.children.first { $0.name == "Air75 V3 Dongle" }?.portNumber == 5)
+        #expect(viaUSB2Hub.children.first { $0.name == "USB Receiver" }?.portNumber == 5)
+
+        // The keyboard sits directly on port 6 while both VIA hubs share port 5.
+        #expect(usb2Root.children.first { $0.name == "Air75 V3" }?.portNumber == 6)
+        let viaUSB3Hub = try #require(usb3Root.children.first { $0.name == "USB3.1 Hub" })
+        #expect(viaUSB3Hub.portNumber == 5)
+        #expect(viaUSB3Hub.children.first { $0.name == "USB 10_100_1000 LAN" }?.portNumber == 5)
+    }
+
+    @Test func identicalDevicesNeedTheReportedNameToPickAPort() {
+        // Two identical receivers: only the name in the port state tells them apart.
+        let devices: [[String: Any]] = [
+            ["IOObjectClass": "IOUSBHostDevice", "USB Product Name": "Receiver A", "idVendor": 1133, "idProduct": 50503, "locationID": 1],
+            ["IOObjectClass": "IOUSBHostDevice", "USB Product Name": "Receiver B", "idVendor": 1133, "idProduct": 50503, "locationID": 2],
+        ]
+        let hint: [[String: Any]] = [[
+            "IOObjectClass": "IOPortTransportStateUSB2",
+            "ParentPortNumber": 6,
+            "ParentPortTypeDescription": "USB-C",
+            "Vendor ID": 1133,
+            "Product ID": 50503,
+            "Product": "Receiver B",
+        ]]
+        let tree = IORegistryParser.attributeUSBPorts(
+            devices: IORegistryParser.parseUSBDevices(devices),
+            states: hint
+        )
+        #expect(tree.first { $0.name == "Receiver B" }?.portNumber == 6)
+        #expect(tree.first { $0.name == "Receiver A" }?.portNumber == nil)
+        #expect(tree.first { $0.name == "Receiver A" }?.isBuiltIn == true)
+    }
+
+    @Test func malformedPortStatesAttributeNothing() {
+        let tree = IORegistryParser.attributeUSBPorts(
+            devices: IORegistryParser.parseUSBDevices(devices),
+            states: [
+                ["IOObjectClass": "IOPortTransportStateUSB2", "ParentPortNumber": "broken"],
+                ["IOObjectClass": "IOPortTransportStateUSB3", "ParentPortTypeDescription": "USB-A", "ParentPortNumber": 3, "Vendor ID": 8457, "Product ID": 2082],
+                ["IOObjectClass": "IOPortTransportStateCC", "ParentPortNumber": 5, "Vendor ID": 8457, "Product ID": 2082],
+            ]
+        )
+        #expect(tree.allSatisfy { $0.portNumber == nil })
     }
 
     @Test func fixtureParsesDisplayThroughItsRealPort() throws {

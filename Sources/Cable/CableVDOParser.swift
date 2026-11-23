@@ -2,17 +2,23 @@ import Foundation
 
 /// Decodes USB Power Delivery Discover Identity cable VDOs.
 ///
-/// Bit layout (PD 3.1 Table 6.45 "Passive Cable VDO", Table 6.47 "Active Cable VDO1",
-/// Table 6.48 "Active Cable VDO2"; unchanged in PD 3.2/3.3):
+/// Bit layout (PD 3.1/3.2/3.3 Table 6.45 "Passive Cable VDO", Table 6.47
+/// "Active Cable VDO1", Table 6.48 "Active Cable VDO2"):
 ///
 /// ```text
 /// 31..28 Hardware Version   27..24 Firmware Version   23..21 VDO Version
 /// 20     Reserved           19..18 Plug Type          17     EPR capable
 /// 16..13 Cable Latency      12..11 Termination        10..9  Maximum VBUS voltage
-/// 8..7   Reserved (passive) / SBU flags (active)
+/// 8..7   Reserved (passive) / 8 SBU supported, 7 SBU type (active)
 /// 6..5   VBUS current       4      VBUS through cable (active) / reserved (passive)
 /// 3      SOP'' controller (active) / reserved (passive)   2..0 USB highest speed
 /// ```
+///
+/// Active Cable VDO2 adds the temperatures and the construction bits: bit 10
+/// copper/optical, bit 9 re-driver/re-timer, bit 8 USB4 supported, bits 7..6 USB 2.0
+/// hub hops, bit 5 USB 2.0 supported, bit 4 USB 3.2 supported, bit 3 lane count,
+/// bit 2 optically isolated, bit 1 USB4 asymmetric mode supported (reserved in
+/// PD 3.0), bit 0 Gen 2 or higher.
 ///
 /// Codes: current 01b = 3 A, 10b = 5 A; voltage 00b = 20 V, 11b = 50 V
 /// (01b/10b are deprecated and receivers shall assume 20 V); speed
@@ -61,6 +67,8 @@ public enum CableVDOParser {
             sbuActive = bit(vdo1, 8) == 0 ? bit(vdo1, 7) == 1 : nil
             vbusThroughCable = bit(vdo1, 4) == 1
             sopPrimeController = bit(vdo1, 3) == 1
+            // Active Cable VDO2, PD 3.3 Table 6.48. Bit 1 is "USB4 Asymmetric
+            // Mode Supported" since PD 3.1; PD 3.0 called it reserved.
             if let vdo2 = activeVDO2 {
                 activeDetails = ActiveCableDetails(
                     vdo2: vdo2,
@@ -110,7 +118,11 @@ public enum CableVDOParser {
     }
 
     /// Decodes a VDO array in wire order. IORegistry exposes each 4-byte VDO as
-    /// little-endian `Data`; index 3 is the cable VDO, index 4/5 active VDO2/3.
+    /// little-endian `Data`. SOP' answers Discover Identity with [ID Header, Cert
+    /// Stat, Product, Cable VDO] for a passive cable and [ID Header, Cert Stat,
+    /// Product, Active Cable VDO1, Active Cable VDO2] for an active one: index 3 is
+    /// always the VDO that carries speed, current and voltage, and an active cable
+    /// appends VDO2 at index 4.
     public static func decode(vdos: [Data], kind: CableKind, vendorID: Int?, productID: Int?) -> CableSpec? {
         let words = vdos.compactMap { data -> UInt32? in
             guard data.count >= 4 else { return nil }
@@ -119,15 +131,14 @@ public enum CableVDOParser {
             return value
         }
         guard words.count > 3 else { return nil }
-        let active1: UInt32? = kind == .active && words.count > 4 ? words[4] : nil
-        let active2: UInt32? = kind == .active && words.count > 5 ? words[5] : nil
+        let activeVDO2: UInt32? = kind == .active && words.count > 4 ? words[4] : nil
         return decode(
-            cableVDO: active1 ?? words[3],
+            cableVDO: words[3],
             kind: kind,
             vendorID: vendorID,
             productID: productID,
-            activeVDO1: active1,
-            activeVDO2: active2,
+            activeVDO1: kind == .active ? words[3] : nil,
+            activeVDO2: activeVDO2,
             rawVDOs: words
         )
     }

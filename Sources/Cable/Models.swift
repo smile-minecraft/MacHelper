@@ -361,8 +361,15 @@ public struct USBDeviceNode: Sendable, Codable, Hashable {
     public var productID: Int?
     public var deviceClass: Int?
     public var isHub: Bool
+    /// USB-C port this device sits behind, resolved from the port's transport state.
     public var portNumber: Int?
+    /// No USB-C port could be attributed: the Mac's own built-in hub tree, or a
+    /// root that matches no port state. ``portNumber`` is nil in both cases.
+    public var isBuiltIn: Bool
     public var negotiatedSpeedMbps: Int?
+    /// Highest speed the descriptor proves. IORegistry exposes no BOS capability
+    /// descriptor, so this is nil for a USB 2.x device and at least 5 Gbps for a
+    /// USB 3.x device: it is a floor, not a full capability list.
     public var maxSpeedMbps: Int?
     public var children: [USBDeviceNode]
 
@@ -376,6 +383,7 @@ public struct USBDeviceNode: Sendable, Codable, Hashable {
         deviceClass: Int? = nil,
         isHub: Bool = false,
         portNumber: Int? = nil,
+        isBuiltIn: Bool = false,
         negotiatedSpeedMbps: Int? = nil,
         maxSpeedMbps: Int? = nil,
         children: [USBDeviceNode] = []
@@ -389,6 +397,7 @@ public struct USBDeviceNode: Sendable, Codable, Hashable {
         self.deviceClass = deviceClass
         self.isHub = isHub
         self.portNumber = portNumber
+        self.isBuiltIn = isBuiltIn
         self.negotiatedSpeedMbps = negotiatedSpeedMbps
         self.maxSpeedMbps = maxSpeedMbps
         self.children = children

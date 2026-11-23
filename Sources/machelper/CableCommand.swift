@@ -52,7 +52,10 @@ private enum CableText {
     static func deviceTree(_ nodes: [USBDeviceNode], indent: String = "") {
         for node in nodes {
             let hub = node.isHub ? " [hub]" : ""
-            Output.line("\(indent)\(node.name)\(hub)  \(speed(node.negotiatedSpeedMbps)) / max \(speed(node.maxSpeedMbps))")
+            let port = node.portNumber.map { " port \($0)" } ?? " (built in; port unknown)"
+            // No "max" claim when the descriptor does not prove a speed.
+            let maximum = node.maxSpeedMbps.map { " / max \(speed($0))" } ?? ""
+            Output.line("\(indent)\(node.name)\(hub)\(port)  \(speed(node.negotiatedSpeedMbps))\(maximum)")
             deviceTree(node.children, indent: indent + "  ")
         }
     }
@@ -166,7 +169,9 @@ struct CableDevices: ParsableCommand {
             CableText.deviceTree(snapshot.usbDevices)
         }
         for device in snapshot.thunderboltDevices {
-            Output.line("Thunderbolt: \(device.name)  Gen\(device.generation.map(String.init) ?? "?")  cable speed \(device.cableSpeed.map(String.init) ?? "?")")
+            let generation = device.generation.map(String.init) ?? "?"
+            let cableSpeed = device.cableSpeed.map(String.init) ?? "?"
+            Output.line("Thunderbolt: \(device.name)  generation code \(generation), cable speed code \(cableSpeed)")
         }
     }
 }

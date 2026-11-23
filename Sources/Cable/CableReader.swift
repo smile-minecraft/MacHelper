@@ -16,7 +16,10 @@ public enum CableReader {
         let cabledNodes = services(matching: "IOPortTransportComponentCCUSBPDSOPp")
         let ports = IORegistryParser.parsePorts(ports: portNodes, states: states, cables: cabledNodes)
         let cables = IORegistryParser.parseCables(cabledNodes)
-        let devices = IORegistryParser.parseUSBDevices(usbDevices())
+        let devices = IORegistryParser.attributeUSBPorts(
+            devices: IORegistryParser.parseUSBDevices(usbDevices()),
+            states: states
+        )
         let displays = IORegistryDisplayParser.parseDisplays(states: states, modes: displayModes())
         let thunderbolt = IORegistryThunderboltParser.parse(states)
         let battery = services(matching: "AppleSmartBattery").first ?? [:]
@@ -31,7 +34,7 @@ public enum CableReader {
             displays: displays,
             power: power,
             findings: ChargingDiagnosis.evaluate(
-                power: power, ports: ports, cables: cables, usbDevices: devices, displays: displays
+                power: power, ports: ports, usbDevices: devices, displays: displays
             )
         )
     }

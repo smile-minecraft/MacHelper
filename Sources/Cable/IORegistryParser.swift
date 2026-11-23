@@ -133,7 +133,12 @@ public enum IORegistryParser {
         if let cio, flag(cio, "Active") == true {
             let generation = number(cio, "Generation").map(String.init) ?? "?"
             let cable = number(cio, "CableSpeed").map(String.init) ?? "?"
-            return "CIO Gen\(generation) / cable speed \(cable)"
+            // IOPortTransportStateCIO exposes link codes, not rates. No Apple
+            // documentation maps Generation/CableSpeed onto a Thunderbolt generation
+            // or Gb/s, and a single machine's system_profiler entry (Thunderbolt 3,
+            // 40 Gb/s at generation 2 / cable speed 3) is not a mapping table, so the
+            // codes are reported as codes: "Gen2" would read like USB 10 Gbps.
+            return "Thunderbolt/USB4 link active (generation code \(generation), cable speed code \(cable))"
         }
         let usb3 = stateNodes(states, containing: "USB3").first(where: { flag($0, "Active") == true })
         if let rate = usb3.flatMap({ text($0, "DataRateDescription") }) { return rate }
@@ -219,17 +224,23 @@ public enum IORegistryParser {
     // MARK: - USB device tree
 
     /// `parentLocationID` is added by the reader from the IORegistry parent chain.
+    /// `IOUSBHostDevice` carries no port key, so a device's port is filled in later
+    /// by ``attributeUSBPorts(devices:states:)``.
     public static func parseUSBDevices(_ nodes: [[String: Any]]) -> [USBDeviceNode] {
-        var all: [USBDeviceNode] = nodes.compactMap { node in
+        let all: [USBDeviceNode] = nodes.compactMap { node in
             guard text(node, "IOObjectClass") == "IOUSBHostDevice" else { return nil }
-            let bcd = number(node, "bcdUSB") ?? 0
-            let maxSpeed: Int? = switch bcd {
-            case 0: nil
-            case 1...0x1FF: 12
-            case 0x200..<0x300: 480
-            case 0x300..<0x320: 5_000
-            default: 10_000
-            }
+            let bcd = number(node, "bcdUSB")
+            let negotiated = number(node, "UsbLinkSpeed").map { $0 / 1_000_000 }
+            // bcdUSB is the protocol version the device speaks, not its link rate:
+            // IORegistry exposes no BOS Device Capability descriptor. A 3.x device
+            // is at least a 5 Gbps device (which matches what it negotiated when the
+            // link is SuperSpeed), while 2.x and below prove nothing about a
+            // SuperSpeed capability, so the maximum stays unknown instead of
+            // claiming 480 Mbps for a bcdUSB 0x200 device.
+            let maxSpeed: Int? = {
+                guard let bcd, bcd >= 0x300 else { return nil }
+                return max(negotiated ?? 5_000, 5_000)
+            }()
             return USBDeviceNode(
                 locationID: number(node, "locationID").flatMap { UInt64(exactly: $0) },
                 parentLocationID: number(node, "ParentLocationID").flatMap { UInt64(exactly: $0) },
@@ -239,8 +250,7 @@ public enum IORegistryParser {
                 productID: number(node, "idProduct"),
                 deviceClass: number(node, "bDeviceClass"),
                 isHub: number(node, "bDeviceClass") == 9,
-                portNumber: number(node, "PortNumber"),
-                negotiatedSpeedMbps: number(node, "UsbLinkSpeed").map { $0 / 1_000_000 },
+                negotiatedSpeedMbps: negotiated,
                 maxSpeedMbps: maxSpeed
             )
         }
@@ -256,19 +266,114 @@ public enum IORegistryParser {
                 .map { build($0, visiting: visiting.union([id])) }
                 .sorted { ($0.locationID ?? 0) < ($1.locationID ?? 0) }
             copy.children = children
-            copy.propagatePort()
             return copy
         }
         return roots.map { build($0, visiting: []) }.sorted { ($0.locationID ?? 0) < ($1.locationID ?? 0) }
     }
-}
 
-extension USBDeviceNode {
-    fileprivate mutating func propagatePort() {
-        for index in children.indices {
-            children[index].portNumber = portNumber ?? children[index].portNumber
-            children[index].propagatePort()
+    /// One USB transport state naming the device plugged directly into its port.
+    private struct PortDeviceHint {
+        let portNumber: Int
+        let vendorID: Int
+        let productID: Int
+        let productName: String?
+
+        func matches(_ device: USBDeviceNode) -> Bool {
+            vendorID == device.vendorID && productID == device.productID
         }
+
+        func matchesName(of device: USBDeviceNode) -> Bool {
+            guard let productName else { return false }
+            return productName.compare(device.name, options: .caseInsensitive) == .orderedSame
+        }
+    }
+
+    /// `IOPortTransportStateUSB2` and `IOPortTransportStateUSB3` name the device
+    /// attached to that port (`Vendor ID`, `Product ID`, `Product`), which is how a
+    /// USB device learns which USB-C port it belongs to; `IOUSBHostDevice` itself has
+    /// no port property. Every device under a matched hub inherits its port. A node
+    /// that still has no port belongs to the Mac's own tree (its root hubs) or could
+    /// not be attributed, so it is flagged ``USBDeviceNode/isBuiltIn``.
+    public static func attributeUSBPorts(devices: [USBDeviceNode], states: [[String: Any]]) -> [USBDeviceNode] {
+        let hints = portDeviceHints(states)
+        let duplicates = duplicateCounts(devices)
+        return devices.map { attribute($0, hints: hints, duplicates: duplicates, inherited: nil) }
+    }
+
+    private static func duplicateCounts(_ devices: [USBDeviceNode]) -> [String: Int] {
+        var counts: [String: Int] = [:]
+        func walk(_ node: USBDeviceNode) {
+            counts[identityKey(node), default: 0] += 1
+            counts[nameKey(node), default: 0] += 1
+            node.children.forEach(walk)
+        }
+        devices.forEach(walk)
+        return counts
+    }
+
+    private static func identityKey(_ device: USBDeviceNode) -> String {
+        "\(device.vendorID.map(String.init) ?? "-"):\(device.productID.map(String.init) ?? "-")"
+    }
+
+    private static func nameKey(_ device: USBDeviceNode) -> String {
+        identityKey(device) + ":" + device.name.lowercased()
+    }
+
+    private static func portDeviceHints(_ states: [[String: Any]]) -> [PortDeviceHint] {
+        states.compactMap { state in
+            let className = text(state, "IOObjectClass") ?? ""
+            guard className.contains("USB2") || className.contains("USB3") else { return nil }
+            // A Type-A receptacle shows the same transport states; only USB-C port
+            // numbers line up with the port status list.
+            if let type = text(state, "ParentPortTypeDescription"), type != "USB-C" { return nil }
+            guard let portNumber = number(state, "ParentPortNumber") ?? number(state, "ParentBuiltInPortNumber"),
+                  let vendorID = number(state, "Vendor ID"),
+                  let productID = number(state, "Product ID")
+            else { return nil }
+            return PortDeviceHint(
+                portNumber: portNumber,
+                vendorID: vendorID,
+                productID: productID,
+                productName: text(state, "Product")
+            )
+        }
+    }
+
+    /// Two identical devices (same VID/PID) are told apart by the name the port
+    /// state reports. If several devices share both identifiers and the name, the
+    /// port stays unknown rather than picking one.
+    private static func directPort(for device: USBDeviceNode, hints: [PortDeviceHint], duplicates: [String: Int]) -> Int? {
+        let candidates = hints.filter { $0.matches(device) }
+        guard !candidates.isEmpty else { return nil }
+        let namedPorts = Set(candidates.filter { $0.matchesName(of: device) }.map(\.portNumber))
+        if namedPorts.count == 1, duplicates[nameKey(device)] == 1 {
+            return namedPorts.first
+        }
+        let ports = Set(candidates.map(\.portNumber))
+        if ports.count == 1, duplicates[identityKey(device)] == 1 {
+            return ports.first
+        }
+        return nil
+    }
+
+    private static func attribute(
+        _ node: USBDeviceNode,
+        hints: [PortDeviceHint],
+        duplicates: [String: Int],
+        inherited: Int?
+    ) -> USBDeviceNode {
+        var copy = node
+        if let direct = directPort(for: node, hints: hints, duplicates: duplicates) {
+            copy.portNumber = direct
+        } else if copy.portNumber == nil {
+            copy.portNumber = inherited
+        }
+        copy.isBuiltIn = copy.portNumber == nil
+        let port = copy.portNumber
+        copy.children = node.children.map {
+            attribute($0, hints: hints, duplicates: duplicates, inherited: port)
+        }
+        return copy
     }
 }
 
