@@ -157,6 +157,8 @@ final class UpdatesModel {
     /// One check loop owns Homebrew; triggers that arrive meanwhile are coalesced into one follow-up.
     private var runTask: Task<Void, Never>?
     private var moduleEnabled = true
+    /// Identifies the current check loop, so a cancelled loop cannot clear a newer one.
+    private var checkGeneration = 0
     private var recheckWhenDone = false
     private var pendingRefresh = false
     private var isUpdating = false
@@ -238,7 +240,7 @@ final class UpdatesModel {
         runTask = nil
         recheckWhenDone = false
         pendingRefresh = false
-        phase = .idle
+        if !isUpdating { phase = .idle }
     }
 
     /// Reads the list from Homebrew's existing catalog first. When that catalog is older than
@@ -263,12 +265,14 @@ final class UpdatesModel {
             }
             return
         }
-        let task = Task { await self.runCheckLoop(initialRefresh: refresh) }
+        checkGeneration += 1
+        let generation = checkGeneration
+        let task = Task { await self.runCheckLoop(initialRefresh: refresh, generation: generation) }
         runTask = task
         await task.value
     }
 
-    private func runCheckLoop(initialRefresh: Bool) async {
+    private func runCheckLoop(initialRefresh: Bool, generation: Int) async {
         var refresh = initialRefresh || pendingRefresh
         pendingRefresh = false
         while moduleEnabled, !Task.isCancelled {
@@ -278,7 +282,8 @@ final class UpdatesModel {
             refresh = pendingRefresh
             pendingRefresh = false
         }
-        if !moduleEnabled { phase = .idle }
+        guard generation == checkGeneration else { return }
+        if !moduleEnabled, !isUpdating { phase = .idle }
         runTask = nil
     }
 

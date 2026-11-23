@@ -39,7 +39,7 @@ final class FanControlModel {
     @ObservationIgnored private var draftLoaded = false
     @ObservationIgnored private var pollTask: Task<Void, Never>?
     @ObservationIgnored private var moduleEnabled = FeatureStore.shared.isEnabled(.fans)
-    @ObservationIgnored private var restoreRequested = false
+    @ObservationIgnored private var moduleTask: Task<Void, Never>?
     @ObservationIgnored private let client = HelperClient.shared
     /// Lets automatic switching know which policy the user picked by hand.
     @ObservationIgnored var onUserApplied: ((FanPolicy) -> Void)?
@@ -77,26 +77,32 @@ final class FanControlModel {
 
     /// While Fans is off, no live polling remains and the Helper must not keep a manual curve.
     /// Re-enabling does not reapply a curve: the user's saved `fan.autoEnabled` rules decide later.
+    /// Only `FeatureLifecycle` calls this, and only in the real app instance.
     func applyModuleAvailability(_ available: Bool) {
         moduleEnabled = available
-        if available {
-            restoreRequested = false
-        } else {
-            stopPolling()
-            // `status` is nil unless the Fans page polled; read the Helper's policy once so a manual
-            // curve set in an earlier session is still handed back to the system.
-            Task { await refresh() }
-        }
+        moduleTask?.cancel()
+        moduleTask = nil
+        guard !available else { return }
+        stopPolling()
+        moduleTask = Task { [weak self] in await self?.handBackToSystem() }
     }
 
-    private func restoreAutomaticIfNeeded() {
-        guard !moduleEnabled, !restoreRequested, !isApplying, let status else { return }
-        if case .automatic = status.policy.mode {
-            restoreRequested = false
-            return
+    /// Reads the Helper's policy (the page may never have polled) and returns the fans to automatic
+    /// control. The user's saved base policy is not touched, so it survives the time Fans is off.
+    private func handBackToSystem() async {
+        // A policy the user sent just before switching Fans off finishes first, then is replaced.
+        while isApplying, !Task.isCancelled { try? await Task.sleep(for: .milliseconds(200)) }
+        guard !Task.isCancelled, !moduleEnabled, client.status == .enabled else { return }
+        do {
+            let current = try await client.fanControlStatus()
+            status = current
+            guard !Task.isCancelled, !moduleEnabled else { return }
+            if case .automatic = current.policy.mode { return }
+            mode = .automatic
+            await send(.automatic, recordsUserChoice: false)
+        } catch {
+            message = "\(error)"
         }
-        restoreRequested = true
-        Task { await restoreAutomatic() }
     }
 
     func refresh() async {
@@ -106,7 +112,6 @@ final class FanControlModel {
             let s = try await client.fanControlStatus()
             status = s
             if !draftLoaded { loadDraft(from: s.policy); draftLoaded = true }
-            restoreAutomaticIfNeeded()
         } catch {
             message = "\(error)"
         }
@@ -200,6 +205,7 @@ final class FanControlModel {
     // MARK: Actions
 
     func apply() async {
+        guard moduleEnabled else { return }
         await send(draftPolicy)
     }
 
@@ -208,12 +214,12 @@ final class FanControlModel {
         await send(.automatic)
     }
 
-    private func send(_ policy: FanPolicy) async {
+    private func send(_ policy: FanPolicy, recordsUserChoice: Bool = true) async {
         isApplying = true
         defer { isApplying = false }
         do {
             try await client.applyFanPolicy(policy)
-            onUserApplied?(policy)
+            if recordsUserChoice { onUserApplied?(policy) }
             message = String(localized: "Applied")
             await refresh()
         } catch {

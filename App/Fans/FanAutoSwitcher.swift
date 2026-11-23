@@ -74,6 +74,9 @@ final class FanAutoSwitcher {
         for observer in observers { NSWorkspace.shared.notificationCenter.removeObserver(observer) }
         observers.removeAll()
         activeRule = nil
+        // The module hand-back changes the Helper's policy behind the switcher; forget what it last
+        // applied so a matching rule applies again once Fans is back on.
+        applied = nil
     }
 
     func applyModuleAvailability(_ available: Bool) {

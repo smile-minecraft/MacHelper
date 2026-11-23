@@ -36,7 +36,8 @@ final class BackgroundRecordingModel {
     @ObservationIgnored private var historyStore: HistoryStore?
     /// Mirrors the monitor module switch. The user's saved intent stays separate and untouched.
     @ObservationIgnored private var moduleEnabled = FeatureStore.shared.isEnabled(.monitor)
-    @ObservationIgnored private var moduleTask: Task<Void, Never>?
+    @ObservationIgnored private var moduleReconciling = false
+    @ObservationIgnored private var moduleReconcilePending = false
     /// Names the enabled recording session written into the profile. A new value on every
     /// enable or disable makes a capacity sample from before the change obsolete.
     @ObservationIgnored private var capacityGeneration: String
@@ -117,6 +118,8 @@ final class BackgroundRecordingModel {
             refresh()
             return
         }
+        // While Monitor is off only the intent is saved; turning the module on registers the agent.
+        guard moduleEnabled else { refresh(); return }
         do {
             try registerAgentIfNeeded()
             message = nil
@@ -136,7 +139,6 @@ final class BackgroundRecordingModel {
             }
         }
         refresh()
-        if !moduleEnabled { applyModuleAvailability(false) }
     }
 
     /// Pause or resume the LaunchAgent when the Monitor module is switched. The profile keeps the
@@ -144,33 +146,44 @@ final class BackgroundRecordingModel {
     func applyModuleAvailability(_ available: Bool) {
         let wasEnabled = moduleEnabled
         moduleEnabled = available
-        if available {
-            // Only turning the module back on restores the agent. A launch with the module already
-            // on leaves the service as it is, so a permission revoked in Login Items stays revoked.
-            guard !wasEnabled, enabledIntent else { refresh(); return }
-            do {
-                try registerAgentIfNeeded()
-                message = nil
-            } catch {
-                message = agent.status == .requiresApproval
-                    ? Self.approvalMessage
-                    : String(localized: "Couldn’t set up background recording: \(error.localizedDescription)")
-            }
-        } else {
-            moduleTask?.cancel()
-            moduleTask = Task { @MainActor [weak self] in
-                guard let self else { return }
-                guard agent.status == .enabled || agent.status == .requiresApproval else { refresh(); return }
+        // Only a real switch changes the service. A launch with the module already on leaves it as
+        // it is, so a permission revoked in Login Items stays revoked.
+        if available, wasEnabled { refresh(); return }
+        reconcileModuleAgent()
+        refresh()
+    }
+
+    /// One loop owns register and unregister for module switches. A switch that arrives while an
+    /// unregister is suspended is folded into the next pass, which reads the latest state, so the
+    /// last switch always wins.
+    private func reconcileModuleAgent() {
+        moduleReconcilePending = true
+        guard !moduleReconciling else { return }
+        moduleReconciling = true
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            while moduleReconcilePending {
+                moduleReconcilePending = false
                 do {
-                    try await agent.unregister()
+                    if moduleEnabled {
+                        if enabledIntent { try registerAgentIfNeeded() }
+                    } else if agent.status == .enabled || agent.status == .requiresApproval {
+                        try await agent.unregister()
+                    }
                     message = nil
                 } catch {
-                    message = String(localized: "Couldn’t stop background recording: \(error.localizedDescription)")
+                    if agent.status == .requiresApproval, moduleEnabled {
+                        message = Self.approvalMessage
+                    } else if moduleEnabled {
+                        message = String(localized: "Couldn’t set up background recording: \(error.localizedDescription)")
+                    } else {
+                        message = String(localized: "Couldn’t stop background recording: \(error.localizedDescription)")
+                    }
                 }
-                refresh()
             }
+            moduleReconciling = false
+            refresh()
         }
-        refresh()
     }
 
     private func registerAgentIfNeeded() throws {

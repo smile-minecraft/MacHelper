@@ -24,6 +24,7 @@ final class FeatureStore {
         guard features.isEnabled(module) != enabled else { return }
         features.setEnabled(module, enabled)
         persist()
+        leaveHiddenPage()
         FeatureLifecycle.apply(features, to: AppModel.shared)
     }
 
@@ -32,7 +33,14 @@ final class FeatureStore {
         let restored = Self.load(from: defaults)
         guard restored != features else { return }
         features = restored
+        leaveHiddenPage()
         FeatureLifecycle.apply(features, to: AppModel.shared)
+    }
+
+    /// Done here rather than in the main window, so it also holds while that window is closed.
+    private func leaveHiddenPage() {
+        let app = AppModel.shared
+        if !app.section.isVisible { app.section = .overview }
     }
 
     private func persist() {

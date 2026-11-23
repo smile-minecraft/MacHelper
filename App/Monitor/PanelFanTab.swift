@@ -37,11 +37,15 @@ struct PanelFanSection: View {
                 }
                 .fixedSize(horizontal: false, vertical: true)
                 trendCard
-                FanModeBar(model: fanModel, fans: store.fans, openFanControl: openFanControl)
+                // Fan control belongs to the Fans module; the speeds above stay as readings.
+                if FeatureStore.shared.isEnabled(.fans) {
+                    FanModeBar(model: fanModel, fans: store.fans, openFanControl: openFanControl)
+                }
             }
         }
         .task(id: range) { await history.run(range, history: store.persistentHistory) }
-        .task {
+        .task(id: FeatureStore.shared.isEnabled(.fans)) {
+            guard FeatureStore.shared.isEnabled(.fans) else { return }
             // The fan window polls on its own; here one status read every few seconds is enough
             // to keep the selected mode current.
             while !Task.isCancelled {

@@ -42,6 +42,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         let visible = allCases.filter(\.isVisible)
         return [(LocalizedStringKey("This Mac"), visible.filter(\.isThisMac)),
                 (LocalizedStringKey("Clean Up"), visible.filter { !$0.isThisMac })]
+            .filter { !$0.1.isEmpty }
     }
 
     var isThisMac: Bool { [.overview, .monitor, .health, .fans].contains(self) }
@@ -128,8 +129,9 @@ final class AppModel {
     }
 
     func show(_ section: AppSection) {
-        // An invisible page has no entry point; ignore stale shortcuts, deep links and imports.
-        guard section.isVisible else { return }
+        // A hidden page has no entry point. Stale shortcuts, the Dock reopen and onboarding land on
+        // the overview instead, so the window still opens.
+        let section = section.isVisible ? section : .overview
         self.section = section
         if !TelemetryRuntime.isNonProduction() {
             Task { await telemetry.recordSectionView(section.rawValue) }
