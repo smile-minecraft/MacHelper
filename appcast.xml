@@ -3,19 +3,19 @@
     <channel>
         <title>MacHelper</title>
         <item>
-            <title>0.4.1</title>
-            <pubDate>Mon, 23 Nov 2026 00:04:28 +0800</pubDate>
-            <sparkle:version>202611230001</sparkle:version>
-            <sparkle:shortVersionString>0.4.1</sparkle:shortVersionString>
+            <title>0.5.0</title>
+            <pubDate>Mon, 23 Nov 2026 15:10:58 +0800</pubDate>
+            <sparkle:version>202611231452</sparkle:version>
+            <sparkle:shortVersionString>0.5.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <sparkle:releaseNotesLink>https://smile-minecraft.github.io/MacHelper/MacHelper-0.4.1.md</sparkle:releaseNotesLink>
-            <sparkle:releaseNotesLink xml:lang="zh-Hant">https://smile-minecraft.github.io/MacHelper/MacHelper-0.4.1.zh-Hant.md</sparkle:releaseNotesLink>
-            <sparkle:releaseNotesLink xml:lang="zh-Hans">https://smile-minecraft.github.io/MacHelper/MacHelper-0.4.1.zh-Hans.md</sparkle:releaseNotesLink>
-            <sparkle:releaseNotesLink xml:lang="ja">https://smile-minecraft.github.io/MacHelper/MacHelper-0.4.1.ja.md</sparkle:releaseNotesLink>
-            <sparkle:releaseNotesLink xml:lang="ko">https://smile-minecraft.github.io/MacHelper/MacHelper-0.4.1.ko.md</sparkle:releaseNotesLink>
-            <sparkle:releaseNotesLink xml:lang="es">https://smile-minecraft.github.io/MacHelper/MacHelper-0.4.1.es.md</sparkle:releaseNotesLink>
-            <enclosure url="https://github.com/smile-minecraft/MacHelper/releases/download/v0.4.1/MacHelper-0.4.1.zip" length="13634693" type="application/octet-stream" sparkle:edSignature="uFdLVdFyhriSsN0Go/023DJxU5YiZDEAW91YEawLogOH6ro4H/USU+LgDcsTQsvsOu6mYzScbBNTI4jQZwx2CQ=="/>
+            <sparkle:releaseNotesLink>https://smile-minecraft.github.io/MacHelper/MacHelper-0.5.0.md</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink xml:lang="zh-Hant">https://smile-minecraft.github.io/MacHelper/MacHelper-0.5.0.zh-Hant.md</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink xml:lang="zh-Hans">https://smile-minecraft.github.io/MacHelper/MacHelper-0.5.0.zh-Hans.md</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink xml:lang="ja">https://smile-minecraft.github.io/MacHelper/MacHelper-0.5.0.ja.md</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink xml:lang="ko">https://smile-minecraft.github.io/MacHelper/MacHelper-0.5.0.ko.md</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink xml:lang="es">https://smile-minecraft.github.io/MacHelper/MacHelper-0.5.0.es.md</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/smile-minecraft/MacHelper/releases/download/v0.5.0/MacHelper-0.5.0.zip" length="13822068" type="application/octet-stream" sparkle:edSignature="wVctVLhBH8t8gts8Yc2yHgPkc7v/8aObX8sP13uYLK7FE2v8J478ggKTZnH0cgZ3Ip+2YADW0/mJRx7rHbi8BA=="/>
         </item>
     </channel>
 </rss>
