@@ -19,6 +19,60 @@
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "按兩次 ⌘W 以關閉" } }
       }
     },
+    "Deep Clean Only…": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Solo limpieza profunda…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ディープクリーンのみ…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "심층 정리만…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "只执行深层优化…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "只執行深層優化…" } }
+      }
+    },
+    "Delete only the selected system caches, logs and temporary files, after your administrator password.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Borra solo las cachés, registros y archivos temporales del sistema seleccionados, tras tu contraseña de administrador." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "管理者パスワードの入力後、選択したシステムキャッシュ、ログ、一時ファイルだけを削除します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "관리자 암호를 입력한 후 선택한 시스템 캐시, 로그 및 임시 파일만 삭제합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "输入管理员密码后，只删除选中的系统缓存、日志与临时文件。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "輸入管理員密碼後，只刪除選取的系統快取、日誌與暫存檔。" } }
+      }
+    },
+    "Run only Deep Clean on %@?": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "¿Ejecutar solo la limpieza profunda en %@?" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%@ にディープクリーンのみを実行しますか？" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%@에 대해 심층 정리만 실행할까요?" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "只对 %@ 执行深层优化？" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "只對 %@ 執行深層優化？" } }
+      }
+    },
+    "Deletes the selected system caches, logs and temporary files as administrator. macOS asks for your administrator password first. Nothing else you selected is cleaned.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Borra como administrador las cachés, registros y archivos temporales del sistema seleccionados. macOS pide primero tu contraseña de administrador. No se limpia nada más de lo que seleccionaste." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "選択したシステムキャッシュ、ログ、一時ファイルを管理者として削除します。macOS が最初に管理者パスワードを求めます。選択したほかの項目はクリーンアップしません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "선택한 시스템 캐시, 로그 및 임시 파일을 관리자로 삭제합니다. macOS가 먼저 관리자 암호를 묻습니다. 선택한 다른 항목은 정리하지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "以管理员身份删除选中的系统缓存、日志与临时文件。macOS 会先要求管理员密码。你选中的其他项目都不会清理。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "以管理員身分刪除選取的系統快取、日誌與暫存檔。macOS 會先要求管理員密碼。你選取的其他項目都不會清理。" } }
+      }
+    },
+    "Deep Clean didn’t finish (%@), so nothing else was cleaned.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "La limpieza profunda no terminó (%@), así que no se limpió nada más." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ディープクリーンが完了しなかったため（%@）、ほかの項目はクリーンアップしていません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "심층 정리가 완료되지 않아(%@) 다른 항목은 정리하지 않았습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "深层优化没有完成（%@），所以其他项目都没有清理。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "深層優化沒有完成（%@），所以其他項目都沒有清理。" } }
+      }
+    },
+    "Deep clean: delete %@ of system caches, logs and temporary files as administrator. macOS asks for your administrator password before anything is cleaned; cancelling cleans nothing at all.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Limpieza profunda: borra como administrador %@ de cachés, registros y archivos temporales del sistema. macOS pide tu contraseña de administrador antes de limpiar nada; si cancelas, no se limpia nada." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ディープクリーン：システムキャッシュ、ログ、一時ファイル %@ を管理者として削除します。macOS は何かをクリーンアップする前に管理者パスワードを求めます。キャンセルすると何もクリーンアップしません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "심층 정리: 시스템 캐시, 로그 및 임시 파일 %@를 관리자로 삭제합니다. macOS는 무엇이든 정리하기 전에 관리자 암호를 묻습니다. 취소하면 아무것도 정리하지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "深层优化：以管理员身份删除 %@ 的系统缓存、日志与临时文件。macOS 会在清理任何东西之前要求管理员密码；取消就什么都不清理。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "深層優化：以管理員身分刪除 %@ 的系統快取、日誌與暫存檔。macOS 會在清理任何東西之前要求管理員密碼；取消就什麼都不清理。" } }
+      }
+    },
     "Set Up or Repair the Helper…": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Configurar o reparar el Helper…" } },
@@ -98,15 +152,6 @@
         "ko": { "stringUnit": { "state": "translated", "value": "암호 필요" } },
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "需要密码" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "需要密碼" } }
-      }
-    },
-    "Deep clean: delete %@ of system caches, logs and temporary files as administrator. macOS asks for your administrator password first; cancelling deletes none of them.": {
-      "localizations": {
-        "es": { "stringUnit": { "state": "translated", "value": "Limpieza profunda: borrar %@ de cachés, registros y archivos temporales del sistema como administrador. macOS pide primero tu contraseña de administrador; si cancelas, no se borra nada de esto." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "ディープクリーン：システムキャッシュ、ログ、一時ファイル %@ を管理者として削除します。先に macOS が管理者パスワードを求めます。キャンセルすると何も削除されません。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "심층 정리: 시스템 캐시, 로그 및 임시 파일 %@을(를) 관리자로 삭제합니다. macOS가 먼저 관리자 암호를 요청하며, 취소하면 아무것도 삭제되지 않습니다." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "深层优化：以管理员身份删除 %@ 的系统缓存、日志与临时文件。macOS 会先要求输入管理员密码；取消的话这些都不会删除。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "深層優化：以管理員身分刪除 %@ 的系統快取、日誌與暫存檔。macOS 會先要求輸入管理員密碼；取消的話這些都不會刪除。" } }
       }
     },
     " (+%lld more)": {

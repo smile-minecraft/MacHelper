@@ -5,6 +5,7 @@ struct OptimizeView: View {
     @Bindable var model: OptimizeModel
     let autoClean: AutoCleanModel
     @State private var confirm = false
+    @State private var confirmDeepOnly = false
     @State private var showAutoClean = false
     @State private var showExclusions = false
     @State private var showHelperSetup = false
@@ -148,6 +149,10 @@ struct OptimizeView: View {
                 }
                 Spacer(minLength: 12)
                 Button("Rescan") { Task { await model.scan(deep: model.deep) } }
+                if model.selectedDeepCount > 0, model.hasNonDeepSelection {
+                    Button("Deep Clean Only…") { confirmDeepOnly = true }
+                        .help("Delete only the selected system caches, logs and temporary files, after your administrator password.")
+                }
                 Button(model.selectedDeepCount > 0 ? "Authorize and Clean…" : "Clean…") { confirm = true }
                     .buttonStyle(.borderedProminent)
                     .disabled(model.selectedBytes == 0 && model.selectedTaskCount == 0 && model.selectedDeepCount == 0)
@@ -158,6 +163,12 @@ struct OptimizeView: View {
             Button("Clean", role: .destructive) { Task { await model.run() } }
         } message: {
             Text(confirmMessage)
+        }
+        .confirmationDialog("Run only Deep Clean on \(Fmt.bytes(Int64(clamping: model.selectedDeepBytes)))?", isPresented: $confirmDeepOnly,
+                            titleVisibility: .visible) {
+            Button("Deep Clean", role: .destructive) { Task { await model.run(deepOnly: true) } }
+        } message: {
+            Text("Deletes the selected system caches, logs and temporary files as administrator. macOS asks for your administrator password first. Nothing else you selected is cleaned.")
         }
     }
 
@@ -173,6 +184,9 @@ struct OptimizeView: View {
 
     /// Why the preview may be incomplete: the scan was stopped, or Full Disk Access is off.
     @ViewBuilder private var notices: some View {
+        if let notice = model.runNotice {
+            NoticeBar(icon: "lock.trianglebadge.exclamationmark", text: notice)
+        }
         if model.scanStopped {
             NoticeBar(icon: "pause.circle", text: String(localized: "Scan stopped early. Only the places checked before that are listed."),
                       action: String(localized: "Scan Everything")) { Task { await model.scan(deep: model.deep) } }
@@ -442,7 +456,7 @@ struct OptimizeView: View {
             lines.append(String(localized: "Delete old system logs and diagnostic reports as administrator: \(Fmt.bytes(Int64(clamping: standardSystemBytes))). Only files older than 30 days in the fixed system log folders."))
         }
         if model.selectedDeepCount > 0 {
-            lines.append(String(localized: "Deep clean: delete \(Fmt.bytes(Int64(clamping: model.selectedDeepBytes))) of system caches, logs and temporary files as administrator. macOS asks for your administrator password first; cancelling deletes none of them."))
+            lines.append(String(localized: "Deep clean: delete \(Fmt.bytes(Int64(clamping: model.selectedDeepBytes))) of system caches, logs and temporary files as administrator. macOS asks for your administrator password before anything is cleaned; cancelling cleans nothing at all."))
         }
         if model.selectedEmptyTrashBytes > 0 {
             lines.append(String(localized: "Empty the Trash: \(Fmt.bytes(Int64(clamping: model.selectedEmptyTrashBytes))). This can’t be undone."))
@@ -803,15 +817,15 @@ private struct CandidateMenu: View {
 private struct NoticeBar: View {
     let icon: String
     let text: String
-    let action: String
-    let perform: () -> Void
+    var action: String? = nil
+    var perform: () -> Void = {}
 
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: icon).foregroundStyle(Theme.amber)
             Text(text).font(.mhCallout).foregroundStyle(Palette.text).lineLimit(2)
             Spacer(minLength: 12)
-            Button(action, action: perform).controlSize(.small)
+            if let action { Button(action, action: perform).controlSize(.small) }
         }
         .padding(.horizontal, 14).padding(.vertical, 8)
         .background(Palette.card)

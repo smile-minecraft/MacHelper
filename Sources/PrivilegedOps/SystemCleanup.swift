@@ -121,6 +121,18 @@ public enum SystemCleanupError: Error, CustomStringConvertible, Equatable {
         case .authorizationDenied(let status): "administrator authorization failed (\(status))"
         }
     }
+
+    /// The authorization error behind a message the Helper sent back over XPC, which carries only
+    /// `description` (possibly wrapped, e.g. "Helper error: …"). Nil for any other failure.
+    public static func authorizationFailure(in message: String) -> SystemCleanupError? {
+        if message.contains(SystemCleanupError.authorizationCancelled.description) { return .authorizationCancelled }
+        if message.contains(SystemCleanupError.authorizationRequired.description) { return .authorizationRequired }
+        let prefix = "administrator authorization failed ("
+        guard let start = message.range(of: prefix)?.upperBound,
+              let end = message[start...].firstIndex(of: ")"),
+              let status = Int32(message[start..<end]) else { return nil }
+        return .authorizationDenied(status)
+    }
 }
 
 public enum SystemCleanup {
