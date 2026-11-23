@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use MacHelper, please cite it as below."
 title: "MacHelper"
-abstract: "A free, open-source, local-first menu bar app and command-line tool for Apple Silicon Macs: system monitor, fan control, cache cleaner, disk analyzer, and app uninstaller, with optional opt-in anonymous telemetry, a JSON CLI, redacted diagnostic reports (machelper report --json), and an agent skill for AI assistants."
+abstract: "A free, open-source, local-first menu bar app and command-line tool for Apple Silicon and Intel Macs: system monitor, fan control, cache cleaner, disk analyzer, and app uninstaller, with optional opt-in anonymous telemetry, a JSON CLI, redacted diagnostic reports (machelper report --json), and an agent skill for AI assistants."
 type: software
 license: MIT
 repository-code: "https://github.com/smile-minecraft/MacHelper"
@@ -9,6 +9,7 @@ url: "https://github.com/smile-minecraft/MacHelper"
 keywords:
   - macos
   - apple-silicon
+  - intel
   - menu-bar
   - system-monitor
   - fan-control

@@ -80,7 +80,6 @@ cask "machelper" do
   desc "Menu bar system monitor, fan control and cleanup utility"
   homepage "$REPO_URL"
 
-  depends_on arch: :arm64
   depends_on macos: :sonoma
 
   app "MacHelper.app"
@@ -192,7 +191,9 @@ prepare() {
   # A clean build in its own folder, signed with Developer ID and a secure timestamp (both needed
   # for notarization); no debugger entitlement (get-task-allow) in a shipped app.
   if ! xcodebuild -project MacHelper.xcodeproj -scheme MacHelper -configuration Release \
+      -destination 'generic/platform=macOS' \
       -derivedDataPath build/release/DerivedData \
+      ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO \
       MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO \
       CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$SIGN_IDENTITY" DEVELOPMENT_TEAM="$SIGN_TEAM" \
       PROVISIONING_PROFILE_SPECIFIER="" OTHER_CODE_SIGN_FLAGS="--timestamp" \
@@ -229,6 +230,17 @@ prepare() {
   done
   for exe in MacHelper MacHelperHelper machelper-cli; do
     [[ -x "$app/Contents/MacOS/$exe" ]] || fail "Missing $exe in the app."
+  done
+  local bin archs
+  for bin in \
+    "$app/Contents/MacOS/MacHelper" \
+    "$app/Contents/MacOS/MacHelperHelper" \
+    "$app/Contents/MacOS/machelper-cli" \
+    "$app/Contents/PlugIns/FinderExtension.appex/Contents/MacOS/FinderExtension" \
+    "$app/Contents/Frameworks/Sparkle.framework/Versions/B/Sparkle"; do
+    archs="$(lipo -archs "$bin" 2>/dev/null || true)"
+    [[ "$archs" == *arm64* && "$archs" == *x86_64* ]] \
+      || fail "$(basename "$bin") is not a universal binary (archs: ${archs:-unknown})."
   done
   [[ "$("$app/Contents/MacOS/machelper-cli" --version)" == "$VERSION ($BUILD_NUMBER)" ]] || fail "The bundled CLI doesn't report $VERSION ($BUILD_NUMBER)."
   local exe_path signer info gatekeeper

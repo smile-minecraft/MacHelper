@@ -5,13 +5,13 @@
 <h1 align="center">MacHelper</h1>
 
 <p align="center">
-  <b>Monitor del sistema nativo para macOS, control de ventiladores, limpiador, analizador de disco y CLI lista para IA — local por defecto, código abierto y diseñada para Apple Silicon.</b>
+  <b>Monitor del sistema nativo para macOS, control de ventiladores, limpiador, analizador de disco y CLI lista para IA — local por defecto, código abierto y universal (Apple Silicon e Intel).</b>
 </p>
 
 <p align="center">
   <a href="https://github.com/smile-minecraft/MacHelper/releases/latest"><img src="https://img.shields.io/github/v/release/smile-minecraft/MacHelper?label=Release&color=5b8def" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-1f2430" alt="macOS 14+">
-  <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-1f2430" alt="Apple Silicon">
+  <img src="https://img.shields.io/badge/Universal-Apple%20Silicon%20%26%20Intel-1f2430" alt="Universal (Apple Silicon & Intel)">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4cc38a" alt="MIT license"></a>
   <a href="https://smile-minecraft.github.io/MacHelper/"><img src="https://img.shields.io/badge/Website-Docs-5b8def" alt="Sitio web y documentación"></a>
 </p>
@@ -47,7 +47,7 @@
 
 ---
 
-MacHelper es una app de barra de menús y herramienta de línea de comandos gratuita, con licencia MIT y escrita en Swift nativo para Macs con Apple Silicon y macOS 14 o posterior. Reúne en una sola app ligera un **monitor del sistema** (CPU, GPU, memoria, temperaturas, ventiladores, consumo, batería, disco y red), **control de ventiladores**, **limpiador de cachés y basura**, **analizador de espacio en disco** y **desinstalador de apps**.
+MacHelper es una app de barra de menús y herramienta de línea de comandos gratuita, con licencia MIT y escrita en Swift nativo para Macs con Apple Silicon e Intel con macOS 14 o posterior. Reúne en una sola app ligera un **monitor del sistema** (CPU, GPU, memoria, temperaturas, ventiladores, consumo, batería, disco y red), **control de ventiladores**, **limpiador de cachés y basura**, **analizador de espacio en disco** y **desinstalador de apps**.
 
 También incluye la CLI `machelper` con salida `--json`, un informe de diagnóstico anonimizado en una sola llamada (`machelper report --json`) y skills integradas para asistentes de IA como Claude Code, Codex y OpenCode: siempre muestra una vista previa primero y pregunta antes de eliminar nada.
 
@@ -64,7 +64,7 @@ En lugar de pagar y mantener cinco utilidades distintas, MacHelper lo reúne tod
 | **Desinstalador de apps** | AppCleaner | Detección por ID de paquete, helpers, contenedores, launchd y zap de Homebrew + restos huérfanos |
 | **Automatización con agentes de IA** | *Exclusivo de MacHelper* | Diagnóstico anonimizado `machelper report --json`, puerta `--yes` y skills para agentes |
 
-> **Gratis · Código abierto (MIT) · Swift nativo · Apple Silicon · Local por defecto**
+> **Gratis · Código abierto (MIT) · Swift nativo · Apple Silicon e Intel · Local por defecto**
 
 ## Instalación
 
@@ -162,7 +162,7 @@ Hay un índice optimizado para modelos de lenguaje en [llms.txt](llms.txt).
 **¿Existe una alternativa gratuita y de código abierto a CleanMyMac o iStat Menus?**
 Sí. MacHelper tiene licencia MIT y combina limpieza, monitor del sistema en la barra de menús, control de ventiladores, análisis de disco y desinstalación de apps en una sola app nativa, sin cuentas ni suscripciones.
 
-**¿Cómo controlo la velocidad de los ventiladores de un Mac con Apple Silicon?**
+**¿Cómo controlo la velocidad de los ventiladores en un Mac?**
 Instala MacHelper y configura su Helper (con guía en el primer inicio). Podrás gestionar los ventiladores en automático, a RPM fijas o con curvas de temperatura personalizadas, límites de seguridad estrictos y perfiles automáticos por app o alimentación.
 
 **¿Cómo obtengo un informe seguro del sistema para una IA sin filtrar datos personales?**
@@ -175,14 +175,14 @@ Instala con `brew install --cask smile-minecraft/tap/machelper`, ejecuta `machel
 Ejecuta `machelper uninstall "Nombre de la app"` para previsualizar preferencias, cachés, contenedores, agentes de inicio y coincidencias zap de Homebrew; añade `--yes` para moverlos a la Papelera. Con `machelper uninstall --orphans` encontrarás restos de apps ya eliminadas.
 
 **¿Funciona en Macs Intel o en macOS más antiguo?**
-No. MacHelper requiere un Mac con Apple Silicon y macOS 14 o posterior.
+Sí, los Macs Intel y Apple Silicon con macOS 14 o posterior son compatibles mediante binarios universales (en Macs Intel, las temperaturas y el control de ventiladores usan SMC; el desglose de consumo de Apple Silicon no está disponible). macOS 13 y anteriores no son compatibles.
 
 **¿Qué datos recopila MacHelper?**
 Por defecto no sale nada de tu Mac salvo las comprobaciones de actualización. Si activas explícitamente la telemetría en **Ajustes → General → Privacidad y diagnóstico**, MacHelper envía únicamente contadores de uso anónimos y diagnósticos básicos de rendimiento (versión de la app, versión de macOS, familia de chip) sin rutas de archivos, nombres de procesos ni identificadores personales. Puedes revisar el JSON exacto y desactivarlo en cualquier momento.
 
 ## Compilar desde el código fuente
 
-Requisitos: Mac con Apple Silicon, Xcode 26 o posterior y [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`). Ejecuta `make` para listar todos los objetivos disponibles.
+Requisitos: un Mac (Apple Silicon o Intel), Xcode 26 o posterior y [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`). Ejecuta `make` para listar todos los objetivos disponibles.
 
 ```sh
 make setup      # comprueba herramientas, descarga Sparkle y genera MacHelper.xcodeproj

@@ -19,7 +19,8 @@ struct MonitorHardwareSampler {
 
     init() {
         fanDriver = smc.map { FanDriver(smc: $0) }
-        power = smc.flatMap { PowerSampler(smc: $0) }
+        // Either source is enough: IOReport on Apple Silicon, the SMC `PSTR` rail on Intel.
+        power = PowerSampler(smc: smc)
         temperatureKeys = smc.map { SMCTemperatures.discoverKeys($0) } ?? []
     }
 
@@ -30,7 +31,7 @@ struct MonitorHardwareSampler {
             lastReadings.cpu = reading
             return reading.map(MonitorHistorySample.cpu) ?? [:]
         case "gpu":
-            return GPUSampler.sample().first.map(MonitorHistorySample.gpu) ?? [:]
+            return GPUSelection.busiest(GPUSampler.sample()).map(MonitorHistorySample.gpu) ?? [:]
         case "memory":
             return MemorySampler.sample().map(MonitorHistorySample.memory) ?? [:]
         case "disk":

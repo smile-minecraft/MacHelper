@@ -23,7 +23,9 @@ final class FanControlEngine: @unchecked Sendable {
     /// SMC temperature keys, used when HID sensors are unavailable to the daemon.
     private let smcTemperatureKeys: [FourCC]
     private var sensorSource = "none"
-    private let limits = SafetyLimits.standard
+    /// Intel Macs never reach the Apple Silicon trip point, so they get their own limits.
+    /// Anything that is not a confirmed Intel Mac keeps the Apple Silicon values.
+    private let limits = SafetyLimits.for(ChipFamily.current == .intel ? .intel : .appleSilicon)
     private let tickInterval: TimeInterval = 1
 
     private var policy: FanPolicy = .automatic

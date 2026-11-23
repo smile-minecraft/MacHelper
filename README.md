@@ -5,13 +5,13 @@
 <h1 align="center">MacHelper</h1>
 
 <p align="center">
-  <b>Native macOS system monitor, fan controller, cleaner, disk analyzer, and AI-ready CLI — local-first, open source, and built for Apple Silicon.</b>
+  <b>Native macOS system monitor, fan controller, cleaner, disk analyzer, and AI-ready CLI — local-first, open source, and Universal (Apple Silicon & Intel).</b>
 </p>
 
 <p align="center">
   <a href="https://github.com/smile-minecraft/MacHelper/releases/latest"><img src="https://img.shields.io/github/v/release/smile-minecraft/MacHelper?label=Release&color=5b8def" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-1f2430" alt="macOS 14 or later">
-  <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-1f2430" alt="Apple Silicon">
+  <img src="https://img.shields.io/badge/Universal-Apple%20Silicon%20%26%20Intel-1f2430" alt="Universal (Apple Silicon & Intel)">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4cc38a" alt="MIT license"></a>
   <a href="https://smile-minecraft.github.io/MacHelper/"><img src="https://img.shields.io/badge/Website-Docs-5b8def" alt="Website and documentation"></a>
 </p>
@@ -47,7 +47,7 @@
 
 ---
 
-MacHelper is a free, MIT-licensed menu bar app and command-line tool written in native Swift for Apple Silicon Macs running macOS 14 or later. It combines a **system monitor** (CPU, GPU, memory, temperatures, fans, power, battery, disk, and network), **fan control**, a **cache and junk cleaner**, a **disk space analyzer**, and an **app uninstaller** in a single lightweight app.
+MacHelper is a free, MIT-licensed menu bar app and command-line tool written in native Swift for Apple Silicon and Intel Macs running macOS 14 or later. It combines a **system monitor** (CPU, GPU, memory, temperatures, fans, power, battery, disk, and network), **fan control**, a **cache and junk cleaner**, a **disk space analyzer**, and an **app uninstaller** in a single lightweight app.
 
 It also ships the `machelper` CLI with `--json` output, a one-shot redacted diagnostic report (`machelper report --json`), and built-in skills for AI coding assistants such as Claude Code, Codex, and OpenCode — always previewing first and asking before anything is removed.
 
@@ -64,7 +64,7 @@ Instead of juggling five separate paid utilities, MacHelper covers the full tool
 | **App Uninstaller** | AppCleaner | Bundle ID, helper, container, launchd, and Homebrew zap matching + orphan cleanup |
 | **AI Agent Automation** | *Unique to MacHelper* | `machelper report --json` redacted diagnostics, `--yes` safety gate, agent skills |
 
-> **Free · Open Source (MIT) · Native Swift · Apple Silicon · Local-First by Default**
+> **Free · Open Source (MIT) · Native Swift · Apple Silicon & Intel · Local-First by Default**
 
 ## Install
 
@@ -166,7 +166,7 @@ A machine-friendly index for language models is available in [llms.txt](llms.txt
 **Is there a free, open-source alternative to CleanMyMac or iStat Menus?**
 Yes. MacHelper is MIT licensed and combines cleanup, menu bar system monitoring, fan control, disk analysis, and app uninstalling in one native app — no accounts and no subscriptions.
 
-**How do I control the fan speed of an Apple Silicon Mac?**
+**How do I control the fan speed on a Mac?**
 Install MacHelper and set up its Helper (guided on first launch). You can then run fans automatically, at a fixed RPM, or on a custom temperature curve with hard safety limits and automatic profiles per app or power source.
 
 **How do I get a safe system report for an AI assistant without leaking personal info?**
@@ -179,14 +179,14 @@ Install via `brew install --cask smile-minecraft/tap/machelper`, run `machelper 
 Run `machelper uninstall "App Name"` to preview preferences, caches, containers, launch agents, and Homebrew zap matches; add `--yes` to move them to the Trash. Run `machelper uninstall --orphans` to locate leftovers of apps already removed.
 
 **Does it work on Intel Macs or older macOS?**
-No. MacHelper requires an Apple Silicon Mac running macOS 14 or later.
+Intel Macs running macOS 14 or later are supported via Universal binaries (temperatures, fan control, and total system power use SMC; the Apple-Silicon-only power breakdown is unavailable on Intel). macOS 13 and earlier are not supported.
 
 **What data does MacHelper collect?**
 By default, nothing leaves your Mac except update checks. If you explicitly opt in under **Settings → General → Privacy & Diagnostics**, MacHelper sends strictly anonymous usage counts and coarse performance diagnostics (app version, macOS version, chip family) with zero file paths, process names, or personal identifiers. You can inspect the exact JSON payload and turn it off anytime.
 
 ## Building
 
-Requirements: an Apple Silicon Mac, Xcode 26 or later, and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`). Run `make` to list all available targets.
+Requirements: a Mac (Apple Silicon or Intel), Xcode 26 or later, and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`). Run `make` to list all available targets.
 
 ```sh
 make setup      # check tools, download Sparkle, generate MacHelper.xcodeproj

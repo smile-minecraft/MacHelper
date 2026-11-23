@@ -842,37 +842,37 @@
         }
       }
     },
-    "Everything your Apple Silicon Mac needs, right in your menu bar — local-first and free.": {
+    "Everything your Mac needs, right in your menu bar — local-first and free.": {
       "extractionState": "manual",
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Todo lo que tu Mac con Apple Silicon necesita, en la barra de menús: local y gratis."
+            "value": "Todo lo que tu Mac necesita, en la barra de menús: local y gratis."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apple シリコン搭載 Mac に必要なものを、すべてメニューバーに。ローカル優先で無料です。"
+            "value": "Mac に必要なものを、すべてメニューバーに。ローカル優先で無料です。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apple Silicon Mac에 필요한 모든 것을 메뉴 막대에서. 로컬 우선, 무료입니다."
+            "value": "Mac에 필요한 모든 것을 메뉴 막대에서. 로컬 우선, 무료입니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apple Silicon Mac 需要的一切，就在菜单栏——数据留在本机，而且免费。"
+            "value": "Mac 需要的一切，就在菜单栏——数据留在本机，而且免费。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apple Silicon Mac 需要的一切，就在選單列——資料留在本機，而且免費。"
+            "value": "Mac 需要的一切，就在選單列——資料留在本機，而且免費。"
           }
         }
       }

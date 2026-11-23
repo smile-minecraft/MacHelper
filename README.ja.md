@@ -5,13 +5,13 @@
 <h1 align="center">MacHelper</h1>
 
 <p align="center">
-  <b>Apple Silicon 向けのネイティブ macOS システムモニタ、ファン制御、クリーナー、ディスク分析 & AI 対応 CLI — ローカルファーストでオープンソース。</b>
+  <b>ネイティブ macOS システムモニタ、ファン制御、クリーナー、ディスク分析 & AI 対応 CLI — ローカルファースト、オープンソース、Apple Silicon と Intel 対応。</b>
 </p>
 
 <p align="center">
   <a href="https://github.com/smile-minecraft/MacHelper/releases/latest"><img src="https://img.shields.io/github/v/release/smile-minecraft/MacHelper?label=Release&color=5b8def" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-1f2430" alt="macOS 14+">
-  <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-1f2430" alt="Apple Silicon">
+  <img src="https://img.shields.io/badge/Universal-Apple%20Silicon%20%26%20Intel-1f2430" alt="Universal (Apple Silicon & Intel)">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4cc38a" alt="MIT license"></a>
   <a href="https://smile-minecraft.github.io/MacHelper/"><img src="https://img.shields.io/badge/Website-Docs-5b8def" alt="Webサイトとドキュメント"></a>
 </p>
@@ -47,7 +47,7 @@
 
 ---
 
-MacHelper は、macOS 14 以降の Apple Silicon Mac 向けにネイティブ Swift で開発された、無料・MIT ライセンスのメニューバー App およびコマンドラインツールです。**システムモニタ**（CPU、GPU、メモリ、温度、ファン、消費電力、バッテリー、ディスク、ネットワーク）、**ファンコントロール**、**キャッシュとジャンクのクリーン**、**ディスク容量の分析**、**App のアンインストール**を 1 つの軽量 App に統合しています。
+MacHelper は、macOS 14 以降の Apple Silicon および Intel Mac 向けにネイティブ Swift で開発された、無料・MIT ライセンスのメニューバー App およびコマンドラインツールです。**システムモニタ**（CPU、GPU、メモリ、温度、ファン、消費電力、バッテリー、ディスク、ネットワーク）、**ファンコントロール**、**キャッシュとジャンクのクリーン**、**ディスク容量の分析**、**App のアンインストール**を 1 つの軽量 App に統合しています。
 
 さらに、`--json` 出力に対応した `machelper` CLI、個人情報マスク済みのワンショット診断レポート（`machelper report --json`）、Claude Code・Codex・OpenCode などの AI コーディングアシスタント向けスキルを同梱。常にまずプレビューを表示し、削除前には必ず確認を求めます。
 
@@ -64,7 +64,7 @@ MacHelper は、macOS 14 以降の Apple Silicon Mac 向けにネイティブ Sw
 | **App アンインストール** | AppCleaner | バンドル ID・内蔵ヘルパー・コンテナ・launchd・Homebrew zap 照合 + 孤立ファイル掃除 |
 | **AI エージェント連携** | *MacHelper 独自* | `machelper report --json` 匿名化診断レポート、`--yes` 安全ゲート、ビルトインスキル |
 
-> **無料 · オープンソース (MIT) · ネイティブ Swift · Apple Silicon · デフォルトでローカルファースト**
+> **無料 · オープンソース (MIT) · ネイティブ Swift · Apple Silicon & Intel · デフォルトでローカルファースト**
 
 ## インストール
 
@@ -162,7 +162,7 @@ machelper clean --json                   # クリーンをプレビュー。--ye
 **CleanMyMac や iStat Menus の代わりになる無料オープンソース App はありますか？**
 はい。MacHelper は MIT ライセンスで、クリーン、メニューバー監視、ファン制御、ディスク分析、App アンインストールをアカウント・サブスクリプション不要で 1 つにまとめています。
 
-**Apple Silicon Mac のファン回転数を制御するには？**
+**Mac のファン回転数を制御するには？**
 MacHelper をインストールして Helper（初回起動時に案内が出ます）を有効にするだけです。自動・固定回転数・カスタム温度カーブで制御でき、安全上限や App／電源ごとの自動プロファイルも使えます。
 
 **個人情報を漏らさずに AI アシスタントへ渡せる診断レポートはどう作りますか？**
@@ -175,14 +175,14 @@ MacHelper をインストールして Helper（初回起動時に案内が出ま
 `machelper uninstall "App 名"` で設定・キャッシュ・コンテナ・ログイン項目・Homebrew zap 一致項目をプレビューし、`--yes` でゴミ箱へ移動します。`machelper uninstall --orphans` を使えば削除済み App の残骸も見つかります。
 
 **Intel Mac や古い macOS でも動きますか？**
-いいえ。macOS 14 以降を搭載した Apple Silicon Mac が必要です。
+macOS 14 以降を搭載した Intel Mac と Apple Silicon Mac の両方に対応しています（ユニバーサルバイナリ。Intel Mac では温度とファン制御に SMC を使用し、Apple Silicon 向けの消費電力内訳は利用できません）。macOS 13 以前は非対応です。
 
 **MacHelper はどのようなデータを収集しますか？**
 デフォルトではアップデートの確認以外に外部へ送信されるデータはありません。**設定 → 一般 → プライバシーと診断** で明示的にオプトインした場合のみ、ファイルパス・プロセス名・個人識別子を一切含まない匿名化利用回数と粗粒度のパフォーマンス診断（App バージョン、macOS バージョン、チップファミリー）を送信します。正確な JSON ペイロードはいつでも確認でき、すぐにオフにできます。
 
 ## ソースからのビルド
 
-必要なもの：Apple Silicon Mac、Xcode 26 以降、[XcodeGen](https://github.com/yonaskolb/XcodeGen)（`brew install xcodegen`）。`make` を実行すると利用可能なターゲット一覧が表示されます。
+必要なもの：Mac（Apple Silicon または Intel）、Xcode 26 以降、[XcodeGen](https://github.com/yonaskolb/XcodeGen)（`brew install xcodegen`）。`make` を実行すると利用可能なターゲット一覧が表示されます。
 
 ```sh
 make setup      # ツール確認、Sparkle のダウンロード、MacHelper.xcodeproj の生成
