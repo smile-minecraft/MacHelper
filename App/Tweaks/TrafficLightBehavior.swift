@@ -150,7 +150,8 @@ final class TrafficLightBehavior: @unchecked Sendable {
             break
         case .closeWindow(let quitIfLast):
             let windowCount = AccessibilityWindows.userWindows(of: pid).count
-            if TrafficLightRules.shouldQuitApp(quitIfLast: quitIfLast, userWindowCount: windowCount) {
+            if TrafficLightRules.shouldQuitApp(quitIfLast: quitIfLast, userWindowCount: windowCount,
+                                               serverWindowCount: serverWindowCount(of: pid)) {
                 NSRunningApplication(processIdentifier: pid)?.terminate()
             } else if let window = window(for: request) {
                 AccessibilityWindows.close(window)
@@ -162,6 +163,20 @@ final class TrafficLightBehavior: @unchecked Sendable {
         case .zoom:
             if let window = window(for: request) { AccessibilityWindows.zoom(window) }
         }
+    }
+
+    /// The app's ordinary windows on every desktop, minimized ones included, from the window server.
+    /// Tiny layer-0 windows (status helpers, offscreen placeholders) are not windows a person closes.
+    private static func serverWindowCount(of pid: pid_t) -> Int {
+        guard let list = CGWindowListCopyWindowInfo([.optionAll, .excludeDesktopElements],
+                                                    kCGNullWindowID) as? [[String: Any]] else { return Int.max }
+        return list.filter { info in
+            guard (info[kCGWindowOwnerPID as String] as? pid_t) == pid,
+                  (info[kCGWindowLayer as String] as? Int) == 0,
+                  let bounds = info[kCGWindowBounds as String] as? [String: Any],
+                  let frame = CGRect(dictionaryRepresentation: bounds as CFDictionary) else { return false }
+            return frame.width >= 50 && frame.height >= 50
+        }.count
     }
 
     /// The clicked window: the button's accessibility parent, or, when the app does not publish

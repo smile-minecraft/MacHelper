@@ -80,10 +80,13 @@ import Testing
     }
 
     @Test func quitOnlyHappensForTheAppsLastWindow() {
-        #expect(TrafficLightRules.shouldQuitApp(quitIfLast: true, userWindowCount: 1))
-        #expect(TrafficLightRules.shouldQuitApp(quitIfLast: true, userWindowCount: 0))
-        #expect(!TrafficLightRules.shouldQuitApp(quitIfLast: true, userWindowCount: 2))
-        #expect(!TrafficLightRules.shouldQuitApp(quitIfLast: false, userWindowCount: 1))
+        #expect(TrafficLightRules.shouldQuitApp(quitIfLast: true, userWindowCount: 1, serverWindowCount: 1))
+        #expect(!TrafficLightRules.shouldQuitApp(quitIfLast: true, userWindowCount: 2, serverWindowCount: 2))
+        #expect(!TrafficLightRules.shouldQuitApp(quitIfLast: false, userWindowCount: 1, serverWindowCount: 1))
+        // An app that did not answer is not an app without windows.
+        #expect(!TrafficLightRules.shouldQuitApp(quitIfLast: true, userWindowCount: 0, serverWindowCount: 0))
+        // Another window on a different desktop: Accessibility misses it, the window server does not.
+        #expect(!TrafficLightRules.shouldQuitApp(quitIfLast: true, userWindowCount: 1, serverWindowCount: 2))
     }
 
     @Test func onlyClicksInTheTitleBarStripReachTheHitTest() {

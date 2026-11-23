@@ -100,8 +100,13 @@ public enum TrafficLightRules {
 
     /// "Quit" on the close button only quits when the clicked window is the app's last one;
     /// otherwise the window closes like the red button normally does.
-    public static func shouldQuitApp(quitIfLast: Bool, userWindowCount: Int) -> Bool {
-        quitIfLast && userWindowCount <= 1
+    ///
+    /// Both counts must agree. Accessibility counts the clicked window itself, so 0 means the app
+    /// did not answer, not that it has no windows. Accessibility usually only lists the current
+    /// desktop, so the window server's count of the app's ordinary windows on every desktop must
+    /// not show another one either. When in doubt the window is closed and the app keeps running.
+    public static func shouldQuitApp(quitIfLast: Bool, userWindowCount: Int, serverWindowCount: Int) -> Bool {
+        quitIfLast && userWindowCount == 1 && serverWindowCount <= 1
     }
 }
 
