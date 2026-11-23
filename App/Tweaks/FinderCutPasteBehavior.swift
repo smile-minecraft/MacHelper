@@ -77,6 +77,12 @@ final class FinderCutPasteBehavior: @unchecked Sendable {
             return nil
         case .cut:
             guard isFinderFrontmost(config), !isTextFocus(config) else { return nil }
+            // Nothing selected: Finder copies nothing, so there is nothing to cut.
+            let selected = config.finderPID.flatMap { AXWindowTools.focusedSelectionCount(for: $0, timeout: focusTimeout) }
+            guard FinderRules.shouldArmCut(selectedCount: selected) else {
+                lock.withLock { session.disarm() }
+                return nil
+            }
             // Finder's copy bumps the change count by exactly one (measured). No change means
             // nothing was selected, and any further change means something replaced the copy; in
             // both cases ⌘V stays a plain paste, the safe direction.

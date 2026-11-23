@@ -2,8 +2,8 @@ import AppKit
 import Foundation
 import Tweaks
 
-/// A menu bar item that lists every app's windows, including minimized ones and windows on other
-/// desktops, and acts on them.
+/// A menu bar item that lists every app's windows, minimized ones included, and acts on them. The
+/// list is what Accessibility reports, which for most apps is the current desktop only.
 ///
 /// Nothing is read from other apps until the menu opens: `menuNeedsUpdate` asks the accessibility API
 /// for the window list, builds the menu, and the menu is thrown away when it closes. A status item
@@ -44,8 +44,8 @@ final class WindowSwitcherMenu: NSObject, NSMenuDelegate {
 
     /// A note for the status file and the CLI when macOS refused the configured shortcut.
     var hotKeyProblem: String? {
-        guard state.enabled, !state.shortcut.isEmpty, hotKeyFailed else { return nil }
-        return "global shortcut unavailable"
+        guard state.enabled else { return nil }
+        return HotKeyShortcut.statusReason(for: state.shortcut, refused: hotKeyFailed)
     }
 
     // MARK: - Installation

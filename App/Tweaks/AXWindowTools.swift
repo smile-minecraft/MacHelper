@@ -41,6 +41,26 @@ enum AXWindowTools {
         return string(element, "AXRole")
     }
 
+    /// How many items the focused view of `pid` has selected: rows in a list view (AXOutline),
+    /// children in an icon or column view (AXList). Nil when the focused element offers neither.
+    static func focusedSelectionCount(for pid: pid_t, timeout: Float) -> Int? {
+        let app = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(app, timeout)
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(app, "AXFocusedUIElement" as CFString, &value) == .success,
+              let value, CFGetTypeID(value) == AXUIElementGetTypeID() else { return nil }
+        let element = value as! AXUIElement
+        AXUIElementSetMessagingTimeout(element, timeout)
+        for attribute in ["AXSelectedRows", "AXSelectedChildren"] {
+            var selection: CFTypeRef?
+            if AXUIElementCopyAttributeValue(element, attribute as CFString, &selection) == .success,
+               let items = selection as? [AnyObject] {
+                return items.count
+            }
+        }
+        return nil
+    }
+
     static func isStandardWindow(_ window: AXUIElement) -> Bool {
         TweakRules.isUserWindow(subrole: string(window, "AXSubrole"))
     }

@@ -68,6 +68,15 @@ import Testing
 }
 
 @Suite struct HotKeyShortcutTests {
+    @Test func theStatusExplainsAShortcutThatDoesNothing() {
+        #expect(HotKeyShortcut.statusReason(for: "", refused: false) == nil)
+        #expect(HotKeyShortcut.statusReason(for: "ctrl+opt+w", refused: false) == nil)
+        #expect(HotKeyShortcut.statusReason(for: "ctrl+opt+w", refused: true) == "global shortcut unavailable")
+        let typo = HotKeyShortcut.statusReason(for: "ctrl+optn+w", refused: false)
+        #expect(typo?.contains("not recognized") == true)
+        #expect(typo?.contains("ctrl+optn+w") == true)
+    }
+
     @Test func shortcutsParseFromTheWayPeopleWriteThem() {
         let plain = HotKeyShortcut.parse("ctrl+opt+w")
         #expect(plain?.keyCode == 13)

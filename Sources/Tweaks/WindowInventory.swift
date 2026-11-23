@@ -288,8 +288,8 @@ public enum WindowCatalog {
             .sorted { ($0.localizedName ?? "").localizedStandardCompare($1.localizedName ?? "") == .orderedAscending }
     }
 
-    /// Every ordinary window of every ordinary app, including minimized windows and windows on other
-    /// desktops. Apps are listed by name, and inside an app in the accessibility order (front to
+    /// Every ordinary window of every ordinary app that Accessibility reports, minimized ones
+    /// included. Most apps only report the windows of the current desktop. Apps are listed by name, and inside an app in the accessibility order (front to
     /// back for most apps). A window without a window server number cannot be addressed later, so
     /// it is left out rather than listed with an id that would not resolve.
     public static func snapshots(timeout: Float = AccessibilityWindows.defaultTimeout) -> [WindowSnapshot] {
