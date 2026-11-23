@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>height</key>
+		<integer>1440</integer>
+		<key>pixelHeight</key>
+		<integer>2880</integer>
+		<key>pixelWidth</key>
+		<integer>5120</integer>
+		<key>productID</key>
+		<integer>15600</integer>
+		<key>refreshHz</key>
+		<real>144.0</real>
+		<key>vendorID</key>
+		<integer>13929</integer>
+		<key>width</key>
+		<integer>2560</integer>
+	</dict>
+</array>
+</plist>
