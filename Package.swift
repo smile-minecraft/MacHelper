@@ -19,6 +19,7 @@ let package = Package(
         .library(name: "SettingsPortability", targets: ["SettingsPortability"]),
         .library(name: "Diagnostics", targets: ["Diagnostics"]),
         .library(name: "Cable", targets: ["Cable"]),
+        .library(name: "Tweaks", targets: ["Tweaks"]),
         .executable(name: "machelper", targets: ["machelper"]),
         .executable(name: "mhprobe", targets: ["mhprobe"]),
     ],
@@ -52,7 +53,7 @@ let package = Package(
         .target(name: "Cable", exclude: ["README.md"], linkerSettings: [.linkedFramework("IOKit"), .linkedFramework("CoreGraphics")]),
         .executableTarget(
             name: "machelper",
-            dependencies: ["Cable", "CleanEngine", "Diagnostics", "DiskScan", "Metrics", "SMCKit", "Storage",
+            dependencies: ["Cable", "CleanEngine", "Diagnostics", "DiskScan", "Metrics", "SMCKit", "Storage", "Tweaks",
                            .product(name: "ArgumentParser", package: "swift-argument-parser")]
         ),
         // Fixed allowlists for what the root Helper may delete or switch; no dependencies.
@@ -60,6 +61,7 @@ let package = Package(
         // Color themes, VS Code theme import and appearance settings; no UI framework.
         .target(name: "Theming"),
         .target(name: "HelperProtocol", dependencies: ["SMCKit", "FanControl"], linkerSettings: [.linkedFramework("Security")]),
+        .target(name: "Tweaks"),
         .executableTarget(name: "mhprobe", dependencies: ["SMCKit", "Metrics"]),
         .testTarget(name: "SMCKitTests", dependencies: ["SMCKit"]),
         .testTarget(name: "FanControlTests", dependencies: ["FanControl"]),
@@ -73,5 +75,6 @@ let package = Package(
         .testTarget(name: "DiagnosticsTests", dependencies: ["Diagnostics", "Storage"]),
         .testTarget(name: "SettingsPortabilityTests", dependencies: ["SettingsPortability", "CleanEngine", "FanControl"]),
         .testTarget(name: "CableTests", dependencies: ["Cable"], resources: [.copy("Fixtures")]),
+        .testTarget(name: "TweaksTests", dependencies: ["Tweaks"]),
     ]
 )

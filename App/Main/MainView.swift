@@ -74,6 +74,7 @@ struct MainView: View {
         case .uninstall: UninstallView(model: app.uninstallModel)
         case .updates: UpdatesView(model: app.updatesModel)
         case .startup: StartupView(model: app.startupModel)
+        case .tweaks: TweaksView(model: app.tweaks)
         }
     }
 }

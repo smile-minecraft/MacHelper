@@ -1,6 +1,24 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Hold ⌘W to close": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Mantén ⌘W para cerrar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "⌘W を長押しして閉じる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "닫으려면 ⌘W를 길게 누르세요" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "按住 ⌘W 以关闭" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "按住 ⌘W 以關閉" } }
+      }
+    },
+    "Press ⌘W twice to close": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Pulsa ⌘W dos veces para cerrar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "⌘W を 2 回押して閉じる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "닫으려면 ⌘W를 두 번 누르세요" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "按两次 ⌘W 以关闭" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "按兩次 ⌘W 以關閉" } }
+      }
+    },
     "Deep Clean Only…": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Solo limpieza profunda…" } },
@@ -42645,6 +42663,474 @@
         "ko": { "stringUnit": { "state": "translated", "value": "끄면 예약된 정리 작업도 일시 중지됩니다." } },
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭后也会暂停定时清理。" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉後也會暫停排程清理。" } }
+      }
+    },
+    "Finder": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Finder" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Finder" } }
+      }
+    },
+    "Dock": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Dock" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Dock" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Dock" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Dock" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Dock" } }
+      }
+    },
+    "Windows": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ventanas" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ウィンドウ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "창" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "窗口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "視窗" } }
+      }
+    },
+    "Media": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Multimedia" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "メディア" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "미디어" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "媒体" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "媒體" } }
+      }
+    },
+    "Tweaks": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ajustes" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "調整" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "조정" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "调整" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "調整" } }
+      }
+    },
+    "Fine-tune Finder, Dock, windows, keyboard and media shortcuts.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ajusta Finder, Dock, ventanas, teclado y multimedia." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder、Dock、ウィンドウ、キーボード、メディアを細かく調整します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder, Dock, 창, 키보드 및 미디어를 세부 조정합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "微调 Finder、Dock、窗口、键盘与媒体快捷键。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "微調 Finder、Dock、視窗、鍵盤與媒體快捷鍵。" } }
+      }
+    },
+    "Changes are saved to tweaks.json and applied by MacHelper while it is running.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Los cambios se guardan en tweaks.json y se aplican mientras MacHelper esté abierto." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "変更は tweaks.json に保存され、MacHelper の実行中に適用されます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "변경 내용은 tweaks.json에 저장되며 MacHelper가 실행 중일 때 적용됩니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "更改会保存到 tweaks.json，并在 MacHelper 运行时生效。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "變更會儲存到 tweaks.json，並在 MacHelper 執行時生效。" } }
+      }
+    },
+    "MacHelper is not running; changes take effect when you open it.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "MacHelper no está en ejecución; los cambios se aplican al abrirlo." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper は実行中ではありません。開くと変更が適用されます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper가 실행 중이 아닙니다. 열면 변경 사항이 적용됩니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "MacHelper 未运行；打开后变更才会生效。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "MacHelper 未執行；開啟後變更才會生效。" } }
+      }
+    },
+    "Grant Accessibility": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Conceder acceso de accesibilidad" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アクセシビリティを許可" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "접근성 권한 허용" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "授予辅助功能权限" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "授予輔助使用權限" } }
+      }
+    },
+    "Requires Finder extension": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Requiere la extensión de Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder 拡張が必要です" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 확장이 필요합니다" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "需要 Finder 扩展" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "需要 Finder 擴充功能" } }
+      }
+    },
+    "Requires Finder automation": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Requiere automatizar Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder の自動操作が必要です" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 자동화가 필요합니다" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "需要 Finder 自动化" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "需要 Finder 自動化" } }
+      }
+    },
+    "Coming soon": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Próximamente" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "近日公開" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "곧 출시" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "即将推出" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "即將推出" } }
+      }
+    },
+    "Waiting for MacHelper": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Esperando a MacHelper" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper を待機中" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper 대기 중" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "等待 MacHelper" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "等待 MacHelper" } }
+      }
+    },
+    "Active": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Activo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "有効" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "활성" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已启用" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已啟用" } }
+      }
+    },
+    "Needs permission": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Necesita permiso" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "権限が必要" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "권한 필요" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "需要权限" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "需要權限" } }
+      }
+    },
+    "Unavailable": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No disponible" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "使用できません" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사용할 수 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "不可用" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "無法使用" } }
+      }
+    },
+    "Hold duration: %.1f s": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Duración de pulsación: %.1f s" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "長押し時間: %.1f 秒" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "길게 누르기 시간: %.1f초" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "长按时长：%.1f 秒" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "長按時間：%.1f 秒" } }
+      }
+    },
+    "Replacement app bundle id": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "ID del paquete de la app sustituta" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "代替アプリのバンドル ID" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "대체 앱 번들 ID" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "替代应用 bundle id" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "替代 App 的 bundle id" } }
+      }
+    },
+    "Guard mode": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Modo de protección" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ガードモード" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "보호 모드" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "保护模式" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "防誤觸模式" } }
+      }
+    },
+    "Hold": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Mantener pulsado" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "長押し" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "길게 누르기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "长按" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "長按" } }
+      }
+    },
+    "Hold duration": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Duración de pulsación" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "長押し時間" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "길게 누르기 시간" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "长按时长" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "長按時間" } }
+      }
+    },
+    "Double press": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Doble pulsación" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ダブルプレス" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "두 번 누르기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "双击" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "連按兩次" } }
+      }
+    },
+    "Also guard ⌘W": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Proteger también ⌘W" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "⌘W も保護する" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "⌘W도 보호" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "也保护 ⌘W" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "也保護 ⌘W" } }
+      }
+    },
+    "Excluded app bundle ids": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "IDs de paquete excluidos" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "除外するアプリのバンドル ID" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "제외할 앱 번들 ID" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "排除的应用 bundle id" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "排除的 App bundle id" } }
+      }
+    },
+    "Click action": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Acción al hacer clic" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "クリック時の動作" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "클릭 동작" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "点击动作" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "點擊動作" } }
+      }
+    },
+    "Cycle windows": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ciclar ventanas" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ウィンドウを巡回" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "창 순환" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "循环窗口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "循環切換視窗" } }
+      }
+    },
+    "Hide app": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ocultar app" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アプリを隠す" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "앱 숨기기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "隐藏应用" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "隱藏 App" } }
+      }
+    },
+    "Minimize windows": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Minimizar ventanas" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ウィンドウを最小化" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "창 최소화" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "最小化窗口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "最小化視窗" } }
+      }
+    },
+    "Press ⌘Q twice to quit": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Pulsa ⌘Q dos veces para salir" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "⌘Q を2回押して終了" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "⌘Q를 두 번 눌러 종료" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "连按两次 ⌘Q 退出" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "連按兩次 ⌘Q 結束" } }
+      }
+    },
+    "Hold ⌘Q to quit": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Mantén ⌘Q pulsado para salir" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "⌘Q を長押しして終了" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "⌘Q를 길게 눌러 종료" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "长按 ⌘Q 退出" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "長按 ⌘Q 結束" } }
+      }
+    },
+    "Cut and paste files in Finder": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cortar y pegar archivos en Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder でファイルをカット＆ペースト" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder에서 파일 잘라내기 및 붙여넣기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 Finder 中剪切与粘贴文件" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 Finder 中剪下與貼上檔案" } }
+      }
+    },
+    "Move files with ⌘X / ⌘V instead of copying them.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Mueve archivos con ⌘X / ⌘V en lugar de copiarlos." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "コピーではなく ⌘X / ⌘V でファイルを移動します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "복사 대신 ⌘X / ⌘V로 파일을 이동합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "用 ⌘X / ⌘V 移动文件，而不是复制。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "用 ⌘X / ⌘V 移動檔案，而不是複製。" } }
+      }
+    },
+    "New file in Finder": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Nuevo archivo en Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder で新規ファイル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder에서 새 파일" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 Finder 中新建文件" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 Finder 中新增檔案" } }
+      }
+    },
+    "Create a blank file from the Finder menu.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Crea un archivo vacío desde el menú de Finder." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder メニューから空のファイルを作成します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 메뉴에서 빈 파일을 만듭니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "从 Finder 菜单创建空白文件。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "從 Finder 選單建立空白檔案。" } }
+      }
+    },
+    "Cleaner Finder context menu": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Menú contextual de Finder más limpio" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "すっきりした Finder のコンテキストメニュー" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "더 깔끔한 Finder 상황 메뉴" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "更干净的 Finder 右键菜单" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "更乾淨的 Finder 右鍵選單" } }
+      }
+    },
+    "Hide items you never use from Finder's right-click menu.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Oculta del menú derecho de Finder los elementos que nunca usas." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "使わない項目を Finder の右クリックメニューから隠します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사용하지 않는 항목을 Finder 오른쪽 클릭 메뉴에서 숨깁니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "从 Finder 右键菜单隐藏从不使用的项目。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "從 Finder 右鍵選單隱藏從不使用的項目。" } }
+      }
+    },
+    "Keep Finder column widths": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Mantener el ancho de columnas de Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder の列幅を維持" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 열 너비 유지" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "保持 Finder 列宽" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "保持 Finder 欄寬" } }
+      }
+    },
+    "Stop Finder from resizing list columns automatically.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Evita que Finder cambie el ancho de las columnas en lista." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder がリストの列幅を自動調整するのを止めます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder가 목록 열 너비를 자동 조정하지 않도록 합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "阻止 Finder 自动调整列表列宽。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "避免 Finder 自動調整列表欄寬。" } }
+      }
+    },
+    "Dock icon click action": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Acción al hacer clic en el icono del Dock" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Dock アイコンをクリックした時の動作" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Dock 아이콘 클릭 동작" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "点击 Dock 图标的动作" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "點擊 Dock 圖示的動作" } }
+      }
+    },
+    "Act on an app already in the foreground when you click its Dock icon.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Actúa sobre una app ya en primer plano al hacer clic en su icono del Dock." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "前方にあるアプリの Dock アイコンをクリックしたときに動作します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "앞에 있는 앱의 Dock 아이콘을 클릭할 때 동작합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "点击已在前台应用的 Dock 图标时执行动作。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "點擊已在前台 App 的 Dock 圖示時執行動作。" } }
+      }
+    },
+    "Block Music auto-launch": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Bloquear el inicio automático de Music" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Music の自動起動をブロック" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Music 자동 실행 차단" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "阻止 Music 自动启动" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "封鎖 Music 自動啟動" } }
+      }
+    },
+    "Close Music as soon as it starts, with an optional replacement app.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cierra Music en cuanto se inicia, con una app sustituta opcional." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "起動直後に Music を終了します。代替アプリも指定できます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Music가 시작되면 즉시 종료하며 대체 앱을 지정할 수 있습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Music 启动后立即关闭，可指定替代应用。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Music 啟動後立即結束，可指定替代 App。" } }
+      }
+    },
+    "Traffic light buttons": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Botones de ventana" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "交通信号ボタン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "창 컨트롤 버튼" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "红绿黄按钮" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "紅綠燈按鈕" } }
+      }
+    },
+    "Change what the close, minimize and zoom buttons do.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cambia qué hacen los botones de cerrar, minimizar y zoom." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "閉じる・最小化・ズームボタンの動作を変更します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "닫기, 최소화, 확대 버튼의 동작을 변경합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "更改关闭、最小化与缩放按钮的行为。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "變更關閉、最小化與縮放按鈕的行為。" } }
+      }
+    },
+    "Restore minimized windows on ⌘Tab": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Restaurar ventanas minimizadas con ⌘Tab" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "⌘Tab で最小化したウィンドウを復元" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "⌘Tab로 최소화된 창 복원" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "用 ⌘Tab 还原最小化的窗口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "用 ⌘Tab 還原最小化的視窗" } }
+      }
+    },
+    "Bring back the last minimized window when you switch to an app with no visible ones.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Recupera la última ventana minimizada al cambiar a una app sin ventanas visibles." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示中のウィンドウがないアプリに切り替えたとき、最後に最小化したウィンドウを戻します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "보이는 창이 없는 앱으로 전환하면 마지막으로 최소화한 창을 복원합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "切换到没有可见窗口的应用时，恢复最近最小化的窗口。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "切換到沒有可見視窗的 App 時，還原最近最小化的視窗。" } }
+      }
+    },
+    "Quit shortcut guard": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Protección del atajo de salir" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "終了ショートカットのガード" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "종료 단축키 보호" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "退出快捷键保护" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "結束快捷鍵防誤觸" } }
+      }
+    },
+    "Require a deliberate press before ⌘Q (and optionally ⌘W) can quit an app.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Exige una pulsación deliberada antes de que ⌘Q (y opcionalmente ⌘W) cierre una app." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "⌘Q（および任意で ⌘W）で終了する前に意図的な操作を必要とします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "⌘Q(및 선택적으로 ⌘W)로 종료하기 전에 명확한 입력을 요구합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 ⌘Q（以及选择性 ⌘W）退出应用前，需要明确的按键操作。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 ⌘Q（以及選擇性 ⌘W）結束 App 前，需要明確的按鍵操作。" } }
+      }
+    },
+    "Window list in the menu bar": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Lista de ventanas en la barra de menús" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "メニューバーのウィンドウ一覧" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "메뉴 막대 창 목록" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "菜单栏中的窗口列表" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "選單列中的視窗清單" } }
+      }
+    },
+    "Switch windows from a menu bar item instead of the app menu.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cambia de ventana desde la barra de menús en lugar del menú de la app." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アプリメニューではなくメニューバーからウィンドウを切り替えます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "앱 메뉴 대신 메뉴 막대에서 창을 전환합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "从菜单栏而非应用菜单切换窗口。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "從選單列而非 App 選單切換視窗。" } }
+      }
+    },
+    "Window buttons in Mission Control": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Botones de ventana en Mission Control" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Mission Control のウィンドウボタン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Mission Control 창 버튼" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Mission Control 中的窗口按钮" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Mission Control 中的視窗按鈕" } }
+      }
+    },
+    "Show per-window controls above Mission Control thumbnails.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Muestra controles por ventana sobre las miniaturas de Mission Control." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Mission Control のサムネイルにウィンドウごとの操作ボタンを表示します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Mission Control 미리보기 위에 창별 컨트롤을 표시합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 Mission Control 缩略图上方显示每窗口控制项。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 Mission Control 縮圖上方顯示每視窗控制項。" } }
       }
     }
   },

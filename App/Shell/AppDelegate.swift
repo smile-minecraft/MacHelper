@@ -6,6 +6,7 @@ import HelperProtocol
 import Storage
 import SwiftUI
 import Telemetry
+import Tweaks
 
 /// Captured at process start so the launch event can report one coarse duration bucket.
 private let processLaunchStart = CFAbsoluteTimeGetCurrent()
@@ -104,6 +105,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             return
         }
         #endif
+        // Isolated verification mode: run only the tweak engine against MACHELPER_TWEAKS_DIR.
+        // It skips status item, Helper, fans, telemetry and updater so a second instance can be
+        // tested without touching the person's normal MacHelper session.
+        if CommandLine.arguments.contains("--tweaks-only") {
+            TweakEngine.shared.start()
+            return
+        }
         // Telemetry runs only in a normal user session. Snapshot, measurement and self-test
         // invocations are diagnostic tools and must never queue or transmit an event.
         if !TelemetryRuntime.isNonProduction() {
@@ -143,6 +151,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             fanSwitcher.start()
             // Converge background work on the module switches: modules that are off stop here.
             FeatureLifecycle.start(app)
+            // Tweaks use a single event tap and only run in a normal session; diagnostic instances
+            // must never change the user's macOS behaviour.
+            if !args.contains(where: { $0.hasPrefix("--snapshot") || $0 == "--measure-pages" || $0 == "--selftest" || $0 == "--export-icon-template" }) {
+                TweakEngine.shared.start()
+            }
         }
         // After an update, rewrite the agent skills MacHelper installed (never a SKILL.md it didn't write).
         if !args.contains(where: { $0.hasPrefix("--snapshot") || $0 == "--export-icon-template" }) {

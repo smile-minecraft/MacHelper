@@ -105,6 +105,7 @@ private struct FeatureSettings: View {
         case .uninstall: "Remove apps together with their leftovers."
         case .updates: "Check Homebrew casks and upgrade the ones you pick."
         case .startup: "Review login items and background agents."
+        case .tweaks: "Fine-tune Finder, Dock, windows, keyboard and media shortcuts."
         }
     }
 
@@ -114,7 +115,7 @@ private struct FeatureSettings: View {
         case .fans: "Fans return to automatic system control while this is off."
         case .optimize: "Turning this off also pauses scheduled cleanup."
         case .updates: "Homebrew update checks stop while this is off."
-        case .health, .disk, .uninstall, .startup: nil
+        case .health, .disk, .uninstall, .startup, .tweaks: nil
         }
     }
 

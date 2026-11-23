@@ -52,6 +52,24 @@ import Testing
         #expect(Set(FeatureModule.allCases.filter(\.hiddenInSimpleMode)) == [.monitor, .fans, .startup])
     }
 
+    @Test func tweaksModuleKeepsOldBackupsReadable() throws {
+        #expect(FeatureModule.allCases.contains(.tweaks))
+        #expect(FeatureModule.tweaks.isVisible(enabled: true, simpleMode: false))
+        #expect(!FeatureModule.tweaks.hiddenInSimpleMode)
+
+        let backupWithoutTweaks = try #require(try JSONDecoder().decode(
+            GeneralSettingsPayload.self,
+            from: Data(#"{"dockMode":"never","features":{"monitor":false}}"#.utf8)))
+        #expect(backupWithoutTweaks.features?.isEnabled(.tweaks) == true)
+        #expect(backupWithoutTweaks.features?.isEnabled(.monitor) == false)
+
+        var features = FeatureSet()
+        features.setEnabled(.tweaks, false)
+        let roundTrip = try JSONDecoder().decode(FeatureSet.self,
+                                                 from: try JSONEncoder().encode(features))
+        #expect(!roundTrip.isEnabled(.tweaks))
+    }
+
     @Test func oldPayloadWithoutFeaturesStillDecodes() throws {
         let legacy = try JSONDecoder().decode(
             GeneralSettingsPayload.self,

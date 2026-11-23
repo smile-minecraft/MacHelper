@@ -3,7 +3,7 @@ import Foundation
 /// A tool page that can be switched off independently. Overview is deliberately not a module:
 /// it is the home page and is always available.
 public enum FeatureModule: String, Codable, CaseIterable, Sendable {
-    case monitor, health, fans, optimize, disk, uninstall, updates, startup
+    case monitor, health, fans, optimize, disk, uninstall, updates, startup, tweaks
 
     /// New modules can ship turned off by changing only this property.
     public var defaultEnabled: Bool { true }
@@ -12,7 +12,7 @@ public enum FeatureModule: String, Codable, CaseIterable, Sendable {
     public var hiddenInSimpleMode: Bool {
         switch self {
         case .monitor, .fans, .startup: true
-        case .health, .optimize, .disk, .uninstall, .updates: false
+        case .health, .optimize, .disk, .uninstall, .updates, .tweaks: false
         }
     }
 
