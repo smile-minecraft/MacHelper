@@ -10,8 +10,9 @@ struct WindowsCommand: ParsableCommand {
         commandName: "windows",
         abstract: "List, focus, minimize, restore and close windows through Accessibility.",
         discussion: """
-        A window id is "<pid>:<index>": the app's process id and the window's place in that app's
-        accessibility window list, which is what `windows list` prints.
+        A window id is "<pid>:<window>": the app's process id and the window server's number for the
+        window, which is what `windows list` prints. The number stays the same while the window is
+        open, so an id from an earlier `list` never reaches a different window.
         Accessibility is a per-executable permission. Without it every command reports that and
         exits non-zero instead of pretending the action worked.
         """,
@@ -89,7 +90,7 @@ extension WindowActionCommand {
     func run() throws {
         try WindowsCommand.requireAccessibility()
         guard let identity = WindowIdentity(window) else {
-            throw ValidationError("Invalid window id \"\(window)\". Use the id from `machelper windows list`, for example 533:0.")
+            throw ValidationError("Invalid window id \"\(window)\". Use the id from `machelper windows list`, for example 533:8421.")
         }
         let worked = AccessibilityWindows.perform(Self.action, on: identity)
         if output.json {
@@ -108,7 +109,7 @@ struct WindowsFocus: WindowActionCommand {
         commandName: "focus",
         abstract: "Bring a window back and in front, activating its app.")
     @OptionGroup var output: OutputOptions
-    @Argument(help: "Window id from `machelper windows list`, for example 533:0.") var window: String
+    @Argument(help: "Window id from `machelper windows list`, for example 533:8421.") var window: String
     static let action = WindowAction.focus
 }
 

@@ -24,7 +24,7 @@ import Testing
 @Suite struct MissionControlMatchingTests {
     private func window(_ index: Int, title: String, width: Double, height: Double,
                         bundleID: String? = "com.apple.TextEdit") -> WindowSnapshot {
-        WindowSnapshot(id: WindowIdentity(pid: 77, index: index), app: "TextEdit", bundleID: bundleID,
+        WindowSnapshot(id: WindowIdentity(pid: 77, window: UInt32(index + 1)), app: "TextEdit", bundleID: bundleID,
                        title: title, minimized: false, visible: true,
                        frame: WindowFrame(CGRect(x: 0, y: 0, width: width, height: height)))
     }
@@ -34,7 +34,7 @@ import Testing
                        window(1, title: "other.txt", width: 300, height: 300)]
         let match = MissionControlModel.match(bundleID: "com.apple.TextEdit", title: "notes.txt",
                                               aspectRatio: 1.5, windows: windows)
-        #expect(match == WindowIdentity(pid: 77, index: 0))
+        #expect(match == WindowIdentity(pid: 77, window: 1))
     }
 
     @Test func nothingIsActedOnWithoutAnAppOrATitle() {
@@ -43,7 +43,7 @@ import Testing
         #expect(MissionControlModel.match(bundleID: "com.apple.TextEdit", title: "", aspectRatio: 1.5, windows: windows) == nil)
         #expect(MissionControlModel.match(bundleID: "com.apple.Safari", title: "notes.txt", aspectRatio: 1.5, windows: windows) == nil)
         #expect(MissionControlModel.match(bundleID: "COM.APPLE.TEXTEDIT", title: "notes.txt",
-                                          aspectRatio: 1.5, windows: windows) == WindowIdentity(pid: 77, index: 0))
+                                          aspectRatio: 1.5, windows: windows) == WindowIdentity(pid: 77, window: 1))
     }
 
     @Test func windowsWithTheSameTitleAreToldApartByShape() {
@@ -51,9 +51,9 @@ import Testing
         let windows = [window(0, title: "Untitled", width: 800, height: 500),   // 1.6
                        window(1, title: "Untitled", width: 400, height: 700)]   // 0.57
         #expect(MissionControlModel.match(bundleID: "com.apple.TextEdit", title: "Untitled",
-                                          aspectRatio: 1.6, windows: windows) == WindowIdentity(pid: 77, index: 0))
+                                          aspectRatio: 1.6, windows: windows) == WindowIdentity(pid: 77, window: 1))
         #expect(MissionControlModel.match(bundleID: "com.apple.TextEdit", title: "Untitled",
-                                          aspectRatio: 0.57, windows: windows) == WindowIdentity(pid: 77, index: 1))
+                                          aspectRatio: 0.57, windows: windows) == WindowIdentity(pid: 77, window: 2))
     }
 
     @Test func anAmbiguousShapeMatchIsSkippedRatherThanGuessed() {

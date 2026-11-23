@@ -1,29 +1,33 @@
 import AppKit
+import Darwin
 import ApplicationServices
 import Foundation
 
 /// A window's identity that survives the trip from `windows list` to `windows close`: the owning
-/// process and the window's position in that app's list of ordinary windows. Accessibility has no
-/// stable per-window number (a `CGWindowID` is not exposed through AX), so the position in the app's
-/// own window list is the closest thing to a durable handle; it only moves when the app closes a
-/// window in front of it.
+/// process and the window server's number for the window (`CGWindowID`).
+///
+/// The position in the app's accessibility window list is not an identity: most apps list their
+/// windows front to back, so focusing one window renumbers the others and an id printed by `list`
+/// would then close a different window. The window number never changes while the window exists,
+/// and an id whose window is gone resolves to nothing instead of to a neighbour.
 public struct WindowIdentity: Hashable, Sendable, CustomStringConvertible {
     public let pid: Int32
-    public let index: Int
+    public let window: UInt32
 
-    public init(pid: Int32, index: Int) {
+    public init(pid: Int32, window: UInt32) {
         self.pid = pid
-        self.index = index
+        self.window = window
     }
 
-    /// "1234:0" — the form printed by `machelper windows list` and accepted by every action.
+    /// "1234:5678" — the form printed by `machelper windows list` and accepted by every action.
     public init?(_ text: String) {
         let parts = text.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
-        guard parts.count == 2, let pid = Int32(parts[0]), pid > 0, let index = Int(parts[1]), index >= 0 else { return nil }
-        self.init(pid: pid, index: index)
+        guard parts.count == 2, let pid = Int32(parts[0]), pid > 0,
+              let window = UInt32(parts[1]), window > 0 else { return nil }
+        self.init(pid: pid, window: window)
     }
 
-    public var description: String { "\(pid):\(index)" }
+    public var description: String { "\(pid):\(window)" }
 }
 
 extension WindowIdentity: Codable {
@@ -168,12 +172,28 @@ public enum AccessibilityWindows {
         return nil
     }
 
+    /// `_AXUIElementGetWindow`: the window server number behind an accessibility window. It is not
+    /// in the public headers, but it is the only link between the two APIs and window managers have
+    /// relied on it for years. It is looked up at run time, so a macOS without it leaves every window
+    /// unaddressable (nothing is listed or acted on) instead of failing to launch.
+    private typealias GetWindowFunction = @convention(c) (AXUIElement, UnsafeMutablePointer<CGWindowID>) -> AXError
+    private static let getWindow: GetWindowFunction? = {
+        guard let symbol = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "_AXUIElementGetWindow") else { return nil }
+        return unsafeBitCast(symbol, to: GetWindowFunction.self)
+    }()
+
+    public static func windowNumber(_ window: AXUIElement) -> UInt32? {
+        guard let getWindow else { return nil }
+        var number: CGWindowID = 0
+        guard getWindow(window, &number) == .success, number != 0 else { return nil }
+        return number
+    }
+
     // MARK: - Actions
 
+    /// The window with this number in the app, or nil when it closed in the meantime.
     public static func resolve(_ identity: WindowIdentity, timeout: Float = defaultTimeout) -> AXUIElement? {
-        let windows = userWindows(of: identity.pid, timeout: timeout)
-        guard identity.index < windows.count else { return nil }
-        return windows[identity.index]
+        userWindows(of: identity.pid, timeout: timeout).first { windowNumber($0) == identity.window }
     }
 
     @discardableResult
@@ -269,16 +289,18 @@ public enum WindowCatalog {
     }
 
     /// Every ordinary window of every ordinary app, including minimized windows and windows on other
-    /// desktops. Apps are listed by name, and inside an app the accessibility window order is kept
-    /// because that order is the window's identity.
+    /// desktops. Apps are listed by name, and inside an app in the accessibility order (front to
+    /// back for most apps). A window without a window server number cannot be addressed later, so
+    /// it is left out rather than listed with an id that would not resolve.
     public static func snapshots(timeout: Float = AccessibilityWindows.defaultTimeout) -> [WindowSnapshot] {
         var result: [WindowSnapshot] = []
         for app in applications() {
             let pid = app.processIdentifier
             let windows = AccessibilityWindows.userWindows(of: pid, timeout: timeout)
-            for (index, window) in windows.enumerated() {
+            for window in windows {
+                guard let number = AccessibilityWindows.windowNumber(window) else { continue }
                 result.append(WindowSnapshot(
-                    id: WindowIdentity(pid: pid, index: index),
+                    id: WindowIdentity(pid: pid, window: number),
                     app: app.localizedName ?? "",
                     bundleID: app.bundleIdentifier,
                     title: AccessibilityWindows.title(of: window),

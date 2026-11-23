@@ -9,9 +9,9 @@ import Tweaks
 /// Control is closed that group is gone and the overlays stay hidden, which is also what makes the
 /// cost of the poll small: one accessibility read of one small tree.
 ///
-/// The overlays are transparent panels at the screen saver window level (above Mission Control) whose
-/// content view only claims clicks on the buttons themselves; every other click falls through to
-/// Mission Control and keeps its own gestures working.
+/// Every button is its own small panel at the shielding window level (above Mission Control). Only
+/// the buttons cover anything: a click anywhere else reaches Mission Control itself, because a
+/// window that covers the screen takes every click inside its frame whatever its view hit-tests.
 @MainActor
 final class MissionControlOverlay {
     private var enabled = false
@@ -77,73 +77,53 @@ final class MissionControlOverlay {
         // its bottom left. One conversion covers every screen.
         let primaryHeight = NSScreen.screens.first { $0.frame.origin == .zero }?.frame.height
             ?? NSScreen.screens.first?.frame.height ?? 0
-        ensurePanels()
-        for panel in panels { panel.contentView?.subviews.forEach { $0.removeFromSuperview() } }
+        removePanels()
         for thumbnail in thumbnails {
-            let center = CGPoint(x: thumbnail.frame.midX, y: thumbnail.frame.midY)
-            guard let screen = NSScreen.screens.first(where: { $0.frame.contains(center) }),
-                  let panel = panels.first(where: { $0.frame == screen.frame }),
-                  let content = panel.contentView else { continue }
             var offset = Self.thumbnailInset
             if showsClose {
-                addButton(.close, thumbnail: thumbnail, content: content, offset: offset,
-                          primaryHeight: primaryHeight, screen: screen)
+                addButton(.close, thumbnail: thumbnail, offset: offset, primaryHeight: primaryHeight)
                 offset += Self.buttonSize + Self.buttonGap
             }
             if showsMinimize {
-                addButton(.minimize, thumbnail: thumbnail, content: content, offset: offset,
-                          primaryHeight: primaryHeight, screen: screen)
+                addButton(.minimize, thumbnail: thumbnail, offset: offset, primaryHeight: primaryHeight)
             }
-        }
-        for panel in panels where !panel.isVisible {
-            panel.orderFrontRegardless()
         }
     }
 
-    private func addButton(_ action: WindowAction, thumbnail: MissionControlThumbnail, content: NSView,
-                           offset: CGFloat, primaryHeight: CGFloat, screen: NSScreen) {
+    private func addButton(_ action: WindowAction, thumbnail: MissionControlThumbnail,
+                           offset: CGFloat, primaryHeight: CGFloat) {
         let size = Self.buttonSize
-        let x = thumbnail.frame.minX + offset
-        let y = primaryHeight - thumbnail.frame.minY - size - Self.thumbnailInset
-        // The panels cover one screen each; a thumbnail belongs to the screen it sits on.
-        let frame = CGRect(x: x - screen.frame.minX, y: y - screen.frame.minY, width: size, height: size)
-        let button = OverlayButton(action: action, thumbnail: thumbnail, frame: frame)
+        // AppKit's global space, bottom left of the primary display: one conversion covers every screen.
+        let frame = CGRect(x: thumbnail.frame.minX + offset,
+                           y: primaryHeight - thumbnail.frame.minY - size - Self.thumbnailInset,
+                           width: size, height: size)
+        let panel = NSPanel(contentRect: frame, styleMask: [.borderless, .nonactivatingPanel],
+                            backing: .buffered, defer: false)
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = false
+        panel.level = NSWindow.Level(rawValue: Int(CGShieldingWindowLevel()))
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+        panel.isMovable = false
+        panel.hidesOnDeactivate = false
+        panel.animationBehavior = .none
+        panel.isReleasedWhenClosed = false
+        let button = OverlayButton(action: action, thumbnail: thumbnail,
+                                   frame: CGRect(origin: .zero, size: frame.size))
         button.target = self
         button.action = #selector(runAction(_:))
-        content.addSubview(button)
+        panel.contentView = button
+        panel.orderFrontRegardless()
+        panels.append(panel)
     }
 
-    private func ensurePanels() {
-        for screen in NSScreen.screens where !panels.contains(where: { $0.frame == screen.frame }) {
-            let panel = NSPanel(contentRect: screen.frame, styleMask: [.borderless, .nonactivatingPanel],
-                                backing: .buffered, defer: false)
-            panel.isOpaque = false
-            panel.backgroundColor = .clear
-            panel.hasShadow = false
-            panel.level = NSWindow.Level(rawValue: Int(CGShieldingWindowLevel()))
-            panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
-            panel.ignoresMouseEvents = false
-            panel.isMovable = false
-            panel.hidesOnDeactivate = false
-            panel.animationBehavior = .none
-            panel.contentView = OverlayContentView(frame: CGRect(origin: .zero, size: screen.frame.size))
-            panels.append(panel)
-        }
-        // A display that went away takes its panel with it.
-        panels.removeAll { panel in
-            guard NSScreen.screens.contains(where: { $0.frame == panel.frame }) else {
-                panel.orderOut(nil)
-                return true
-            }
-            return false
-        }
+    private func removePanels() {
+        for panel in panels { panel.orderOut(nil) }
+        panels.removeAll()
     }
 
     private func hideOverlays() {
-        for panel in panels {
-            panel.orderOut(nil)
-            panel.contentView?.subviews.forEach { $0.removeFromSuperview() }
-        }
+        removePanels()
         layoutSignature = ""
     }
 
@@ -205,12 +185,4 @@ private final class OverlayButton: NSButton {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
-}
-
-/// Transparent content that lets every click that is not on a button through to Mission Control.
-private final class OverlayContentView: NSView {
-    override func hitTest(_ point: NSPoint) -> NSView? {
-        let hit = super.hitTest(point)
-        return hit === self ? nil : hit
-    }
 }
