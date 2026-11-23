@@ -1,0 +1,78 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "New File": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Nuevo archivo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "新規ファイル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "새 파일" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "新建文件" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "新增檔案" } }
+      }
+    },
+    "Copy Path": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Copiar ruta" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パスをコピー" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "경로 복사" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "拷贝路径" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "拷貝路徑" } }
+      }
+    },
+    "Open in Terminal": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Abrir en Terminal" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ターミナルで開く" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "터미널에서 열기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在终端中打开" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在終端機中開啟" } }
+      }
+    },
+    "Cut": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cortar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "カット" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "잘라내기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "剪切" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "剪下" } }
+      }
+    },
+    "Plain Text": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Texto sin formato" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "プレーンテキスト" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "일반 텍스트" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "纯文本" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "純文字" } }
+      }
+    },
+    "Markdown": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Markdown" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Markdown" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Markdown" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Markdown" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Markdown" } }
+      }
+    },
+    "Rich Text": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Texto enriquecido" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リッチテキスト" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "서식 있는 텍스트" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "富文本" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "富文字" } }
+      }
+    },
+    "Custom Extension": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Extensión personalizada" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "カスタム拡張子" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사용자 설정 확장자" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "自定义扩展名" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "自訂副檔名" } }
+      }
+    }
+  },
+  "version": "1.0"
+}

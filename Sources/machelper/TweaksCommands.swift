@@ -61,6 +61,8 @@ struct Tweaks: ParsableCommand {
         let schemaVersion = 1
         let appRunning: Bool
         let accessibilityGranted: Bool?
+        let automationFinderGranted: Bool?
+        let finderExtensionEnabled: Bool?
         let eventTapInstalled: Bool
         let message: String?
         let tweaks: [StateJSON]
@@ -150,6 +152,8 @@ struct Tweaks: ParsableCommand {
                 try Output.json(StatusJSON(
                     appRunning: running,
                     accessibilityGranted: running ? granted : nil,
+                    automationFinderGranted: running ? runtime?.automationFinderGranted : nil,
+                    finderExtensionEnabled: running ? runtime?.finderExtensionEnabled : nil,
                     eventTapInstalled: running && (runtime?.eventTapInstalled ?? false),
                     message: running ? nil : "MacHelper is not running; saved changes take effect when you open it.",
                     tweaks: rows))
@@ -157,6 +161,12 @@ struct Tweaks: ParsableCommand {
             }
             if running {
                 Output.line("MacHelper is running (PID \(runtime?.appPID ?? 0)). Accessibility: \(granted == true ? "granted" : "not granted").")
+                if let automation = runtime?.automationFinderGranted {
+                    Output.line("  Finder automation: \(automation ? "granted" : "not granted")")
+                }
+                if let extensionEnabled = runtime?.finderExtensionEnabled {
+                    Output.line("  Finder extension: \(extensionEnabled ? "enabled" : "not enabled")")
+                }
             } else {
                 Output.line("MacHelper is not running; saved changes take effect when you open it.")
             }
