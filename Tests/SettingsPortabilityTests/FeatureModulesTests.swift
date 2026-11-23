@@ -70,6 +70,26 @@ import Testing
         #expect(!roundTrip.isEnabled(.tweaks))
     }
 
+    @Test func cableModuleKeepsOldBackupsReadable() throws {
+        #expect(FeatureModule.allCases.contains(.cable))
+        #expect(FeatureModule.cable.isVisible(enabled: true, simpleMode: false))
+        #expect(!FeatureModule.cable.hiddenInSimpleMode)
+
+        let backupWithoutCable = try JSONDecoder().decode(
+            GeneralSettingsPayload.self,
+            from: Data(#"{"dockMode":"never","features":{"monitor":false,"tweaks":false}}"#.utf8))
+        #expect(backupWithoutCable.features?.isEnabled(.cable) == true)
+        #expect(backupWithoutCable.features?.isEnabled(.monitor) == false)
+        #expect(backupWithoutCable.features?.isEnabled(.tweaks) == false)
+
+        var features = FeatureSet()
+        features.setEnabled(.cable, false)
+        let roundTrip = try JSONDecoder().decode(FeatureSet.self,
+                                                 from: try JSONEncoder().encode(features))
+        #expect(!roundTrip.isEnabled(.cable))
+        #expect(roundTrip.isEnabled(.tweaks))
+    }
+
     @Test func oldPayloadWithoutFeaturesStillDecodes() throws {
         let legacy = try JSONDecoder().decode(
             GeneralSettingsPayload.self,

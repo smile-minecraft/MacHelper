@@ -75,6 +75,7 @@ struct MainView: View {
         case .updates: UpdatesView(model: app.updatesModel)
         case .startup: StartupView(model: app.startupModel)
         case .tweaks: TweaksView(model: app.tweaks)
+        case .cable: CableView(app: app, model: app.cableModel)
         }
     }
 }

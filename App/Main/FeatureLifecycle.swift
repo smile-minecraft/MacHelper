@@ -24,5 +24,6 @@ enum FeatureLifecycle {
         app.fanModel.applyModuleAvailability(features.isEnabled(.fans))
         app.updatesModel.applyModuleAvailability(features.isEnabled(.updates))
         if !features.isEnabled(.disk) { app.diskModel.trimCachedTrees() }
+        if !features.isEnabled(.cable) { app.cableModel.setVisible(false) }
     }
 }
