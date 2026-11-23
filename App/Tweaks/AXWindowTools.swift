@@ -27,6 +27,20 @@ enum AXWindowTools {
         windows(for: pid, timeout: timeout).contains { isStandardWindow($0) && isVisible($0) }
     }
 
+    /// The role of whatever has keyboard focus in `pid`. Used on the event tap's thread to leave
+    /// text fields alone, so the timeout is short and applies to the focused element as well: the
+    /// app's timeout does not reach the element it hands out.
+    static func focusedRole(for pid: pid_t, timeout: Float) -> String? {
+        let app = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(app, timeout)
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(app, "AXFocusedUIElement" as CFString, &value) == .success,
+              let value, CFGetTypeID(value) == AXUIElementGetTypeID() else { return nil }
+        let element = value as! AXUIElement
+        AXUIElementSetMessagingTimeout(element, timeout)
+        return string(element, "AXRole")
+    }
+
     static func isStandardWindow(_ window: AXUIElement) -> Bool {
         TweakRules.isUserWindow(subrole: string(window, "AXSubrole"))
     }

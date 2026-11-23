@@ -85,6 +85,17 @@ final class EventTapService: @unchecked Sendable {
         event.post(tap: .cghidEventTap)
     }
 
+    /// Synthesizes a key press (down then up) for a behaviour that replaces a shortcut. The events
+    /// carry the service's marker, so the tap that asked for them passes them straight through.
+    static func postKey(keyCode: UInt16, flags: UInt64, marker: Bool = true) {
+        for isDown in [true, false] {
+            guard let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: isDown) else { continue }
+            event.flags = CGEventFlags(rawValue: flags)
+            if marker { event.setIntegerValueField(.eventSourceUserData, value: postedMarker) }
+            event.post(tap: .cghidEventTap)
+        }
+    }
+
     private func receive(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
         // macOS turns a tap off when a callback was too slow or on secure input; turn it back on
         // instead of silently losing the guard. These two notifications carry no real event.

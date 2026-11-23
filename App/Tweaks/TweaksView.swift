@@ -111,7 +111,11 @@ struct TweaksView: View {
     }
 
     private func stateLabel(_ definition: TweakDefinition, _ state: TweakRuntimeStatus.TweakState.Kind?) -> String {
-        if !definition.implemented { return String(localized: "Coming soon") }
+        if !definition.implemented {
+            // A tweak that cannot be offered says why; the rest are simply not written yet.
+            return definition.unavailableReason.map { NSLocalizedString($0, comment: "") }
+                ?? String(localized: "Coming soon")
+        }
         guard let state else { return String(localized: "Waiting for MacHelper") }
         switch state {
         case .active: return String(localized: "Active")
@@ -144,6 +148,15 @@ struct TweaksView: View {
         case "cycleWindows": "Cycle windows"
         case "hide": "Hide app"
         case "minimize": "Minimize windows"
+        case "shortcut": "Shortcut"
+        case "template": "Template"
+        case "text": "Plain text"
+        case "markdown": "Markdown"
+        case "rtf": "Rich text"
+        case "custom": "Custom extension"
+        case "baseName": "File name"
+        case "customExtension": "Custom extension"
+        case "terminalBundleID": "Terminal app bundle id"
         default: id
         }
     }

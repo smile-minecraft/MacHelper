@@ -121,15 +121,19 @@ public struct TweakDefinition: Equatable, Sendable, Identifiable {
     public let permissions: [TweakPermission]
     public let options: [TweakOptionDefinition]
     public let implemented: Bool
+    /// Why this build cannot offer the tweak, when the answer is not simply "not written yet".
+    public let unavailableReason: String?
 
     public init(id: TweakID, title: String, detail: String, permissions: [TweakPermission] = [],
-                options: [TweakOptionDefinition] = [], implemented: Bool = false) {
+                options: [TweakOptionDefinition] = [], implemented: Bool = false,
+                unavailableReason: String? = nil) {
         self.id = id
         self.title = title
         self.detail = detail
         self.permissions = permissions
         self.options = options
         self.implemented = implemented
+        self.unavailableReason = unavailableReason
     }
 
     public func option(_ id: String) -> TweakOptionDefinition? { options.first { $0.id == id } }
@@ -141,20 +145,28 @@ public enum TweakCatalog {
     public static let all: [TweakDefinition] = [
         TweakDefinition(id: .finderCutPaste, title: "Cut and paste files in Finder",
                         detail: "Move files with ⌘X / ⌘V instead of copying them.",
-                        permissions: [.accessibility, .automationFinder],
-                        options: [.init(id: "crossVolume", kind: .bool, defaultValue: .bool(false))]),
+                        permissions: [.accessibility],
+                        options: [],
+                        implemented: true),
         TweakDefinition(id: .finderNewFile, title: "New file in Finder",
-                        detail: "Create a blank file from the Finder menu.",
+                        detail: "Create a file in the folder the Finder window shows and start renaming it.",
+                        permissions: [.accessibility, .automationFinder],
+                        options: [.init(id: "shortcut", kind: .string, defaultValue: .string("ctrl+option+n")),
+                                  .init(id: "template", kind: .enumeration, defaultValue: .string("text"),
+                                        allowedValues: FinderFileTemplate.allCases.map(\.rawValue)),
+                                  .init(id: "baseName", kind: .string, defaultValue: .string(FinderNewFileRules.defaultBaseName)),
+                                  .init(id: "customExtension", kind: .string, defaultValue: .string("txt"))],
+                        implemented: true),
+        TweakDefinition(id: .finderContextMenu, title: "Finder context menu items",
+                        detail: "Add New File, Copy Path, Open in Terminal and Cut to Finder's right-click menu.",
                         permissions: [.finderExtension],
-                        options: [.init(id: "template", kind: .string, defaultValue: .string(""))]),
-        TweakDefinition(id: .finderContextMenu, title: "Cleaner Finder context menu",
-                        detail: "Hide items you never use from Finder's right-click menu.",
+                        options: [.init(id: "terminalBundleID", kind: .string, defaultValue: .string("com.apple.Terminal"))],
+                        implemented: true),
+        TweakDefinition(id: .finderColumnAutosize, title: "Fit Finder column widths",
+                        detail: "Size a column view column to fit its longest name.",
                         permissions: [.finderExtension],
-                        options: [.init(id: "hiddenItems", kind: .appList, defaultValue: .stringList([]))]),
-        TweakDefinition(id: .finderColumnAutosize, title: "Keep Finder column widths",
-                        detail: "Stop Finder from resizing list columns automatically.",
-                        permissions: [.finderExtension],
-                        options: [.init(id: "rememberPerFolder", kind: .bool, defaultValue: .bool(true))]),
+                        options: [],
+                        unavailableReason: "Finder does not let Accessibility set column widths."),
         TweakDefinition(id: .dockClickAction, title: "Dock icon click action",
                         detail: "Act on an app already in the foreground when you click its Dock icon.",
                         permissions: [.accessibility],

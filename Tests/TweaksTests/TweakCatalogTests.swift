@@ -10,12 +10,40 @@ import Tweaks
         #expect(TweakID.allCases.count == 11)
     }
 
-    @Test func onlyFourAdjustmentsAreImplemented() {
+    @Test func onlyTheShippedAdjustmentsAreImplemented() {
         let implemented = Set(TweakCatalog.all.filter(\.implemented).map(\.id))
-        #expect(implemented == [.dockClickAction, .musicBlockAutolaunch, .windowCmdTabRestore, .inputQuitGuard])
+        #expect(implemented == [.finderCutPaste, .finderNewFile, .finderContextMenu, .dockClickAction,
+                                .musicBlockAutolaunch, .windowCmdTabRestore, .inputQuitGuard])
         for id in TweakID.allCases where !implemented.contains(id) {
             #expect(!TweakCatalog.isAvailable(id))
         }
+    }
+
+    @Test func theFinderColumnTweakSaysWhyItIsNotShipped() throws {
+        let definition = TweakCatalog.definition(for: .finderColumnAutosize)
+        #expect(!definition.implemented)
+        let reason = try #require(definition.unavailableReason)
+        #expect(reason.contains("Accessibility"))
+        // Every other unavailable tweak is simply not written yet.
+        for definition in TweakCatalog.all where !definition.implemented && definition.id != .finderColumnAutosize {
+            #expect(definition.unavailableReason == nil)
+        }
+    }
+
+    @Test func theFinderTweaksCarryTheOptionsTheBehavioursRead() {
+        let newFile = TweakCatalog.definition(for: .finderNewFile)
+        #expect(newFile.permissions == [.accessibility, .automationFinder])
+        #expect(newFile.option("shortcut")?.parse("ctrl+option+n") == .string("ctrl+option+n"))
+        #expect(newFile.option("template")?.isValid(.string("markdown")) == true)
+        #expect(newFile.option("template")?.isValid(.string("docx")) == false)
+        #expect(newFile.option("baseName")?.parse("Notes") == .string("Notes"))
+
+        let contextMenu = TweakCatalog.definition(for: .finderContextMenu)
+        #expect(contextMenu.permissions == [.finderExtension])
+        #expect(contextMenu.option("terminalBundleID")?.parse("com.googlecode.iterm2") == .string("com.googlecode.iterm2"))
+
+        // Cut and paste needs the event tap only: no Apple Events, no extension.
+        #expect(TweakCatalog.definition(for: .finderCutPaste).permissions == [.accessibility])
     }
 
     @Test func everyCategoryHasAdjustmentsAndTitles() {
@@ -95,13 +123,15 @@ import Tweaks
 
     @Test func unimplementedTweaksCannotBeEnabled() {
         var settings = TweakSettings()
-        let finderSwitch = settings.setEnabled(.finderCutPaste, true)
-        #expect(!finderSwitch)
-        #expect(!settings.isEnabled(.finderCutPaste))
-        let finderOption = settings.setValue("crossVolume", for: .finderCutPaste, to: .bool(true))
-        #expect(finderOption)
+        let trafficLights = settings.setEnabled(.windowTrafficLights, true)
+        #expect(!trafficLights)
+        #expect(!settings.isEnabled(.windowTrafficLights))
+        let closeAction = settings.setValue("closeAction", for: .windowTrafficLights, to: .string("minimize"))
+        #expect(closeAction)
         // Options for a coming-soon tweak can be prepared, but the switch itself stays off.
-        #expect(settings.bool("crossVolume", for: .finderCutPaste))
+        #expect(settings.string("closeAction", for: .windowTrafficLights) == "minimize")
+        let columnAutosize = settings.setEnabled(.finderColumnAutosize, true)
+        #expect(!columnAutosize)
         let dockSwitch = settings.setEnabled(.dockClickAction, true)
         #expect(dockSwitch)
         #expect(settings.isEnabled(.dockClickAction))

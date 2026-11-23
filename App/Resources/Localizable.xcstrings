@@ -42962,49 +42962,49 @@
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 Finder 中新增檔案" } }
       }
     },
-    "Create a blank file from the Finder menu.": {
+    "Create a file in the folder the Finder window shows and start renaming it.": {
       "localizations": {
-        "es": { "stringUnit": { "state": "translated", "value": "Crea un archivo vacío desde el menú de Finder." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "Finder メニューから空のファイルを作成します。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "Finder 메뉴에서 빈 파일을 만듭니다." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "从 Finder 菜单创建空白文件。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "從 Finder 選單建立空白檔案。" } }
+        "es": { "stringUnit": { "state": "translated", "value": "Crea un archivo en la carpeta que muestra la ventana del Finder y empieza a renombrarlo." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder ウインドウに表示中のフォルダにファイルを作成し、名前の変更を開始します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 윈도우에 표시된 폴더에 파일을 만들고 이름 바꾸기를 시작합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 Finder 窗口显示的文件夹中创建文件，并开始重命名。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 Finder 視窗顯示的資料夾中建立檔案，並開始重新命名。" } }
       }
     },
-    "Cleaner Finder context menu": {
+    "Finder context menu items": {
       "localizations": {
-        "es": { "stringUnit": { "state": "translated", "value": "Menú contextual de Finder más limpio" } },
-        "ja": { "stringUnit": { "state": "translated", "value": "すっきりした Finder のコンテキストメニュー" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "더 깔끔한 Finder 상황 메뉴" } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "更干净的 Finder 右键菜单" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "更乾淨的 Finder 右鍵選單" } }
+        "es": { "stringUnit": { "state": "translated", "value": "Elementos del menú contextual del Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder のコンテキストメニュー項目" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 상황에 맞는 메뉴 항목" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Finder 右键菜单项目" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Finder 右鍵選單項目" } }
       }
     },
-    "Hide items you never use from Finder's right-click menu.": {
+    "Add New File, Copy Path, Open in Terminal and Cut to Finder's right-click menu.": {
       "localizations": {
-        "es": { "stringUnit": { "state": "translated", "value": "Oculta del menú derecho de Finder los elementos que nunca usas." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "使わない項目を Finder の右クリックメニューから隠します。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "사용하지 않는 항목을 Finder 오른쪽 클릭 메뉴에서 숨깁니다." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "从 Finder 右键菜单隐藏从不使用的项目。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "從 Finder 右鍵選單隱藏從不使用的項目。" } }
+        "es": { "stringUnit": { "state": "translated", "value": "Añade Nuevo archivo, Copiar ruta, Abrir en Terminal y Cortar al menú contextual del Finder." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder の右クリックメニューに「新規ファイル」「パスをコピー」「ターミナルで開く」「カット」を追加します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder의 상황에 맞는 메뉴에 '새 파일', '경로 복사', '터미널에서 열기', '잘라내기'를 추가합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 Finder 右键菜单中加入“新建文件”、“拷贝路径”、“在终端中打开”和“剪切”。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 Finder 右鍵選單中加入「新增檔案」、「拷貝路徑」、「在終端機中開啟」和「剪下」。" } }
       }
     },
-    "Keep Finder column widths": {
+    "Fit Finder column widths": {
       "localizations": {
-        "es": { "stringUnit": { "state": "translated", "value": "Mantener el ancho de columnas de Finder" } },
-        "ja": { "stringUnit": { "state": "translated", "value": "Finder の列幅を維持" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "Finder 열 너비 유지" } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "保持 Finder 列宽" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "保持 Finder 欄寬" } }
+        "es": { "stringUnit": { "state": "translated", "value": "Ajustar el ancho de las columnas del Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder のカラム幅を合わせる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 열 너비 맞추기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "调整 Finder 栏宽" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "調整 Finder 欄寬" } }
       }
     },
-    "Stop Finder from resizing list columns automatically.": {
+    "Size a column view column to fit its longest name.": {
       "localizations": {
-        "es": { "stringUnit": { "state": "translated", "value": "Evita que Finder cambie el ancho de las columnas en lista." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "Finder がリストの列幅を自動調整するのを止めます。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "Finder가 목록 열 너비를 자동 조정하지 않도록 합니다." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "阻止 Finder 自动调整列表列宽。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "避免 Finder 自動調整列表欄寬。" } }
+        "es": { "stringUnit": { "state": "translated", "value": "Ajusta una columna de la vista en columnas al nombre más largo." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "カラム表示の幅を最も長い名前の長さに合わせます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "열 보기의 열 너비를 가장 긴 이름에 맞춥니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "按最长的名称调整分栏视图的栏宽。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "依最長的名稱調整欄位檢視的欄寬。" } }
       }
     },
     "Dock icon click action": {
@@ -43815,6 +43815,150 @@
         "ko": { "stringUnit": { "state": "translated", "value": "최대 전류" } },
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "最大电流" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "最大電流" } }
+      }
+    },
+    "Finder does not let Accessibility set column widths.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "El Finder no permite que Accesibilidad cambie el ancho de las columnas." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder ではアクセシビリティからカラム幅を変更できません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder는 손쉬운 사용에서 열 너비를 설정하도록 허용하지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Finder 不允许“辅助功能”设置栏宽。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Finder 不允許「輔助使用」設定欄寬。" } }
+      }
+    },
+    "Shortcut": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Atajo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ショートカット" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "단축키" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "快捷键" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "快速鍵" } }
+      }
+    },
+    "Template": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Plantilla" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "テンプレート" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "템플릿" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "模板" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "範本" } }
+      }
+    },
+    "Plain text": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Texto sin formato" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "プレーンテキスト" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "일반 텍스트" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "纯文本" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "純文字" } }
+      }
+    },
+    "Markdown": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Markdown" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Markdown" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Markdown" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Markdown" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Markdown" } }
+      }
+    },
+    "Rich text": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Texto enriquecido" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リッチテキスト" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "서식 있는 텍스트" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "富文本" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "富文字" } }
+      }
+    },
+    "Custom extension": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Extensión personalizada" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "カスタム拡張子" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사용자 설정 확장자" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "自定义扩展名" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "自訂副檔名" } }
+      }
+    },
+    "File name": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Nombre del archivo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ファイル名" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "파일 이름" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "文件名" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "檔名" } }
+      }
+    },
+    "Terminal app bundle id": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "ID del paquete de la app de terminal" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ターミナルアプリのバンドル ID" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "터미널 앱 번들 ID" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "终端应用 Bundle ID" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "終端機 App Bundle ID" } }
+      }
+    },
+    "Allow MacHelper to control Finder in System Settings › Privacy & Security › Automation.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Permite que MacHelper controle el Finder en Ajustes del Sistema › Privacidad y seguridad › Automatización." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システム設定 › プライバシーとセキュリティ › オートメーションで MacHelper に Finder の制御を許可してください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 설정 › 개인정보 보호 및 보안 › 자동화에서 MacHelper가 Finder를 제어하도록 허용하세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "请在“系统设置 › 隐私与安全性 › 自动化”中允许 MacHelper 控制 Finder。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "請在「系統設定 › 隱私權與安全性 › 自動化」中允許 MacHelper 控制 Finder。" } }
+      }
+    },
+    "Open a Finder window first.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Abre primero una ventana del Finder." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "先に Finder ウインドウを開いてください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "먼저 Finder 윈도우를 여세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "请先打开一个 Finder 窗口。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "請先開啟一個 Finder 視窗。" } }
+      }
+    },
+    "The file could not be created in this folder.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No se pudo crear el archivo en esta carpeta." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "このフォルダにファイルを作成できませんでした。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 폴더에 파일을 만들 수 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "无法在此文件夹中创建文件。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "無法在此資料夾中建立檔案。" } }
+      }
+    },
+    "The Finder selection is no longer available.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "La selección del Finder ya no está disponible." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder の選択項目はすでに利用できません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 선택 항목을 더 이상 사용할 수 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Finder 中的所选项目已不可用。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Finder 中的所選項目已無法使用。" } }
+      }
+    },
+    "The terminal app could not be found.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No se encontró la app de terminal." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ターミナルアプリが見つかりませんでした。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "터미널 앱을 찾을 수 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "找不到终端应用。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "找不到終端機 App。" } }
+      }
+    },
+    "Copied. Turn on Cut and paste files in Finder to move items instead.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Copiado. Activa Cortar y pegar archivos en el Finder para moverlos." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "コピーしました。移動するには「Finder でファイルをカット＆ペースト」をオンにしてください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "복사했습니다. 이동하려면 'Finder에서 파일 잘라내기 및 붙여넣기'를 켜세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已拷贝。要改为移动，请打开“在 Finder 中剪切和粘贴文件”。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已拷貝。若要改為移動，請開啟「在 Finder 中剪下與貼上檔案」。" } }
+      }
+    },
+    "Cut. Paste in Finder to move the items.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cortado. Pega en el Finder para mover los elementos." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "カットしました。Finder でペーストすると移動します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "잘라냈습니다. Finder에서 붙여넣으면 이동합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已剪切。在 Finder 中粘贴即可移动。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已剪下。在 Finder 中貼上即可移動。" } }
       }
     }
   },
