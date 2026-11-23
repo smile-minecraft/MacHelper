@@ -6,7 +6,7 @@ import Telemetry
 import Tweaks
 
 enum AppSection: String, CaseIterable, Identifiable, Hashable {
-    case overview, monitor, health, fans, optimize, disk, uninstall, updates, startup, tweaks
+    case overview, monitor, health, fans, optimize, disk, uninstall, updates, startup, tweaks, cable
     var id: String { rawValue }
 
     var title: LocalizedStringKey {
@@ -21,10 +21,17 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         case .updates: "Homebrew Updates"
         case .startup: "Startup Items"
         case .tweaks: "Tweaks"
+        case .cable: "Cable"
         }
     }
 
-    var icon: String { self == .tweaks ? "px.settings" : "px.\(rawValue)" }
+    var icon: String {
+        switch self {
+        case .tweaks: "px.settings"
+        case .cable: "px.power"
+        default: "px.\(rawValue)"
+        }
+    }
 
     var accent: Color {
         switch self {
@@ -38,6 +45,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         case .updates: Theme.mint
         case .startup: Theme.orange
         case .tweaks: Theme.slate
+        case .cable: Theme.amber
         }
     }
 
@@ -49,7 +57,7 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
             .filter { !$0.1.isEmpty }
     }
 
-    var isThisMac: Bool { [.overview, .monitor, .health, .fans].contains(self) }
+    var isThisMac: Bool { [.overview, .monitor, .health, .fans, .cable].contains(self) }
 
     /// Overview is the permanent home page; every other page belongs to one module.
     var module: FeatureModule? { FeatureModule(rawValue: rawValue) }
@@ -81,6 +89,7 @@ final class AppModel {
     let startupModel = StartupModel()
     let healthModel = HealthModel()
     let tweaks = TweakSettingsModel()
+    let cableModel = CableModel()
 
     /// Opt-in telemetry. Creating the client never reads anything or sends anything; only an
     /// explicit opt-in queues events, and only a configured endpoint can transmit them.

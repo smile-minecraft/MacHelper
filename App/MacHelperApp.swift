@@ -10,11 +10,15 @@ struct MacHelperApp: App {
         }
     }
 
-    /// The original pages keep ⌘1–⌘9. A tenth page needs a single-character key; ⌘T is free and
-    /// matches Tweaks. Converting "10" to Character would trap at startup.
+    /// The original pages keep ⌘1–⌘9. Later pages use dedicated single-character keys so they
+    /// never trap `Character("10")` or collide with ⌘0 (Actual Size).
     private static func sectionShortcut(_ index: Int, _ section: AppSection) -> KeyEquivalent {
         if index < 9 { return KeyEquivalent(Character(String(index + 1))) }
-        return KeyEquivalent(section == .tweaks ? "t" : "0")
+        switch section {
+        case .tweaks: return "t"
+        case .cable: return "u"
+        default: return "0"
+        }
     }
 
     var body: some Scene {

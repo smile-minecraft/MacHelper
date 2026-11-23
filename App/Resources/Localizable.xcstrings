@@ -43132,6 +43132,690 @@
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 Mission Control 缩略图上方显示每窗口控制项。" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 Mission Control 縮圖上方顯示每視窗控制項。" } }
       }
+    },
+    "Cable": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cable" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ケーブル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "케이블" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "线材" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "線材" } }
+      }
+    },
+    "USB-C and Thunderbolt ports, cable ratings, charging diagnostics, devices and displays.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Puertos USB-C y Thunderbolt, especificaciones de cables, diagnóstico de carga, dispositivos y pantallas." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "USB-C / Thunderbolt ポート、ケーブル仕様、充電診断、接続デバイスとディスプレイを確認します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "USB-C 및 Thunderbolt 포트, 케이블 사양, 충전 진단, 연결된 기기 및 디스플레이를 확인합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "查看 USB-C 与 Thunderbolt 端口、线材规格、充电诊断、连接设备与显示器。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "檢視 USB-C 與 Thunderbolt 埠、線材規格、充電診斷、外接裝置與螢幕。" } }
+      }
+    },
+    "Inspect USB-C ports, cable ratings, charging diagnostics, devices and displays.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Inspecciona puertos USB-C, especificaciones de cables, diagnóstico de carga, dispositivos y pantallas." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "USB-C ポート、ケーブル仕様、充電診断、デバイス、ディスプレイを検査します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "USB-C 포트, 케이블 사양, 충전 진단, 기기 및 디스플레이를 검사합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "检查 USB-C 端口、线材规格、充电诊断、设备与显示器。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "檢查 USB-C 埠、線材規格、充電診斷、裝置與螢幕。" } }
+      }
+    },
+    "USB-C Ports": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Puertos USB-C" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "USB-C ポート" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "USB-C 포트" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "USB-C 端口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "USB-C 埠" } }
+      }
+    },
+    "Top Cable Rating": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cable de mayor capacidad" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "最大ケーブル規格" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최고 케이블 사양" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "最高线材规格" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "最高線材規格" } }
+      }
+    },
+    "Connected Devices": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Dispositivos conectados" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "接続デバイス" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "연결된 기기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已连接设备" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已連接裝置" } }
+      }
+    },
+    "Displays": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Pantallas" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ディスプレイ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "디스플레이" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示器" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "螢幕" } }
+      }
+    },
+    "USB-C & Thunderbolt Ports": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Puertos USB-C y Thunderbolt" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "USB-C / Thunderbolt ポート" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "USB-C 및 Thunderbolt 포트" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "USB-C 与 Thunderbolt 端口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "USB-C 與 Thunderbolt 埠" } }
+      }
+    },
+    "Unused Ports": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Puertos sin usar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "未使用のポート" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사용하지 않는 포트" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未连接端口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未連接的埠" } }
+      }
+    },
+    "No USB-C or Thunderbolt ports reported on this Mac.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No se detectaron puertos USB-C ni Thunderbolt en este Mac." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この Mac では USB-C または Thunderbolt ポートが報告されませんでした。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 Mac에서 보고된 USB-C 또는 Thunderbolt 포트가 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "此 Mac 未报告任何 USB-C 或 Thunderbolt 端口。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這台 Mac 沒有回報任何 USB-C 或 Thunderbolt 埠。" } }
+      }
+    },
+    "%lld connected": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "%lld conectados" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld 接続中" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%lld개 연결됨" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已连接 %lld 个" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已連接 %lld 個" } }
+      }
+    },
+    "%lld of %lld connected": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "%lld de %lld conectados" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld / %lld ポート接続中" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%2$lld개 중 %1$lld개 연결됨" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已连接 %lld / %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已連接 %lld / %lld" } }
+      }
+    },
+    "No e-marked cable": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Sin cable con e-marker" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "e-marker 対応ケーブルなし" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "e-marker 케이블 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "无 e-marker 线材" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "無 e-marker 線材" } }
+      }
+    },
+    "%lld USB": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "%lld USB" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "USB %lld 台" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "USB %lld개" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "%lld 个 USB" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "%lld 個 USB" } }
+      }
+    },
+    "%lld Thunderbolt · %lld USB": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "%lld Thunderbolt · %lld USB" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Thunderbolt %lld · USB %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Thunderbolt %lld · USB %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "%lld 个 Thunderbolt · %lld 个 USB" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "%lld 個 Thunderbolt · %lld 個 USB" } }
+      }
+    },
+    "None detected": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ninguna detectada" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "検出なし" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "감지되지 않음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未检测到" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未偵測到" } }
+      }
+    },
+    "Port %lld": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Puerto %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ポート %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "포트 %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "端口 %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "埠 %lld" } }
+      }
+    },
+    "Connected device": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Dispositivo conectado" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "接続中のデバイス" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "연결된 기기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已连接设备" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已連接裝置" } }
+      }
+    },
+    "Link": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Enlace" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リンク" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링크" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "链路" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "連線" } }
+      }
+    },
+    "Partner %@": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Dispositivo par %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パートナー %@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "파트너 %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "对端设备 %@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "對端裝置 %@" } }
+      }
+    },
+    "Partner %@:%@": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Dispositivo par %@:%@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パートナー %@:%@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "파트너 %@:%@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "对端设备 %@:%@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "對端裝置 %@:%@" } }
+      }
+    },
+    "No e-marker": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Sin e-marker" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "e-marker なし" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "e-marker 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "没有 e-marker" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "沒有 e-marker" } }
+      }
+    },
+    "No e-marker: up to 3 A / 60 W, data rate unknown.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Sin e-marker: hasta 3 A / 60 W, velocidad desconocida." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "e-marker なし：最大 3 A / 60 W、データ速度不明。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "e-marker 없음: 최대 3 A / 60 W, 데이터 속도 알 수 없음." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "没有 e-marker：最多 3A / 60W，速度不明。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "沒有 e-marker：最多 3A / 60W，速度不明。" } }
+      }
+    },
+    "Cable identity unknown": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Identidad del cable desconocida" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ケーブル識別情報が不明" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "케이블 식별 정보 알 수 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "线材身份不明" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "線材身分不明" } }
+      }
+    },
+    "Passive cable": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cable pasivo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "パッシブケーブル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "패시브 케이블" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "被动线材" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "被動線材" } }
+      }
+    },
+    "Active cable": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cable activo" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アクティブケーブル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "액티브 케이블" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "主动线材" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "主動線材" } }
+      }
+    },
+    "Unknown cable": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cable desconocido" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "不明なケーブル" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "알 수 없는 케이블" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未知线材" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未知線材" } }
+      }
+    },
+    "Captive": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Integrado" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "一体型" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "일체형" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "固定式" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "固定式" } }
+      }
+    },
+    "Flipped": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Invertido" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "反転" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "반전" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "反插" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "反面" } }
+      }
+    },
+    "Unknown": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Desconocido" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "不明" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "알 수 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未知" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "不明" } }
+      }
+    },
+    "Empty": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Vacío" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "未接続" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "비어 있음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未连接" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未連接" } }
+      }
+    },
+    "Vendor %@": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Fabricante %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ベンダー %@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "제조사 %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "厂商 %@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "廠商 %@" } }
+      }
+    },
+    "Max Power": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Potencia máx." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "最大電力" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최대 전력" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "最大功率" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "最大瓦數" } }
+      }
+    },
+    "Latency %@": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Latencia %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "遅延 %@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "지연 시간 %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "延迟 %@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "延遲 %@" } }
+      }
+    },
+    "Product %@": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Producto %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "製品 %@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "제품 %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "产品 %@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "產品 %@" } }
+      }
+    },
+    "Copper": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cobre" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "銅線" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "구리선" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "铜缆" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "銅纜" } }
+      }
+    },
+    "Optical": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Óptico" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "光ファイバー" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "광케이블" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "光缆" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "光纖" } }
+      }
+    },
+    "Retimer": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Retimer" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リタイマー" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "리타이머" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "重定时器" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "重定時器" } }
+      }
+    },
+    "Redriver": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Redriver" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リドライバー" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "리드라이버" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "中继驱动" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "訊號中繼" } }
+      }
+    },
+    "Max %lld °C": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Máx. %lld °C" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "上限 %lld °C" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최대 %lld °C" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "最高 %lld °C" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "最高 %lld °C" } }
+      }
+    },
+    "Speed unknown": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Velocidad desconocida" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "速度不明" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "속도 알 수 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "速度不明" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "速度不明" } }
+      }
+    },
+    "Generation code %lld": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Código de generación %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "世代コード %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "세대 코드 %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "世代代码 %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "世代代碼 %lld" } }
+      }
+    },
+    "Cable speed code %lld": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Código de velocidad de cable %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ケーブル速度コード %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "케이블 속도 코드 %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "线材速度代码 %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "線材速度代碼 %lld" } }
+      }
+    },
+    "Cable generation code %lld": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Código de generación de cable %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ケーブル世代コード %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "케이블 세대 코드 %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "线材世代代码 %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "線材世代代碼 %lld" } }
+      }
+    },
+    "Charging Diagnostics": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Diagnóstico de carga" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電診断" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전 진단" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "充电诊断" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "充電診斷" } }
+      }
+    },
+    "Not applicable": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No aplicable" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "対象外" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "해당 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "不适用" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "不適用" } }
+      }
+    },
+    "No issues": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Sin problemas" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "問題なし" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "문제 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "无异常" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "無異常" } }
+      }
+    },
+    "%lld findings": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "%lld hallazgos" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%lld 件の検出" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%lld건 발견" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "%lld 项发现" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "%lld 項發現" } }
+      }
+    },
+    "This Mac has no battery, so charging diagnosis does not apply.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Este Mac no tiene batería, por lo que el diagnóstico de carga no aplica." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この Mac にはバッテリーがないため、充電診断は対象外です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 Mac에는 배터리가 없으므로 충전 진단을 적용할 수 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这台 Mac 没有电池，充电诊断不适用。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這台 Mac 沒有電池，充電診斷不適用。" } }
+      }
+    },
+    "Battery charging checks only apply to portable Macs with an internal battery.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Las comprobaciones de carga solo se aplican a ordenadores Mac portátiles con batería interna." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バッテリー充電チェックは内蔵バッテリーを搭載したノートブック型 Mac のみ対象です。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리 충전 진단은 내장 배터리가 있는 노트북 Mac에만 적용됩니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电池充电检查仅适用于配备内置电池的便携式 Mac。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電池充電檢查僅適用於具備內建電池的筆記型 Mac。" } }
+      }
+    },
+    "Adapter": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Adaptador" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "電源アダプタ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "어댑터" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电源适配器" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電源轉接器" } }
+      }
+    },
+    "Not charging": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No está cargando" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電停止中" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전 중이 아님" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未在充电" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未充電" } }
+      }
+    },
+    "Battery Temp": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Temp. de batería" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バッテリー温度" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "배터리 온도" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "电池温度" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "電池溫度" } }
+      }
+    },
+    "Charge Limit": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Límite de carga" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電上限" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전 제한" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "充电上限" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "充電上限" } }
+      }
+    },
+    "No charging issues detected.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No se detectaron problemas de carga." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "充電に関する問題は検出されませんでした。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "충전 문제가 감지되지 않았습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未检测到充电异常。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未偵測到充電問題。" } }
+      }
+    },
+    "Problem": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Problema" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "問題" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "문제" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "严重问题" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "問題" } }
+      }
+    },
+    "Info": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Información" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "情報" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "정보" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "提示" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "資訊" } }
+      }
+    },
+    "External Devices": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Dispositivos externos" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "外部デバイス" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "외부 기기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "外接设备" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "外接裝置" } }
+      }
+    },
+    "Thunderbolt / USB4 Devices": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Dispositivos Thunderbolt / USB4" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Thunderbolt / USB4 デバイス" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Thunderbolt / USB4 기기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Thunderbolt / USB4 设备" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Thunderbolt / USB4 裝置" } }
+      }
+    },
+    "USB Device Tree": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Árbol de dispositivos USB" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "USB デバイスツリー" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "USB 기기 트리" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "USB 设备树" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "USB 裝置樹" } }
+      }
+    },
+    "No USB devices detected.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No se detectaron dispositivos USB." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "USB デバイスは検出されませんでした。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "감지된 USB 기기가 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未检测到 USB 设备。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未偵測到 USB 裝置。" } }
+      }
+    },
+    "Hub": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Concentrador" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ハブ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "허브" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "集线器" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "集線器" } }
+      }
+    },
+    "Mac Built-in": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Integrado en Mac" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Mac 内蔵" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Mac 내장" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Mac 内置" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Mac 內建" } }
+      }
+    },
+    "Port unknown": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Puerto desconocido" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ポート不明" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "포트 알 수 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "端口未知" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "埠不明" } }
+      }
+    },
+    "Speed below capability": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Velocidad inferior a su capacidad" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "性能より低速" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최대 속도 미만" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "速度低于能力" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "速度低於能力" } }
+      }
+    },
+    "Capable ≥ %@": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Capacidad ≥ %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "対応 ≥ %@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "지원 ≥ %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "支持 ≥ %@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "支援 ≥ %@" } }
+      }
+    },
+    "Negotiated %@ on a device capable of ≥ %@": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Negociado a %@ en un dispositivo compatible con ≥ %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%2$@ 以上に対応したデバイスが %1$@ でリンク中" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%2$@ 이상 지원 기기가 %1$@ 속도로 협상됨" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "设备支持 ≥ %2$@，当前协商为 %1$@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "裝置支援 ≥ %2$@，目前協商速度為 %1$@" } }
+      }
+    },
+    "No displays detected.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No se detectaron pantallas." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ディスプレイは検出されませんでした。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "감지된 디스플레이가 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未检测到显示器。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未偵測到螢幕。" } }
+      }
+    },
+    "Resolution": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Resolución" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "解像度" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "해상도" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "分辨率" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "解析度" } }
+      }
+    },
+    "Refresh Rate": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Frecuencia" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リフレッシュレート" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "주사율" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "刷新率" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "更新率" } }
+      }
+    },
+    "Link Rate": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Velocidad de enlace" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "リンクレート" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "링크 속도" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "链路速率" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "連線速率" } }
+      }
+    },
+    "Tunneled": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Tunelizado" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "トンネル経由" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "터널링됨" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "隧道传输" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "隧道傳輸" } }
+      }
+    },
+    "%@ · Port %lld": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "%@ · Puerto %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%@ · ポート %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%@ · 포트 %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "%@ · 端口 %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "%@ · 埠 %lld" } }
+      }
+    },
+    "Backing pixels %lld × %lld": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Píxeles nativos %lld × %lld" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "実ピクセル %lld × %lld" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "실제 픽셀 %lld × %lld" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "实际像素 %lld × %lld" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "實際像素 %lld × %lld" } }
+      }
+    },
+    "Data Rate": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Velocidad de datos" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "データ速度" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "데이터 속도" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "数据速率" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "資料速率" } }
+      }
+    },
+    "Max Current": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Corriente máx." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "最大電流" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최대 전류" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "最大电流" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "最大電流" } }
+      }
     }
   },
   "version": "1.0"
