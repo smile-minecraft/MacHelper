@@ -49,7 +49,7 @@ let package = Package(
         .target(name: "SettingsPortability", dependencies: ["CleanEngine", "FanControl"]),
         .target(name: "Diagnostics", dependencies: ["CleanEngine", "Storage"], resources: [.process("Localizable.xcstrings")]),
         // Read-only USB-C cable, port, device, display and charging diagnostics.
-        .target(name: "Cable", linkerSettings: [.linkedFramework("IOKit"), .linkedFramework("CoreGraphics")]),
+        .target(name: "Cable", exclude: ["README.md"], linkerSettings: [.linkedFramework("IOKit"), .linkedFramework("CoreGraphics")]),
         .executableTarget(
             name: "machelper",
             dependencies: ["Cable", "CleanEngine", "Diagnostics", "DiskScan", "Metrics", "SMCKit", "Storage",

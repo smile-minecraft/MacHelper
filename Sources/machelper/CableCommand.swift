@@ -52,7 +52,7 @@ private enum CableText {
     static func deviceTree(_ nodes: [USBDeviceNode], indent: String = "") {
         for node in nodes {
             let hub = node.isHub ? " [hub]" : ""
-            let port = node.portNumber.map { " port \($0)" } ?? " (built in; port unknown)"
+            let port = node.portNumber.map { " port \($0)" } ?? (node.isBuiltIn ? " (built in)" : " (port unknown)")
             // No "max" claim when the descriptor does not prove a speed.
             let maximum = node.maxSpeedMbps.map { " / max \(speed($0))" } ?? ""
             Output.line("\(indent)\(node.name)\(hub)\(port)  \(speed(node.negotiatedSpeedMbps))\(maximum)")

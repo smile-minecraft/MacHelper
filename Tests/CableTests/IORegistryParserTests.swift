@@ -200,4 +200,11 @@ import Testing
         #expect(IORegistryPowerParser.decodeNotChargingReason(272).contains { $0.contains("Temperature above maximum") })
         #expect(IORegistryPowerParser.decodeNotChargingReason(1 << 15).contains { $0.contains("Predictive charging") })
     }
+
+    @Test func usbTwoOnlyPortNamesItsDeviceAndHighFaultBitsSurvive() {
+        let ports = IORegistryParser.parsePorts(ports: FixtureLoader.array("Ports"), states: FixtureLoader.array("PortStates"))
+        // Port 6 has only a USB 2.0 keyboard and an idle USB3 state.
+        #expect(ports.first { $0.number == 6 }?.deviceName == "Air75 V3")
+        #expect(IORegistryPowerParser.decodeNotChargingReason(Int(bitPattern: UInt(1) << 63)).contains("Battery or charger fault"))
+    }
 }

@@ -198,7 +198,10 @@ public enum IORegistryParser {
             let orientationCode = number(port, "PlugOrientation")
             let orientation: PlugOrientation = orientationCode == 0 ? .normal
                 : orientationCode == 1 ? .flipped : .unknown
-            let usb = stateNodes(portStates, containing: "USB3").first ?? stateNodes(portStates, containing: "USB2").first
+            // Only a transport in use names the attached device: a USB 2.0 keyboard leaves an
+            // idle USB3 state on the same port.
+            let usb = stateNodes(portStates, containing: "USB3").first(where: { flag($0, "Active") == true })
+                ?? stateNodes(portStates, containing: "USB2").first(where: { flag($0, "Active") == true })
             let cio = stateNodes(portStates, containing: "CIO").first
             let deviceName = text(usb, "Product") ?? text(cio, "Device Model Name")
 
@@ -525,8 +528,9 @@ public enum IORegistryPowerParser {
     /// (see Battman's published SMC CHNC bit layout). Legacy values 1, 128 and
     /// 256/272 fit the same decoding: full, VBUS missing, high-temperature stop.
     public static func decodeNotChargingReason(_ raw: Int?) -> [String] {
-        guard let raw, raw != 0, raw >= 0 else { return [] }
-        let value = UInt64(raw)
+        guard let raw, raw != 0 else { return [] }
+        // A value with bit 63 set arrives as a negative Int; keep its bits.
+        let value = UInt64(bitPattern: Int64(raw))
         var result: [String] = []
         func add(_ bit: Int, _ text: String) {
             if value & (UInt64(1) << UInt64(bit)) != 0 { result.append(text) }

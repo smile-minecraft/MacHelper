@@ -100,9 +100,10 @@ public enum CableLatency: String, Codable, Sendable {
         case .ns50To60: return "50–60 ns (~6 m)"
         case .ns60To70: return "60–70 ns (~7 m)"
         case .over70ns: return ">70 ns (>~7 m)"
-        case .active100ns: return "~100 ns (~100 m, active)"
-        case .active200ns: return "~200 ns (~200 m, active)"
-        case .active300ns: return "~300 ns (~300 m, active)"
+        // PD Table 6.47: active cable codes 1000b/1001b/1010b are 1000/2000/3000 ns.
+        case .active100ns: return "~1000 ns (~100 m, active)"
+        case .active200ns: return "~2000 ns (~200 m, active)"
+        case .active300ns: return "~3000 ns (~300 m, active)"
         }
     }
 }
