@@ -1,6 +1,195 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Modifiers and one key, for example control+option+w.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Modificadores y una tecla, por ejemplo control+option+w." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "修飾キーと 1 つのキーで指定します（例: control+option+w）。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "보조 키와 키 하나로 지정합니다(예: control+option+w)." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "修饰键加一个按键，例如 control+option+w。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "修飾鍵加一個按鍵，例如 control+option+w。" } }
+      }
+    },
+    "Window List": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Lista de ventanas" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ウインドウリスト" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "윈도우 목록" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "窗口列表" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "視窗列表" } }
+      }
+    },
+    "No Open Windows": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No hay ventanas abiertas" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "開いているウインドウはありません" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "열린 윈도우 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "没有打开的窗口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "沒有開啟的視窗" } }
+      }
+    },
+    "Hide %@": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ocultar %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "%@を隠す" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%@ 가리기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "隐藏 %@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "隱藏 %@" } }
+      }
+    },
+    "Untitled Window": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ventana sin título" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "名称未設定のウインドウ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "제목 없는 윈도우" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未命名窗口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未命名視窗" } }
+      }
+    },
+    "Restore": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Restaurar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "復元" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "복원" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "恢复" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "還原" } }
+      }
+    },
+    "Minimize": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Minimizar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "しまう" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최소화" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "最小化" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "縮到最小" } }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cerrar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "閉じる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "닫기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉" } }
+      }
+    },
+    "Close Window": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cerrar ventana" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ウインドウを閉じる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "윈도우 닫기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭窗口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉視窗" } }
+      }
+    },
+    "Minimize Window": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Minimizar ventana" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ウインドウをしまう" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "윈도우 최소화" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "最小化窗口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "將視窗縮到最小" } }
+      }
+    },
+    "Close button": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Botón de cerrar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "閉じるボタン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "닫기 버튼" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭按钮" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉按鈕" } }
+      }
+    },
+    "Minimize button": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Botón de minimizar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "しまうボタン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최소화 버튼" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "最小化按钮" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "縮到最小按鈕" } }
+      }
+    },
+    "Zoom button": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Botón de zoom" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ズームボタン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "확대/축소 버튼" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "缩放按钮" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "縮放按鈕" } }
+      }
+    },
+    "Show app icons": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar iconos de apps" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アプリのアイコンを表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "앱 아이콘 표시" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示应用图标" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示應用程式圖示" } }
+      }
+    },
+    "Global shortcut": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Atajo global" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "グローバルショートカット" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "전역 단축키" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "全局快捷键" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "全域快速鍵" } }
+      }
+    },
+    "Buttons to show": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Botones a mostrar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "表示するボタン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "표시할 버튼" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "要显示的按钮" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "要顯示的按鈕" } }
+      }
+    },
+    "Quit app on the last window": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cerrar la app al cerrar la última ventana" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "最後のウインドウを閉じたらアプリを終了" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "마지막 윈도우를 닫으면 앱 종료" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭最后一个窗口时退出应用" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉最後一個視窗時結束應用程式" } }
+      }
+    },
+    "Close the window": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cerrar la ventana" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ウインドウを閉じる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "윈도우 닫기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭窗口" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉視窗" } }
+      }
+    },
+    "Enter full screen": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Entrar en pantalla completa" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "フルスクリーンにする" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "전체 화면으로" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "进入全屏幕" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "進入全螢幕" } }
+      }
+    },
+    "Fill the screen": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Llenar la pantalla" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "画面いっぱいに広げる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "화면 채우기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "填满屏幕" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "填滿螢幕" } }
+      }
+    },
+    "System zoom": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Zoom del sistema" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システムのズーム" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 확대/축소" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "系统缩放" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "系統縮放" } }
+      }
+    },
     "Hold ⌘W to close": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Mantén ⌘W para cerrar" } },

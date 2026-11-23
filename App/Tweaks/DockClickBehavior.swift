@@ -21,7 +21,7 @@ final class DockClickBehavior: @unchecked Sendable {
 
     private let lock = NSLock()
     private var config = Config()
-    private var pairing = DockClickPairing()
+    private var pairing = MouseClickPairing()
 
     func configure(enabled: Bool, settings: TweakSettings, frontmost: NSRunningApplication?) {
         let dockPID = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock").first?.processIdentifier
@@ -32,7 +32,7 @@ final class DockClickBehavior: @unchecked Sendable {
                             frontmostBundleID: frontmost?.bundleIdentifier,
                             frontmostPID: frontmost?.processIdentifier,
                             dockPID: dockPID)
-            if !enabled { pairing = DockClickPairing() }
+            if !enabled { pairing = MouseClickPairing() }
         }
     }
 

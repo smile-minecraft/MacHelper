@@ -10,9 +10,10 @@ import Tweaks
         #expect(TweakID.allCases.count == 11)
     }
 
-    @Test func onlyFourAdjustmentsAreImplemented() {
+    @Test func everyAvailableAdjustmentIsTheOneThisBuildImplements() {
         let implemented = Set(TweakCatalog.all.filter(\.implemented).map(\.id))
-        #expect(implemented == [.dockClickAction, .musicBlockAutolaunch, .windowCmdTabRestore, .inputQuitGuard])
+        #expect(implemented == [.dockClickAction, .musicBlockAutolaunch, .windowCmdTabRestore, .inputQuitGuard,
+                                .windowTrafficLights, .windowSwitcherMenu, .missionControlWindowButtons])
         for id in TweakID.allCases where !implemented.contains(id) {
             #expect(!TweakCatalog.isAvailable(id))
         }
@@ -48,6 +49,21 @@ import Tweaks
         let action = TweakCatalog.definition(for: .dockClickAction).option("action")!
         #expect(action.parse("minimize") == .string("minimize"))
         #expect(action.parse("close") == nil)
+
+        let trafficLights = TweakCatalog.definition(for: .windowTrafficLights)
+        #expect(trafficLights.option("closeAction")!.parse("quit") == .string("quit"))
+        #expect(trafficLights.option("closeAction")!.parse("minimize") == nil)
+        #expect(trafficLights.option("minimizeAction")!.parse("hide") == .string("hide"))
+        #expect(trafficLights.option("zoomAction")!.parse("fill") == .string("fill"))
+        #expect(trafficLights.option("zoomAction")!.parse("fullscreen") == nil)
+        #expect(trafficLights.option("excludedApps")!.parse("com.apple.Safari,com.apple.dt.Xcode")
+            == .stringList(["com.apple.Safari", "com.apple.dt.Xcode"]))
+
+        let switcher = TweakCatalog.definition(for: .windowSwitcherMenu)
+        #expect(switcher.option("hotkey")!.parse("ctrl+opt+w") == .string("ctrl+opt+w"))
+
+        let missionControl = TweakCatalog.definition(for: .missionControlWindowButtons)
+        #expect(missionControl.option("buttons")!.parse("close,minimize") == .stringList(["close", "minimize"]))
     }
 }
 

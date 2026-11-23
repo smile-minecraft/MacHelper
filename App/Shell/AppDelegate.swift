@@ -109,6 +109,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         // It skips status item, Helper, fans, telemetry and updater so a second instance can be
         // tested without touching the person's normal MacHelper session.
         if CommandLine.arguments.contains("--tweaks-only") {
+            // Debug aids for the window tweaks: print what they read and stop, so the same data the
+            // menu and the Mission Control overlay use can be checked from a terminal.
+            if CommandLine.arguments.contains("--dump-window-menu") {
+                for line in WindowSwitcherMenu.menuDescription() { print(line) }
+                exit(0)
+            }
+            if CommandLine.arguments.contains("--dump-mission-control") {
+                for line in MissionControlOverlay.thumbnailsDescription() { print(line) }
+                exit(0)
+            }
             TweakEngine.shared.start()
             return
         }

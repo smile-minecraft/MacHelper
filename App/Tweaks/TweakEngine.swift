@@ -22,6 +22,9 @@ final class TweakEngine {
     private let cmdTab = CmdTabRestoreBehavior()
     private let quitGuard = QuitGuardBehavior()
     private let dockClick = DockClickBehavior()
+    private let trafficLights = TrafficLightBehavior()
+    private let switcher = WindowSwitcherMenu()
+    private let missionControl = MissionControlOverlay()
 
     /// Only the event types an enabled behaviour looks at reach the tap: with just the quit guard
     /// on, mouse events never pass through MacHelper at all.
@@ -95,27 +98,35 @@ final class TweakEngine {
 
         let quitEnabled = latest.isEnabled(.inputQuitGuard)
         let dockEnabled = latest.isEnabled(.dockClickAction)
+        let trafficEnabled = latest.isEnabled(.windowTrafficLights)
         // Configure the behaviours before the tap can deliver anything to them.
         music.configure(enabled: latest.isEnabled(.musicBlockAutolaunch), settings: latest)
         cmdTab.configure(enabled: granted && latest.isEnabled(.windowCmdTabRestore))
         quitGuard.configure(enabled: quitEnabled, settings: latest, frontmostBundleID: frontmostBundleID)
         dockClick.configure(enabled: dockEnabled, settings: latest, frontmost: NSWorkspace.shared.frontmostApplication)
+        trafficLights.configure(enabled: granted && trafficEnabled, settings: latest,
+                                ownBundleID: Bundle.main.bundleIdentifier ?? "com.machelper.MacHelper")
 
-        if granted && (quitEnabled || dockEnabled) {
+        if granted && (quitEnabled || dockEnabled || trafficEnabled) {
             if eventTap == nil {
-                // Runs on the tap's own thread: both behaviours are thread-safe and never wait on
+                // Runs on the tap's own thread: the behaviours are thread-safe and never wait on
                 // the main actor.
-                let quitGuard = quitGuard, dockClick = dockClick
+                let quitGuard = quitGuard, dockClick = dockClick, trafficLights = trafficLights
                 eventTap = EventTapService { type, event in
-                    quitGuard.handle(type, event) ?? dockClick.handle(type, event) ?? .pass
+                    trafficLights.handle(type, event) ?? quitGuard.handle(type, event) ?? dockClick.handle(type, event) ?? .pass
                 }
             }
-            eventTap?.install(mask: Self.eventMask(keys: quitEnabled, clicks: dockEnabled))
+            eventTap?.install(mask: Self.eventMask(keys: quitEnabled, clicks: dockEnabled || trafficEnabled))
         } else {
             eventTap?.remove()
             eventTap = nil
             quitGuard.reset()
+            trafficLights.reset()
         }
+        // These two own what they show (a status item, overlay panels) and only exist while their
+        // tweak is on and Accessibility is granted.
+        switcher.configure(enabled: granted && latest.isEnabled(.windowSwitcherMenu), settings: latest)
+        missionControl.configure(enabled: granted && latest.isEnabled(.missionControlWindowButtons), settings: latest)
         publishStatus()
     }
 
@@ -129,6 +140,8 @@ final class TweakEngine {
                 states[definition.id.rawValue] = .off
             } else if definition.permissions.contains(.accessibility) && !granted {
                 states[definition.id.rawValue] = .needsPermission
+            } else if definition.id == .windowSwitcherMenu, let problem = switcher.hotKeyProblem {
+                states[definition.id.rawValue] = TweakRuntimeStatus.TweakState(.active, reason: problem)
             } else {
                 states[definition.id.rawValue] = .active
             }

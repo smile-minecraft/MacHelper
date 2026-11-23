@@ -19,7 +19,7 @@ import Testing
     }
 
     @Test func aSwallowedDownAlsoSwallowsItsUpAndNothingElse() {
-        var pairing = DockClickPairing()
+        var pairing = MouseClickPairing()
         var results: [Bool] = []
         results.append(pairing.mouseUp())                 // stray up: passes
         results.append(pairing.mouseDown(matched: true))
