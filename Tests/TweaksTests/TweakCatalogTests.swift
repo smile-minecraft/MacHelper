@@ -13,7 +13,8 @@ import Tweaks
     @Test func onlyTheShippedAdjustmentsAreImplemented() {
         let implemented = Set(TweakCatalog.all.filter(\.implemented).map(\.id))
         #expect(implemented == [.finderCutPaste, .finderNewFile, .finderContextMenu, .dockClickAction,
-                                .musicBlockAutolaunch, .windowCmdTabRestore, .inputQuitGuard])
+                                .musicBlockAutolaunch, .windowCmdTabRestore, .inputQuitGuard,
+                                .windowTrafficLights, .windowSwitcherMenu, .missionControlWindowButtons])
         for id in TweakID.allCases where !implemented.contains(id) {
             #expect(!TweakCatalog.isAvailable(id))
         }
@@ -76,6 +77,21 @@ import Tweaks
         let action = TweakCatalog.definition(for: .dockClickAction).option("action")!
         #expect(action.parse("minimize") == .string("minimize"))
         #expect(action.parse("close") == nil)
+
+        let trafficLights = TweakCatalog.definition(for: .windowTrafficLights)
+        #expect(trafficLights.option("closeAction")!.parse("quit") == .string("quit"))
+        #expect(trafficLights.option("closeAction")!.parse("minimize") == nil)
+        #expect(trafficLights.option("minimizeAction")!.parse("hide") == .string("hide"))
+        #expect(trafficLights.option("zoomAction")!.parse("fill") == .string("fill"))
+        #expect(trafficLights.option("zoomAction")!.parse("fullscreen") == nil)
+        #expect(trafficLights.option("excludedApps")!.parse("com.apple.Safari,com.apple.dt.Xcode")
+            == .stringList(["com.apple.Safari", "com.apple.dt.Xcode"]))
+
+        let switcher = TweakCatalog.definition(for: .windowSwitcherMenu)
+        #expect(switcher.option("hotkey")!.parse("ctrl+opt+w") == .string("ctrl+opt+w"))
+
+        let missionControl = TweakCatalog.definition(for: .missionControlWindowButtons)
+        #expect(missionControl.option("buttons")!.parse("close,minimize") == .stringList(["close", "minimize"]))
     }
 }
 
@@ -123,15 +139,10 @@ import Tweaks
 
     @Test func unimplementedTweaksCannotBeEnabled() {
         var settings = TweakSettings()
-        let trafficLights = settings.setEnabled(.windowTrafficLights, true)
-        #expect(!trafficLights)
-        #expect(!settings.isEnabled(.windowTrafficLights))
-        let closeAction = settings.setValue("closeAction", for: .windowTrafficLights, to: .string("minimize"))
-        #expect(closeAction)
-        // Options for a coming-soon tweak can be prepared, but the switch itself stays off.
-        #expect(settings.string("closeAction", for: .windowTrafficLights) == "minimize")
+        // Column autosizing is the one tweak this build cannot offer.
         let columnAutosize = settings.setEnabled(.finderColumnAutosize, true)
         #expect(!columnAutosize)
+        #expect(!settings.isEnabled(.finderColumnAutosize))
         let dockSwitch = settings.setEnabled(.dockClickAction, true)
         #expect(dockSwitch)
         #expect(settings.isEnabled(.dockClickAction))

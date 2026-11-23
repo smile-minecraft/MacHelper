@@ -24,6 +24,9 @@ final class TweakEngine {
     private let dockClick = DockClickBehavior()
     private let finderCutPaste = FinderCutPasteBehavior()
     private let finderNewFile = FinderNewFileBehavior()
+    private let trafficLights = TrafficLightBehavior()
+    private let switcher = WindowSwitcherMenu()
+    private let missionControl = MissionControlOverlay()
 
     /// Only the event types an enabled behaviour looks at reach the tap: with just the quit guard
     /// on, mouse events never pass through MacHelper at all.
@@ -102,6 +105,7 @@ final class TweakEngine {
 
         let quitEnabled = latest.isEnabled(.inputQuitGuard)
         let dockEnabled = latest.isEnabled(.dockClickAction)
+        let trafficEnabled = latest.isEnabled(.windowTrafficLights)
         let cutPasteEnabled = latest.isEnabled(.finderCutPaste)
         let newFileEnabled = latest.isEnabled(.finderNewFile)
         let frontmost = NSWorkspace.shared.frontmostApplication
@@ -112,29 +116,38 @@ final class TweakEngine {
         dockClick.configure(enabled: dockEnabled, settings: latest, frontmost: frontmost)
         finderCutPaste.configure(enabled: cutPasteEnabled, frontmost: frontmost)
         finderNewFile.configure(enabled: newFileEnabled, settings: latest, frontmost: frontmost)
+        trafficLights.configure(enabled: granted && trafficEnabled, settings: latest,
+                                ownBundleID: Bundle.main.bundleIdentifier ?? "com.machelper.MacHelper")
 
         let wantsKeys = quitEnabled || cutPasteEnabled || newFileEnabled
-        if granted && (wantsKeys || dockEnabled) {
+        let wantsClicks = dockEnabled || trafficEnabled
+        if granted && (wantsKeys || wantsClicks) {
             if eventTap == nil {
                 // Runs on the tap's own thread: the behaviours are thread-safe and never wait on
                 // the main actor.
-                let quitGuard = quitGuard, dockClick = dockClick
+                let quitGuard = quitGuard, dockClick = dockClick, trafficLights = trafficLights
                 let finderCutPaste = finderCutPaste, finderNewFile = finderNewFile
                 eventTap = EventTapService { type, event in
-                    quitGuard.handle(type, event)
+                    trafficLights.handle(type, event)
+                        ?? quitGuard.handle(type, event)
                         ?? finderCutPaste.handle(type, event)
                         ?? finderNewFile.handle(type, event)
                         ?? dockClick.handle(type, event)
                         ?? .pass
                 }
             }
-            eventTap?.install(mask: Self.eventMask(keys: wantsKeys, clicks: dockEnabled))
+            eventTap?.install(mask: Self.eventMask(keys: wantsKeys, clicks: wantsClicks))
         } else {
             eventTap?.remove()
             eventTap = nil
             quitGuard.reset()
+            trafficLights.reset()
             finderCutPaste.reset()
         }
+        // These two own what they show (a status item, overlay panels) and only exist while their
+        // tweak is on and Accessibility is granted.
+        switcher.configure(enabled: granted && latest.isEnabled(.windowSwitcherMenu), settings: latest)
+        missionControl.configure(enabled: granted && latest.isEnabled(.missionControlWindowButtons), settings: latest)
         publishStatus()
     }
 
@@ -153,6 +166,8 @@ final class TweakEngine {
                 states[definition.id.rawValue] = .off
             } else if definition.permissions.contains(.accessibility) && !granted {
                 states[definition.id.rawValue] = .needsPermission
+            } else if definition.id == .windowSwitcherMenu, let problem = switcher.hotKeyProblem {
+                states[definition.id.rawValue] = TweakRuntimeStatus.TweakState(.active, reason: problem)
             } else if definition.id == .finderNewFile && automation == .denied {
                 states[definition.id.rawValue] = .needsPermission(
                     "Allow MacHelper to control Finder in System Settings › Privacy & Security › Automation")

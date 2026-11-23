@@ -88,10 +88,15 @@ struct TweaksView: View {
                        in: (option.minimum ?? 0)...(option.maximum ?? 1), step: 0.1)
             }
         case .string:
-            TextField(LocalizedStringKey(optionLabel(option.id)),
-                      text: Binding(get: { model.settings.string(option.id, for: id) },
-                                    set: { model.setValue(option.id, for: id, to: .string($0)) }))
-                .font(.mhCallout)
+            VStack(alignment: .leading, spacing: 2) {
+                TextField(LocalizedStringKey(optionLabel(option.id)),
+                          text: Binding(get: { model.settings.string(option.id, for: id) },
+                                        set: { model.setValue(option.id, for: id, to: .string($0)) }))
+                    .font(.mhCallout)
+                if option.id == "hotkey" {
+                    Text("Modifiers and one key, for example control+option+w.").settingsCaption()
+                }
+            }
         case .enumeration:
             Picker(LocalizedStringKey(optionLabel(option.id)), selection: Binding(
                 get: { model.settings.string(option.id, for: id) },
@@ -146,6 +151,12 @@ struct TweaksView: View {
         case "excludedApps": "Excluded app bundle ids"
         case "action": "Click action"
         case "cycleWindows": "Cycle windows"
+        case "closeAction": "Close button"
+        case "minimizeAction": "Minimize button"
+        case "zoomAction": "Zoom button"
+        case "showIcons": "Show app icons"
+        case "hotkey": "Global shortcut"
+        case "buttons": "Buttons to show"
         case "hide": "Hide app"
         case "minimize": "Minimize windows"
         case "shortcut": "Shortcut"
@@ -157,6 +168,11 @@ struct TweaksView: View {
         case "baseName": "File name"
         case "customExtension": "Custom extension"
         case "terminalBundleID": "Terminal app bundle id"
+        case "quit": "Quit app on the last window"
+        case "close": "Close the window"
+        case "fullScreen": "Enter full screen"
+        case "fill": "Fill the screen"
+        case "zoom": "System zoom"
         default: id
         }
     }

@@ -94,23 +94,3 @@ public enum TweakRules {
         }
     }
 }
-
-/// Pairs a swallowed Dock mouse-down with its mouse-up. The Dock acts on the release, so letting
-/// the up through after taking the down would make it activate the app that was just hidden.
-public struct DockClickPairing: Equatable, Sendable {
-    private var swallowedDown = false
-
-    public init() {}
-
-    /// Returns whether the mouse-down is swallowed (it was a click on the frontmost app's icon).
-    public mutating func mouseDown(matched: Bool) -> Bool {
-        swallowedDown = matched
-        return matched
-    }
-
-    /// Returns whether the mouse-up is swallowed: only the one that ends a swallowed down.
-    public mutating func mouseUp() -> Bool {
-        defer { swallowedDown = false }
-        return swallowedDown
-    }
-}
