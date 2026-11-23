@@ -18,6 +18,7 @@ let package = Package(
         .library(name: "Telemetry", targets: ["Telemetry"]),
         .library(name: "SettingsPortability", targets: ["SettingsPortability"]),
         .library(name: "Diagnostics", targets: ["Diagnostics"]),
+        .library(name: "Tweaks", targets: ["Tweaks"]),
         .executable(name: "machelper", targets: ["machelper"]),
         .executable(name: "mhprobe", targets: ["mhprobe"]),
     ],
@@ -49,7 +50,7 @@ let package = Package(
         .target(name: "Diagnostics", dependencies: ["CleanEngine", "Storage"], resources: [.process("Localizable.xcstrings")]),
         .executableTarget(
             name: "machelper",
-            dependencies: ["CleanEngine", "Diagnostics", "DiskScan", "Metrics", "SMCKit", "Storage",
+            dependencies: ["CleanEngine", "Diagnostics", "DiskScan", "Metrics", "SMCKit", "Storage", "Tweaks",
                            .product(name: "ArgumentParser", package: "swift-argument-parser")]
         ),
         // Fixed allowlists for what the root Helper may delete or switch; no dependencies.
@@ -57,6 +58,7 @@ let package = Package(
         // Color themes, VS Code theme import and appearance settings; no UI framework.
         .target(name: "Theming"),
         .target(name: "HelperProtocol", dependencies: ["SMCKit", "FanControl"], linkerSettings: [.linkedFramework("Security")]),
+        .target(name: "Tweaks"),
         .executableTarget(name: "mhprobe", dependencies: ["SMCKit", "Metrics"]),
         .testTarget(name: "SMCKitTests", dependencies: ["SMCKit"]),
         .testTarget(name: "FanControlTests", dependencies: ["FanControl"]),
@@ -69,5 +71,6 @@ let package = Package(
         .testTarget(name: "TelemetryTests", dependencies: ["Telemetry"]),
         .testTarget(name: "DiagnosticsTests", dependencies: ["Diagnostics", "Storage"]),
         .testTarget(name: "SettingsPortabilityTests", dependencies: ["SettingsPortability", "CleanEngine", "FanControl"]),
+        .testTarget(name: "TweaksTests", dependencies: ["Tweaks"]),
     ]
 )

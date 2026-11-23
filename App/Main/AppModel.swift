@@ -3,9 +3,10 @@ import Observation
 import SettingsPortability
 import SwiftUI
 import Telemetry
+import Tweaks
 
 enum AppSection: String, CaseIterable, Identifiable, Hashable {
-    case overview, monitor, health, fans, optimize, disk, uninstall, updates, startup
+    case overview, monitor, health, fans, optimize, disk, uninstall, updates, startup, tweaks
     var id: String { rawValue }
 
     var title: LocalizedStringKey {
@@ -19,10 +20,11 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         case .uninstall: "Uninstall"
         case .updates: "Homebrew Updates"
         case .startup: "Startup Items"
+        case .tweaks: "Tweaks"
         }
     }
 
-    var icon: String { "px.\(rawValue)" }
+    var icon: String { self == .tweaks ? "px.settings" : "px.\(rawValue)" }
 
     var accent: Color {
         switch self {
@@ -35,13 +37,15 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         case .uninstall: Theme.rose
         case .updates: Theme.mint
         case .startup: Theme.orange
+        case .tweaks: Theme.slate
         }
     }
 
     @MainActor static var groups: [(LocalizedStringKey, [AppSection])] {
         let visible = allCases.filter(\.isVisible)
         return [(LocalizedStringKey("This Mac"), visible.filter(\.isThisMac)),
-                (LocalizedStringKey("Clean Up"), visible.filter { !$0.isThisMac })]
+                (LocalizedStringKey("Clean Up"), visible.filter { !$0.isThisMac && $0 != .tweaks }),
+                (LocalizedStringKey("Tweaks"), visible.filter { $0 == .tweaks })]
             .filter { !$0.1.isEmpty }
     }
 
@@ -76,6 +80,7 @@ final class AppModel {
     let uninstallModel = UninstallModel()
     let startupModel = StartupModel()
     let healthModel = HealthModel()
+    let tweaks = TweakSettingsModel()
 
     /// Opt-in telemetry. Creating the client never reads anything or sends anything; only an
     /// explicit opt-in queues events, and only a configured endpoint can transmit them.

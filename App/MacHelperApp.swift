@@ -10,6 +10,13 @@ struct MacHelperApp: App {
         }
     }
 
+    /// The original pages keep ⌘1–⌘9. A tenth page needs a single-character key; ⌘T is free and
+    /// matches Tweaks. Converting "10" to Character would trap at startup.
+    private static func sectionShortcut(_ index: Int, _ section: AppSection) -> KeyEquivalent {
+        if index < 9 { return KeyEquivalent(Character(String(index + 1))) }
+        return KeyEquivalent(section == .tweaks ? "t" : "0")
+    }
+
     var body: some Scene {
         Window("MacHelper", id: "main") {
             // The synthetic screenshot run draws its pages in its own off-screen windows; the
@@ -28,7 +35,7 @@ struct MacHelperApp: App {
                 // Keep the original number for every page; only omit the invisible ones.
                 ForEach(Array(AppSection.allCases.enumerated()).filter { $0.element.isVisible }, id: \.element) { i, s in
                     Button(s.title) { AppModel.shared.show(s) }
-                        .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
+                        .keyboardShortcut(Self.sectionShortcut(i, s), modifiers: .command)
                 }
                 Divider()
             }
