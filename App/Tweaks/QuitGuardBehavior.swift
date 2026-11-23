@@ -96,6 +96,7 @@ final class QuitGuardBehavior: @unchecked Sendable {
         var press: Press?
         var lastPress: (keyCode: UInt16, at: Date)?
         var nextToken: UInt64 = 0
+        var frontmostPID: pid_t?
     }
 
     private let lock = NSLock()
@@ -118,9 +119,11 @@ final class QuitGuardBehavior: @unchecked Sendable {
 
     /// A pending press belongs to the app that was in front when ⌘Q went down; switching apps
     /// drops it, so the hold can never complete on a different app.
-    func updateFrontmost(_ bundleID: String?) {
+    /// Compared by process, so two apps without a bundle id still count as a switch.
+    func updateFrontmost(_ bundleID: String?, pid: pid_t) {
         lock.withLock {
-            if state.config.frontmostBundleID != bundleID { state.press = nil; state.lastPress = nil }
+            if state.frontmostPID != pid { state.press = nil; state.lastPress = nil }
+            state.frontmostPID = pid
             state.config.frontmostBundleID = bundleID
         }
     }

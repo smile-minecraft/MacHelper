@@ -9,12 +9,14 @@ import Tweaks
 enum AXWindowTools {
     static func windows(for pid: pid_t, timeout: Float = 0.5) -> [AXUIElement] {
         let app = AXUIElementCreateApplication(pid)
-        // A hung app must not freeze MacHelper for the default six seconds. Elements obtained
-        // from it inherit the application's timeout.
+        // A hung app must not freeze MacHelper (or the event tap) for the default six seconds.
+        // The timeout is per element: windows read from the app don't inherit it, so each gets
+        // its own before any of its attributes is read.
         AXUIElementSetMessagingTimeout(app, timeout)
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(app, "AXWindows" as CFString, &value) == .success,
               let windows = value as? [AXUIElement] else { return [] }
+        for window in windows { AXUIElementSetMessagingTimeout(window, timeout) }
         return windows
     }
 

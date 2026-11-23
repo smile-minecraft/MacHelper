@@ -81,7 +81,7 @@ final class TweakEngine {
 
     private func applicationActivated(_ app: NSRunningApplication) {
         frontmostBundleID = app.bundleIdentifier
-        quitGuard.updateFrontmost(frontmostBundleID)
+        quitGuard.updateFrontmost(frontmostBundleID, pid: app.processIdentifier)
         dockClick.updateFrontmost(app)
         cmdTab.handleActivation(app)
     }
