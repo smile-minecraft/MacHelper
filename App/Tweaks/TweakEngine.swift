@@ -220,7 +220,8 @@ final class TweakEngine {
             appPID: Int32(ProcessInfo.processInfo.processIdentifier),
             accessibilityGranted: granted,
             eventTapInstalled: eventTap?.isInstalled ?? false,
-            automationFinderGranted: automation == .granted,
+            // Nil until it was read: automation is only checked while a Finder tweak needs it.
+            automationFinderGranted: automation == .unavailable ? nil : automation == .granted,
             finderExtensionEnabled: extensionEnabled,
             tweaks: states)
         try? status.write(to: store.statusURL)

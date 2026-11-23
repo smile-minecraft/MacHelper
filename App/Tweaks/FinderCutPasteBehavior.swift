@@ -76,10 +76,14 @@ final class FinderCutPasteBehavior: @unchecked Sendable {
             lock.withLock { session.disarm() }
             return nil
         case .cut:
-            guard isFinderFrontmost(config), !isTextFocus(config) else { return nil }
+            guard isFinderFrontmost(config), let pid = config.finderPID else { return nil }
+            // One accessibility trip answers both questions: is the caret in text, and is
+            // anything selected. It also refreshes the focus cache the paste reads.
+            let focus = AXWindowTools.focusedState(for: pid, timeout: focusTimeout)
+            lock.withLock { focusCache = (pid, Date(), focus.role) }
+            guard !FinderRules.isTextFocus(focus.role) else { return nil }
             // Nothing selected: Finder copies nothing, so there is nothing to cut.
-            let selected = config.finderPID.flatMap { AXWindowTools.focusedSelectionCount(for: $0, timeout: focusTimeout) }
-            guard FinderRules.shouldArmCut(selectedCount: selected) else {
+            guard FinderRules.shouldArmCut(selectedCount: focus.selectedCount) else {
                 lock.withLock { session.disarm() }
                 return nil
             }
