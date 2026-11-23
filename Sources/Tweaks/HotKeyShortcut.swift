@@ -61,6 +61,17 @@ public struct HotKeyShortcut: Equatable, Sendable, CustomStringConvertible {
         return HotKeyShortcut(keyCode: keyCode, carbonModifiers: modifiers, key: key)
     }
 
+    /// What the status file says about a configured shortcut: nothing when it works or none is set,
+    /// otherwise why the shortcut does nothing. A typo must not look like a working shortcut.
+    public static func statusReason(for text: String, refused: Bool) -> String? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        guard parse(trimmed) != nil else {
+            return "global shortcut \"\(trimmed)\" is not recognized; use modifiers and one key, for example control+option+w"
+        }
+        return refused ? "global shortcut unavailable" : nil
+    }
+
     /// The canonical spelling, the one the CLI accepts back: "ctrl+opt+w".
     public var description: String {
         var parts: [String] = []

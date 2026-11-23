@@ -41,6 +41,30 @@ enum AXWindowTools {
         return string(element, "AXRole")
     }
 
+    /// The focused element of `pid` in one trip: its role, and how many items it has selected
+    /// (rows in a list view's AXOutline, children in an icon or column view's AXList; nil when it
+    /// offers neither). One focused-element read instead of two keeps ⌘X quick on the tap thread.
+    static func focusedState(for pid: pid_t, timeout: Float) -> (role: String?, selectedCount: Int?) {
+        let app = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(app, timeout)
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(app, "AXFocusedUIElement" as CFString, &value) == .success,
+              let value, CFGetTypeID(value) == AXUIElementGetTypeID() else { return (nil, nil) }
+        let element = value as! AXUIElement
+        AXUIElementSetMessagingTimeout(element, timeout)
+        let role = string(element, "AXRole")
+        // Only views that list items have a selection; a text role never reaches the cut anyway.
+        guard role == "AXOutline" || role == "AXList" || role == "AXTable" else { return (role, nil) }
+        for attribute in ["AXSelectedRows", "AXSelectedChildren"] {
+            var selection: CFTypeRef?
+            if AXUIElementCopyAttributeValue(element, attribute as CFString, &selection) == .success,
+               let items = selection as? [AnyObject] {
+                return (role, items.count)
+            }
+        }
+        return (role, nil)
+    }
+
     static func isStandardWindow(_ window: AXUIElement) -> Bool {
         TweakRules.isUserWindow(subrole: string(window, "AXSubrole"))
     }

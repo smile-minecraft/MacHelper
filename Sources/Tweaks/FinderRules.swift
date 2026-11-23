@@ -32,6 +32,14 @@ public enum FinderRules {
         }
     }
 
+    /// Whether ⌘X should start a cut, from the number of items selected in the focused Finder view
+    /// (nil when Finder did not say). With nothing selected Finder copies nothing, and a cut armed
+    /// over an unchanged clipboard could pair with whatever writes the clipboard next, so ⌘X is
+    /// left to Finder. An unknown count falls back to the clipboard check at paste time.
+    public static func shouldArmCut(selectedCount: Int?) -> Bool {
+        selectedCount != 0
+    }
+
     // MARK: - Chords
 
     public enum Chord: Equatable, Sendable {

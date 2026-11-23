@@ -219,7 +219,11 @@ prepare() {
   codesign --verify --deep --strict "$app" || fail "Signature check failed."
   [[ "$(defaults read "$PWD/$app/Contents/Info" CFBundleShortVersionString)" == "$VERSION" ]] || fail "The app's version isn't $VERSION."
   local entitlements target
-  for target in "$app" "$app/Contents/MacOS/MacHelperHelper" "$app/Contents/MacOS/machelper-cli"; do
+  # The Finder extension is signed by the same build; it is checked like the other executables so a
+  # stray development signature never reaches notarization.
+  local finder_extension="$app/Contents/PlugIns/FinderExtension.appex"
+  [[ -d "$finder_extension" ]] || fail "Missing FinderExtension.appex in the app."
+  for target in "$app" "$app/Contents/MacOS/MacHelperHelper" "$app/Contents/MacOS/machelper-cli" "$finder_extension"; do
     entitlements="$(codesign -d --entitlements - --xml "$target" 2>/dev/null || true)"
     if grep -q "get-task-allow" <<< "$entitlements"; then fail "$(basename "$target") still has get-task-allow."; fi
   done
@@ -228,7 +232,7 @@ prepare() {
   done
   [[ "$("$app/Contents/MacOS/machelper-cli" --version)" == "$VERSION ($BUILD_NUMBER)" ]] || fail "The bundled CLI doesn't report $VERSION ($BUILD_NUMBER)."
   local exe_path signer info gatekeeper
-  for exe_path in "$app" "$app/Contents/MacOS/MacHelperHelper" "$app/Contents/MacOS/machelper-cli"; do
+  for exe_path in "$app" "$app/Contents/MacOS/MacHelperHelper" "$app/Contents/MacOS/machelper-cli" "$finder_extension"; do
     info="$(codesign -dv --verbose=2 "$exe_path" 2>&1)"
     signer="$(sed -n 's/^Authority=//p' <<< "$info" | sed -n '1p')"
     [[ "$signer" == "$SIGN_IDENTITY" ]] || fail "$(basename "$exe_path") is signed by \"${signer:-ad-hoc}\", not $SIGN_IDENTITY."

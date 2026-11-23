@@ -17,6 +17,14 @@ final class TweakEngine {
     private var eventTap: EventTapService?
     private var observers: [NSObjectProtocol] = []
     private var poll: Timer?
+    /// Finder automation and extension state change only in System Settings, so they are read in
+    /// the background every few seconds while a Finder tweak needs them, never on the main thread
+    /// (the extension check runs pluginkit).
+    private var automation: FinderAutomation.Permission = .unavailable
+    private var extensionEnabled: Bool?
+    private var finderStatusTick = 0
+    private var refreshingFinderStatus = false
+    private static let finderStatusEvery = 10
 
     private let music = MusicLaunchBehavior()
     private let cmdTab = CmdTabRestoreBehavior()
@@ -77,7 +85,10 @@ final class TweakEngine {
             Task { @MainActor in self?.applicationActivated(app) }
         })
         poll = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.apply() }
+            Task { @MainActor in
+                self?.apply()
+                self?.refreshFinderStatusIfDue()
+            }
         }
         apply(force: true)
     }
@@ -149,14 +160,41 @@ final class TweakEngine {
         switcher.configure(enabled: granted && latest.isEnabled(.windowSwitcherMenu), settings: latest)
         missionControl.configure(enabled: granted && latest.isEnabled(.missionControlWindowButtons), settings: latest)
         publishStatus()
+        // A Finder tweak that was just turned on reports its permission without waiting a cycle.
+        if needsFinderStatus { refreshFinderStatus() }
+    }
+
+    private var needsFinderStatus: Bool {
+        settings.isEnabled(.finderNewFile) || settings.isEnabled(.finderContextMenu)
+    }
+
+    private func refreshFinderStatusIfDue() {
+        guard needsFinderStatus else { return }
+        finderStatusTick += 1
+        guard finderStatusTick % Self.finderStatusEvery == 0 else { return }
+        refreshFinderStatus()
+    }
+
+    private func refreshFinderStatus() {
+        guard !refreshingFinderStatus else { return }
+        refreshingFinderStatus = true
+        Task { [weak self] in
+            let (automation, extensionEnabled) = await Task.detached(priority: .utility) {
+                (FinderAutomation.permission, FinderExtensionStatus.isEnabled())
+            }.value
+            guard let self else { return }
+            refreshingFinderStatus = false
+            guard automation != self.automation || extensionEnabled != self.extensionEnabled else { return }
+            self.automation = automation
+            self.extensionEnabled = extensionEnabled
+            publishStatus()
+        }
     }
 
     /// The extension's Cut item: from here on the next ⌘V in Finder moves what is on the clipboard.
     func armFinderCut(changeCount: Int) { finderCutPaste.armCut(changeCount: changeCount) }
 
     private func publishStatus() {
-        let automation = FinderAutomation.permission
-        let extensionEnabled = FinderExtensionStatus.isEnabled()
         var states: [String: TweakRuntimeStatus.TweakState] = [:]
         for definition in TweakCatalog.all {
             let enabled = settings.isEnabled(definition.id)
@@ -182,7 +220,8 @@ final class TweakEngine {
             appPID: Int32(ProcessInfo.processInfo.processIdentifier),
             accessibilityGranted: granted,
             eventTapInstalled: eventTap?.isInstalled ?? false,
-            automationFinderGranted: automation == .granted,
+            // Nil until it was read: automation is only checked while a Finder tweak needs it.
+            automationFinderGranted: automation == .unavailable ? nil : automation == .granted,
             finderExtensionEnabled: extensionEnabled,
             tweaks: states)
         try? status.write(to: store.statusURL)

@@ -5,9 +5,10 @@ import Tweaks
 /// Draws close and minimize buttons over Mission Control's window thumbnails.
 ///
 /// Mission Control cannot be observed through notifications, so while the tweak is on a timer asks
-/// the WindowManager for its `mc.display` group a little less than once a second. While Mission
-/// Control is closed that group is gone and the overlays stay hidden, which is also what makes the
-/// cost of the poll small: one accessibility read of one small tree.
+/// the WindowManager for its `mc.display` group: a little less than once a second while Mission
+/// Control is closed, several times a second while the buttons show, so they leave the screen right
+/// after Mission Control does. The read runs off the main thread: a WindowManager that stops
+/// answering must not stall the app's own windows.
 ///
 /// Every button is its own small panel at the shielding window level (above Mission Control). Only
 /// the buttons cover anything: a click anywhere else reaches Mission Control itself, because a
@@ -20,6 +21,15 @@ final class MissionControlOverlay {
     private var timer: Timer?
     private var panels: [NSPanel] = []
     private var layoutSignature = ""
+    private var tick = 0
+    private var reading = false
+    /// Bumped whenever polling restarts or stops, so a read that was in flight then is dropped.
+    private var generation = 0
+
+    private static let tickInterval: TimeInterval = 0.15
+    /// While nothing shows, only every fifth tick reads (about 0.75 s).
+    private static let idleTicks = 5
+    private static let readTimeout: Float = 0.2
 
     private static let buttonSize: CGFloat = 22
     private static let buttonGap: CGFloat = 4
@@ -39,7 +49,8 @@ final class MissionControlOverlay {
 
     private func startPolling() {
         stopPolling()
-        let timer = Timer(timeInterval: 0.75, repeats: true) { [weak self] _ in
+        generation += 1
+        let timer = Timer(timeInterval: Self.tickInterval, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.poll() }
         }
         // .common keeps the timer alive while a menu is tracking or a window is being dragged.
@@ -51,12 +62,29 @@ final class MissionControlOverlay {
     private func stopPolling() {
         timer?.invalidate()
         timer = nil
+        generation += 1
         hideOverlays()
     }
 
     private func poll() {
-        guard enabled else { return }
-        let thumbnails = MissionControlModel.thumbnails()
+        guard enabled, !reading else { return }
+        tick += 1
+        guard !panels.isEmpty || tick % Self.idleTicks == 1 else { return }
+        reading = true
+        let generation = generation
+        let timeout = Self.readTimeout
+        Task { [weak self] in
+            let thumbnails = await Task.detached(priority: .userInitiated) {
+                MissionControlModel.thumbnails(timeout: timeout)
+            }.value
+            guard let self else { return }
+            reading = false
+            guard enabled, generation == self.generation else { return }
+            show(thumbnails)
+        }
+    }
+
+    private func show(_ thumbnails: [MissionControlThumbnail]) {
         guard !thumbnails.isEmpty else {
             if !panels.isEmpty { hideOverlays() }
             layoutSignature = ""

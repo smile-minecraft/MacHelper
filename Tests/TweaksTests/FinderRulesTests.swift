@@ -86,6 +86,14 @@ import Tweaks
         #expect(unchecked)
     }
 
+    @Test func aCutNeedsSomethingSelected() {
+        #expect(!FinderRules.shouldArmCut(selectedCount: 0), "nothing selected: nothing to move")
+        #expect(FinderRules.shouldArmCut(selectedCount: 1))
+        #expect(FinderRules.shouldArmCut(selectedCount: 12))
+        // Finder did not say: the clipboard check at paste time still guards the move.
+        #expect(FinderRules.shouldArmCut(selectedCount: nil))
+    }
+
     @Test func anExpiredCutIsNotConsumed() {
         let start = Date(timeIntervalSinceReferenceDate: 3_000)
         var session = FinderCutSession()

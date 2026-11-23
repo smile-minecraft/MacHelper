@@ -129,7 +129,7 @@ enum FinderExtensionStatus {
 
     private static let lock = NSLock()
     nonisolated(unsafe) private static var cache: (value: Bool?, at: Date)?
-    private static let cacheLifetime: TimeInterval = 10
+    private static let cacheLifetime: TimeInterval = 5
 
     static func isEnabled() -> Bool? {
         if let cached = lock.withLock({ cache }), Date().timeIntervalSince(cached.at) < cacheLifetime {
