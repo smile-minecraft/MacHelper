@@ -20,6 +20,8 @@ final class AutoCleanModel {
     @ObservationIgnored private let agent: any AutoCleanAgentServicing
     @ObservationIgnored private let configURL: URL
     @ObservationIgnored private let defaults: UserDefaults
+    /// Mirrors the Optimize module switch; `config.enabled` remains the user's own intent.
+    @ObservationIgnored private var moduleEnabled = FeatureStore.shared.isEnabled(.optimize)
     private(set) var isUpdatingSchedule = false
     @ObservationIgnored private var pendingEnabledChange = false
 
@@ -50,7 +52,7 @@ final class AutoCleanModel {
     }
 
     func refreshScheduleMigration() async {
-        guard !isUpdatingSchedule, !pendingEnabledChange, config.enabled else { return }
+        guard moduleEnabled, !isUpdatingSchedule, !pendingEnabledChange, config.enabled else { return }
         isUpdatingSchedule = true
         let outcome = await AutoCleanScheduleMigration.runIfNeeded(servicing: agent, defaults: defaults) {
             self.config.enabled && !self.pendingEnabledChange
@@ -62,6 +64,19 @@ final class AutoCleanModel {
 
     func retryScheduleMigration() {
         Task { await refreshScheduleMigration() }
+    }
+
+    /// Pause or resume the scheduled agent when the Optimize module is switched. The config file is
+    /// never rewritten here, so the user's enable choice survives the time the module is off.
+    func applyModuleAvailability(_ available: Bool) {
+        let wasEnabled = moduleEnabled
+        moduleEnabled = available
+        // A launch with the module already on keeps today's behavior: the schedule is left as it is.
+        if available, wasEnabled { return }
+        if !available { AutoCleanScheduleMigration.cancel(defaults: defaults) }
+        pendingEnabledChange = true
+        Task { await applyEnabledChange() }
+        agentStatus = agent.status
     }
 
     var enabled: Bool {
@@ -136,7 +151,7 @@ final class AutoCleanModel {
         while pendingEnabledChange {
             pendingEnabledChange = false
             do {
-                if config.enabled {
+                if config.enabled && moduleEnabled {
                     if agent.status != .enabled && agent.status != .requiresApproval {
                         // Persist the intent before the service call: a register that fails here
                         // leaves the marker set, so the next refresh or Retry resumes instead of

@@ -56,16 +56,19 @@ public enum DockPreference {
 public struct GeneralSettingsPayload: Codable, Equatable, Sendable {
     public var dockMode: DockMode
     public var language: String?
+    public var features: FeatureSet?
 
-    public init(dockMode: DockMode = .whileWindowOpen, language: String? = nil) {
+    public init(dockMode: DockMode = .whileWindowOpen, language: String? = nil, features: FeatureSet? = nil) {
         self.dockMode = dockMode
         self.language = language
+        self.features = features
     }
 
     private enum CodingKeys: String, CodingKey {
         case dockMode
         case showInDock
         case language
+        case features
     }
 
     public init(from decoder: Decoder) throws {
@@ -78,11 +81,14 @@ public struct GeneralSettingsPayload: Codable, Equatable, Sendable {
             dockMode = .whileWindowOpen
         }
         language = try container.decodeIfPresent(String.self, forKey: .language)
+        // A malformed features value from a newer version must not make the rest unreadable.
+        features = try? container.decodeIfPresent(FeatureSet.self, forKey: .features)
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(dockMode, forKey: .dockMode)
         try container.encodeIfPresent(language, forKey: .language)
+        try container.encodeIfPresent(features, forKey: .features)
     }
 }

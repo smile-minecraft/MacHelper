@@ -34,6 +34,10 @@ final class BackgroundRecordingModel {
     /// only that failure and never an approval or registration message.
     @ObservationIgnored private var saveErrorMessage: String?
     @ObservationIgnored private var historyStore: HistoryStore?
+    /// Mirrors the monitor module switch. The user's saved intent stays separate and untouched.
+    @ObservationIgnored private var moduleEnabled = FeatureStore.shared.isEnabled(.monitor)
+    @ObservationIgnored private var moduleReconciling = false
+    @ObservationIgnored private var moduleReconcilePending = false
     /// Names the enabled recording session written into the profile. A new value on every
     /// enable or disable makes a capacity sample from before the change obsolete.
     @ObservationIgnored private var capacityGeneration: String
@@ -77,7 +81,7 @@ final class BackgroundRecordingModel {
     func refresh() {
         let heartbeat = MonitorAgentHeartbeatStore.load(from: heartbeatURL)
         state = BackgroundRecordingStatus.evaluate(serviceStatus: Self.serviceStatus(agent.status),
-                                                   profileEnabled: enabledIntent,
+                                                   profileEnabled: enabledIntent && moduleEnabled,
                                                    enabledModuleCount: enabledModulePlans().count,
                                                    processCollectionEnabled: processCollectionEnabled(),
                                                    heartbeat: heartbeat,
@@ -114,8 +118,10 @@ final class BackgroundRecordingModel {
             refresh()
             return
         }
+        // While Monitor is off only the intent is saved; turning the module on registers the agent.
+        guard moduleEnabled else { refresh(); return }
         do {
-            if agent.status != .enabled { try agent.register() }
+            try registerAgentIfNeeded()
             message = nil
         } catch {
             if agent.status == .requiresApproval {
@@ -133,6 +139,55 @@ final class BackgroundRecordingModel {
             }
         }
         refresh()
+    }
+
+    /// Pause or resume the LaunchAgent when the Monitor module is switched. The profile keeps the
+    /// user's intent, so a later enable restores the exact same recording setup.
+    func applyModuleAvailability(_ available: Bool) {
+        let wasEnabled = moduleEnabled
+        moduleEnabled = available
+        // Only a real switch changes the service. A launch with the module already on leaves it as
+        // it is, so a permission revoked in Login Items stays revoked.
+        if available, wasEnabled { refresh(); return }
+        reconcileModuleAgent()
+        refresh()
+    }
+
+    /// One loop owns register and unregister for module switches. A switch that arrives while an
+    /// unregister is suspended is folded into the next pass, which reads the latest state, so the
+    /// last switch always wins.
+    private func reconcileModuleAgent() {
+        moduleReconcilePending = true
+        guard !moduleReconciling else { return }
+        moduleReconciling = true
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            while moduleReconcilePending {
+                moduleReconcilePending = false
+                do {
+                    if moduleEnabled {
+                        if enabledIntent { try registerAgentIfNeeded() }
+                    } else if agent.status == .enabled || agent.status == .requiresApproval {
+                        try await agent.unregister()
+                    }
+                    message = nil
+                } catch {
+                    if agent.status == .requiresApproval, moduleEnabled {
+                        message = Self.approvalMessage
+                    } else if moduleEnabled {
+                        message = String(localized: "Couldn’t set up background recording: \(error.localizedDescription)")
+                    } else {
+                        message = String(localized: "Couldn’t stop background recording: \(error.localizedDescription)")
+                    }
+                }
+            }
+            moduleReconciling = false
+            refresh()
+        }
+    }
+
+    private func registerAgentIfNeeded() throws {
+        if agent.status != .enabled { try agent.register() }
     }
 
     /// User-initiated disable. Unregisters the agent; the app keeps recording while it runs.
@@ -209,6 +264,8 @@ final class BackgroundRecordingModel {
     /// was enabled and registered before the install; a revoked permission, a disabled intent,
     /// or a pending approval stays off.
     func resumeAfterUpdateIfNeeded() {
+        // While Monitor is off the lifecycle owns the agent; leave the handoff untouched for now.
+        guard moduleEnabled else { return }
         guard let handoff = UpdateAgentHandoffStore.load(from: handoffURL) else { return }
         switch UpdateAgentRestorePlanner.restore(handoff: handoff,
                                                  serviceStatus: Self.serviceStatus(agent.status)) {

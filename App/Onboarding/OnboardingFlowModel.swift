@@ -295,8 +295,8 @@ final class OnboardingFlowModel {
         let app = AppModel.shared
         switch destination {
         case .overview: app.section = .overview
-        case .health: app.section = .health
-        case .disk: app.section = .disk
+        case .health: app.show(AppSection.health.isVisible ? .health : .overview)
+        case .disk: app.show(AppSection.disk.isVisible ? .disk : .overview)
         }
     }
 }

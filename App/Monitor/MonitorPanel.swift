@@ -195,11 +195,11 @@ private struct QuickBar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            item(.optimize, actions.openOptimize)
-            if !ThemeStore.shared.isSimple { item(.fans, actions.openFanControl) }
-            item(.disk, actions.openDiskAnalysis)
-            item(.uninstall, actions.openUninstall)
-            if !ThemeStore.shared.isSimple { item(.startup, actions.openStartup) }
+            if AppSection.optimize.isVisible { item(.optimize, actions.openOptimize) }
+            if AppSection.fans.isVisible { item(.fans, actions.openFanControl) }
+            if AppSection.disk.isVisible { item(.disk, actions.openDiskAnalysis) }
+            if AppSection.uninstall.isVisible { item(.uninstall, actions.openUninstall) }
+            if AppSection.startup.isVisible { item(.startup, actions.openStartup) }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)

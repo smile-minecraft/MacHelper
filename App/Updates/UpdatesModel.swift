@@ -156,6 +156,9 @@ final class UpdatesModel {
     private let environment: any UpdatesEnvironment
     /// One check loop owns Homebrew; triggers that arrive meanwhile are coalesced into one follow-up.
     private var runTask: Task<Void, Never>?
+    private var moduleEnabled = true
+    /// Identifies the current check loop, so a cancelled loop cannot clear a newer one.
+    private var checkGeneration = 0
     private var recheckWhenDone = false
     private var pendingRefresh = false
     private var isUpdating = false
@@ -230,10 +233,21 @@ final class UpdatesModel {
         }
     }
 
+    func applyModuleAvailability(_ available: Bool) {
+        moduleEnabled = available
+        guard !available else { return }
+        runTask?.cancel()
+        runTask = nil
+        recheckWhenDone = false
+        pendingRefresh = false
+        if !isUpdating { phase = .idle }
+    }
+
     /// Reads the list from Homebrew's existing catalog first. When that catalog is older than
     /// Homebrew's own auto-update window, the index is refreshed in the background and the list is
     /// replaced. `refresh` (Check Again) always runs `brew update` first and reports its result.
     func check(refresh: Bool = false, followUp: Bool = false) async {
+        guard moduleEnabled else { return }
         if let runTask {
             // Reopening the page only waits for the result already on its way. A new trigger that
             // changes what is asked (Check Again, the greedy toggle) runs once more afterwards.
@@ -251,21 +265,25 @@ final class UpdatesModel {
             }
             return
         }
-        let task = Task { await self.runCheckLoop(initialRefresh: refresh) }
+        checkGeneration += 1
+        let generation = checkGeneration
+        let task = Task { await self.runCheckLoop(initialRefresh: refresh, generation: generation) }
         runTask = task
         await task.value
     }
 
-    private func runCheckLoop(initialRefresh: Bool) async {
+    private func runCheckLoop(initialRefresh: Bool, generation: Int) async {
         var refresh = initialRefresh || pendingRefresh
         pendingRefresh = false
-        while true {
+        while moduleEnabled, !Task.isCancelled {
             recheckWhenDone = false
             await performCheck(refresh: refresh)
-            guard recheckWhenDone else { break }
+            guard moduleEnabled, recheckWhenDone else { break }
             refresh = pendingRefresh
             pendingRefresh = false
         }
+        guard generation == checkGeneration else { return }
+        if !moduleEnabled, !isUpdating { phase = .idle }
         runTask = nil
     }
 
