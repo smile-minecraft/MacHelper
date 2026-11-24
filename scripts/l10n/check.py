@@ -5,9 +5,9 @@ import glob, json, os, re
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DERIVED_DATA = os.environ.get('DERIVED_DATA', 'build')
 B = os.path.join(ROOT, DERIVED_DATA, 'Build/Intermediates.noindex')
-TARGETS = {'App/Resources/Localizable.xcstrings': B + '/MacHelper.build/Release/MacHelper.build/Objects-normal/arm64/*.stringsdata',
-           'Sources/CleanEngine/Localizable.xcstrings': B + '/MacHelperKit.build/Release/CleanEngine-t.build/Objects-normal/arm64/*.stringsdata',
-           'Sources/Diagnostics/Localizable.xcstrings': B + '/MacHelperKit.build/Release/Diagnostics-t.build/Objects-normal/arm64/*.stringsdata'}
+TARGETS = {'App/Resources/Localizable.xcstrings': B + '/MacHelper.build/Release/MacHelper.build/Objects-normal/*/*.stringsdata',
+           'Sources/CleanEngine/Localizable.xcstrings': B + '/MacHelperKit.build/Release/CleanEngine-t.build/Objects-normal/*/*.stringsdata',
+           'Sources/Diagnostics/Localizable.xcstrings': B + '/MacHelperKit.build/Release/Diagnostics-t.build/Objects-normal/*/*.stringsdata'}
 LANGS = ['zh-Hant', 'zh-Hans', 'ja', 'ko', 'es']
 TRIVIAL = re.compile(r'^[\s%@lldf°·:：()/–-]*( ?(rpm|°C|W|s))?$|^(App|CPU|GPU|GB)$')
 PLACEHOLDER = re.compile(r'%(?:\d+\$)?(hh|h|ll|l|q|z|t|j)?([@dDiuUxXoOfFeEgGcCsSpaA])')

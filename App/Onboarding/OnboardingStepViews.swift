@@ -32,7 +32,7 @@ struct OnboardingWelcomeStep: View {
                 Text(onboardingText("Welcome to MacHelper"))
                     .font(.display(26, weight: .bold))
                     .foregroundStyle(Palette.text)
-                Text(onboardingText("Everything your Apple Silicon Mac needs, right in your menu bar — local-first and free."))
+                Text(onboardingText("Everything your Mac needs, right in your menu bar — local-first and free."))
                     .font(.mhBody)
                     .foregroundStyle(Palette.textMuted)
                     .multilineTextAlignment(.center)

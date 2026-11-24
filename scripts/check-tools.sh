@@ -39,8 +39,8 @@ for tool in curl shasum unzip; do
     command -v "$tool" >/dev/null 2>&1 || { say "✗ $tool not found"; ok=0; }
 done
 
-if [[ "$(uname -m)" != "arm64" ]]; then
-    say "! This Mac isn't Apple Silicon. The app builds, but its sensors and fan control only work on Apple Silicon."
+if [[ "$(sysctl -n hw.optional.arm64 2>/dev/null)" != "1" ]]; then
+    say "✓ Intel Mac (x86_64) — SMC temperatures, fan control, and total system power are supported; the Apple-Silicon-only power breakdown is unavailable on Intel."
 fi
 
 (( ok )) || exit 1

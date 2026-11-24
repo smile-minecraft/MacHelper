@@ -512,14 +512,30 @@ public enum IORegistryPowerParser {
         )
     }
 
+    /// Adapter wattage each portable is charged with, keyed by product identifier.
+    ///
+    /// The identifier decides, because "MacBookPro" alone spans 61 W to 140 W adapters: a family
+    /// prefix cannot tell a 13-inch from a 16-inch, which is how 61-87 W models ended up on the
+    /// 140 W entry.
+    private static let adapterWattsByIdentifier: [String: Int] = [
+        "macbookpro15,1": 87, "macbookpro15,3": 87,
+        "macbookpro15,2": 61, "macbookpro15,4": 61, "macbookpro16,2": 61, "macbookpro16,3": 61,
+        "macbookpro16,1": 96, "macbookpro16,4": 96,
+        "macbookpro18,3": 140, "macbookpro18,4": 140,
+        "macbookair8,1": 30, "macbookair8,2": 30, "macbookair9,1": 30,
+    ]
+
     /// Conservative minimum adapter wattages. Unknown models return nil: guessing
     /// a wattage would create false charging warnings on unsupported hardware.
     public static func recommendedAdapterWatts(model: String?) -> Int? {
         guard let model else { return nil }
-        let m = model.lowercased()
+        let m = model.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if let watts = adapterWattsByIdentifier[m] { return watts }
+        // Identifiers the table does not name keep the family default from before this table,
+        // so only the models listed above change.
         if m.contains("macbookair") { return 35 }
         if m.contains("macbookpro") {
-            return ["18,3", "18,4", "15,3", "15,4"].contains(where: m.contains) ? 140 : 96
+            return ["18,3", "18,4"].contains(where: m.contains) ? 140 : 96
         }
         return nil
     }

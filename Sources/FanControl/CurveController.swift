@@ -7,6 +7,13 @@ public enum FanCommand: Sendable, Equatable {
     case manual(rpm: Double)
 }
 
+/// CPU family a set of safety limits applies to. FanControl reads no hardware itself (it stays
+/// free of SMCKit), so whoever runs the controller states the silicon it detected.
+public enum FanSilicon: Sendable {
+    case appleSilicon
+    case intel
+}
+
 /// Hard limits enforced by the Helper. Not user-configurable.
 public struct SafetyLimits: Sendable, Hashable {
     /// Any sensor at or above this → release to firmware immediately.
@@ -20,6 +27,18 @@ public struct SafetyLimits: Sendable, Hashable {
         self.resumeBelowCelsius = resumeBelowCelsius
     }
     public static let standard = SafetyLimits()
+
+    /// Limits for one CPU family.
+    ///
+    /// Intel mobile parts (Tj max 100 °C) throttle around 95 °C and never reach the Apple Silicon trip
+    /// point, so 108 °C would leave the safety valve unreachable while the firmware fights the curve.
+    /// They trip at 95 °C instead, above the SMC's own fan ramp and below their thermal limit.
+    public static func `for`(_ silicon: FanSilicon) -> SafetyLimits {
+        switch silicon {
+        case .appleSilicon: .standard
+        case .intel: SafetyLimits(releaseAboveCelsius: 95, resumeBelowCelsius: 88)
+        }
+    }
 }
 
 /// Inputs for one control tick of one fan.

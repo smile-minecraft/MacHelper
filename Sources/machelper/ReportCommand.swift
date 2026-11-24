@@ -107,7 +107,11 @@ struct Report: ParsableCommand {
         let net = netSampler.sample()
         input.networkInBytesPerSecond = net?.inBytesPerSecond
         input.networkOutBytesPerSecond = net?.outBytesPerSecond
-        let temperatures = HIDTemperatureSensors()?.read() ?? []
+        // Same merge rule as the app and the background recorder: HID first, and the SMC keys
+        // (the only source on Intel Macs) fill in what HID does not report.
+        let temperatureKeys = smc.map { SMCTemperatures.discoverKeys($0) } ?? []
+        let temperatures = TemperatureSources.readings(hid: HIDTemperatureSensors(), smc: smc,
+                                                       smcKeys: temperatureKeys) ?? []
         input.hottestCelsius = temperatures.map(\.celsius).max()
         input.temperatureSensorCount = temperatures.count
         input.fans = (smc.flatMap { FanDriver(smc: $0) }?.readFans() ?? []).map {

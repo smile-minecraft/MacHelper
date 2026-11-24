@@ -27,10 +27,23 @@ jobs:
         run: brew install xcodegen
       - name: Test the Swift packages
         run: make test
-      - name: Build the app (ad-hoc signed)
+      - name: Build the universal app (ad-hoc signed)
         run: |
           make build CONFIGURATION=Release \
-            XCODEBUILD_FLAGS="CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="
+            XCODEBUILD_FLAGS="-destination 'generic/platform=macOS' ARCHS='arm64 x86_64' ONLY_ACTIVE_ARCH=NO CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER="
+      - name: Verify universal binaries
+        run: |
+          app="build/Build/Products/Release/MacHelper.app"
+          for bin in \
+            "$app/Contents/MacOS/MacHelper" \
+            "$app/Contents/MacOS/MacHelperHelper" \
+            "$app/Contents/MacOS/machelper-cli" \
+            "$app/Contents/PlugIns/FinderExtension.appex/Contents/MacOS/FinderExtension" \
+            "$app/Contents/Frameworks/Sparkle.framework/Versions/B/Sparkle"; do
+            archs="$(lipo -archs "$bin")"
+            echo "$(basename "$bin"): $archs"
+            [[ "$archs" == *arm64* && "$archs" == *x86_64* ]]
+          done
       - name: Show the build log
         if: failure()
         run: tail -60 build/xcodebuild-Release.log || true

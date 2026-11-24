@@ -54,7 +54,7 @@ final class MetricSources: @unchecked Sendable {
     func sample(_ m: MonitorModule) -> ModuleSample? {
         switch m {
         case .cpu: return cpu.sample().map(ModuleSample.cpu)
-        case .gpu: return GPUSampler.sample().first.map(ModuleSample.gpu)
+        case .gpu: return GPUSelection.busiest(GPUSampler.sample()).map(ModuleSample.gpu)
         case .memory: return MemorySampler.sample().map(ModuleSample.memory)
         case .disk: return disk.sample().map(ModuleSample.disk)
         case .network: return network.sample().map(ModuleSample.network)

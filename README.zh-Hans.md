@@ -5,13 +5,13 @@
 <h1 align="center">MacHelper</h1>
 
 <p align="center">
-  <b>专为 Apple Silicon 打造的原生 macOS 系统监控、风扇控制、清理、磁盘分析与 AI 就绪 CLI 工具——本地优先、完全开源。</b>
+  <b>原生 macOS 系统监控、风扇控制、清理、磁盘分析与 AI 就绪 CLI 工具——本地优先、完全开源，支持 Apple Silicon 与 Intel。</b>
 </p>
 
 <p align="center">
   <a href="https://github.com/smile-minecraft/MacHelper/releases/latest"><img src="https://img.shields.io/github/v/release/smile-minecraft/MacHelper?label=Release&color=5b8def" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-1f2430" alt="macOS 14+">
-  <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-1f2430" alt="Apple Silicon">
+  <img src="https://img.shields.io/badge/Universal-Apple%20Silicon%20%26%20Intel-1f2430" alt="Universal (Apple Silicon & Intel)">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4cc38a" alt="MIT license"></a>
   <a href="https://smile-minecraft.github.io/MacHelper/"><img src="https://img.shields.io/badge/Website-Docs-5b8def" alt="官方网站与文档"></a>
 </p>
@@ -47,7 +47,7 @@
 
 ---
 
-MacHelper 是免费、以 MIT 许可证开源的菜单栏 App 与命令行工具，使用原生 Swift 编写，适用于运行 macOS 14 或更高版本的 Apple Silicon Mac。它将**系统监控**（CPU、GPU、内存、温度、风扇、功耗、电池、磁盘与网络）、**风扇控制**、**缓存与垃圾清理**、**磁盘空间分析**以及 **App 卸载**整合在同一个轻量级 App 中。
+MacHelper 是免费、以 MIT 许可证开源的菜单栏 App 与命令行工具，使用原生 Swift 编写，适用于运行 macOS 14 或更高版本的 Apple Silicon 与 Intel Mac。它将**系统监控**（CPU、GPU、内存、温度、风扇、功耗、电池、磁盘与网络）、**风扇控制**、**缓存与垃圾清理**、**磁盘空间分析**以及 **App 卸载**整合在同一个轻量级 App 中。
 
 同时内置支持 `--json` 输出的 `machelper` 命令行工具、一键脱敏诊断报告（`machelper report --json`），以及面向 Claude Code、Codex、OpenCode 等 AI 编程助手的技能——始终先预览再执行，移除任何项目前都会先向你确认。
 
@@ -64,7 +64,7 @@ MacHelper 是免费、以 MIT 许可证开源的菜单栏 App 与命令行工具
 | **App 彻底卸载** | AppCleaner | 追踪 Bundle ID、内置 Helper、容器、launchd 与 Homebrew zap 规则，支持孤儿残留清理 |
 | **AI Agent 自动化** | *MacHelper 独有* | `machelper report --json` 脱敏诊断报告、`--yes` 安全确认门控、内置 Agent 技能 |
 
-> **免费 · 开源（MIT）· 原生 Swift · Apple Silicon · 默认本地优先**
+> **免费 · 开源（MIT）· 原生 Swift · Apple Silicon 与 Intel · 默认本地优先**
 
 ## 安装
 
@@ -162,7 +162,7 @@ machelper clean --json                   # 预览清理；加上 --yes 前先询
 **有没有免费开源、可替代 CleanMyMac 或 iStat Menus 的 App？**
 有的。MacHelper 采用 MIT 许可证，在一个原生 App 中集成了系统清理、菜单栏监控、风扇控制、磁盘分析和 App 卸载，无需账号或订阅。
 
-**如何控制 Apple Silicon Mac 的风扇转速？**
+**如何控制 Mac 的风扇转速？**
 安装 MacHelper 并配置 Helper（首次启动会有引导）。之后可以让风扇自动运行、保持固定转速，或按自定义温度曲线运行，具备硬性安全上限，还能根据当前 App 或电源自动切换配置。
 
 **如何给 AI 助手生成一份不泄露个人隐私的系统诊断报告？**
@@ -175,14 +175,14 @@ machelper clean --json                   # 预览清理；加上 --yes 前先询
 运行 `machelper uninstall "App 名称"` 预览偏好设置、缓存、容器、启动项和 Homebrew zap 匹配项，加上 `--yes` 即可移入废纸篓。运行 `machelper uninstall --orphans` 可查找已删除 App 的遗留文件。
 
 **支持 Intel Mac 或更早的 macOS 吗？**
-不支持。MacHelper 仅支持运行 macOS 14 或更高版本的 Apple Silicon Mac。
+支持运行 macOS 14 或更高版本的 Intel Mac 与 Apple Silicon Mac（Universal 通用版；Intel Mac 上温度与风扇控制通过 SMC 运行，不提供 Apple Silicon 专用功耗细项）。不支持 macOS 13 及更早版本。
 
 **MacHelper 会收集什么数据？**
 默认情况下，除检查更新外不会有任何数据离开你的 Mac。如果你在 **设置 → 通用 → 隐私与诊断** 中主动开启遥测，MacHelper 仅会发送严格匿名的使用计数与粗粒度性能诊断（App 版本、macOS 版本、芯片系列），不包含任何文件路径、进程名或个人身份信息，你可以随时查看精确的 JSON 内容并关闭。
 
 ## 从源代码构建
 
-环境要求：Apple Silicon Mac、Xcode 26 或更高版本，以及 [XcodeGen](https://github.com/yonaskolb/XcodeGen)（`brew install xcodegen`）。运行 `make` 可列出所有可用目标。
+环境要求：Mac（Apple Silicon 或 Intel）、Xcode 26 或更高版本，以及 [XcodeGen](https://github.com/yonaskolb/XcodeGen)（`brew install xcodegen`）。运行 `make` 可列出所有可用目标。
 
 ```sh
 make setup      # 检查工具、下载 Sparkle、生成 MacHelper.xcodeproj

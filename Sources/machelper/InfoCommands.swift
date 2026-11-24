@@ -117,6 +117,8 @@ struct Status: ParsableCommand {
         let cpu = CPUSampler(), net = NetworkSampler(), disk = DiskSampler()
         let power = PowerSampler(smc: smc)
         let hid = HIDTemperatureSensors()
+        // Walking the SMC key table is slow, so it happens once, outside the sampling loop.
+        let temperatureKeys = smc.map { SMCTemperatures.discoverKeys($0) } ?? []
         let fans = smc.map { FanDriver(smc: $0) }
         // Rates need two samples.
         _ = cpu.sample(); _ = net.sample(); _ = disk.sample(); _ = power?.sample()
@@ -124,7 +126,8 @@ struct Status: ParsableCommand {
         let samples = max(watch, 1)
         for i in 0..<samples {
             Thread.sleep(forTimeInterval: max(interval, 0.2))
-            let temps = hid?.read() ?? []
+            // HID when it has sensors; on Intel Macs the SMC keys are the only source.
+            let temps = TemperatureSources.readings(hid: hid, smc: smc, smcKeys: temperatureKeys) ?? []
             let snap = Snapshot(time: Date(), chip: ChipFamily.current.description, cpu: cpu.sample(),
                                 gpu: GPUSampler.sample(), memory: MemorySampler.sample(), disk: disk.sample(),
                                 network: net.sample(), battery: BatterySampler.sample(), power: power?.sample(),
