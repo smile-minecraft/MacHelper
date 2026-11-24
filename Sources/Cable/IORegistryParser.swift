@@ -521,7 +521,8 @@ public enum IORegistryPowerParser {
         "macbookpro15,1": 87, "macbookpro15,3": 87,
         "macbookpro15,2": 61, "macbookpro15,4": 61, "macbookpro16,2": 61, "macbookpro16,3": 61,
         "macbookpro16,1": 96, "macbookpro16,4": 96,
-        "macbookpro18,3": 140, "macbookpro18,4": 140,
+        "macbookpro18,1": 140, "macbookpro18,2": 140,
+        "macbookpro18,3": 67, "macbookpro18,4": 67,
         "macbookair8,1": 30, "macbookair8,2": 30, "macbookair9,1": 30,
     ]
 
@@ -534,9 +535,7 @@ public enum IORegistryPowerParser {
         // Identifiers the table does not name keep the family default from before this table,
         // so only the models listed above change.
         if m.contains("macbookair") { return 35 }
-        if m.contains("macbookpro") {
-            return ["18,3", "18,4"].contains(where: m.contains) ? 140 : 96
-        }
+        if m.contains("macbookpro") { return 96 }
         return nil
     }
 

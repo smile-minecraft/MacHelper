@@ -13,7 +13,8 @@ import Testing
             "MacBookPro15,1": 87, "MacBookPro15,3": 87,
             "MacBookPro15,2": 61, "MacBookPro15,4": 61, "MacBookPro16,2": 61, "MacBookPro16,3": 61,
             "MacBookPro16,1": 96, "MacBookPro16,4": 96,
-            "MacBookPro18,3": 140, "MacBookPro18,4": 140,
+            "MacBookPro18,1": 140, "MacBookPro18,2": 140,
+            "MacBookPro18,3": 67, "MacBookPro18,4": 67,
             "MacBookAir8,1": 30, "MacBookAir8,2": 30, "MacBookAir9,1": 30,
         ]
         for (model, expectedWatts) in expected {
@@ -23,7 +24,6 @@ import Testing
 
     @Test func appleSiliconAndUnnamedModelsKeepTheFamilyDefault() {
         // Identifiers the table does not name must behave exactly as before the identifier table.
-        #expect(watts("MacBookPro18,1") == 96)
         #expect(watts("MacBookPro17,1") == 96)
         #expect(watts("MacBookAir10,1") == 35)
         #expect(watts("Mac14,10") == nil)
@@ -54,5 +54,35 @@ import Testing
         var small = power
         small.adapterWatts = 61
         #expect(ChargingDiagnosis.evaluate(power: small).contains { $0.id == "charging.adapter.underpowered" })
+    }
+
+    @Test func m1ProMaxFourteenInchUses67WAndSixteenInchUses140W() {
+        let fourteen = PowerState(
+            machineModel: "MacBookPro18,3",
+            batteryInstalled: true,
+            adapterWatts: 67,
+            recommendedAdapterWatts: watts("MacBookPro18,3"),
+            externalConnected: true,
+            isCharging: true
+        )
+        #expect(!ChargingDiagnosis.evaluate(power: fourteen).contains { $0.id == "charging.adapter.underpowered" })
+
+        var fourteenSmall = fourteen
+        fourteenSmall.adapterWatts = 45
+        #expect(ChargingDiagnosis.evaluate(power: fourteenSmall).contains { $0.id == "charging.adapter.underpowered" })
+
+        let sixteen = PowerState(
+            machineModel: "MacBookPro18,1",
+            batteryInstalled: true,
+            adapterWatts: 140,
+            recommendedAdapterWatts: watts("MacBookPro18,1"),
+            externalConnected: true,
+            isCharging: true
+        )
+        #expect(!ChargingDiagnosis.evaluate(power: sixteen).contains { $0.id == "charging.adapter.underpowered" })
+
+        var sixteenSmall = sixteen
+        sixteenSmall.adapterWatts = 96
+        #expect(ChargingDiagnosis.evaluate(power: sixteenSmall).contains { $0.id == "charging.adapter.underpowered" })
     }
 }
