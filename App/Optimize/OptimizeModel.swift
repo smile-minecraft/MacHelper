@@ -41,6 +41,7 @@ final class OptimizeModel {
     /// The last scan was stopped early: the plan holds only the rules finished before that.
     private(set) var scanStopped = false
     @ObservationIgnored private let stopFlag = OSAllocatedUnfairLock(initialState: false)
+    @ObservationIgnored private var scanGeneration = 0
     /// Whether MacHelper can read folders protected by Full Disk Access (checked at each scan and when the app comes back).
     private(set) var fullDiskAccess = FullDiskAccess.isGranted
     /// Paths and globs the user never wants cleaned (clean-whitelist.txt).
@@ -82,16 +83,27 @@ final class OptimizeModel {
 
     func stopScan() { stopFlag.withLock { $0 = true } }
 
+    /// Returns to the start menu so the user can choose between One-Click Optimize and Deep Optimize.
+    func returnToMenu() {
+        scanGeneration += 1
+        stopScan()
+        phase = .idle
+        scanProgress = nil
+        scanStopped = false
+        loadError = nil
+        runNotice = nil
+    }
+
     /// `deep` also previews the system caches, logs and temporary files that only an administrator
     /// may delete (see `SystemCleanup.deepTargets`). Previewing never asks for a password.
     func scan(deep: Bool = false) async {
+        scanGeneration += 1
+        let generation = scanGeneration
         self.deep = deep
         phase = .scanning
         scanProgress = nil
         scanStopped = false
         stopFlag.withLock { $0 = false }
-        fullDiskAccess = FullDiskAccess.isGranted
-        exclusions = CleanExclusions().entries()
         loadError = nil
         report = nil
         artifactReport = nil
@@ -99,16 +111,38 @@ final class OptimizeModel {
         taskResults = []
         runNotice = nil
         let roots = artifactRoots
-        let helperEnabled = HelperClient.shared.status == .enabled
         do {
+            // Move filesystem and SMAppService checks off MainActor so the scanning view renders
+            // immediately on the first frame without waiting on I/O.
+            let (fda, currentExclusions, helperEnabled) = await Task.detached(priority: .userInitiated) {
+                (FullDiskAccess.isGranted, CleanExclusions().entries(), HelperClient.shared.status == .enabled)
+            }.value
+            guard scanGeneration == generation else { return }
+            fullDiskAccess = fda
+            exclusions = currentExclusions
+
             async let docker: Result<DockerUsage, DockerUsage.Failure>? = Task.detached(priority: .userInitiated) {
                 MaintenanceCatalog.docker == nil ? nil : DockerUsage.read()
             }.value
+            async let systemPreview: ([SystemRow], String?) = Self.fetchSystemCleanupPreview(deep: deep, helperEnabled: helperEnabled)
             let stop = stopFlag
+            let lastProgressAt = OSAllocatedUnfairLock(initialState: CFAbsoluteTime(0))
             let (plan, artifacts, tasks, stopped) = try await Task.detached(priority: .userInitiated) { [weak self] in
                 let rules = try RuleSet.load()
                 var plan = CleanScanner(rules: rules).scan(progress: { done, total in
-                    Task { @MainActor in self?.scanProgress = (done, total) }
+                    let now = CFAbsoluteTimeGetCurrent()
+                    let shouldEmit = lastProgressAt.withLock { last -> Bool in
+                        if done <= 1 || done >= total || now - last >= 0.05 {
+                            last = now
+                            return true
+                        }
+                        return false
+                    }
+                    guard shouldEmit else { return }
+                    Task { @MainActor in
+                        guard let self, self.scanGeneration == generation else { return }
+                        self.scanProgress = (done, total)
+                    }
                 }, shouldStop: { stop.withLock { $0 } })
                 let stopped = stop.withLock { $0 }
                 if !stopped {
@@ -122,6 +156,7 @@ final class OptimizeModel {
                 }
                 return (plan, artifacts, tasks, stopped)
             }.value
+            guard scanGeneration == generation else { return }
             scanStopped = stopped
             guard !stopped || !plan.results.isEmpty else {
                 // Stopped before any rule finished: nothing to show.
@@ -133,38 +168,40 @@ final class OptimizeModel {
             self.artifacts = artifacts
             self.tasks = tasks
             self.dockerUsage = await docker
+            guard scanGeneration == generation else { return }
             if stopped {
                 systemRows = (deep ? SystemCleanupCatalog.deep : SystemCleanupCatalog.standard).map { SystemRow(info: $0, preview: nil, selected: false) }
                 systemError = String(localized: "Scan stopped")
             } else {
-                await previewSystemCleanup(helperEnabled: helperEnabled)
+                let (rows, err) = await systemPreview
+                guard scanGeneration == generation else { return }
+                systemRows = rows
+                systemError = err
             }
             phase = .ready
         } catch {
+            guard scanGeneration == generation else { return }
             loadError = "\(error)"
             phase = .idle
         }
     }
 
-    private func previewSystemCleanup(helperEnabled: Bool) async {
+    private nonisolated static func fetchSystemCleanupPreview(deep: Bool, helperEnabled: Bool) async -> ([SystemRow], String?) {
         // The deep targets cover the standard ones (same folders, deeper, younger files), so a deep
         // scan previews only them and no file is counted twice.
         let infos = deep ? SystemCleanupCatalog.deep : SystemCleanupCatalog.standard
         guard helperEnabled else {
-            systemRows = infos.map { SystemRow(info: $0, preview: nil, selected: false) }
-            systemError = String(localized: "Helper not enabled")
-            return
+            return (infos.map { SystemRow(info: $0, preview: nil, selected: false) }, String(localized: "Helper not enabled"))
         }
         do {
             let result = try await HelperClient.shared.systemCleanup(SystemCleanupRequest(targetIDs: infos.map(\.id), dryRun: true))
-            systemRows = infos.map { info in
+            let rows = infos.map { info in
                 let preview = result.targets.first { $0.id == info.id }
                 return SystemRow(info: info, preview: preview, selected: info.selectedByDefault && (preview?.count ?? 0) > 0)
             }
-            systemError = nil
+            return (rows, nil)
         } catch {
-            systemRows = infos.map { SystemRow(info: $0, preview: nil, selected: false) }
-            systemError = "\(error)"
+            return (infos.map { SystemRow(info: $0, preview: nil, selected: false) }, "\(error)")
         }
     }
 

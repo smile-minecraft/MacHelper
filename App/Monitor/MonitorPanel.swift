@@ -68,21 +68,30 @@ struct MonitorPanel: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            let isSoft = ThemeStore.shared.isSoft
             header
             if !tabs.isEmpty {
                 TabStrip(items: tabs.map { ($0, LocalizedStringKey($0.title)) },
                          icons: Dictionary(uniqueKeysWithValues: PanelPage.allCases.map { ($0, $0.icon) }),
                          selection: resolvedSelection, stacked: tabs.count > 5)
                     .padding(.horizontal, 18)
-                    .padding(.bottom, 12)
+                    .padding(.bottom, isSoft ? 2 : 12)
             }
             Group {
                 if scrollable {
-                    ScrollView { content.padding(.horizontal, 20).padding(.bottom, 16) }
-                        .scrollIndicators(.never)
-                        .frame(height: 600)
+                    ScrollView {
+                        content
+                            .padding(.horizontal, 20)
+                            .padding(.top, isSoft ? 12 : 0)
+                            .padding(.bottom, 16)
+                    }
+                    .scrollIndicators(.never)
+                    .frame(height: 600)
                 } else {
-                    content.padding(.horizontal, 20).padding(.bottom, 16)
+                    content
+                        .padding(.horizontal, 20)
+                        .padding(.top, isSoft ? 12 : 0)
+                        .padding(.bottom, 16)
                 }
             }
             // Pages cross-fade as the pill slides, instead of the content cutting over.
@@ -109,7 +118,8 @@ struct MonitorPanel: View {
     }
 
     private var header: some View {
-        HStack(spacing: 8) {
+        let isSoft = ThemeStore.shared.isSoft
+        return HStack(spacing: isSoft ? 10 : 8) {
             Button(action: actions.openMain) {
                 HStack(spacing: 7) {
                     Image(nsImage: ThemeStore.shared.logoImage).interpolation(.none).resizable().frame(width: 22, height: 22)
@@ -123,7 +133,7 @@ struct MonitorPanel: View {
             IconButton(symbol: "macwindow", help: "Open MacHelper", action: actions.openMain)
             IconButton(symbol: "gearshape", help: "Settings", action: actions.openSettings)
         }
-        .padding(.horizontal, 14)
+        .padding(.horizontal, isSoft ? 18 : 14)
         .padding(.top, 12)
         .padding(.bottom, 10)
     }

@@ -200,9 +200,9 @@ public struct SurfaceTokens: Sendable, Hashable {
 
         // Neumorphic light and shadow derived from `base` so custom and imported themes work in
         // soft style too: bright top-left light and cool-tinted bottom-right shadow in light,
-        // subtle lifted rim and deep shadow in dark.
-        softHighlight = dark ? base.mixed(with: white, 0.24).withAlpha(0.60) : base.mixed(with: white, 0.90).withAlpha(0.92)
-        softShadow = dark ? black.withAlpha(0.62) : base.mixed(with: ink, 0.36).withAlpha(0.46)
+        // subtle lifted rim and deep shadow in dark (kept restrained so narrow card gaps stay clean).
+        softHighlight = dark ? base.mixed(with: white, 0.16).withAlpha(0.38) : base.mixed(with: white, 0.88).withAlpha(0.82)
+        softShadow = dark ? black.withAlpha(0.58) : base.mixed(with: ink, 0.34).withAlpha(0.42)
         softWell = dark ? base.mixed(with: black, 0.16) : base.mixed(with: ink, 0.045)
     }
 

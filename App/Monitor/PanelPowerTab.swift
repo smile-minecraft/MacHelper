@@ -10,7 +10,7 @@ struct PanelPowerTab: View {
     @AppStorage("panel.power.range") private var range: PanelRange = .live
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: ThemeStore.shared.isSoft ? 14 : 10) {
             if store.availableModules.contains(.power) {
                 if !store.isActive(.power) {
                     PanelEmptyState(symbol: "bolt.slash", title: "Power readings are off",

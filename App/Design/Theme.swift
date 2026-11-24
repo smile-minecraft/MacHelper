@@ -102,19 +102,19 @@ struct PixelIcon: View {
 /// text and charts never pay to re-blur shadows.
 enum SoftSurface {
     enum Elevation {
-        case card, control, pill
+        case card, tile, control, pill
 
         var lightOffset: CGFloat {
-            switch self { case .card: 4; case .control: 2; case .pill: 1.5 }
+            switch self { case .card: 2.5; case .tile: 1.5; case .control: 1.5; case .pill: 1 }
         }
         var darkOffset: CGFloat {
-            switch self { case .card: 4.5; case .control: 2.5; case .pill: 2 }
+            switch self { case .card: 4; case .tile: 2.5; case .control: 2.5; case .pill: 1.5 }
         }
         var lightRadius: CGFloat {
-            switch self { case .card: 6; case .control: 3.5; case .pill: 2.5 }
+            switch self { case .card: 4.5; case .tile: 2.5; case .control: 2.5; case .pill: 2 }
         }
         var darkRadius: CGFloat {
-            switch self { case .card: 7; case .control: 4; case .pill: 3 }
+            switch self { case .card: 6; case .tile: 3.5; case .control: 3.5; case .pill: 2.5 }
         }
     }
 
@@ -130,7 +130,7 @@ enum SoftSurface {
     }
 
     static var rimGradient: LinearGradient {
-        LinearGradient(colors: [Palette.softHighlight.opacity(0.65), .clear, Palette.softShadow.opacity(0.25)],
+        LinearGradient(colors: [Palette.softHighlight.opacity(0.5), .clear, Palette.softShadow.opacity(0.22)],
                        startPoint: .topLeading, endPoint: .bottomTrailing)
     }
 
@@ -203,6 +203,7 @@ struct CardStyle: ViewModifier {
 struct SurfaceBackground: ViewModifier {
     var fill: Color?
     var wash: Color?
+    var elevation: SoftSurface.Elevation = .card
     @Environment(\.frostedSurfaces) private var translucentContainer
 
     func body(content: Content) -> some View {
@@ -219,7 +220,7 @@ struct SurfaceBackground: ViewModifier {
             content
                 .background { washLayer(shape) }
                 .background { if let fill { shape.fill(fill) } }
-                .background { SoftSurface.raised(shape, fill: Palette.base, elevation: .card) }
+                .background { SoftSurface.raised(shape, fill: Palette.base, elevation: elevation) }
         } else if translucentContainer && store.material == .liquidGlass {
             content
                 .background { washLayer(shape) }
@@ -256,8 +257,8 @@ extension View {
             self
         }
     }
-    func surface(_ fill: Color? = nil, wash: Color? = nil) -> some View {
-        modifier(SurfaceBackground(fill: fill, wash: wash))
+    func surface(_ fill: Color? = nil, wash: Color? = nil, elevation: SoftSurface.Elevation = .card) -> some View {
+        modifier(SurfaceBackground(fill: fill, wash: wash, elevation: elevation))
     }
 
     /// Applies the color scheme the theme or the Appearance setting forces (single-variant
@@ -349,14 +350,26 @@ struct PixelEmptyState<Actions: View>: View {
 }
 
 /// Pixel art that bobs gently while work is in progress (respects Reduce Motion).
-struct ScanningArt: View {
+/// Uses a render-server repeating animation rather than `phaseAnimator` so frequent progress
+/// updates on the parent view never hitch or delay the bobbing motion.
+struct ScanningArt: View, Equatable {
     let art: String
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var bobbing = false
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool { lhs.art == rhs.art }
 
     var body: some View {
         PixelIcon(name: art, size: 96)
-            .phaseAnimator(reduceMotion ? [0.0] : [0.0, -6.0]) { view, y in view.offset(y: y) }
-                animation: { _ in .easeInOut(duration: 0.6) }
+            .offset(y: bobbing ? -6 : 0)
+            .animation(reduceMotion || !bobbing ? nil : .easeInOut(duration: 0.6).repeatForever(autoreverses: true),
+                       value: bobbing)
+            .onAppear {
+                if !reduceMotion { bobbing = true }
+            }
+            .onChange(of: reduceMotion) { _, reduced in
+                bobbing = !reduced
+            }
     }
 }
 

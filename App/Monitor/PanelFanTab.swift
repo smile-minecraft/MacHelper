@@ -14,7 +14,8 @@ struct PanelFanSection: View {
     private var fanModel: FanControlModel { AppModel.shared.fanModel }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let isSoft = ThemeStore.shared.isSoft
+        VStack(alignment: .leading, spacing: isSoft ? 14 : 10) {
             HairlineHeader(text: "Fans")
             if !store.isActive(.fan) {
                 PanelEmptyState(symbol: "fan.slash", title: "Fan readings are off",
@@ -23,11 +24,11 @@ struct PanelFanSection: View {
                 SkeletonRows(count: 5).padding(.top, 8)
             } else {
                 // Both columns take the taller one's height, so the card edges line up.
-                HStack(alignment: .top, spacing: 8) {
+                HStack(alignment: .top, spacing: isSoft ? 12 : 8) {
                     HottestCard(reading: store.temperatures.max { $0.celsius < $1.celsius })
                         .frame(width: 148)
                         .frame(maxHeight: .infinity)
-                    VStack(spacing: 8) {
+                    VStack(spacing: isSoft ? 12 : 8) {
                         ForEach(store.fans) {
                             FanSpeedCard(fan: $0, count: store.fans.count).frame(maxHeight: .infinity)
                         }
@@ -64,7 +65,7 @@ struct PanelFanSection: View {
             ("GPU", "square.stack.3d.up", t.filter { $0.category == .gpu }.map(\.celsius).max()),
             ("SSD", "internaldrive", t.filter { $0.category == .storage }.map(\.celsius).max()),
         ]
-        return HStack(spacing: 8) {
+        return HStack(spacing: ThemeStore.shared.isSoft ? 10 : 8) {
             ForEach(Array(tiles.enumerated()), id: \.offset) { _, tile in
                 TemperatureTile(title: tile.0, symbol: tile.1, celsius: tile.2)
             }
@@ -253,7 +254,7 @@ private struct TemperatureTile: View {
         }
         .padding(.horizontal, 9).padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .surface(Palette.base)
+        .surface(Palette.base, elevation: .tile)
         .accessibilityElement(children: .combine)
     }
 }
