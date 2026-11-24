@@ -33,7 +33,7 @@ struct TweaksView: View {
         let state = model.status?.tweaks[definition.id.rawValue]?.kind
         let needsAccessibility = definition.permissions.contains(.accessibility)
             && model.status?.accessibilityGranted != true
-        let restartRequired = needsAccessibility && model.status?.accessibilityRestartRequired == true
+        let restartRequired = needsAccessibility && enabled && model.status?.accessibilityRestartRequired == true
         Toggle(isOn: Binding(
             get: { enabled },
             set: { model.setEnabled(definition.id, $0) }

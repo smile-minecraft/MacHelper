@@ -129,7 +129,8 @@ final class TweakEngine {
         if !force, latest == settings, nowGranted == granted { return }
         settings = latest
         granted = nowGranted
-        if granted { grantedInFreshProcess = false }
+        // Probes stop once no enabled tweak needs the grant, so their last answer is dropped too.
+        if granted || !needsAccessibility { grantedInFreshProcess = false }
 
         let quitEnabled = latest.isEnabled(.inputQuitGuard)
         let dockEnabled = latest.isEnabled(.dockClickAction)

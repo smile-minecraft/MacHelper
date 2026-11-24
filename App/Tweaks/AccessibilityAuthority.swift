@@ -23,8 +23,9 @@ enum AccessibilityAuthority {
     }
 
     /// Asks a new process running this app's own executable, so TCC checks the same code identity
-    /// and the answer reflects a grant made after this process started.
-    static func isGrantedInFreshProcess() async -> Bool {
+    /// and the answer reflects a grant made after this process started. A probe that has not
+    /// answered within a few seconds is stopped and counts as not granted.
+    static func isGrantedInFreshProcess(timeout: TimeInterval = 5) async -> Bool {
         guard let executable = Bundle.main.executableURL else { return false }
         return await withCheckedContinuation { continuation in
             let process = Process()
@@ -36,6 +37,9 @@ enum AccessibilityAuthority {
             process.terminationHandler = { continuation.resume(returning: $0.terminationStatus == 0) }
             do {
                 try process.run()
+                DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + timeout) {
+                    if process.isRunning { process.terminate() }
+                }
             } catch {
                 continuation.resume(returning: false)
             }
