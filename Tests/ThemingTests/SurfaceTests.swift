@@ -138,6 +138,9 @@ import Testing
                 #expect(s.softHighlight.luminance > r.colors.base.luminance || !r.isDark)
                 #expect(s.softShadow.luminance < r.colors.base.luminance || r.isDark)
                 #expect(s.softHighlight.alpha > 0 && s.softShadow.alpha > 0)
+                if r.isDark {
+                    #expect(s.softHighlight.alpha <= 0.45, "\(theme.name) dark softHighlight stays restrained")
+                }
             }
         }
     }

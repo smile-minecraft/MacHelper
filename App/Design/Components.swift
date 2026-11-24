@@ -162,7 +162,7 @@ struct StatCard: View {
         }
         .padding(compact ? 10 : 14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .surface()
+        .surface(elevation: compact ? .tile : .card)
     }
 }
 
@@ -652,10 +652,12 @@ struct HistoryArea: View, Equatable {
 }
 
 /// Placeholder rows shown while the first sample arrives (instead of a spinner).
-struct SkeletonRows: View {
+struct SkeletonRows: View, Equatable {
     var count = 5
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var dim = false
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool { lhs.count == rhs.count }
 
     var body: some View {
         VStack(spacing: 9) {

@@ -30,6 +30,17 @@ struct OptimizeView: View {
         .animatesStates(model.phase)
         .frame(minWidth: 680, minHeight: 520)
         .toolbar {
+            if model.phase == .ready || model.phase == .finished {
+                ToolbarItem(placement: .navigation) {
+                    Button {
+                        category = nil
+                        model.returnToMenu()
+                    } label: {
+                        Label("Back to Menu", systemImage: "chevron.left")
+                    }
+                    .help("Return to Optimize menu")
+                }
+            }
             ToolbarItem {
                 Button { showExclusions = true } label: { Label("Never Clean…", systemImage: "hand.raised") }
                     .help("Paths MacHelper never cleans")
@@ -50,17 +61,34 @@ struct OptimizeView: View {
     }
 
     private var start: some View {
-        PixelEmptyState(art: "px.empty.clean", title: "Optimize",
-                        message: "Scan first to list what can be cleaned.") {
-            VStack(spacing: 8) {
-                if ThemeStore.shared.isSoft {
-                    Button("Start Scan") { category = nil; Task { await model.scan() } }
-                        .buttonStyle(PrimaryButtonStyle(large: true))
-                        .padding(.bottom, 4)
-                } else {
-                    Button("Start Scan") { category = nil; Task { await model.scan() } }.buttonStyle(.borderedProminent).controlSize(.large)
+        let helperOn = helperHealth.isHealthy
+        return PixelEmptyState(art: "px.empty.clean", title: "Optimize",
+                               message: "Scan first to list what can be cleaned.") {
+            VStack(spacing: 10) {
+                HStack(spacing: 12) {
+                    if ThemeStore.shared.isSoft {
+                        Button("Start Scan") { category = nil; Task { await model.scan() } }
+                            .buttonStyle(PrimaryButtonStyle(large: true))
+                        Button { category = "deep"; Task { await model.scan(deep: true) } } label: {
+                            Label("Deep Optimize…", systemImage: "lock.shield")
+                        }
+                        .buttonStyle(SecondarySoftButtonStyle(large: true))
+                        .disabled(!helperOn)
+                        .help("Also cleans system caches, old system logs and temporary files. Asks for an administrator password before deleting.")
+                    } else {
+                        Button("Start Scan") { category = nil; Task { await model.scan() } }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.large)
+                        Button { category = "deep"; Task { await model.scan(deep: true) } } label: {
+                            Label("Deep Optimize…", systemImage: "lock.shield")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                        .disabled(!helperOn)
+                        .help("Also cleans system caches, old system logs and temporary files. Asks for an administrator password before deleting.")
+                    }
                 }
-                deepEntry
+                deepCaption(helperOn: helperOn)
                 if model.scanStopped { Text("Scan stopped before any results were ready.").font(.mhCaption).foregroundStyle(Palette.textMuted) }
                 if let e = model.loadError { Text(e).font(.mhCaption).foregroundStyle(Theme.rose) }
                 if !model.fullDiskAccess {
@@ -74,23 +102,15 @@ struct OptimizeView: View {
         }
     }
 
-    /// Deep clean: the same scan plus system caches, rotated logs and temporary files that only an
-    /// administrator may delete. Needs the Helper; the password is asked right before deleting.
-    @ViewBuilder private var deepEntry: some View {
-        let helperOn = helperHealth.isHealthy
+    /// Deep clean caption: explains administrator-level cleanup or links to Helper setup when unavailable.
+    @ViewBuilder private func deepCaption(helperOn: Bool) -> some View {
         VStack(spacing: 4) {
-            Button { category = "deep"; Task { await model.scan(deep: true) } } label: {
-                Label("Deep Optimize…", systemImage: "lock.shield")
-            }
-            .controlSize(.large)
-            .disabled(!helperOn)
-            .help("Also cleans system caches, old system logs and temporary files. Asks for an administrator password before deleting.")
             if helperOn {
                 Text("Goes deeper into system folders. You review everything first; deleting asks for your administrator password.")
-                    .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center).frame(maxWidth: 400)
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center).frame(maxWidth: 420)
             } else {
                 Text("Deep Optimize needs the MacHelper Helper, which works on system folders as administrator.")
-                    .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center).frame(maxWidth: 400)
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted).multilineTextAlignment(.center).frame(maxWidth: 420)
                 // Not set up, waiting for approval, outdated after an update or not answering:
                 // the setup sheet explains the state and offers the matching fix.
                 if helperHealth.state.needsAttention {
@@ -99,7 +119,6 @@ struct OptimizeView: View {
                 Button("Set Up or Repair the Helper…") { showHelperSetup = true }.buttonStyle(.link).font(.mhCaption)
             }
         }
-        .padding(.top, 2)
     }
 
     private var scanning: some View {
@@ -148,6 +167,7 @@ struct OptimizeView: View {
                     Text("Low-risk items are deleted directly, medium and high risk go to the Trash.").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 }
                 Spacer(minLength: 12)
+                Button("Back to Menu") { category = nil; model.returnToMenu() }
                 Button("Rescan") { Task { await model.scan(deep: model.deep) } }
                 if model.selectedDeepCount > 0, model.hasNonDeepSelection {
                     Button("Deep Clean Only…") { confirmDeepOnly = true }
@@ -634,9 +654,34 @@ struct OptimizeView: View {
             ActionBar {
                 Text("All operations are logged in ~/Library/Logs/MacHelper/operations.jsonl").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 Spacer(minLength: 12)
+                Button("Back to Menu") { category = nil; model.returnToMenu() }
                 Button("Scan Again") { Task { await model.scan(deep: model.deep) } }
             }
         }
+    }
+}
+
+/// Raised secondary button matching `PrimaryButtonStyle` height in Soft (Neumorphic) style.
+private struct SecondarySoftButtonStyle: ButtonStyle {
+    var large = false
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        let shape = SurfaceShape(cornerRadius: large ? 13 : 11, style: .continuous)
+        configuration.label
+            .font(.mh(size: large ? 14 : 13, weight: .semibold))
+            .foregroundStyle(isEnabled ? Palette.text : Palette.textFaint)
+            .padding(.horizontal, large ? 20 : 14).padding(.vertical, large ? 10 : 8)
+            .background {
+                if configuration.isPressed && isEnabled {
+                    SoftSurface.recessed(shape, depth: .pressed)
+                } else {
+                    SoftSurface.raised(shape, fill: Palette.base, elevation: .control)
+                }
+            }
+            .opacity(isEnabled ? 1 : 0.55)
+            .scaleEffect(configuration.isPressed && isEnabled ? 0.985 : 1)
+            .animation(Motion.press, value: configuration.isPressed)
     }
 }
 

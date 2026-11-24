@@ -1,6 +1,24 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Back to Menu": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Volver al menú" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "メニューに戻る" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "메뉴로 돌아가기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "返回菜单" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "返回選單" } }
+      }
+    },
+    "Return to Optimize menu": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Volver al menú de optimización" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "最適化メニューに戻る" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "최적화 메뉴로 돌아가기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "返回一键优化菜单" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "返回一鍵優化選單" } }
+      }
+    },
     "Modifiers and one key, for example control+option+w.": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Modificadores y una tecla, por ejemplo control+option+w." } },
