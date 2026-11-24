@@ -36,6 +36,19 @@ import Tweaks
         #expect(status.tweaks["dock.click-action"]?.kind == .needsPermission)
     }
 
+    @Test func restartRequiredRoundTripsAndDefaultsToFalse() throws {
+        let dir = tempDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let url = dir.appending(path: "tweaks-status.json")
+        try TweakRuntimeStatus(appPID: 1, accessibilityGranted: false, accessibilityRestartRequired: true)
+            .write(to: url)
+        #expect(try #require(TweakRuntimeStatus.load(from: url)).accessibilityRestartRequired)
+
+        let older = #"{"appPID":1,"updatedAt":"2026-01-01T00:00:00Z","accessibilityGranted":false}"#
+        try Data(older.utf8).write(to: url)
+        #expect(try #require(TweakRuntimeStatus.load(from: url)).accessibilityRestartRequired == false)
+    }
+
     @Test func storeWritesSettingsToAnInjectableFile() throws {
         let dir = tempDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
@@ -92,5 +105,21 @@ import Tweaks
         #expect(TweakRules.shouldTerminateMusic(bundleID: "com.apple.Music", enabled: true))
         #expect(!TweakRules.shouldTerminateMusic(bundleID: "com.apple.Music", enabled: false))
         #expect(!TweakRules.shouldTerminateMusic(bundleID: "com.apple.iTunes", enabled: true))
+    }
+}
+
+@Suite struct AccessibilityGrantTests {
+    @Test func aGrantOnlyANewProcessSeesAsksForARestart() {
+        #expect(AccessibilityGrant(inProcess: true, freshProcess: nil) == .granted)
+        #expect(AccessibilityGrant(inProcess: true, freshProcess: false) == .granted)
+        #expect(AccessibilityGrant(inProcess: false, freshProcess: true) == .restartRequired)
+        #expect(AccessibilityGrant(inProcess: false, freshProcess: false) == .notGranted)
+        #expect(AccessibilityGrant(inProcess: false, freshProcess: nil) == .notGranted)
+    }
+
+    @Test func macOS27NamesTheListDeviceControlAndDataAccess() {
+        #expect(AccessibilityGrant.settingsListName(macOSMajorVersion: 26) == "Accessibility")
+        #expect(AccessibilityGrant.settingsListName(macOSMajorVersion: 27) == "Device Control and Data Access")
+        #expect(AccessibilityGrant.settingsListName(macOSMajorVersion: 28) == "Device Control and Data Access")
     }
 }

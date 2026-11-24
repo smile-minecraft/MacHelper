@@ -42987,6 +42987,33 @@
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "授予輔助使用權限" } }
       }
     },
+    "Grant Device Control and Data Access": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Conceder control de dispositivos y acceso a datos" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "デバイスの制御とデータへのアクセスを許可" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "기기 제어 및 데이터 접근 권한 허용" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "授予设备控制和数据访问权限" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "授予裝置控制和資料取用權限" } }
+      }
+    },
+    "Restart required": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Reinicio necesario" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "再起動が必要です" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "재시작 필요" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "需要重新启动" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "需要重新啟動" } }
+      }
+    },
+    "Restart MacHelper": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Reiniciar MacHelper" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper を再起動" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper 재시작" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "重新启动 MacHelper" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "重新啟動 MacHelper" } }
+      }
+    },
     "Requires Finder extension": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Requiere la extensión de Finder" } },

@@ -198,7 +198,7 @@ struct LanguagePicker: View {
                 changed = true
             }
             if changed {
-                Button("Relaunch") { relaunch() }
+                Button("Relaunch") { AppRelauncher.relaunch() }
             }
         }
         if changed {
@@ -207,14 +207,6 @@ struct LanguagePicker: View {
         }
     }
 
-    private func relaunch() {
-        let path = Bundle.main.bundlePath
-        let p = Process()
-        p.executableURL = URL(fileURLWithPath: "/bin/sh")
-        p.arguments = ["-c", "sleep 1; /usr/bin/open \"$0\"", path]
-        try? p.run()
-        NSApp.terminate(nil)
-    }
 }
 
 /// Links ~/.local/bin/machelper to the CLI inside the app bundle (no administrator needed).
