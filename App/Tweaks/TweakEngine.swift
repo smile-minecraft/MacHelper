@@ -13,6 +13,9 @@ final class TweakEngine {
     private let store = TweakStore()
     private var settings = TweakSettings()
     private var granted = false
+    /// A new process sees the grant although this one does not (see `AccessibilityGrant`).
+    private var grantedInFreshProcess = false
+    private var probingGrant = false
     private var frontmostBundleID: String?
     private var eventTap: EventTapService?
     private var observers: [NSObjectProtocol] = []
@@ -22,9 +25,11 @@ final class TweakEngine {
     /// (the extension check runs pluginkit).
     private var automation: FinderAutomation.Permission = .unavailable
     private var extensionEnabled: Bool?
-    private var finderStatusTick = 0
+    private var pollTick = 0
     private var refreshingFinderStatus = false
-    private static let finderStatusEvery = 10
+    /// Polls that read System Settings state (Finder automation, the extension, the Accessibility
+    /// grant through a new process) run every this many one-second ticks.
+    private static let slowCheckEvery = 10
 
     private let music = MusicLaunchBehavior()
     private let cmdTab = CmdTabRestoreBehavior()
@@ -61,8 +66,19 @@ final class TweakEngine {
         for name in ["com.apple.accessibility.api", "com.apple.accessibility.API"] {
             observers.append(DistributedNotificationCenter.default().addObserver(
                 forName: NSNotification.Name(name), object: nil, queue: .main
-            ) { [weak self] _ in Task { @MainActor in self?.apply(force: true) } })
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    self?.apply(force: true)
+                    // The notification can arrive before the new grant is readable.
+                    try? await Task.sleep(for: .seconds(1))
+                    self?.refreshFreshGrant()
+                }
+            })
         }
+        // Coming back from System Settings is when a grant has most likely just been made.
+        observers.append(NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main
+        ) { [weak self] _ in Task { @MainActor in self?.refreshFreshGrant() } })
         let workspace = NSWorkspace.shared.notificationCenter
         observers.append(workspace.addObserver(
             forName: NSWorkspace.didLaunchApplicationNotification, object: nil, queue: .main
@@ -87,7 +103,7 @@ final class TweakEngine {
         poll = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.apply()
-                self?.refreshFinderStatusIfDue()
+                self?.slowChecksIfDue()
             }
         }
         apply(force: true)
@@ -113,6 +129,7 @@ final class TweakEngine {
         if !force, latest == settings, nowGranted == granted { return }
         settings = latest
         granted = nowGranted
+        if granted { grantedInFreshProcess = false }
 
         let quitEnabled = latest.isEnabled(.inputQuitGuard)
         let dockEnabled = latest.isEnabled(.dockClickAction)
@@ -160,19 +177,44 @@ final class TweakEngine {
         switcher.configure(enabled: granted && latest.isEnabled(.windowSwitcherMenu), settings: latest)
         missionControl.configure(enabled: granted && latest.isEnabled(.missionControlWindowButtons), settings: latest)
         publishStatus()
-        // A Finder tweak that was just turned on reports its permission without waiting a cycle.
+        // A tweak that was just turned on reports its permission without waiting a cycle.
         if needsFinderStatus { refreshFinderStatus() }
+        refreshFreshGrant()
+    }
+
+    private var needsAccessibility: Bool {
+        TweakCatalog.all.contains {
+            $0.implemented && $0.permissions.contains(.accessibility) && settings.isEnabled($0.id)
+        }
+    }
+
+    private var accessibilityGrant: AccessibilityGrant {
+        AccessibilityGrant(inProcess: granted, freshProcess: grantedInFreshProcess)
+    }
+
+    /// Only runs while a tweak waits for Accessibility, since each check starts a process.
+    private func refreshFreshGrant() {
+        guard !granted, needsAccessibility, !probingGrant else { return }
+        probingGrant = true
+        Task { [weak self] in
+            let fresh = await AccessibilityAuthority.isGrantedInFreshProcess()
+            guard let self else { return }
+            probingGrant = false
+            guard !granted, fresh != grantedInFreshProcess else { return }
+            grantedInFreshProcess = fresh
+            publishStatus()
+        }
     }
 
     private var needsFinderStatus: Bool {
         settings.isEnabled(.finderNewFile) || settings.isEnabled(.finderContextMenu)
     }
 
-    private func refreshFinderStatusIfDue() {
-        guard needsFinderStatus else { return }
-        finderStatusTick += 1
-        guard finderStatusTick % Self.finderStatusEvery == 0 else { return }
-        refreshFinderStatus()
+    private func slowChecksIfDue() {
+        pollTick += 1
+        guard pollTick % Self.slowCheckEvery == 0 else { return }
+        if needsFinderStatus { refreshFinderStatus() }
+        refreshFreshGrant()
     }
 
     private func refreshFinderStatus() {
@@ -203,7 +245,9 @@ final class TweakEngine {
             } else if !enabled {
                 states[definition.id.rawValue] = .off
             } else if definition.permissions.contains(.accessibility) && !granted {
-                states[definition.id.rawValue] = .needsPermission
+                states[definition.id.rawValue] = accessibilityGrant == .restartRequired
+                    ? .needsPermission("Restart MacHelper to use the \(AccessibilityGrant.settingsListName) permission")
+                    : .needsPermission
             } else if definition.id == .windowSwitcherMenu, let problem = switcher.hotKeyProblem {
                 states[definition.id.rawValue] = TweakRuntimeStatus.TweakState(.active, reason: problem)
             } else if definition.id == .finderNewFile && automation == .denied {
@@ -219,6 +263,7 @@ final class TweakEngine {
         let status = TweakRuntimeStatus(
             appPID: Int32(ProcessInfo.processInfo.processIdentifier),
             accessibilityGranted: granted,
+            accessibilityRestartRequired: accessibilityGrant == .restartRequired,
             eventTapInstalled: eventTap?.isInstalled ?? false,
             // Nil until it was read: automation is only checked while a Finder tweak needs it.
             automationFinderGranted: automation == .unavailable ? nil : automation == .granted,

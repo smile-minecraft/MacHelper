@@ -31,6 +31,9 @@ struct TweaksView: View {
     private func tweakRow(_ definition: TweakDefinition) -> some View {
         let enabled = model.settings.isEnabled(definition.id)
         let state = model.status?.tweaks[definition.id.rawValue]?.kind
+        let needsAccessibility = definition.permissions.contains(.accessibility)
+            && model.status?.accessibilityGranted != true
+        let restartRequired = needsAccessibility && model.status?.accessibilityRestartRequired == true
         Toggle(isOn: Binding(
             get: { enabled },
             set: { model.setEnabled(definition.id, $0) }
@@ -41,9 +44,16 @@ struct TweaksView: View {
                 Text(LocalizedStringKey(definition.detail))
                     .settingsCaption()
                 HStack(spacing: 8) {
-                    Text(stateLabel(definition, state)).settingsCaption(stateColor(definition, state))
-                    if definition.permissions.contains(.accessibility), model.status?.accessibilityGranted != true {
-                        Button("Grant Accessibility") { TweakEngine.requestAccessibility() }
+                    Text(restartRequired && state == .needsPermission
+                         ? String(localized: "Restart required")
+                         : stateLabel(definition, state))
+                        .settingsCaption(stateColor(definition, state))
+                    if restartRequired {
+                        Button("Restart MacHelper") { AppRelauncher.relaunch() }
+                            .buttonStyle(.link)
+                            .font(.mhCaption)
+                    } else if needsAccessibility {
+                        Button(Self.grantAccessibilityTitle) { TweakEngine.requestAccessibility() }
                             .buttonStyle(.link)
                             .font(.mhCaption)
                     }
@@ -113,6 +123,13 @@ struct TweaksView: View {
                                     set: { model.setValue(option.id, for: id, to: .stringList($0.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) })) }))
                 .font(.mhCallout)
         }
+    }
+
+    /// macOS 27 calls the Accessibility list "Device Control and Data Access".
+    private static var grantAccessibilityTitle: LocalizedStringKey {
+        AccessibilityGrant.usesDeviceControlName
+            ? "Grant Device Control and Data Access"
+            : "Grant Accessibility"
     }
 
     private func stateLabel(_ definition: TweakDefinition, _ state: TweakRuntimeStatus.TweakState.Kind?) -> String {

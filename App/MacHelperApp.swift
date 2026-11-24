@@ -5,6 +5,9 @@ struct MacHelperApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     init() {
+        if CommandLine.arguments.dropFirst() == [AccessibilityAuthority.probeArgument] {
+            AccessibilityAuthority.runProbeAndExit()
+        }
         if CommandLine.arguments.contains("--selftest") {
             SelfTest.runAndExit()
         }

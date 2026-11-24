@@ -27,6 +27,8 @@ public struct TweakRuntimeStatus: Codable, Equatable, Sendable {
     public var appPID: Int32
     public var updatedAt: Date
     public var accessibilityGranted: Bool
+    /// The grant exists but the running app only sees it after a relaunch (see `AccessibilityGrant`).
+    public var accessibilityRestartRequired: Bool
     public var eventTapInstalled: Bool
     /// Nil when this build does not ask Finder for anything (no Apple Events permission needed).
     public var automationFinderGranted: Bool?
@@ -35,12 +37,13 @@ public struct TweakRuntimeStatus: Codable, Equatable, Sendable {
     public var tweaks: [String: TweakState]
 
     public init(appPID: Int32, updatedAt: Date = Date(), accessibilityGranted: Bool,
-                eventTapInstalled: Bool = false, automationFinderGranted: Bool? = nil,
+                accessibilityRestartRequired: Bool = false, eventTapInstalled: Bool = false, automationFinderGranted: Bool? = nil,
                 finderExtensionEnabled: Bool? = nil, tweaks: [String: TweakState] = [:]) {
         self.schemaVersion = 1
         self.appPID = appPID
         self.updatedAt = updatedAt
         self.accessibilityGranted = accessibilityGranted
+        self.accessibilityRestartRequired = accessibilityRestartRequired
         self.eventTapInstalled = eventTapInstalled
         self.automationFinderGranted = automationFinderGranted
         self.finderExtensionEnabled = finderExtensionEnabled
@@ -53,6 +56,7 @@ public struct TweakRuntimeStatus: Codable, Equatable, Sendable {
         appPID = try c.decode(Int32.self, forKey: .appPID)
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
         accessibilityGranted = (try? c.decode(Bool.self, forKey: .accessibilityGranted)) ?? false
+        accessibilityRestartRequired = (try? c.decode(Bool.self, forKey: .accessibilityRestartRequired)) ?? false
         eventTapInstalled = (try? c.decode(Bool.self, forKey: .eventTapInstalled)) ?? false
         automationFinderGranted = try? c.decode(Bool.self, forKey: .automationFinderGranted)
         finderExtensionEnabled = try? c.decode(Bool.self, forKey: .finderExtensionEnabled)

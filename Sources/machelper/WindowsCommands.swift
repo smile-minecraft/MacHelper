@@ -26,8 +26,8 @@ struct WindowsCommand: ParsableCommand {
         guard AXIsProcessTrusted() else {
             throw ValidationError("""
             Accessibility permission is not granted to this process. Grant it under System Settings → \
-            Privacy & Security → Accessibility for the app that runs this command (a terminal run \
-            counts the terminal), then try again.
+            Privacy & Security → \(AccessibilityGrant.settingsListName) for the app that runs this \
+            command (a terminal run counts the terminal), then try again.
             """)
         }
     }
