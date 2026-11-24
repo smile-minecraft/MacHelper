@@ -65,7 +65,7 @@ struct SettingsBackupSection: View {
                     Text("The new language is used after MacHelper relaunches.")
                         .settingsCaption()
                     Spacer()
-                    Button("Relaunch") { relaunch() }
+                    Button("Relaunch") { AppRelauncher.relaunch() }
                 }
             }
         }
@@ -255,14 +255,6 @@ struct SettingsBackupSection: View {
                                  rollbackFailures.joined(separator: ", "))
         }
         return text
-    }
-
-    private func relaunch() {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/bin/sh")
-        process.arguments = ["-c", "sleep 1; /usr/bin/open \"$0\"", Bundle.main.bundlePath]
-        try? process.run()
-        NSApp.terminate(nil)
     }
 }
 
