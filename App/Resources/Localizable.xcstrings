@@ -44228,6 +44228,24 @@
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "已剪切。在 Finder 中粘贴即可移动。" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "已剪下。在 Finder 中貼上即可移動。" } }
       }
+    },
+    "Actions": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Acciones" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アクション" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "동작" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "操作" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "動作" } }
+      }
+    },
+    "Primary Action": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Acción principal" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "主要アクション" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "주요 동작" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "主要操作" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "主要動作" } }
+      }
     }
   },
   "version": "1.0"

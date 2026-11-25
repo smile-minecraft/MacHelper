@@ -10,6 +10,13 @@ struct OverviewView: View {
     private var store: MonitorStore { app.store }
 
     var body: some View {
+        page
+            // The overview has no page commands; publishing an empty set withdraws the previous
+            // page's, so the Actions menu and the toolbar never act on a page that is gone.
+            .focusedSceneValue(\.pageCommands, PageCommands())
+    }
+
+    @ViewBuilder private var page: some View {
         // While the main window is closed or miniaturized this renders nothing, so the
         // store updates below do not re-evaluate the headline, readouts or process list.
         // The menu bar and background recording read the store directly, not this view.

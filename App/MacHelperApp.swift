@@ -77,6 +77,8 @@ struct MacHelperApp: App {
                     .keyboardShortcut("0", modifiers: .command)
                 Divider()
             }
+            // The page's own commands, between View and Window.
+            PageCommandsMenu()
             // Help → Welcome Guide replays the first-launch guide at any time.
             CommandGroup(after: .help) {
                 Button(onboardingText("Welcome Guide…")) { OnboardingCenter.shared.present() }

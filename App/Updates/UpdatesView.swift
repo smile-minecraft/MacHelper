@@ -13,8 +13,6 @@ struct UpdatesView: View {
                         .toggleStyle(.checkbox).font(.mhCallout)
                         .disabled(model.phase == .checking || model.phase == .updating || model.isRefreshingIndex)
                         .help("Also list apps such as browsers that normally install their own updates")
-                    IconButton(symbol: "arrow.clockwise", help: "Check Again") { Task { await model.check(refresh: true) } }
-                        .disabled(model.phase == .checking || model.phase == .updating || model.isRefreshingIndex)
                 }
                 content
             }
@@ -32,11 +30,29 @@ struct UpdatesView: View {
         // The previous list stays on screen while the check runs, so re-opening the page shows the
         // previous result and replaces it when Homebrew answers.
         .task { await model.check() }
+        // The check and the update button are in the window toolbar and the Actions menu as well;
+        // the bottom bar stays, because it carries the selection count.
+        .focusedSceneValue(\.pageCommands, pageCommands)
         .confirmationDialog(confirmTitle, isPresented: $confirm, titleVisibility: .visible) {
             Button("Update") { Task { await model.update() } }
         } message: {
             Text(confirmMessage)
         }
+    }
+
+    /// Checking again and updating the selection, with the same enablement as the page's buttons.
+    private var pageCommands: PageCommands {
+        let busy = model.phase == .checking || model.phase == .updating || model.isRefreshingIndex
+        return PageCommands(
+            primary: PageCommand(id: "update",
+                                 title: "Update \(model.selectedCasks.count) Apps…",
+                                 systemImage: "arrow.down.circle",
+                                 isEnabled: !busy && !model.selectedCasks.isEmpty && model.phase == .ready) {
+                confirm = true
+            },
+            refresh: PageCommand(id: "check", title: "Check Again", systemImage: "arrow.clockwise", isEnabled: !busy) {
+                Task { await model.check(refresh: true) }
+            })
     }
 
     @ViewBuilder private var content: some View {

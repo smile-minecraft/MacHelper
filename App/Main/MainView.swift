@@ -5,10 +5,16 @@ import SwiftUI
 struct MainView: View {
     @Bindable var app: AppModel
     @Environment(\.openWindow) private var openWindow
+    /// The commands of the page on screen: the Actions menu and the toolbar both act through them.
+    @FocusedValue(\.pageCommands) private var pageCommands
     /// The welcome guide: opens by itself on first launch and again from Help → Welcome Guide.
     @Bindable private var onboarding = OnboardingCenter.shared
     /// The Helper setup guide, opened by hand from the sidebar footer.
     @State private var showHelperSetup = false
+
+    /// The window toolbar's own id; every item in it has an id too, which is what makes
+    /// View → Customize Toolbar… available.
+    private static let toolbarID = "main"
 
     var body: some View {
         NavigationSplitView {
@@ -33,6 +39,9 @@ struct MainView: View {
             }
             .background(Palette.base)
             .navigationTitle(Text(app.section.title))
+            // The page publishes what it can do; the toolbar and the Actions menu read it. The
+            // ids make the items customizable, the page fills in the labels and enablement.
+            .toolbar(id: Self.toolbarID) { PageToolbar(commands: pageCommands) }
             .modifier(SteadyTitleBar())
         }
         .frame(minWidth: 980, minHeight: 640)
@@ -69,6 +78,7 @@ struct MainView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
             }
+            .focusedSceneValue(\.pageCommands, PageCommands())
         case .optimize: OptimizeView(model: app.optimizeModel, autoClean: app.autoCleanModel)
         case .disk: DiskAnalysisView(model: app.diskModel)
         case .uninstall: UninstallView(model: app.uninstallModel)

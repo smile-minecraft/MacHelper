@@ -25,6 +25,8 @@ struct TweaksView: View {
         .formStyle(.grouped)
         .settingsSurface()
         .navigationTitle(Text("Tweaks"))
+        // Tweaks has no page commands; an empty set withdraws the previous page's.
+        .focusedSceneValue(\.pageCommands, PageCommands())
     }
 
     @ViewBuilder

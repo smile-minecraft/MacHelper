@@ -23,8 +23,6 @@ struct HealthView: View {
                             Text("Updating…").font(.mhCaption).foregroundStyle(Palette.textMuted)
                         }
                     }
-                    IconButton(symbol: "arrow.clockwise", help: "Run again") { Task { await reload(force: true) } }
-                        .disabled(model.loading || model.updating)
                 }
                 if let error = model.error {
                     Text(error).font(.mhCallout).foregroundStyle(Theme.amber).textSelection(.enabled)
@@ -56,6 +54,12 @@ struct HealthView: View {
         .task(id: model.window) { await reload() }
         .task { await model.loadSecurity() }
         .onDisappear { model.cancelBackgroundRefresh() }
+        // Running the check again sits in the window toolbar and the Actions menu (⌘R).
+        .focusedSceneValue(\.pageCommands, PageCommands(refresh: PageCommand(id: "runAgain", title: "Run again",
+                                                                           systemImage: "arrow.clockwise",
+                                                                           isEnabled: !model.loading && !model.updating) {
+            Task { await reload(force: true) }
+        }))
     }
 
     private func reload(force: Bool = false) async { await model.load(history: app.store.persistentHistory, forceRefresh: force) }
