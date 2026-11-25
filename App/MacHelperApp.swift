@@ -35,7 +35,8 @@ struct MacHelperApp: App {
         static func install() {
             guard monitor == nil else { return }
             monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-                let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+                // Only the chord keys count, so Caps Lock or the keypad's + doesn't stop the match.
+                let flags = event.modifierFlags.intersection([.command, .shift, .option, .control])
                 // ⇧⌘= on most layouts, ⌘+ where + has its own key.
                 guard flags == .command || flags == [.command, .shift],
                       event.charactersIgnoringModifiers == "+" else { return event }

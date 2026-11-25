@@ -70,7 +70,7 @@ struct PageCommandsMenu: Commands {
 }
 
 /// The page's items in the window toolbar, each with a fixed id so View → Customize Toolbar… can
-/// arrange them and keep that arrangement per page.
+/// arrange them. The window has one toolbar, so the arrangement is shared by every page.
 struct PageToolbar: CustomizableToolbarContent {
     let commands: PageCommands?
 

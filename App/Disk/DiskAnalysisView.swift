@@ -53,7 +53,6 @@ struct DiskAnalysisView: View {
         // Scan, rescan and stop live in the window toolbar; the Actions menu offers the same
         // through ⌘R, so the page itself defines no keyboard shortcut.
         .focusedSceneValue(\.pageCommands, pageCommands)
-        .searchable(text: $model.searchText, placement: .toolbar, prompt: Text("Search names and paths"))
     }
 
     /// The page's scan button and its stop twin. ⌘R runs the scan (Refresh in the Actions menu).
@@ -65,7 +64,7 @@ struct DiskAnalysisView: View {
         }
         return PageCommands(refresh: PageCommand(id: "scan",
                                                  title: model.root == nil ? "Scan" : "Rescan",
-                                                 systemImage: model.root == nil ? "magnifyingglass" : "arrow.clockwise") {
+                                                 systemImage: model.root == nil ? "play.circle" : "arrow.clockwise") {
             model.scan()
         })
     }
@@ -189,9 +188,13 @@ struct DiskAnalysisView: View {
                     List { ForEach(Array(focus.children.prefix(60))) { node in row(node, total: focus.size) } }
                         .listStyle(.plain)
                 case .largest:
-                    largestFilters
-                    List { ForEach(model.largestFiles(in: focus)) { node in row(node, total: focus.size) } }
-                        .listStyle(.plain)
+                    // The search filters this list only, so it is in the toolbar while the tab is open.
+                    VStack(spacing: 0) {
+                        largestFilters
+                        List { ForEach(model.largestFiles(in: focus)) { node in row(node, total: focus.size) } }
+                            .listStyle(.plain)
+                    }
+                    .searchable(text: $model.searchText, placement: .toolbar, prompt: Text("Search names and paths"))
                 case .duplicates:
                     DuplicatesList(model: model)
                 case .changes:

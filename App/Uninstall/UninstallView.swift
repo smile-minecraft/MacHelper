@@ -17,7 +17,11 @@ struct UninstallView: View {
             .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
             ZStack {
                 switch model.tab {
-                case .apps: appsTab.transition(Motion.swap)
+                case .apps:
+                    // The search filters the app list only, so it leaves the toolbar with that tab.
+                    appsTab
+                        .searchable(text: $model.search, placement: .toolbar, prompt: Text("Search Apps"))
+                        .transition(Motion.swap)
                 case .orphans: OrphansTab(model: model).transition(Motion.swap)
                 }
             }
@@ -26,8 +30,7 @@ struct UninstallView: View {
         }
         .frame(minWidth: 700, minHeight: 520)
         .task { await model.loadApps() }
-        // The app search sits in the window toolbar (⌘F) and the list reload sits beside it.
-        .searchable(text: $model.search, placement: .toolbar, prompt: Text("Search Apps"))
+        // The list reload sits in the window toolbar, beside the app search.
         .focusedSceneValue(\.pageCommands, pageCommands)
     }
 
