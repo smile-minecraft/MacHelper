@@ -51,6 +51,12 @@ struct MonitorView: View {
     ]
 
     var body: some View {
+        contentOrNothing
+            // The monitor has no page commands; an empty set withdraws the previous page's.
+            .focusedSceneValue(\.pageCommands, PageCommands())
+    }
+
+    @ViewBuilder private var contentOrNothing: some View {
         // Stop the live charts and process list while the main window is closed or minimized.
         // The menu bar and background recording read the store directly and are unaffected.
         if app.hasVisibleMainWindow {

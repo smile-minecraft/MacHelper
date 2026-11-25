@@ -17,7 +17,11 @@ struct UninstallView: View {
             .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
             ZStack {
                 switch model.tab {
-                case .apps: appsTab.transition(Motion.swap)
+                case .apps:
+                    // The search filters the app list only, so it leaves the toolbar with that tab.
+                    appsTab
+                        .searchable(text: $model.search, placement: .toolbar, prompt: Text("Search Apps"))
+                        .transition(Motion.swap)
                 case .orphans: OrphansTab(model: model).transition(Motion.swap)
                 }
             }
@@ -26,16 +30,34 @@ struct UninstallView: View {
         }
         .frame(minWidth: 700, minHeight: 520)
         .task { await model.loadApps() }
+        // The list reload sits in the window toolbar, beside the app search.
+        .focusedSceneValue(\.pageCommands, pageCommands)
+    }
+
+    /// Reloads the tab on screen: the installed app list, or the leftovers of removed apps.
+    private var pageCommands: PageCommands {
+        switch model.tab {
+        case .apps:
+            PageCommands(refresh: PageCommand(id: "refresh", title: "Refresh", systemImage: "arrow.clockwise",
+                                              isEnabled: !model.loadingApps && !model.refreshingApps) {
+                Task { await model.loadApps(forceRefresh: true) }
+            })
+        case .orphans:
+            PageCommands(refresh: PageCommand(id: "refresh", title: "Search Again", systemImage: "arrow.clockwise",
+                                              isEnabled: !model.loadingOrphans) {
+                Task { await model.loadOrphans() }
+            })
+        }
     }
 
     private var appsTab: some View {
         HSplitView {
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
-                    TextField("Search Apps", text: $model.search).textFieldStyle(.roundedBorder)
                     if model.refreshingApps {
                         ProgressView().controlSize(.small).help("Updating the app list…")
                     }
+                    Spacer(minLength: 0)
                     Picker("", selection: $model.sort) {
                         Text("Name").tag(UninstallModel.Sort.name)
                         Text("Size").tag(UninstallModel.Sort.size)

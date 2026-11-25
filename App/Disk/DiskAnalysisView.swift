@@ -50,6 +50,23 @@ struct DiskAnalysisView: View {
         .frame(minWidth: 720, minHeight: 560)
         .quickLookPreview($model.previewURL)
         .task { model.restoreSavedScanIfNeeded() }
+        // Scan, rescan and stop live in the window toolbar; the Actions menu offers the same
+        // through ⌘R, so the page itself defines no keyboard shortcut.
+        .focusedSceneValue(\.pageCommands, pageCommands)
+    }
+
+    /// The page's scan button and its stop twin. ⌘R runs the scan (Refresh in the Actions menu).
+    private var pageCommands: PageCommands {
+        if model.phase == .scanning {
+            return PageCommands(primary: PageCommand(id: "stop", title: "Stop", systemImage: "stop.circle") {
+                model.cancel()
+            })
+        }
+        return PageCommands(refresh: PageCommand(id: "scan",
+                                                 title: model.root == nil ? "Scan" : "Rescan",
+                                                 systemImage: model.root == nil ? "play.circle" : "arrow.clockwise") {
+            model.scan()
+        })
     }
 
     /// The result on screen is a saved one: it may not match the disk any more.
@@ -88,13 +105,6 @@ struct DiskAnalysisView: View {
             .labelsHidden()
             .frame(width: 220)
             .disabled(model.phase == .scanning)
-
-            if model.phase == .scanning {
-                Button("Stop") { model.cancel() }
-            } else {
-                Button(model.root == nil ? "Scan" : "Rescan") { model.scan() }
-                    .keyboardShortcut("r", modifiers: .command)
-            }
 
             Spacer()
 
@@ -178,9 +188,13 @@ struct DiskAnalysisView: View {
                     List { ForEach(Array(focus.children.prefix(60))) { node in row(node, total: focus.size) } }
                         .listStyle(.plain)
                 case .largest:
-                    largestFilters
-                    List { ForEach(model.largestFiles(in: focus)) { node in row(node, total: focus.size) } }
-                        .listStyle(.plain)
+                    // The search filters this list only, so it is in the toolbar while the tab is open.
+                    VStack(spacing: 0) {
+                        largestFilters
+                        List { ForEach(model.largestFiles(in: focus)) { node in row(node, total: focus.size) } }
+                            .listStyle(.plain)
+                    }
+                    .searchable(text: $model.searchText, placement: .toolbar, prompt: Text("Search names and paths"))
                 case .duplicates:
                     DuplicatesList(model: model)
                 case .changes:
@@ -207,20 +221,6 @@ struct DiskAnalysisView: View {
     private var largestFilters: some View {
         VStack(spacing: 6) {
             HStack(spacing: 8) {
-                HStack(spacing: 6) {
-                    Image(systemName: "magnifyingglass").foregroundStyle(Palette.textFaint)
-                    TextField("Search names and paths", text: $model.searchText)
-                        .textFieldStyle(.plain)
-                        .lineLimit(1)
-                    if !model.searchText.isEmpty {
-                        Button { model.searchText = "" } label: { Image(systemName: "xmark.circle.fill") }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(Palette.textFaint)
-                            .accessibilityLabel("Clear search")
-                    }
-                }
-                .padding(.horizontal, 8).padding(.vertical, 5)
-                .background(Palette.card, in: SurfaceShape(cornerRadius: 6))
                 Picker("Size", selection: $model.minFileBytes) {
                     Text("Any size").tag(UInt64(0))
                     Text("Over 10 MB").tag(UInt64(10_000_000))
@@ -229,6 +229,7 @@ struct DiskAnalysisView: View {
                 }
                 .labelsHidden()
                 .fixedSize()
+                Spacer(minLength: 0)
             }
             HStack {
                 Picker("Kind", selection: $model.kindFilter) {

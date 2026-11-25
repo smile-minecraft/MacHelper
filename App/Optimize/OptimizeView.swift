@@ -29,34 +29,63 @@ struct OptimizeView: View {
         }
         .animatesStates(model.phase)
         .frame(minWidth: 680, minHeight: 520)
-        .toolbar {
-            if model.phase == .ready || model.phase == .finished {
-                ToolbarItem(placement: .navigation) {
-                    Button {
-                        category = nil
-                        model.returnToMenu()
-                    } label: {
-                        Label("Back to Menu", systemImage: "chevron.left")
-                    }
-                    .help("Return to Optimize menu")
-                }
-            }
-            ToolbarItem {
-                Button { showExclusions = true } label: { Label("Never Clean…", systemImage: "hand.raised") }
-                    .help("Paths MacHelper never cleans")
-            }
-            ToolbarItem {
-                Button { showAutoClean = true } label: {
-                    Label(autoClean.config.enabled ? "Auto Clean: On" : "Auto Clean: Off", systemImage: "clock.arrow.circlepath")
-                }
-                .help("Regularly clean low-risk items in the background")
-            }
-        }
+        // The scan, clean and options buttons live in the window toolbar and the Actions menu,
+        // built from the same state as the buttons on the page.
+        .focusedSceneValue(\.pageCommands, pageCommands)
+        .searchable(text: $model.filter.text, placement: .toolbar, prompt: Text("Search names and paths"))
         .sheet(isPresented: $showAutoClean) { AutoCleanView(model: autoClean) }
         .sheet(isPresented: $showExclusions) { ExclusionsView(model: model) }
         .sheet(isPresented: $showHelperSetup) { HelperSetupSheet() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             model.recheckFullDiskAccess()
+        }
+    }
+
+    // MARK: Page commands
+
+    /// What the toolbar and the Actions menu offer while Optimize is on screen: the step's main
+    /// button, the rescan while results are showing, and the two option sheets.
+    private var pageCommands: PageCommands {
+        let options = [
+            PageCommand(id: "exclusions", title: "Never Clean…", systemImage: "hand.raised") { showExclusions = true },
+            PageCommand(id: "autoClean",
+                        title: autoClean.config.enabled ? "Auto Clean: On" : "Auto Clean: Off",
+                        systemImage: "clock.arrow.circlepath") { showAutoClean = true },
+        ]
+        let back = PageCommand(id: "back", title: "Back to Menu", systemImage: "chevron.left") {
+            category = nil
+            model.returnToMenu()
+        }
+        switch model.phase {
+        case .idle:
+            return PageCommands(primary: PageCommand(id: "scan", title: "Start Scan", systemImage: "magnifyingglass") {
+                category = nil
+                Task { await model.scan() }
+            }, options: options)
+        case .scanning:
+            return PageCommands(primary: PageCommand(id: "stop", title: "Stop Scan", systemImage: "stop.circle") {
+                model.stopScan()
+            }, options: options)
+        case .running:
+            return PageCommands(primary: PageCommand(id: "clean", title: "Clean…", systemImage: "sparkles", isEnabled: false) {},
+                                options: options)
+        case .ready:
+            let selected = model.selectedBytes > 0 || model.selectedTaskCount > 0 || model.selectedDeepCount > 0
+            return PageCommands(
+                back: back,
+                primary: PageCommand(id: "clean",
+                                     title: model.selectedDeepCount > 0 ? "Authorize and Clean…" : "Clean…",
+                                     systemImage: "sparkles", isEnabled: selected) { confirm = true },
+                refresh: PageCommand(id: "rescan", title: "Rescan", systemImage: "arrow.clockwise") {
+                    Task { await model.scan(deep: model.deep) }
+                },
+                options: options)
+        case .finished:
+            return PageCommands(back: back,
+                                primary: PageCommand(id: "scan", title: "Scan Again", systemImage: "arrow.clockwise") {
+                                    Task { await model.scan(deep: model.deep) }
+                                },
+                                options: options)
         }
     }
 
@@ -311,13 +340,10 @@ struct OptimizeView: View {
     }
 
     private var filterBar: some View {
-        // One row when there is room. Otherwise the search field keeps its own row and the three
-        // pickers share the next one, so none of them is squeezed into unusable widths at the
-        // window’s minimum size.
+        // The search moved to the window toolbar (⌘F); the three pickers and the matching menu
+        // stay with the list they filter.
         ViewThatFits(in: .horizontal) {
             HStack(spacing: 10) {
-                searchField
-                    .frame(minWidth: 200, idealWidth: 240, maxWidth: 260)
                 sizePicker
                 agePicker
                 sortPicker
@@ -326,43 +352,20 @@ struct OptimizeView: View {
             }
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 10) {
-                    searchField
-                    Spacer(minLength: 8)
-                    matchingMenu
-                }
-                HStack(spacing: 10) {
                     sizePicker
                     agePicker
                     sortPicker
                     Spacer(minLength: 0)
+                }
+                HStack(spacing: 10) {
+                    Spacer(minLength: 0)
+                    matchingMenu
                 }
             }
         }
         .controlSize(.small)
         .padding(.horizontal, 12).padding(.vertical, 8)
         .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
-    }
-
-    private var searchField: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "magnifyingglass").foregroundStyle(Palette.textFaint)
-            TextField("Search names and paths", text: $model.filter.text).textFieldStyle(.plain)
-            if !model.filter.text.isEmpty {
-                Button { model.filter.text = "" } label: { Image(systemName: "xmark.circle.fill") }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(Palette.textFaint)
-                    .help("Clear search")
-                    .accessibilityLabel("Clear search")
-            }
-        }
-        .padding(.horizontal, 8).padding(.vertical, 5)
-        .background {
-            if ThemeStore.shared.isSoft {
-                SoftSurface.recessed(SurfaceShape(cornerRadius: 9), depth: .track)
-            } else {
-                SurfaceShape(cornerRadius: 6).fill(Palette.card)
-            }
-        }
     }
 
     private var sizePicker: some View {

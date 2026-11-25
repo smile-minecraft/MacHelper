@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 @main
@@ -11,6 +12,7 @@ struct MacHelperApp: App {
         if CommandLine.arguments.contains("--selftest") {
             SelfTest.runAndExit()
         }
+        ZoomInAlternateKey.install()
     }
 
     /// The original pages keep ⌘1–⌘9. Later pages use dedicated single-character keys so they
@@ -21,6 +23,26 @@ struct MacHelperApp: App {
         case .tweaks: return "t"
         case .cable: return "u"
         default: return "0"
+        }
+    }
+
+    /// ⇧⌘= zooms in as well as ⌘=, but the View menu shows one item only: the menu item's key
+    /// equivalent can't match both, and a second item would read as a duplicate. A key monitor is
+    /// used instead, because it survives the menu rebuilds SwiftUI does on state changes.
+    private enum ZoomInAlternateKey {
+        nonisolated(unsafe) private static var monitor: Any?
+
+        static func install() {
+            guard monitor == nil else { return }
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                // Only the chord keys count, so Caps Lock or the keypad's + doesn't stop the match.
+                let flags = event.modifierFlags.intersection([.command, .shift, .option, .control])
+                // ⇧⌘= on most layouts, ⌘+ where + has its own key.
+                guard flags == .command || flags == [.command, .shift],
+                      event.charactersIgnoringModifiers == "+" else { return event }
+                ThemeStore.shared.zoom(by: 1)
+                return nil
+            }
         }
     }
 
@@ -46,10 +68,8 @@ struct MacHelperApp: App {
                 }
                 Divider()
             }
-            // Interface size: ⌘+ / ⌘- / ⌘0 change the text size setting (80–150 %).
+            // Interface size: ⌘= / ⌘- / ⌘0 change the text size setting (80–150 %).
             CommandGroup(after: .toolbar) {
-                Button("Make Interface Bigger") { ThemeStore.shared.zoom(by: 1) }
-                    .keyboardShortcut("+", modifiers: .command)
                 Button("Make Interface Bigger") { ThemeStore.shared.zoom(by: 1) }
                     .keyboardShortcut("=", modifiers: .command)
                 Button("Make Interface Smaller") { ThemeStore.shared.zoom(by: -1) }
@@ -58,6 +78,8 @@ struct MacHelperApp: App {
                     .keyboardShortcut("0", modifiers: .command)
                 Divider()
             }
+            // The page's own commands, between View and Window.
+            PageCommandsMenu()
             // Help → Welcome Guide replays the first-launch guide at any time.
             CommandGroup(after: .help) {
                 Button(onboardingText("Welcome Guide…")) { OnboardingCenter.shared.present() }

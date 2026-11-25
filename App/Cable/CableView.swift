@@ -37,6 +37,12 @@ struct CableView: View {
         .onChange(of: app.hasVisibleMainWindow) { _, visible in
             model.setVisible(isOnScreen && visible)
         }
+        // Re-reading the ports sits in the window toolbar and the Actions menu (⌘R).
+        .focusedSceneValue(\.pageCommands, PageCommands(refresh: PageCommand(id: "refresh", title: "Refresh",
+                                                                           systemImage: "arrow.clockwise",
+                                                                           isEnabled: !model.refreshing) {
+            model.refreshNow()
+        }))
     }
 
     // MARK: - Header
@@ -69,10 +75,6 @@ struct CableView: View {
                         }
                     }
                 }
-                IconButton(symbol: "arrow.clockwise", help: "Refresh") {
-                    model.refreshNow()
-                }
-                .disabled(model.refreshing)
             }
         }
     }

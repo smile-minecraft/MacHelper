@@ -15,7 +15,6 @@ struct StartupView: View {
                     Text("Login & Background Items").tag(StartupModel.Tab.background)
                 }
                 .pickerStyle(.segmented).labelsHidden().fixedSize()
-                TextField("Search", text: $model.search).textFieldStyle(.roundedBorder).frame(maxWidth: 220)
                 if model.tab == .launchd {
                     Toggle("Only items whose program is missing", isOn: $model.onlyBroken).toggleStyle(.checkbox)
                 } else {
@@ -24,9 +23,6 @@ struct StartupView: View {
                 Spacer()
                 if model.refreshing {
                     ProgressView().controlSize(.small).help("Updating startup items…")
-                }
-                IconButton(symbol: "arrow.clockwise", help: "Refresh") {
-                    Task { if model.tab == .launchd { await model.load(forceRefresh: true) } else { await model.loadBackground(forceRefresh: true) } }
                 }
             }
             .padding(.horizontal, 12).padding(.vertical, 10)
@@ -83,6 +79,13 @@ struct StartupView: View {
         .frame(minWidth: 680, minHeight: 480)
         .task { await model.load() }
         .task(id: model.tab) { if model.tab == .background && model.backgroundGroups.isEmpty { await model.loadBackground() } }
+        // The search sits in the window toolbar (⌘F); the list reload sits beside it.
+        .searchable(text: $model.search, placement: .toolbar, prompt: Text("Search"))
+        .focusedSceneValue(\.pageCommands, PageCommands(refresh: PageCommand(id: "refresh", title: "Refresh",
+                                                                            systemImage: "arrow.clockwise",
+                                                                            isEnabled: !model.refreshing) {
+            Task { if model.tab == .launchd { await model.load(forceRefresh: true) } else { await model.loadBackground(forceRefresh: true) } }
+        }))
         .confirmationDialog("Remove \(removing?.label ?? "")?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }),
                             titleVisibility: .visible) {
             Button("Stop and Move to Trash", role: .destructive) {
