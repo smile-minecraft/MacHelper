@@ -90,7 +90,7 @@ private struct SecurityText {
     let settings: URL?
 
     init(_ c: SecurityCheck) {
-        let privacy = URL(string: "x-apple.systempreferences:com.apple.preference.security?General")
+        let privacy = SystemSettingsPane.privacySecurityGeneral.url
         let unknown = String(localized: "Couldn’t be read")
         switch c.id {
         case "gatekeeper":
@@ -103,7 +103,7 @@ private struct SecurityText {
             }
         case "filevault":
             title = String(localized: "FileVault disk encryption")
-            settings = URL(string: "x-apple.systempreferences:com.apple.preference.security?FileVault")
+            settings = SystemSettingsPane.fileVault.url
             (state, detail) = switch c.state {
             case .on: (String(localized: "On"), String(localized: "The startup disk is encrypted. Without your password nobody can read it, even with the disk removed."))
             case .off: (String(localized: "Off"), String(localized: "The startup disk isn’t encrypted: anyone who gets this Mac can read its files. Encrypting runs in the background while you keep working."))
@@ -112,7 +112,7 @@ private struct SecurityText {
             }
         case "firewall":
             title = String(localized: "Firewall")
-            settings = URL(string: "x-apple.systempreferences:com.apple.Network-Settings.extension?Firewall")
+            settings = SystemSettingsPane.firewall.url
             (state, detail) = switch c.state {
             case .on: (String(localized: "On"), c.detail == "stealth"
                        ? String(localized: "Incoming connections are filtered, and this Mac doesn’t answer probes from the network (stealth mode).")
@@ -131,7 +131,7 @@ private struct SecurityText {
             }
         case "updates":
             title = String(localized: "Automatic security updates")
-            settings = URL(string: "x-apple.systempreferences:com.apple.Software-Update-Settings.extension")
+            settings = SystemSettingsPane.softwareUpdate.url
             (state, detail) = switch c.state {
             case .on: (String(localized: "On"), String(localized: "Security responses and malware definitions install by themselves."))
             case .off: (String(localized: "Off"), String(localized: "Security fixes and malware definitions don’t install by themselves. In Software Update → Automatic Updates, turn on “Install Security Responses and system files”."))
