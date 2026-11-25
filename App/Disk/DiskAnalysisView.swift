@@ -47,7 +47,6 @@ struct DiskAnalysisView: View {
             .animatesStates(model.phase)
         }
         .animation(Motion.standard, value: model.restoredAt)
-        .frame(minWidth: 720, minHeight: 560)
         .quickLookPreview($model.previewURL)
         .task { model.restoreSavedScanIfNeeded() }
         // Scan, rescan and stop live in the window toolbar; the Actions menu offers the same
@@ -125,9 +124,11 @@ struct DiskAnalysisView: View {
     @ViewBuilder private var content: some View {
         switch model.phase {
         case .idle where model.root == nil:
-            PixelEmptyState(art: "px.empty.scan", title: "Disk Analysis",
-                            message: "Choose a location to analyze, then click Scan.") {
-                Button("Scan \(model.target.title)") { model.scan() }.buttonStyle(.borderedProminent).controlSize(.large)
+            ScrollingCenter {
+                PixelEmptyState(art: "px.empty.scan", title: "Disk Analysis",
+                                message: "Choose a location to analyze, then click Scan.") {
+                    Button("Scan \(model.target.title)") { model.scan() }.buttonStyle(.borderedProminent).controlSize(.large)
+                }
             }
         case .scanning:
             VStack(spacing: 14) {
@@ -206,7 +207,9 @@ struct DiskAnalysisView: View {
                 Divider()
                 collector
             }
-            .frame(width: 340)
+            // Half a screen: the chart keeps enough room to read and the list narrows, rather
+            // than the fixed column pushing the chart out of the window.
+            .frame(minWidth: 260, idealWidth: 340, maxWidth: 340)
         }
     }
 

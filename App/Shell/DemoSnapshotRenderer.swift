@@ -23,8 +23,20 @@ enum DemoSnapshotRenderer {
         (.disk, "disk", CGSize(width: 860, height: 700)),
     ]
 
+    /// The same pages at another size, for checking a layout at one window width:
+    /// `--snapshot-demo DIR --snapshot-size 520x428`. Without the argument the README sizes above
+    /// are used, so `make screenshots` writes exactly what it always did.
+    private static var requestedSize: CGSize? {
+        let arguments = CommandLine.arguments
+        guard let i = arguments.firstIndex(of: "--snapshot-size"), i + 1 < arguments.count else { return nil }
+        let parts = arguments[i + 1].lowercased().split(separator: "x").compactMap { Double($0) }
+        guard parts.count == 2, parts[0] >= 320, parts[1] >= 240 else { return nil }
+        return CGSize(width: parts[0], height: parts[1])
+    }
+
     static func run(app: AppModel, to dir: URL) {
         Task { @MainActor in
+            let pages = requestedSize.map { size in Self.pages.map { (section: $0.section, file: $0.file, size: size) } } ?? Self.pages
             pinDisplayChoices()
             NSApp.appearance = NSAppearance(named: .darkAqua)
             for window in NSApp.windows { window.orderOut(nil) }
@@ -147,7 +159,11 @@ private struct DemoPageFrame<Content: View>: View {
                 .padding(.horizontal, 16)
                 .frame(height: 40)
             Rectangle().fill(Palette.hairline).frame(height: 1)
-            content.frame(maxWidth: .infinity, maxHeight: .infinity)
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // The page picks its narrow layout from the width the split view gives it;
+                // this frame stands in for that width when a page is drawn on its own.
+                .pageContentWidth()
         }
         .frame(width: size.width, height: size.height)
         .background(Palette.base)

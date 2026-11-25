@@ -37,6 +37,9 @@ struct MainView: View {
             // The banner view renders nothing once hidden, so its last measured height is ignored then.
             .padding(.top, HelperHealthMonitor.shared.shouldShowBanner ? bannerHeight : 0)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // Pages decide between their wide and their narrow layout from this width: four
+            // readouts in a row, or a list beside its details, need more than half a screen.
+            .pageContentWidth()
             // The Helper warning floats over the top of the detail area and the page moves down by
             // its measured height. Stacked in a VStack (or a safe area inset) above the page, the
             // banner grew the split view past the window instead, pushing every column, sidebar
@@ -56,7 +59,10 @@ struct MainView: View {
             .toolbar(id: Self.toolbarID) { PageToolbar(commands: pageCommands) }
             .modifier(SteadyTitleBar())
         }
-        .frame(minWidth: 980, minHeight: 640)
+        // Half of a 13-inch MacBook Air's screen, so two windows sit side by side: 720 × 520 on
+        // screen, which is 720 × 468 for the content under the 52 pt title bar and toolbar. The
+        // sidebar folds away by itself when the split view gets this narrow.
+        .frame(minWidth: 720, minHeight: 468)
         // Single-variant themes and the Light / Dark setting force their scheme on the window.
         .themeColorScheme()
         .onAppear {

@@ -12,6 +12,9 @@ struct OptimizeView: View {
     @State private var category: String?
     /// The verified Helper state (running, outdated, unresponsive…), not just its registration.
     @Bindable private var helperHealth = HelperHealthMonitor.shared
+    /// Half a screen: the footer keeps the number but drops its explanation, and the category
+    /// list gives its width to the items instead of the two panes fighting for it.
+    @Environment(\.isCompactPage) private var compact
 
     var body: some View {
         ZStack {
@@ -28,7 +31,8 @@ struct OptimizeView: View {
             .transition(Motion.swap)
         }
         .animatesStates(model.phase)
-        .frame(minWidth: 680, minHeight: 520)
+        // The page fills the detail column; the split view owns the window's minimum size, and
+        // this page's own lists and panes scroll inside whatever height it is given.
         // The scan, clean and options buttons live in the window toolbar and the Actions menu,
         // built from the same state as the buttons on the page.
         .focusedSceneValue(\.pageCommands, pageCommands.withSearch())
@@ -91,42 +95,44 @@ struct OptimizeView: View {
 
     private var start: some View {
         let helperOn = helperHealth.isHealthy
-        return PixelEmptyState(art: "px.empty.clean", title: "Optimize",
-                               message: "Scan first to list what can be cleaned.") {
-            VStack(spacing: 10) {
-                HStack(spacing: 12) {
-                    if ThemeStore.shared.isSoft {
-                        Button("Start Scan") { category = nil; Task { await model.scan() } }
-                            .buttonStyle(PrimaryButtonStyle(large: true))
-                        Button { category = "deep"; Task { await model.scan(deep: true) } } label: {
-                            Label("Deep Optimize…", systemImage: "lock.shield")
-                        }
-                        .buttonStyle(SecondarySoftButtonStyle(large: true))
-                        .disabled(!helperOn)
-                        .help("Also cleans system caches, old system logs and temporary files. Asks for an administrator password before deleting.")
-                    } else {
-                        Button("Start Scan") { category = nil; Task { await model.scan() } }
-                            .buttonStyle(.borderedProminent)
+        return ScrollingCenter {
+            PixelEmptyState(art: "px.empty.clean", title: "Optimize",
+                            message: "Scan first to list what can be cleaned.") {
+                VStack(spacing: 10) {
+                    HStack(spacing: 12) {
+                        if ThemeStore.shared.isSoft {
+                            Button("Start Scan") { category = nil; Task { await model.scan() } }
+                                .buttonStyle(PrimaryButtonStyle(large: true))
+                            Button { category = "deep"; Task { await model.scan(deep: true) } } label: {
+                                Label("Deep Optimize…", systemImage: "lock.shield")
+                            }
+                            .buttonStyle(SecondarySoftButtonStyle(large: true))
+                            .disabled(!helperOn)
+                            .help("Also cleans system caches, old system logs and temporary files. Asks for an administrator password before deleting.")
+                        } else {
+                            Button("Start Scan") { category = nil; Task { await model.scan() } }
+                                .buttonStyle(.borderedProminent)
+                                .controlSize(.large)
+                            Button { category = "deep"; Task { await model.scan(deep: true) } } label: {
+                                Label("Deep Optimize…", systemImage: "lock.shield")
+                            }
+                            .buttonStyle(.bordered)
                             .controlSize(.large)
-                        Button { category = "deep"; Task { await model.scan(deep: true) } } label: {
-                            Label("Deep Optimize…", systemImage: "lock.shield")
+                            .disabled(!helperOn)
+                            .help("Also cleans system caches, old system logs and temporary files. Asks for an administrator password before deleting.")
                         }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
-                        .disabled(!helperOn)
-                        .help("Also cleans system caches, old system logs and temporary files. Asks for an administrator password before deleting.")
                     }
+                    deepCaption(helperOn: helperOn)
+                    if model.scanStopped { Text("Scan stopped before any results were ready.").font(.mhCaption).foregroundStyle(Palette.textMuted) }
+                    if let e = model.loadError { Text(e).font(.mhCaption).foregroundStyle(Theme.rose) }
+                    if !model.fullDiskAccess {
+                        Button("Allow Full Disk Access to see everything") { model.openFullDiskAccessSettings() }
+                            .buttonStyle(.link).font(.mhCaption)
+                    }
+                    AutoCleanEntry(model: autoClean) { showAutoClean = true }
+                        .frame(maxWidth: 440)
+                        .padding(.top, 8)
                 }
-                deepCaption(helperOn: helperOn)
-                if model.scanStopped { Text("Scan stopped before any results were ready.").font(.mhCaption).foregroundStyle(Palette.textMuted) }
-                if let e = model.loadError { Text(e).font(.mhCaption).foregroundStyle(Theme.rose) }
-                if !model.fullDiskAccess {
-                    Button("Allow Full Disk Access to see everything") { model.openFullDiskAccessSettings() }
-                        .buttonStyle(.link).font(.mhCaption)
-                }
-                AutoCleanEntry(model: autoClean) { showAutoClean = true }
-                    .frame(maxWidth: 440)
-                    .padding(.top, 8)
             }
         }
     }
@@ -183,7 +189,7 @@ struct OptimizeView: View {
             // Two panes: categories with their selected size on the left, the chosen category's items on the right.
             HStack(spacing: 0) {
                 categoryList
-                    .frame(width: 250)
+                    .frame(minWidth: 190, idealWidth: 250, maxWidth: 250)
                 Rectangle().fill(Palette.hairline).frame(width: 1)
                 categoryDetail
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -193,7 +199,9 @@ struct OptimizeView: View {
                     Text(selectionSummary)
                         .font(Theme.smallNumeral)
                         .foregroundStyle(Palette.text)
-                    Text("Low-risk items are deleted directly, medium and high risk go to the Trash.").font(.mhCaption).foregroundStyle(Palette.textMuted)
+                    if !compact {
+                        Text("Low-risk items are deleted directly, medium and high risk go to the Trash.").font(.mhCaption).foregroundStyle(Palette.textMuted)
+                    }
                 }
                 Spacer(minLength: 12)
                 Button("Back to Menu") { category = nil; model.returnToMenu() }

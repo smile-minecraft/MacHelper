@@ -189,7 +189,7 @@ struct SeriesHistoryView: View {
                 } else if temperaturePlots.isEmpty, corePlots.isEmpty {
                     Text("No data in this range").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 } else if let shownRange {
-                    HairlinePanel(columns: temperaturePlots.isEmpty || corePlots.isEmpty ? 1 : 2) {
+                    HairlinePanel(columns: temperaturePlots.isEmpty || corePlots.isEmpty ? 1 : 2, minColumnWidth: 360) {
                         if !temperaturePlots.isEmpty {
                             chart("Temperature sensors", plots: temperaturePlots, format: .celsius, range: shownRange)
                         }

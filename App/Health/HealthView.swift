@@ -6,24 +6,13 @@ import SwiftUI
 struct HealthView: View {
     let app: AppModel
     @Bindable var model: HealthModel
+    /// Half a screen: the summary reads as two columns and the two process lists stack.
+    @Environment(\.isCompactPage) private var compact
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                PageHeader(section: .health, subtitle: String(localized: "A one-off check of the last hours of history, free space and background items.")) {
-                    Picker("Period", selection: $model.window) {
-                        Text("1 hour").tag(HealthModel.Window.hour)
-                        Text("24 hours").tag(HealthModel.Window.day)
-                        Text("7 days").tag(HealthModel.Window.week)
-                    }
-                    .pickerStyle(.segmented).labelsHidden().fixedSize()
-                    if model.updating {
-                        HStack(spacing: 6) {
-                            ProgressView().controlSize(.small)
-                            Text("Updating…").font(.mhCaption).foregroundStyle(Palette.textMuted)
-                        }
-                    }
-                }
+                header
                 if let error = model.error {
                     Text(error).font(.mhCallout).foregroundStyle(Theme.amber).textSelection(.enabled)
                 }
@@ -63,6 +52,44 @@ struct HealthView: View {
     }
 
     private func reload(force: Bool = false) async { await model.load(history: app.store.persistentHistory, forceRefresh: force) }
+
+    /// The page title and the period picker. At half a screen the picker takes its own row:
+    /// side by side it left the title and the subtitle about 160 pt.
+    @ViewBuilder private var header: some View {
+        if compact {
+            VStack(alignment: .leading, spacing: 12) {
+                PageHeader(section: .health, subtitle: String(localized: "A one-off check of the last hours of history, free space and background items."))
+                HStack(spacing: 10) {
+                    periodPicker
+                    updatingHint
+                    Spacer(minLength: 0)
+                }
+            }
+        } else {
+            PageHeader(section: .health, subtitle: String(localized: "A one-off check of the last hours of history, free space and background items.")) {
+                periodPicker
+                updatingHint
+            }
+        }
+    }
+
+    private var periodPicker: some View {
+        Picker("Period", selection: $model.window) {
+            Text("1 hour").tag(HealthModel.Window.hour)
+            Text("24 hours").tag(HealthModel.Window.day)
+            Text("7 days").tag(HealthModel.Window.week)
+        }
+        .pickerStyle(.segmented).labelsHidden().fixedSize()
+    }
+
+    @ViewBuilder private var updatingHint: some View {
+        if model.updating {
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.small)
+                Text("Updating…").font(.mhCaption).foregroundStyle(Palette.textMuted)
+            }
+        }
+    }
 
     // MARK: Findings
 
@@ -134,21 +161,20 @@ struct HealthView: View {
 
     private func summary(_ report: HealthReport) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Four equal columns across the card instead of a block packed to the left.
-            Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 14) {
-                GridRow {
-                    stat("CPU", "\(Fmt.percent(report.cpu.average)) · \(Fmt.percent(report.cpu.maximum))")
-                    stat("Memory", "\(Fmt.percent(report.memory.average)) · \(Fmt.percent(report.memory.maximum))")
-                    stat("Temperature", Fmt.celsius(report.temperature.maximum))
-                    stat("Power", Fmt.watts(report.power.average))
-                }
-                GridRow {
-                    stat("Recorded", Fmt.percent(report.coverage))
-                    stat("Swap", report.system.swapUsedBytes.map { Fmt.bytes(Int64($0)) } ?? "–")
-                    stat("Uptime", report.system.uptimeSeconds.map { Duration.seconds($0).formatted(.units(allowed: [.days, .hours], width: .abbreviated)) } ?? "–")
-                    stat("Background items", report.system.activeBackgroundItems.map { "\($0)" } ?? "–",
-                         note: report.system.activeBackgroundItems == nil ? String(localized: "Needs the Helper") : nil)
-                }
+            // Equal columns across the card instead of a block packed to the left: four on a wide
+            // window, two at half a screen so the values keep their width.
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16, alignment: .leading),
+                                     count: compact ? 2 : 4),
+                      alignment: .leading, spacing: 14) {
+                stat("CPU", "\(Fmt.percent(report.cpu.average)) · \(Fmt.percent(report.cpu.maximum))")
+                stat("Memory", "\(Fmt.percent(report.memory.average)) · \(Fmt.percent(report.memory.maximum))")
+                stat("Temperature", Fmt.celsius(report.temperature.maximum))
+                stat("Power", Fmt.watts(report.power.average))
+                stat("Recorded", Fmt.percent(report.coverage))
+                stat("Swap", report.system.swapUsedBytes.map { Fmt.bytes(Int64($0)) } ?? "–")
+                stat("Uptime", report.system.uptimeSeconds.map { Duration.seconds($0).formatted(.units(allowed: [.days, .hours], width: .abbreviated)) } ?? "–")
+                stat("Background items", report.system.activeBackgroundItems.map { "\($0)" } ?? "–",
+                     note: report.system.activeBackgroundItems == nil ? String(localized: "Needs the Helper") : nil)
             }
             Text("CPU and memory: average · highest. Temperature: highest. Power: average.")
                 .font(.mhCaption2).foregroundStyle(Palette.textFaint)
@@ -173,14 +199,27 @@ struct HealthView: View {
         if report.topByCPU.isEmpty && report.topByMemory.isEmpty {
             Text("Turn on “Record process usage” in Settings → General → Data to see which processes were busiest.")
                 .font(.mhCallout).foregroundStyle(Palette.textMuted).card()
+        } else if compact {
+            VStack(alignment: .leading, spacing: 16) {
+                busiestByCPU(report)
+                largestByMemory(report)
+            }
         } else {
             HStack(alignment: .top, spacing: 16) {
-                processList("Busiest by CPU", report.topByCPU,
-                            note: "CPU is the share of one core while the process was among the busiest.") { Fmt.percent($0.averageCPU) }
-                processList("Largest by memory", report.topByMemory,
-                            note: "Memory is the average footprint while the process was among the largest.") { Fmt.memory(UInt64(max($0.averageMemoryBytes, 0))) }
+                busiestByCPU(report)
+                largestByMemory(report)
             }
         }
+    }
+
+    private func busiestByCPU(_ report: HealthReport) -> some View {
+        processList("Busiest by CPU", report.topByCPU,
+                    note: "CPU is the share of one core while the process was among the busiest.") { Fmt.percent($0.averageCPU) }
+    }
+
+    private func largestByMemory(_ report: HealthReport) -> some View {
+        processList("Largest by memory", report.topByMemory,
+                    note: "Memory is the average footprint while the process was among the largest.") { Fmt.memory(UInt64(max($0.averageMemoryBytes, 0))) }
     }
 
     private func processList(_ title: LocalizedStringKey, _ lines: [HealthReport.ProcessLine],

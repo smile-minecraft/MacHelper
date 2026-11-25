@@ -32,7 +32,6 @@ struct UninstallView: View {
             .frame(maxHeight: .infinity)
             .animatesStates(model.tab)
         }
-        .frame(minWidth: 700, minHeight: 520)
         .animatesStateChanges(model.dropNotice)
         // Any app bundle can be dropped anywhere on the page, whichever tab is showing.
         .dropDestination(for: URL.self) { urls, _ in
@@ -129,7 +128,9 @@ struct UninstallView: View {
                     .onDeleteCommand { if model.canUninstallSelected { confirmUninstall = true } }
                 }
             }
-            .frame(minWidth: 300, idealWidth: 330, maxWidth: 420)
+            // Both panes give way at half a screen: the list keeps the app names readable and
+            // the details keep the leftover paths and the Uninstall button on screen.
+            .frame(minWidth: 200, idealWidth: 300, maxWidth: 420)
 
             Group {
                 if let app = model.selectedApp {
@@ -137,14 +138,16 @@ struct UninstallView: View {
                         .id(app.id)
                         .transition(.opacity)
                 } else {
-                    PixelEmptyState(art: "px.empty.box", title: "Choose an App to Uninstall",
-                                    message: "MacHelper also finds the caches, settings and data it left behind, and you decide item by item what to delete.") {
-                        Text("Or drag an app from Finder onto this window.")
-                            .font(.mhCaption).foregroundStyle(Palette.textFaint)
+                    ScrollingCenter {
+                        PixelEmptyState(art: "px.empty.box", title: "Choose an App to Uninstall",
+                                        message: "MacHelper also finds the caches, settings and data it left behind, and you decide item by item what to delete.") {
+                            Text("Or drag an app from Finder onto this window.")
+                                .font(.mhCaption).foregroundStyle(Palette.textFaint)
+                        }
                     }
                 }
             }
-            .frame(minWidth: 480, maxWidth: .infinity, maxHeight: .infinity)
+            .frame(minWidth: 300, maxWidth: .infinity, maxHeight: .infinity)
             // A short cross-fade when another app is picked, so the details don't flash.
             .animation(Motion.fade, value: model.selectedAppID)
         }

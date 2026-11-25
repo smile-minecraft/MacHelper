@@ -693,12 +693,80 @@ struct PressableStyle: ButtonStyle {
 /// One bordered surface split into a grid by hairlines (no gaps, no nested cards).
 struct HairlinePanel<Content: View>: View {
     let columns: Int
+    /// When set, the panel gives up columns instead of squeezing each cell narrower than this, so
+    /// the window can shrink to half a screen without the cells becoming unreadable. Zero keeps
+    /// the column count at every width.
+    var minColumnWidth: CGFloat = 0
+    @State private var width: CGFloat = 0
     @ViewBuilder var content: Content
 
     var body: some View {
-        _VariadicView.Tree(HairlineGridLayout(columns: columns)) { content }
+        _VariadicView.Tree(HairlineGridLayout(columns: shownColumns)) { content }
             .clipShape(SurfaceShape(cornerRadius: Theme.cardRadius))
             .surface()
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+    }
+
+    private var shownColumns: Int {
+        guard minColumnWidth > 0, width > 0 else { return columns }
+        // `+ 1` counts the hairline between two cells, so two cells plus their divider fit.
+        let fitting = Int(((width + 1) / (minColumnWidth + 1)).rounded(.down))
+        return max(1, min(columns, fitting))
+    }
+}
+
+/// Centres a page's fixed-shape content (an empty state, say) and scrolls it instead of squeezing
+/// it when the window is short: with the Helper warning on screen a 520 pt window leaves the page
+/// under 400 pt, which is less than an illustration, a title and its buttons need.
+struct ScrollingCenter<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        GeometryReader { geo in
+            ScrollView {
+                content.frame(minHeight: geo.size.height)
+            }
+        }
+    }
+}
+
+// MARK: - Page width
+/// The width a page is laid out at, published by `pageContentWidth()`.
+private struct ContentWidthKey: EnvironmentKey {
+    /// `.infinity` until the first measurement, so a page draws its wide layout first.
+    static let defaultValue: CGFloat = .infinity
+}
+
+extension EnvironmentValues {
+    /// How much room the page has (points). Set by `pageContentWidth()`; see `isCompactPage`.
+    var contentWidth: CGFloat {
+        get { self[ContentWidthKey.self] }
+        set { self[ContentWidthKey.self] = newValue }
+    }
+
+    /// True when the window is too narrow for a page's side-by-side layout: four readouts in a
+    /// row, a list beside its details, or a chart beside its file list. Those pages switch to a
+    /// single column or a two-column grid instead of squeezing the wide one. The split view
+    /// publishes the detail column's width, so a page is compact at about half a 13-inch screen.
+    var isCompactPage: Bool { contentWidth < 760 }
+}
+
+extension View {
+    /// Publishes the width this view is laid out at to its content through `\.contentWidth`.
+    /// Apply it to the page's own content, inside its padding, so the number is the width the
+    /// page's rows actually get.
+    func pageContentWidth() -> some View {
+        modifier(PageContentWidth())
+    }
+}
+
+private struct PageContentWidth: ViewModifier {
+    @State private var width: CGFloat = .infinity
+
+    func body(content: Content) -> some View {
+        content
+            .environment(\.contentWidth, width)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
     }
 }
 
