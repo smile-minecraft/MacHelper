@@ -13,15 +13,15 @@ final class UninstallModel {
     /// it in the background after this age. Reading every bundle's size is the expensive part.
     static let appsMaxAge: TimeInterval = 120
 
-    var tab: Tab = .apps
+    var tab: Tab = .apps { didSet { dropNotice = nil } }
     var sort: Sort = .name
-    var search = ""
+    var search = "" { didSet { dropNotice = nil } }
     private(set) var apps: [InstalledApp] = []
     private(set) var loadingApps = false
     /// True while the old list stays on screen and a newer one is being read.
     private(set) var refreshingApps = false
     @ObservationIgnored private var appsLoadedAt: Date?
-    var selectedAppID: InstalledApp.ID? { didSet { Task { await loadPlan() } } }
+    var selectedAppID: InstalledApp.ID? { didSet { dropNotice = nil; Task { await loadPlan() } } }
     private(set) var plan: UninstallPlan?
     private(set) var loadingPlan = false
     var includeUserData = false { didSet { applyUserDataChoice() } }
@@ -34,6 +34,17 @@ final class UninstallModel {
     private(set) var loadingOrphans = false
 
     var selectedApp: InstalledApp? { apps.first { $0.id == selectedAppID } }
+
+    /// The condition that enables the Uninstall button for the selected app. The Delete key asks
+    /// the same question, so it never opens the confirmation for an app the button would skip.
+    var canUninstallSelected: Bool {
+        guard !loadingPlan, let app = selectedApp, let plan, plan.app.id == app.id else { return false }
+        return app.canUninstall && !app.isRunning && plan.selectedSize > 0
+    }
+
+    /// An explanation shown under the tabs when a dropped bundle can't be opened. The next drop,
+    /// app or tab choice, search or reload clears it, so it never stays in the way.
+    private(set) var dropNotice: String?
 
     var visibleApps: [InstalledApp] {
         let filtered = search.isEmpty ? apps : apps.filter {
@@ -49,6 +60,7 @@ final class UninstallModel {
     // MARK: Loading
 
     func loadApps(forceRefresh: Bool = false) async {
+        dropNotice = nil
         guard !loadingApps, !refreshingApps else { return }
         if !forceRefresh, !apps.isEmpty {
             PageLoadProbe.mark(.uninstall, "cache")
@@ -66,6 +78,44 @@ final class UninstallModel {
         appsLoadedAt = Date()
         PageLoadProbe.mark(.uninstall, "apps")
         PageLoadProbe.mark(.uninstall, "refresh")
+    }
+
+    /// Opens the app a bundle was dropped for and returns whether the drop was taken. Only a row of
+    /// the installed list is selected: a copy of an installed app (the same bundle ID, another
+    /// folder) opens the installed app, which owns that bundle and those leftovers. A bundle whose
+    /// app isn't installed is not added to the list — everything here is uninstalled from the
+    /// Applications folders — and the page says why instead.
+    func handleDrop(_ url: URL) -> Bool {
+        dropNotice = nil
+        guard !apps.isEmpty else {
+            // The first read of the app list is still running. Answer once the rows are there, so
+            // an installed app dropped right after the page opens isn't turned away.
+            Task {
+                await loadApps()
+                if !apps.isEmpty { takeDrop(url) }
+            }
+            return true
+        }
+        return takeDrop(url)
+    }
+
+    /// Selects the installed row the bundle stands for, or explains where the bundle has to be.
+    @discardableResult
+    private func takeDrop(_ url: URL) -> Bool {
+        guard let app = AppUninstaller.installedApp(forDroppedBundle: url, in: apps) else {
+            let path = url.standardizedFileURL.path
+            let name = ((path as NSString).lastPathComponent as NSString).deletingPathExtension
+            dropNotice = String(localized: "MacHelper uninstalls apps from the Applications folders. Move \(name) there first.")
+            return false
+        }
+        selectForDrop(app)
+        return true
+    }
+
+    private func selectForDrop(_ app: InstalledApp) {
+        tab = .apps
+        search = ""
+        selectedAppID = app.id
     }
 
     private func loadPlan() async {

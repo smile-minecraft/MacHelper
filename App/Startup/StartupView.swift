@@ -49,6 +49,8 @@ struct StartupView: View {
                             }
                         }
                         .scrollContentBackground(.hidden)
+                        // Delete does what the row's own control does, after the same confirmation.
+                        .onDeleteCommand { deleteSelected() }
                         .frame(minWidth: 320, idealWidth: 380, maxWidth: 440)
                         Rectangle().fill(Palette.hairline).frame(width: 1)
                         Group {
@@ -101,6 +103,18 @@ struct StartupView: View {
             }
         } message: {
             Text("This system daemon is stopped for all users and won’t start again until you enable it here. The app that installed it may stop working properly (for example its updater, VPN or network helper). The plist isn’t changed or removed.")
+        }
+    }
+
+    /// Delete acts like the item's own control, after the same confirmation: Remove… for your own
+    /// agents, Disable for a system daemon the Helper can switch. Items without such an action do
+    /// nothing, matching the buttons those cases disable.
+    private func deleteSelected() {
+        guard let item = model.items.first(where: { $0.id == selectedID }) else { return }
+        if item.scope.canRemove {
+            removing = item
+        } else if item.scope == .systemDaemon, !item.isDisabled, model.canToggle(item) {
+            disablingDaemon = item
         }
     }
 

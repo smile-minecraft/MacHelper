@@ -139,7 +139,7 @@ public enum AppUninstaller {
     // MARK: Installed apps
 
     public static func installedApps(measureSizes: Bool = true) -> [InstalledApp] {
-        let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
+        let running = CleanScanner.runningBundleIDs()
         var bundles: [String] = []
         for folder in appFolders {
             for name in (try? FileManager.default.contentsOfDirectory(atPath: folder)) ?? [] {
@@ -158,22 +158,58 @@ public enum AppUninstaller {
             ? Dictionary(uniqueKeysWithValues: CleanScanner.measure(bundles).map { ($0.path, $0.size) }) : [:]
         return bundles.compactMap { path -> InstalledApp? in
             guard let bundle = Bundle(path: path), let id = bundle.bundleIdentifier else { return nil }
-            let info = bundle.infoDictionary ?? [:]
-            let name = (info["CFBundleDisplayName"] as? String) ?? (info["CFBundleName"] as? String)
-                ?? ((path as NSString).lastPathComponent as NSString).deletingPathExtension
-            let reason: String? = if id.hasPrefix("com.apple.") {
-                String(localized: "Built-in Apple app, managed by macOS", bundle: .module)
-            } else if id.hasPrefix("com.machelper.") {
-                String(localized: "MacHelper itself", bundle: .module)
-            } else { nil }
-            return InstalledApp(
-                name: name, bundleID: id, version: info["CFBundleShortVersionString"] as? String, path: path,
-                size: sizes[path] ?? 0,
-                isAppStore: FileManager.default.fileExists(atPath: path + "/Contents/_MASReceipt/receipt"),
-                lastUsed: lastUsedDate(path), isRunning: running.contains(id),
-                teamID: CodeSignInfo.read(path)?.teamID, protectedReason: reason)
+            return makeApp(path: path, bundle: bundle, id: id, size: sizes[path] ?? 0, running: running)
         }
         .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    /// True for a folder the Uninstall page accepts when a bundle is dropped on it: a `.app`
+    /// directory the system can read as a bundle. Cheap enough to answer while the drop lands.
+    public static func isAppBundle(_ url: URL) -> Bool {
+        guard url.isFileURL else { return false }
+        let path = url.standardizedFileURL.path
+        guard (path as NSString).pathExtension.caseInsensitiveCompare("app") == .orderedSame, isDirectory(path) else {
+            return false
+        }
+        return Bundle(path: path)?.bundleIdentifier != nil
+    }
+
+    /// The installed row a bundle dropped from Finder stands for: the same bundle when it is in the
+    /// list, otherwise another copy of an installed app (the same bundle ID, dragged out of a DMG, a
+    /// download or a backup), preferring a copy in an Applications folder. The leftovers named after
+    /// the bundle ID and the bundle the uninstall moves are the installed copy's, so a second copy
+    /// never gets a row of its own. Nil when the app is not installed, so the page never lists a
+    /// bundle it cannot uninstall.
+    public static func installedApp(forDroppedBundle url: URL, in apps: [InstalledApp]) -> InstalledApp? {
+        let path = url.standardizedFileURL.path
+        if let sameBundle = apps.first(where: { $0.path == path }) { return sameBundle }
+        guard let id = Bundle(path: path)?.bundleIdentifier else { return nil }
+        let copies = apps.filter { $0.bundleID == id }
+        return copies.first(where: { isInAppFolder($0.path) }) ?? copies.first
+    }
+
+    /// True for a bundle path inside one of the Applications folders the installed list reads.
+    static func isInAppFolder(_ path: String) -> Bool {
+        appFolders.contains { path.hasPrefix($0 + "/") }
+    }
+
+    /// The row the installed list shows.
+    private static func makeApp(path: String, bundle: Bundle, id: String, size: UInt64,
+                                running: Set<String>) -> InstalledApp {
+        let info = bundle.infoDictionary ?? [:]
+        let name = (info["CFBundleDisplayName"] as? String) ?? (info["CFBundleName"] as? String)
+            ?? ((path as NSString).lastPathComponent as NSString).deletingPathExtension
+        let reason: String? = if id.hasPrefix("com.apple.") {
+            String(localized: "Built-in Apple app, managed by macOS", bundle: .module)
+        } else if id.hasPrefix("com.machelper.") {
+            String(localized: "MacHelper itself", bundle: .module)
+        } else { nil }
+        return InstalledApp(
+            name: name, bundleID: id, version: info["CFBundleShortVersionString"] as? String, path: path,
+            size: size,
+            isAppStore: FileManager.default.fileExists(atPath: path + "/Contents/_MASReceipt/receipt"),
+            lastUsed: lastUsedDate(path), isRunning: running.contains(id),
+            teamID: CodeSignInfo.read(path)?.teamID, protectedReason: reason)
     }
 
     /// Matches by bundle id, exact name, or path. Throws if none or several match.
