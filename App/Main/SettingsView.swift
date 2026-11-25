@@ -24,7 +24,7 @@ struct SettingsView: View {
             AppearanceSettingsView()
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
                 .tag(Tab.appearance)
-            MonitorSettingsView(settings: app.settings, available: app.store.availableModules)
+            MonitorSettingsView(app: app, settings: app.settings, available: app.store.availableModules)
                 .tabItem { Label("Menu Bar", systemImage: "menubar.rectangle") }
                 .tag(Tab.menuBar)
             Form { AlertSettingsSection(alerts: app.store.alerts) }
@@ -200,12 +200,18 @@ private struct GeneralSettings: View {
                 Picker("Dock icon", selection: Binding(
                     get: { dockMode },
                     set: { newValue in
+                        // The picker below disables the two modes that take the Dock icon away while
+                        // the menu bar item is hidden; refuse them here as well so no path can leave
+                        // the app with neither entry point.
+                        guard DockPolicy.allows(newValue, menuBarVisible: app.isMenuBarItemVisible) else { return }
                         withAnimation(Motion.stateChange) { dockMode = newValue }
                     }
                 )) {
                     Text("Always").tag(DockMode.always)
                     Text("While a window is open").tag(DockMode.whileWindowOpen)
+                        .disabled(!app.isMenuBarItemVisible)
                     Text("Never").tag(DockMode.never)
+                        .disabled(!app.isMenuBarItemVisible)
                 }
                 .onChange(of: dockMode) { AppModel.applyDockPreference() }
                 Toggle("Open at login", isOn: $openAtLogin)
@@ -233,6 +239,14 @@ private struct GeneralSettings: View {
                 }
                 .transition(Motion.stateSwap)
                 .animatesStateChanges(dockMode)
+                Group {
+                    if !app.isMenuBarItemVisible {
+                        Text("The Dock icon stays on while the menu bar item is hidden.")
+                            .settingsCaption()
+                    }
+                }
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(app.isMenuBarItemVisible)
             }
             Section {
                 LanguagePicker()

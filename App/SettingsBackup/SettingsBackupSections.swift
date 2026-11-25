@@ -30,7 +30,8 @@ struct SettingsBackupError: LocalizedError, CustomStringConvertible {
     var description: String { message }
 }
 
-/// Dock and app language. "Open at login" registers a login item, so it stays out of the file.
+/// Dock, menu bar item and app language. "Open at login" registers a login item, so it stays out of
+/// the file.
 struct GeneralSettingsSection: SettingsSection {
     var defaults: UserDefaults = .standard
     var domainName: String? = Bundle.main.bundleIdentifier
@@ -50,6 +51,7 @@ struct GeneralSettingsSection: SettingsSection {
 
     private var payload: GeneralSettingsPayload {
         GeneralSettingsPayload(dockMode: DockPreference.migrate(defaults),
+                               menuBarVisible: MenuBarPreference.isVisible(defaults),
                                language: Self.currentLanguage(defaults: defaults, domainName: domainName),
                                features: currentFeatures)
     }
@@ -66,8 +68,12 @@ struct GeneralSettingsSection: SettingsSection {
         if let language = incoming.language, !AppLanguage.codes.contains(language) {
             return .invalid(String(localized: "The language must be one of \(AppLanguage.codes.joined(separator: ", ")), or null."))
         }
+        // The canonical bytes carry the Dock mode that will actually be stored, so a file that hides
+        // the menu bar item while asking for a Dock mode that needs it shown compares equal to the
+        // state the import leaves behind.
+        let normalized = incoming.normalized()
         do {
-            return .valid(SettingsPayload(data: try SettingsBackupJSON.encode(incoming),
+            return .valid(SettingsPayload(data: try SettingsBackupJSON.encode(normalized),
                                           summary: String(localized: "Dock and language settings")))
         } catch {
             return .invalid(String(describing: error))
@@ -76,7 +82,8 @@ struct GeneralSettingsSection: SettingsSection {
 
     func apply(_ data: Data) throws {
         let payload = try SettingsBackupJSON.decode(GeneralSettingsPayload.self, from: data)
-        DockPreference.write(payload.dockMode, to: defaults)
+        DockPreference.write(payload.effectiveDockMode, to: defaults)
+        MenuBarPreference.write(visible: payload.menuBarVisible, to: defaults)
         if let language = payload.language {
             defaults.set([language], forKey: "AppleLanguages")
         } else {

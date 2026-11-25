@@ -55,11 +55,16 @@ public enum DockPreference {
 /// backups still import; encoding always writes the new `dockMode` string.
 public struct GeneralSettingsPayload: Codable, Equatable, Sendable {
     public var dockMode: DockMode
+    /// Whether the menu bar item is shown. Backups written before this switch existed have no field
+    /// and decode as shown, which is what those versions did.
+    public var menuBarVisible: Bool
     public var language: String?
     public var features: FeatureSet?
 
-    public init(dockMode: DockMode = .whileWindowOpen, language: String? = nil, features: FeatureSet? = nil) {
+    public init(dockMode: DockMode = .whileWindowOpen, menuBarVisible: Bool = true,
+                language: String? = nil, features: FeatureSet? = nil) {
         self.dockMode = dockMode
+        self.menuBarVisible = menuBarVisible
         self.language = language
         self.features = features
     }
@@ -67,6 +72,7 @@ public struct GeneralSettingsPayload: Codable, Equatable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case dockMode
         case showInDock
+        case menuBarVisible
         case language
         case features
     }
@@ -80,6 +86,7 @@ public struct GeneralSettingsPayload: Codable, Equatable, Sendable {
         } else {
             dockMode = .whileWindowOpen
         }
+        menuBarVisible = try container.decodeIfPresent(Bool.self, forKey: .menuBarVisible) ?? true
         language = try container.decodeIfPresent(String.self, forKey: .language)
         // A malformed features value from a newer version must not make the rest unreadable.
         features = try? container.decodeIfPresent(FeatureSet.self, forKey: .features)
@@ -88,7 +95,23 @@ public struct GeneralSettingsPayload: Codable, Equatable, Sendable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(dockMode, forKey: .dockMode)
+        try container.encode(menuBarVisible, forKey: .menuBarVisible)
         try container.encodeIfPresent(language, forKey: .language)
         try container.encodeIfPresent(features, forKey: .features)
+    }
+}
+
+extension GeneralSettingsPayload {
+    /// The Dock mode this payload really means: hiding the menu bar item keeps the Dock icon.
+    public var effectiveDockMode: DockMode {
+        DockPolicy.effectiveMode(requested: dockMode, menuBarVisible: menuBarVisible)
+    }
+
+    /// The payload as it will be applied. Validation and apply both go through this, so a file that
+    /// hides the menu bar item while asking for a Dock mode that needs it shown reports and stores
+    /// the mode the app ends up using.
+    public func normalized() -> GeneralSettingsPayload {
+        GeneralSettingsPayload(dockMode: effectiveDockMode, menuBarVisible: menuBarVisible,
+                               language: language, features: features)
     }
 }
