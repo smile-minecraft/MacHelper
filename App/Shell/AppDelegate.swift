@@ -83,6 +83,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         return true
     }
 
+    /// Destinations the Dock icon offers while MacHelper runs. With the menu bar item hidden this
+    /// menu is the way into the app, so it repeats the pages people actually open.
+    private static let dockMenuSections: [AppSection] = [.overview, .monitor, .optimize, .disk, .uninstall]
+
+    /// The Dock icon's own menu. Pages the display mode or a module switch hid are left out, because
+    /// their shortcut would quietly land on Overview instead.
+    func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+        let menu = NSMenu()
+        let pages = Self.dockMenuSections.filter(\.isVisible)
+        for section in pages {
+            menu.addItem(dockMenuItem(section.localizedTitle, #selector(openDockSection(_:)), section.rawValue))
+        }
+        // Settings stays reachable even when every page above it is turned off.
+        if !pages.isEmpty { menu.addItem(.separator()) }
+        menu.addItem(dockMenuItem(String(localized: "Settings…"), #selector(openSettingsFromDockMenu(_:)), nil))
+        return menu
+    }
+
+    private func dockMenuItem(_ title: String, _ action: Selector, _ section: String?) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
+        item.target = self
+        item.representedObject = section
+        return item
+    }
+
+    @objc private func openDockSection(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String, let section = AppSection(rawValue: raw) else { return }
+        open(section)
+    }
+
+    @objc private func openSettingsFromDockMenu(_ sender: NSMenuItem) {
+        openSettings()
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Debug aid: measure how long each page takes to show usable content. It returns before
         // the Helper, fan control, status item and background services start, so a second
@@ -135,6 +169,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
         setUpStatusItem()
         setUpPopover()
+        // The Settings toggle and a settings import both end up in the app model, so the status
+        // item is shown or hidden from one place.
+        app.applyMenuBarItemVisibility = { [weak self] visible in self?.setStatusItemVisible(visible) }
         // Sparkle stops the background recorder before replacing the app; restore it if this
         // launch is the other side of an update and the user still wants it.
         app.backgroundRecording.resumeAfterUpdateIfNeeded()
@@ -693,7 +730,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                            "panel-\(tab.rawValue)-\(name)", dir)
                 }
             }
-            render(MonitorSettingsView(settings: settings, available: store.availableModules).background(Color(white: 0.93)), "settings", dir)
+            render(MonitorSettingsView(app: app, settings: settings, available: store.availableModules).background(Color(white: 0.93)), "settings", dir)
             if let savedTab { UserDefaults.standard.set(savedTab, forKey: "panel.module") }
             else { UserDefaults.standard.removeObject(forKey: "panel.module") }
             NSApp.terminate(nil)
@@ -888,6 +925,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         remeasureStatusItem()
         observeStatusLayout()
         button.setAccessibilityLabel(String(localized: "MacHelper System Monitor"))
+        statusItem.isVisible = app.isMenuBarItemVisible
+    }
+
+    /// Shows or hides the running status item. Hiding it closes the panel first: an open popover
+    /// anchored to an item that just disappeared would be left floating.
+    private func setStatusItemVisible(_ visible: Bool) {
+        if !visible { popover.performClose(nil) }
+        statusItem?.isVisible = visible
     }
 
     private func setUpPopover() {

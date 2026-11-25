@@ -3,6 +3,7 @@ import SwiftUI
 import Theming
 
 struct MonitorSettingsView: View {
+    let app: AppModel
     @Bindable var settings: MonitorSettingsStore
     let available: Set<MonitorModule>
     var alerts: AlertCenter?
@@ -12,6 +13,15 @@ struct MonitorSettingsView: View {
 
     var body: some View {
         Form {
+            Section {
+                Toggle("Show MacHelper in the menu bar", isOn: Binding(
+                    get: { app.isMenuBarItemVisible },
+                    set: { app.setMenuBarItemVisible($0) }
+                ))
+                Text("Turn this off to keep only the Dock icon. Its menu opens the same pages, and the Dock icon stays visible while the menu bar item is hidden.")
+                    .settingsCaption()
+            } header: { Text("Menu Bar Item") }
+
             Section {
                 Picker("Font", selection: $look.settings.menuBarFont) {
                     Text("System Rounded").tag(AppearanceSettings.MenuBarFont.rounded)

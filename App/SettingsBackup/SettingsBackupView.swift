@@ -222,7 +222,9 @@ struct SettingsBackupSection: View {
 
     private func reload(_ ids: Set<String>) {
         if ids.contains(SettingsCategory.general.rawValue) {
-            AppModel.applyDockPreference()
+            // Re-reads the menu bar item and re-applies the Dock mode; an import can hide the item,
+            // which then keeps the Dock icon.
+            app.reloadMenuBarItemVisibility()
             FeatureStore.shared.reload()
         }
         if ids.contains(SettingsCategory.monitor.rawValue) {
