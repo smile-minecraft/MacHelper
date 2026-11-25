@@ -27,8 +27,11 @@ struct PageCommands {
     var primary: PageCommand?
     /// Reloads or rescans what the page shows; the Actions menu binds ⌘R to it.
     var refresh: PageCommand?
-    /// The page's further actions, in the order its buttons show them.
-    var options: [PageCommand] = []
+    /// The page's further actions, in the order its buttons show them. The toolbar has two slots
+    /// for them, so a page offers at most two.
+    var options: [PageCommand] = [] {
+        didSet { assert(options.count <= 2, "PageToolbar shows at most two page options") }
+    }
     /// Whether the page shows a search field in the toolbar right now; Edit → Find… (⌘F) focuses it.
     var canSearch = false
 
@@ -134,9 +137,16 @@ struct PageToolbar: CustomizableToolbarContent {
             }
         }
         // One item per action, so each keeps its own label for VoiceOver and the customization sheet.
-        ForEach(commands?.options ?? []) { option in
+        // Two fixed slots instead of ForEach: ForEach isn't customizable toolbar content in the
+        // macOS 26 SDK the CI builds with.
+        if let option = commands?.options.first {
             ToolbarItem(id: "page.option.\(option.id)", placement: .primaryAction) {
                 PageToolbarButton(command: option)
+            }
+        }
+        if let options = commands?.options, options.count > 1 {
+            ToolbarItem(id: "page.option.\(options[1].id)", placement: .primaryAction) {
+                PageToolbarButton(command: options[1])
             }
         }
     }
