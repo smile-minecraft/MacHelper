@@ -225,7 +225,23 @@ final class BackgroundRecordingModel {
         refresh()
     }
 
-    func openLoginItems() { SMAppService.openSystemSettingsLoginItems() }
+    /// Registers the agent again while recording is switched on, for when the registration went
+    /// missing (removed in System Settings or by a cleanup tool). It never turns recording on: with
+    /// the switch or the Monitor module off it only reads the state again.
+    func setUpAgain() {
+        guard enabledIntent, moduleEnabled else { refresh(); return }
+        // The agent reads the profile, so publish it before the agent can start.
+        guard writeProfileSnapshot() else { refresh(); return }
+        do {
+            try registerAgentIfNeeded()
+            message = nil
+        } catch {
+            message = agent.status == .requiresApproval
+                ? Self.approvalMessage
+                : String(localized: "Couldn’t set up background recording: \(error.localizedDescription)")
+        }
+        refresh()
+    }
 
     // MARK: - App update
 

@@ -21,7 +21,7 @@ struct BackgroundRecordingSection: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             if model.state == .pendingApproval {
-                Button("Open Login Items") { model.openLoginItems() }
+                Button("Open Login Items") { PermissionFlow.shared.openGuided(.backgroundRecording) }
             }
             if let message = model.message {
                 Text(message).settingsCaption(messageColor)

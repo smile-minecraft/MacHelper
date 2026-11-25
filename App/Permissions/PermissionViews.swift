@@ -93,6 +93,8 @@ struct PermissionActionButton: View {
 /// it, what it never reads, and exactly what appears next. Nothing is requested until Continue.
 struct PermissionPrePromptSheet: View {
     let id: PermissionID
+    /// Runs after Continue's request has finished, for screens that show the result themselves.
+    var completed: (@MainActor () async -> Void)?
     @Environment(\.dismiss) private var dismiss
 
     private var info: PermissionInfo { PermissionInfo.info(for: id) }
@@ -134,7 +136,10 @@ struct PermissionPrePromptSheet: View {
                     .keyboardShortcut(.cancelAction)
                 Button("Continue") {
                     dismiss()
-                    Task { await PermissionFlow.shared.confirmPrePrompt(id) }
+                    Task {
+                        await PermissionFlow.shared.confirmPrePrompt(id)
+                        await completed?()
+                    }
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
@@ -251,6 +256,10 @@ struct PermissionsSettingsView: View {
                     Text("MacHelper asks only for what a feature you use needs. Each row says what it unlocks, what goes missing without it and what it never reads.")
                         .settingsCaption()
                     if let error = center.lastActionError {
+                        Label(error, systemImage: "exclamationmark.triangle.fill")
+                            .settingsCaption(Theme.rose)
+                    }
+                    if let error = flow.agentError {
                         Label(error, systemImage: "exclamationmark.triangle.fill")
                             .settingsCaption(Theme.rose)
                     }

@@ -15,6 +15,9 @@ final class PermissionGuideController: NSObject, NSWindowDelegate {
     private var panel: NSPanel?
     private var activationObserver: NSObjectProtocol?
     private var placementTask: Task<Void, Never>?
+    /// Counts the guides shown. A guide's own close (its button, or the delay after success) only
+    /// closes that guide, never one opened after it.
+    private var generation = 0
 
     static let width: CGFloat = 340
 
@@ -23,7 +26,9 @@ final class PermissionGuideController: NSObject, NSWindowDelegate {
     func show(_ id: PermissionID) {
         close()
         current = id
-        let host = NSHostingView(rootView: PermissionGuideView(id: id) { [weak self] in self?.close() })
+        generation += 1
+        let shown = generation
+        let host = NSHostingView(rootView: PermissionGuideView(id: id) { [weak self] in self?.close(shown) })
         let size = host.fittingSize
         let panel = GuidePanel(contentRect: CGRect(origin: .zero, size: CGSize(width: Self.width, height: max(size.height, 200))),
                                styleMask: [.nonactivatingPanel, .titled, .closable, .fullSizeContentView],
@@ -36,6 +41,10 @@ final class PermissionGuideController: NSObject, NSWindowDelegate {
         panel.hidesOnDeactivate = false
         panel.becomesKeyOnlyIfNeeded = true
         panel.isMovableByWindowBackground = true
+        // The guide has its own close button; the grey traffic lights would only repeat it.
+        for button in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] {
+            panel.standardWindowButton(button)?.isHidden = true
+        }
         panel.isReleasedWhenClosed = false
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         panel.animationBehavior = .utilityWindow
@@ -60,6 +69,12 @@ final class PermissionGuideController: NSObject, NSWindowDelegate {
                 self.place(panel)
             }
         }
+    }
+
+    /// Closes the guide only while it is still the one that was shown as `shownGeneration`.
+    private func close(_ shownGeneration: Int) {
+        guard shownGeneration == generation, panel != nil else { return }
+        close()
     }
 
     func close() {
@@ -181,16 +196,23 @@ struct PermissionGuideView: View {
         .task(id: id) {
             if id == .helper { await PermissionFlow.shared.followHelperApproval() }
         }
-        .onChange(of: item?.state) { _, state in
-            guard state == .granted, !succeeded else { return }
-            succeeded = true
-            NSAccessibility.post(element: NSApp as Any, notification: .announcementRequested,
-                                 userInfo: [.announcement: guide.success, .priority: NSAccessibilityPriorityLevel.high.rawValue])
-            Task {
-                try? await Task.sleep(for: .seconds(1.5))
-                close()
-            }
+        // A guide can open for a grant that is already in place, so the first state counts too.
+        .onAppear { markSucceededIfGranted(item?.state) }
+        .onChange(of: item?.state) { _, state in markSucceededIfGranted(state) }
+        // Tied to this view: the delay ends with the guide, and the controller ignores a close
+        // from a guide that is no longer the one on screen.
+        .task(id: succeeded) {
+            guard succeeded else { return }
+            do { try await Task.sleep(for: .seconds(1.5)) } catch { return }
+            close()
         }
+    }
+
+    private func markSucceededIfGranted(_ state: PermissionState?) {
+        guard state == .granted, !succeeded else { return }
+        succeeded = true
+        NSAccessibility.post(element: NSApp as Any, notification: .announcementRequested,
+                             userInfo: [.announcement: guide.success, .priority: NSAccessibilityPriorityLevel.high.rawValue])
     }
 
     @ViewBuilder private var statusLine: some View {

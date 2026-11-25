@@ -97,7 +97,7 @@ struct AutoCleanView: View {
                 HStack {
                     Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Theme.orange)
                     Text("The background schedule needs your approval in Login Items.")
-                    Button("Open Login Items") { model.openLoginItems() }
+                    Button("Open Login Items") { PermissionFlow.shared.openGuided(.autoCleanSchedule) }
                 }
                 .font(.mhCallout)
             }

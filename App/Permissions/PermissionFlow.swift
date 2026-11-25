@@ -14,6 +14,8 @@ enum PermissionPrimaryAction: Equatable, Sendable {
     case relaunch
     case turnOnAtLogin
     case turnOffAtLogin
+    /// The feature is on but its background agent is not registered; register it again.
+    case setUpAgent
     /// Nothing to approve yet; read the state again.
     case checkAgain
 
@@ -26,6 +28,7 @@ enum PermissionPrimaryAction: Equatable, Sendable {
         case .relaunch: String(localized: "Relaunch MacHelper")
         case .turnOnAtLogin: String(localized: "Turn On")
         case .turnOffAtLogin: String(localized: "Turn Off")
+        case .setUpAgent: String(localized: "Set Up Again")
         case .checkAgain: String(localized: "Check Again")
         }
     }
@@ -44,6 +47,8 @@ enum PermissionPrimaryAction: Equatable, Sendable {
 final class PermissionFlow {
     static let shared = PermissionFlow()
 
+    /// Why the last attempt to register a background agent from a row failed, shown on that tab.
+    private(set) var agentError: String?
     /// The row the Permissions tab should expand and scroll to.
     var focus: PermissionID?
     /// A permission whose action should start as soon as the Permissions tab is on screen.
@@ -84,10 +89,12 @@ final class PermissionFlow {
         case .fullDiskAccess, .finderExtension:
             return item.state == .granted ? nil : .openSettings
         case .backgroundRecording, .autoCleanSchedule:
-            // The feature registers its own agent; only the approval switch is the user's job.
+            // The feature registers its own agent. While the feature is on, a missing registration
+            // is registered again through the feature's own model; otherwise only reading the
+            // state again makes sense.
             switch item.state {
             case .needsApproval: return .openSettings
-            case .notRequested, .denied: return .checkAgain
+            case .notRequested, .denied: return item.isRequired ? .setUpAgent : .checkAgain
             case .granted, .notApplicable, .checking: return nil
             }
         }
@@ -115,8 +122,17 @@ final class PermissionFlow {
         }
     }
 
+    /// The entry point for buttons outside the Permissions tab: reads the state first, because a
+    /// screen can be on display before anything read it or right after a feature switch changed
+    /// what is needed, then runs the same button the Permissions tab would show.
+    func start(_ id: PermissionID, presentPrePrompt: (PermissionID) -> Void) async {
+        await center.refresh()
+        trigger(id, presentPrePrompt: presentPrePrompt)
+    }
+
     /// What the explanation's Continue button runs, read again from the state at that moment.
     func confirmPrePrompt(_ id: PermissionID) async {
+        if center.item(id)?.state == .checking { await center.refresh() }
         guard let item = center.item(id), let action = Self.primaryAction(for: item) else { return }
         await perform(action, for: id)
     }
@@ -151,8 +167,39 @@ final class PermissionFlow {
             await center.setOpenAtLogin(true)
         case .turnOffAtLogin:
             await center.setOpenAtLogin(false)
+        case .setUpAgent:
+            await setUpAgent(id)
         case .checkAgain:
             await center.refresh()
+        }
+    }
+
+    /// Registers a feature's background agent again through the model that owns it, then opens the
+    /// guide when macOS wants the switch turned on. The models only register while the feature and
+    /// its switch are on, so this never starts something the user turned off.
+    private func setUpAgent(_ id: PermissionID) async {
+        agentError = nil
+        let failure: String?
+        switch id {
+        case .backgroundRecording:
+            let model = AppModel.shared.backgroundRecording
+            model.setUpAgain()
+            failure = model.message
+        case .autoCleanSchedule:
+            let model = AppModel.shared.autoCleanModel
+            await model.setUpAgain()
+            failure = model.message
+        default:
+            return
+        }
+        await center.refresh()
+        switch center.item(id)?.state {
+        case .needsApproval:
+            openGuided(id)
+        case .granted, .checking, .notApplicable, nil:
+            break
+        case .notRequested, .denied:
+            agentError = failure ?? String(localized: "macOS didn’t register the background task. Reinstalling MacHelper restores it.")
         }
     }
 

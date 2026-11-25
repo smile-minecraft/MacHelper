@@ -1,4 +1,5 @@
 import HelperProtocol
+import Permissions
 import ServiceManagement
 import SMCKit
 import SwiftUI
@@ -9,7 +10,8 @@ struct HelperDiagnosticsView: View {
     @State private var status = HelperClient.shared.status
     @State private var log: [String] = []
     @State private var fans: [FanReading] = []
-    @State private var showSetup = false
+    /// The explanation shown before the Helper is installed, as on the Permissions tab.
+    @State private var prePrompt: PermissionID?
     @State private var showDiagnostics = false
     /// Verified health, shared with the banner and sidebar: "enabled" in Login Items does
     /// not prove the Helper answers, so this view must show what XPC actually observed.
@@ -42,12 +44,14 @@ struct HelperDiagnosticsView: View {
                     case .requiresApproval:
                         Text("In General → Login Items & Extensions, turn on MacHelper under “Allow in the Background”. macOS asks for your password.")
                             .settingsCaption()
-                        Button("Open Login Items") { client.openLoginItemsSettings() }
+                        Button("Open Login Items") { PermissionFlow.shared.openGuided(.helper) }
                     case .notFound:
                         Text("The Helper is missing from this copy of MacHelper. Reinstall the app to restore it.")
                             .settingsCaption(Theme.amber)
                     default:
-                        Button("Set up Helper…") { showSetup = true }
+                        Button("Set up Helper…") {
+                            Task { await PermissionFlow.shared.start(.helper) { prePrompt = $0 } }
+                        }
                     }
                 }
                 .transition(Motion.stateSwap)
@@ -68,7 +72,7 @@ struct HelperDiagnosticsView: View {
                                     }
                                     .disabled(health.isRepairing)
                                 }
-                                Button("Open Login Items") { health.openLoginItems() }
+                                Button("Open Login Items") { PermissionFlow.shared.openGuided(.helper) }
                             }
                             Group {
                                 if let error = health.repairError {
@@ -91,7 +95,11 @@ struct HelperDiagnosticsView: View {
                     }
                     LabeledContent("Helper status", value: status.label)
                     HStack {
-                        Button("Register") { act("register") { try client.register() } }
+                        // Registering shows macOS's own notification and needs approval, so even
+                        // the raw tool goes through the same explanation and guide.
+                        Button("Register") {
+                            Task { await PermissionFlow.shared.start(.helper) { prePrompt = $0 } }
+                        }
                         Button("Unregister") { act("unregister") { try await client.unregister() } }
                         Button("Handshake") {
                             act("handshake") {
@@ -131,7 +139,15 @@ struct HelperDiagnosticsView: View {
         }
         .formStyle(.grouped)
         .settingsSurface()
-        .sheet(isPresented: $showSetup, onDismiss: { status = client.currentStatus }) { HelperSetupSheet() }
+        .sheet(item: $prePrompt) { id in
+            PermissionPrePromptSheet(id: id) {
+                status = client.currentStatus
+                append("register: \(status.label)")
+            }
+        }
+        // While the guide waits for the switch in System Settings, probe the Helper often enough
+        // for the status above and the guide to follow it.
+        .task { await PermissionFlow.shared.followHelperApproval() }
         .task {
             // Approval happens in System Settings; follow it while this tab is open.
             while !Task.isCancelled {

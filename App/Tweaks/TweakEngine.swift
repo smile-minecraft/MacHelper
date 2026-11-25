@@ -109,11 +109,6 @@ final class TweakEngine {
         apply(force: true)
     }
 
-    static func requestAccessibility() {
-        _ = AccessibilityAuthority.requestPrompt()
-        Task { @MainActor in shared.apply(force: true) }
-    }
-
     private func applicationActivated(_ app: NSRunningApplication) {
         frontmostBundleID = app.bundleIdentifier
         quitGuard.updateFrontmost(frontmostBundleID, pid: app.processIdentifier)
