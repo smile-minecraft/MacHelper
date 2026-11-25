@@ -45,7 +45,9 @@ struct HelperRecoveryBanner: View {
                         }
                         .disabled(monitor.isRepairing)
                     }
-                    Button("Open Login Items") { monitor.openLoginItems() }
+                    // Opens Login Items with the floating guide beside it.
+                    Button("Open Login Items") { PermissionFlow.shared.openGuided(.helper) }
+                    Button("Permission Details…") { PermissionFlow.shared.showInSettings(.helper) }
                     Spacer()
                     Button("Dismiss") { monitor.dismissBanner() }
                 }

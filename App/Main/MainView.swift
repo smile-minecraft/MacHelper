@@ -10,7 +10,6 @@ struct MainView: View {
     /// The welcome guide: opens by itself on first launch and again from Help → Welcome Guide.
     @Bindable private var onboarding = OnboardingCenter.shared
     /// The Helper setup guide, opened by hand from the sidebar footer.
-    @State private var showHelperSetup = false
     /// Last measured height of the Helper warning floating over the detail area. Only used while
     /// the warning shows; once hidden the overlay keeps just its 10 pt top padding.
     @State private var bannerHeight: CGFloat = 0
@@ -21,7 +20,7 @@ struct MainView: View {
 
     var body: some View {
         NavigationSplitView {
-            Sidebar(app: app, setUpHelper: { showHelperSetup = true })
+            Sidebar(app: app, setUpHelper: { PermissionFlow.shared.showInSettings(.helper, start: true) })
                 .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
         } detail: {
             // The previous page leaves at once and the new one fades in, rising a few points, so a
@@ -71,7 +70,6 @@ struct MainView: View {
         .sheet(isPresented: $onboarding.isPresented, onDismiss: { OnboardingLifecycle.markCompleted() }) {
             OnboardingFlowView(finish: { onboarding.dismissed() })
         }
-        .sheet(isPresented: $showHelperSetup) { HelperSetupSheet() }
         // Switching to simple mode while on an advanced page goes back to the overview.
         .onChange(of: ThemeStore.shared.settings.mode) { if !app.section.isVisible { app.section = .overview } }
         // Turning off the module of the open page does the same, from a toggle or a settings import.
@@ -170,7 +168,7 @@ private struct SidebarFooter: View {
         } else {
             Button(action: setUpHelper) { row }
                 .buttonStyle(.plain)
-                .help("Open Helper setup and repair options")
+                .help("Open the Helper in Settings → Permissions")
         }
     }
 

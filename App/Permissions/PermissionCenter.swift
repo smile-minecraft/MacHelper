@@ -294,6 +294,9 @@ final class PermissionCenter {
         if HelperClient.shared.currentStatus == .requiresApproval {
             SystemSettingsPane.loginItems.open()
         }
+        // The row reads the health monitor's verified state; probe once so it reflects the new
+        // registration now instead of at the next periodic pass. The probe never repairs.
+        await HelperHealthMonitor.shared.check(allowRecovery: false)
         await refresh()
     }
 

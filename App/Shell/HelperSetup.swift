@@ -61,7 +61,7 @@ struct HelperSetupSheet: View {
                             }
                             .disabled(health.isRepairing)
                         }
-                        Button("Open Login Items") { health.openLoginItems() }
+                        Button("Open Login Items") { PermissionFlow.shared.openGuided(.helper) }
                     }
                     if let repairError = health.repairError {
                         Text(repairError)
@@ -84,7 +84,7 @@ struct HelperSetupSheet: View {
                 step(2, done: approved, active: installed && !approved,
                      title: "Allow it in System Settings",
                      detail: "In General → Login Items & Extensions, turn on MacHelper under “Allow in the Background”. macOS asks for your password.") {
-                    Button("Open Login Items") { HelperClient.shared.openLoginItemsSettings() }
+                    Button("Open Login Items") { PermissionFlow.shared.openGuided(.helper) }
                 }
                 step(3, done: responding, active: approved && !responding,
                      title: "Helper is running",
@@ -140,7 +140,7 @@ struct HelperSetupSheet: View {
             try HelperClient.shared.register()
             status = HelperClient.shared.status
             // Registering normally needs approval; take the user straight to the switch.
-            if status == .requiresApproval { HelperClient.shared.openLoginItemsSettings() }
+            if status == .requiresApproval { PermissionFlow.shared.openGuided(.helper) }
         } catch {
             self.error = error.localizedDescription
         }

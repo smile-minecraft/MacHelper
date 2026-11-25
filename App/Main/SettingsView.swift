@@ -7,7 +7,7 @@ import Telemetry
 struct SettingsView: View {
     let app: AppModel
 
-    enum Tab: String { case general, features, appearance, menuBar, alerts, helper, history }
+    enum Tab: String { case general, permissions, features, appearance, menuBar, alerts, helper, history }
 
     /// Opens on General. A debug launch argument (`-settings.tab helper`) can pick another tab for
     /// screenshots; it lives in the volatile argument domain and is never written back.
@@ -18,6 +18,9 @@ struct SettingsView: View {
             GeneralSettings(app: app)
                 .tabItem { Label("General", systemImage: "gearshape") }
                 .tag(Tab.general)
+            PermissionsSettingsView()
+                .tabItem { Label("Permissions", systemImage: "hand.raised") }
+                .tag(Tab.permissions)
             FeatureSettings(app: app)
                 .tabItem { Label("Features", systemImage: "square.grid.2x2") }
                 .tag(Tab.features)
@@ -40,6 +43,9 @@ struct SettingsView: View {
                 .tag(Tab.history)
         }
         .frame(minWidth: 760, minHeight: 580)
+        // Another screen asked for a permission: show the tab that lists it.
+        .onAppear { if PermissionFlow.shared.focus != nil { tab = .permissions } }
+        .onChange(of: PermissionFlow.shared.tabRequest) { tab = .permissions }
     }
 }
 

@@ -297,7 +297,7 @@ struct DiskAnalysisView: View {
             HStack {
                 Image(systemName: "lock.fill").foregroundStyle(Theme.orange)
                 Text("\(model.progress.inaccessibleDirectories) folders couldn’t be read; the results are incomplete.")
-                Button("Open Full Disk Access Settings") { model.openFullDiskAccessSettings() }.buttonStyle(.link)
+                Button("Open Full Disk Access Settings") { PermissionFlow.shared.openGuided(.fullDiskAccess) }.buttonStyle(.link)
             }
             .font(.mhCaption)
         }

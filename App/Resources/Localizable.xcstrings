@@ -1,6 +1,600 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "A small guide stays beside System Settings and closes once MacHelper sees the Helper running.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Una pequeña guía queda junto a Ajustes del Sistema y se cierra cuando MacHelper ve el Helper en marcha." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "小さなガイドがシステム設定の横に表示され、MacHelper が Helper の動作を確認すると閉じます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "작은 안내 창이 시스템 설정 옆에 떠 있다가 MacHelper가 Helper 실행을 확인하면 닫힙니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "一个小指引会停在“系统设置”旁，MacHelper 确认 Helper 正在运行后自动关闭。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "一個小指引會停在「系統設定」旁，MacHelper 確認 Helper 正在執行後會自動關閉。" } }
+      }
+    },
+    "Accessibility is on.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "La accesibilidad está activada." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アクセシビリティがオンになりました。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "손쉬운 사용이 켜졌습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "辅助功能已开启。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "輔助使用已開啟。" } }
+      }
+    },
+    "Add MacHelper to Full Disk Access": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Añade MacHelper a Acceso total al disco" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper をフルディスクアクセスに追加" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper를 전체 디스크 접근 권한에 추가" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "将 MacHelper 加入“完全磁盘访问权限”" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "將 MacHelper 加入「完全取用磁碟」" } }
+      }
+    },
+    "Allow the Helper": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Permite el Helper" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Helper を許可" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Helper 허용" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "允许 Helper" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "允許 Helper" } }
+      }
+    },
+    "Allow the background task": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Permite la tarea en segundo plano" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "バックグラウンド作業を許可" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "백그라운드 작업 허용" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "允许后台任务" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "允許背景作業" } }
+      }
+    },
+    "Allowed. It now runs while MacHelper is closed.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Permitido. Ahora funciona aunque MacHelper esté cerrado." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "許可されました。MacHelper を閉じていても動作します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "허용되었습니다. 이제 MacHelper를 닫아도 실행됩니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已允许。现在即使关闭 MacHelper 也会运行。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已允許。現在即使關閉 MacHelper 也會執行。" } }
+      }
+    },
+    "Allow…": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Permitir…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "許可…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "허용…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "允许…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "允許⋯" } }
+      }
+    },
+    "Before macOS asks about Accessibility": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Antes de que macOS pregunte por la accesibilidad" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS がアクセシビリティについて尋ねる前に" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 손쉬운 사용 권한을 묻기 전에" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 macOS 询问辅助功能权限之前" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 macOS 詢問輔助使用權限之前" } }
+      }
+    },
+    "Before macOS asks about Finder": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Antes de que macOS pregunte por el Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS が Finder について尋ねる前に" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 Finder 제어를 묻기 전에" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 macOS 询问 Finder 控制权限之前" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 macOS 詢問 Finder 控制權限之前" } }
+      }
+    },
+    "Before macOS asks about notifications": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Antes de que macOS pregunte por las notificaciones" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS が通知について尋ねる前に" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 알림을 묻기 전에" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 macOS 询问通知权限之前" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 macOS 詢問通知權限之前" } }
+      }
+    },
+    "Before you install the Helper": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Antes de instalar el Helper" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Helper をインストールする前に" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Helper를 설치하기 전에" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "安装 Helper 之前" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "安裝 Helper 之前" } }
+      }
+    },
+    "Close guide": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Cerrar guía" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ガイドを閉じる" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "안내 닫기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "关闭指引" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "關閉指引" } }
+      }
+    },
+    "Closes by itself when it’s done.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Se cierra sola al terminar." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "完了すると自動で閉じます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "완료되면 자동으로 닫힙니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "完成后自动关闭。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "完成後會自動關閉。" } }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Continuar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "続ける" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "계속" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "继续" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "繼續" } }
+      }
+    },
+    "Done.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Listo." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "完了しました。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "완료되었습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已完成。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已完成。" } }
+      }
+    },
+    "Drag MacHelper into the list": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Arrastra MacHelper a la lista" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper をリストへドラッグ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper를 목록으로 드래그" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "将 MacHelper 拖到列表中" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "將 MacHelper 拖到列表中" } }
+      }
+    },
+    "Drag it into the Full Disk Access list in System Settings.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Arrástralo a la lista de Acceso total al disco en Ajustes del Sistema." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システム設定のフルディスクアクセスのリストへドラッグしてください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 설정의 전체 디스크 접근 권한 목록으로 드래그하세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "将它拖到“系统设置”的“完全磁盘访问权限”列表中。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "將它拖到「系統設定」的「完全取用磁碟」列表中。" } }
+      }
+    },
+    "Drag this icon into the list": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Arrastra este icono a la lista" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "このアイコンをリストへドラッグ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 아이콘을 목록으로 드래그" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "将此图标拖到列表中" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "將這個圖像拖到列表中" } }
+      }
+    },
+    "Enter your password or use Touch ID when macOS asks.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Introduce tu contraseña o usa Touch ID cuando macOS lo pida." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS に求められたらパスワードを入力するか Touch ID を使ってください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 요청하면 암호를 입력하거나 Touch ID를 사용하세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "macOS 要求时，输入密码或使用触控 ID。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "macOS 要求時，輸入密碼或使用 Touch ID。" } }
+      }
+    },
+    "Full Disk Access is on.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "El acceso total al disco está activado." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "フルディスクアクセスがオンになりました。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "전체 디스크 접근 권한이 켜졌습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "完全磁盘访问权限已开启。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "完全取用磁碟已開啟。" } }
+      }
+    },
+    "Hide details": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ocultar detalles" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "詳細を隠す" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "세부사항 숨기기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "隐藏详细信息" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "隱藏詳細資訊" } }
+      }
+    },
+    "If MacHelper isn’t in the list, drag the icon below into it.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Si MacHelper no está en la lista, arrastra el icono de abajo hasta ella." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper がリストにない場合は、下のアイコンをリストへドラッグします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper가 목록에 없으면 아래 아이콘을 목록으로 드래그하세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "如果列表中没有 MacHelper，把下面的图标拖进去。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "如果列表中沒有 MacHelper，把下方的圖像拖進去。" } }
+      }
+    },
+    "If macOS offers to quit and reopen MacHelper, you can choose Later.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Si macOS ofrece salir y reabrir MacHelper, puedes elegir Más tarde." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS が MacHelper の終了と再起動を提案したら、「後で」を選んでもかまいません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 MacHelper를 종료하고 다시 열겠냐고 물으면 ‘나중에’를 선택해도 됩니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "如果 macOS 提示退出并重新打开 MacHelper，可以选择“稍后”。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "如果 macOS 提示結束並重新開啟 MacHelper，可以選擇「稍後」。" } }
+      }
+    },
+    "If you choose Don’t Allow, you can change it later in Privacy & Security → Automation.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Si eliges No permitir, puedes cambiarlo más tarde en Privacidad y seguridad → Automatización." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「許可しない」を選んだ場合も、後でプライバシーとセキュリティ → オートメーションで変更できます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "‘허용 안 함’을 선택해도 나중에 개인정보 보호 및 보안 → 자동화에서 변경할 수 있습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "如果选择“不允许”，之后可在“隐私与安全性”→“自动化”中更改。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "如果選擇「不允許」，之後可以在「隱私權與安全性」→「自動化」中更改。" } }
+      }
+    },
+    "In Privacy & Security → Accessibility, turn on the switch next to MacHelper.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "En Privacidad y seguridad → Accesibilidad, activa el interruptor junto a MacHelper." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "プライバシーとセキュリティ → アクセシビリティで、MacHelper の横のスイッチをオンにします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "개인정보 보호 및 보안 → 손쉬운 사용에서 MacHelper 옆의 스위치를 켜세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在“隐私与安全性”→“辅助功能”中，打开 MacHelper 旁边的开关。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在「隱私權與安全性」→「輔助使用」中，打開 MacHelper 旁邊的開關。" } }
+      }
+    },
+    "MacHelper app icon": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Icono de la app MacHelper" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper アプリのアイコン" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper 앱 아이콘" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "MacHelper App 图标" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "MacHelper App 圖像" } }
+      }
+    },
+    "MacHelper asks only for what a feature you use needs. Each row says what it unlocks, what goes missing without it and what it never reads.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "MacHelper solo pide lo que necesita una función que usas. Cada fila indica qué habilita, qué falta sin ello y qué nunca lee." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper が求めるのは、使っている機能に必要な権限だけです。各行に、何ができるようになるか、ないと何ができないか、何を読み取らないかを示します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper는 사용 중인 기능에 필요한 권한만 요청합니다. 각 행에 무엇을 할 수 있게 되는지, 없으면 무엇이 빠지는지, 무엇을 절대 읽지 않는지 표시합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "MacHelper 只请求你所用功能需要的权限。每一行都说明它能做什么、没有它会少什么，以及它绝不读取什么。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "MacHelper 只會要求你正在使用的功能所需的權限。每一列都說明它能做什麼、沒有它會少什麼，以及它絕不讀取什麼。" } }
+      }
+    },
+    "Needed for your setup": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Necesarios para tu configuración" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "現在の設定に必要" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "현재 설정에 필요" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "你的设置需要" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "你的設定需要" } }
+      }
+    },
+    "Never accessed": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Nunca se accede" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "読み取らないもの" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "절대 접근하지 않는 것" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "绝不读取" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "絕不讀取" } }
+      }
+    },
+    "No feature you have turned on uses these. They move up when you turn one on.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ninguna función activada los usa. Suben cuando activas una que los necesite." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オンにしている機能では使いません。必要な機能をオンにすると上に移動します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "켜 둔 기능 중 이 권한을 쓰는 기능이 없습니다. 필요한 기능을 켜면 위로 이동합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "你开启的功能都用不到这些。开启需要它们的功能后会移到上方。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "你開啟的功能都用不到這些。開啟需要它們的功能後會移到上方。" } }
+      }
+    },
+    "Not needed right now": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No se necesitan ahora" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "現在は不要" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "지금은 필요 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "目前不需要" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "目前不需要" } }
+      }
+    },
+    "Open the Helper in Settings → Permissions": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Abre el Helper en Ajustes → Permisos" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "設定 → 権限で Helper を開く" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "설정 → 권한에서 Helper 열기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在“设置”→“权限”中打开 Helper" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在「設定」→「權限」中開啟 Helper" } }
+      }
+    },
+    "Optional": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Opcionales" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "任意" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "선택 사항" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "可选" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "選用" } }
+      }
+    },
+    "Or click + below the list and choose MacHelper in Applications.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "O haz clic en + bajo la lista y elige MacHelper en Aplicaciones." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "または、リストの下の + をクリックして「アプリケーション」の MacHelper を選びます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "또는 목록 아래의 +를 클릭하고 응용 프로그램에서 MacHelper를 선택하세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "或点按列表下方的 +，然后在“应用程序”中选择 MacHelper。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "或按一下列表下方的 +，然後在「應用程式」中選擇 MacHelper。" } }
+      }
+    },
+    "Permission Details…": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Detalles del permiso…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "権限の詳細…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "권한 세부사항…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "权限详情…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "權限詳細資訊⋯" } }
+      }
+    },
+    "Permissions": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Permisos" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "権限" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "권한" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "权限" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "權限" } }
+      }
+    },
+    "Relaunch MacHelper": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Reabrir MacHelper" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper を再起動" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper 다시 열기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "重新打开 MacHelper" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "重新開啟 MacHelper" } }
+      }
+    },
+    "Relaunch MacHelper when asked; macOS hands the grant only to a new copy.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Reabre MacHelper cuando se te pida; macOS solo concede el permiso a una copia nueva." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "求められたら MacHelper を再起動してください。macOS は新しく起動したものにだけ権限を渡します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "요청하면 MacHelper를 다시 여세요. macOS는 새로 실행한 앱에만 권한을 넘겨줍니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "出现提示时重新打开 MacHelper；macOS 只会把权限交给新启动的副本。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "出現提示時重新開啟 MacHelper；macOS 只會把權限交給重新啟動的程式。" } }
+      }
+    },
+    "Relaunch MacHelper when this guide asks; macOS hands the grant only to a new copy.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Reabre MacHelper cuando esta guía lo pida; macOS solo concede el permiso a una copia nueva." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "このガイドに表示されたら MacHelper を再起動してください。macOS は新しく起動したものにだけ権限を渡します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 안내에서 요청하면 MacHelper를 다시 여세요. macOS는 새로 실행한 앱에만 권한을 넘겨줍니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "此指引提示时重新打开 MacHelper；macOS 只会把权限交给新启动的副本。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這個指引提示時重新開啟 MacHelper；macOS 只會把權限交給重新啟動的程式。" } }
+      }
+    },
+    "Relaunch needed": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Hay que reabrir" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "再起動が必要" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "다시 열어야 함" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "需要重新打开" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "需要重新開啟" } }
+      }
+    },
+    "Scroll to Extensions and click ⓘ next to Finder.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Desplázate hasta Extensiones y haz clic en ⓘ junto a Finder." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「拡張機能」までスクロールし、Finder の横の ⓘ をクリックします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "확장 프로그램까지 스크롤한 다음 Finder 옆의 ⓘ를 클릭하세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "滚动到“扩展”，然后点按 Finder 旁边的 ⓘ。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "捲動到「延伸功能」，然後按一下 Finder 旁邊的 ⓘ。" } }
+      }
+    },
+    "Show details": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Mostrar detalles" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "詳細を表示" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "세부사항 보기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "显示详细信息" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "顯示詳細資訊" } }
+      }
+    },
+    "Status: %@": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Estado: %@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "状態: %@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "상태: %@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "状态：%@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "狀態：%@" } }
+      }
+    },
+    "Step %lld: %@": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Paso %1$lld: %2$@" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ステップ %1$lld: %2$@" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "%1$lld단계: %2$@" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "第 %1$lld 步：%2$@" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "第 %1$lld 步：%2$@" } }
+      }
+    },
+    "System Settings opens at General → Login Items & Extensions.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ajustes del Sistema se abre en General → Ítems de inicio y extensiones." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システム設定の 一般 → ログイン項目と機能拡張 が開きます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 설정의 일반 → 로그인 항목 및 확장 프로그램이 열립니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "“系统设置”会打开“通用”→“登录项与扩展”。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「系統設定」會打開「一般」→「登入項目與延伸功能」。" } }
+      }
+    },
+    "System Settings opens at Login Items & Extensions. Turn on MacHelper under “Allow in the Background” and enter your password.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ajustes del Sistema se abre en Ítems de inicio y extensiones. Activa MacHelper en «Permitir en segundo plano» e introduce tu contraseña." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システム設定の ログイン項目と機能拡張 が開きます。「バックグラウンドでの実行を許可」で MacHelper をオンにし、パスワードを入力します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 설정의 로그인 항목 및 확장 프로그램이 열립니다. ‘백그라운드에서 허용’에서 MacHelper를 켜고 암호를 입력하세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "“系统设置”会打开“登录项与扩展”。在“允许在后台”下打开 MacHelper，并输入密码。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「系統設定」會打開「登入項目與延伸功能」。在「允許在背景執行」下打開 MacHelper，並輸入密碼。" } }
+      }
+    },
+    "System Settings opens at Privacy & Security → Accessibility.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ajustes del Sistema se abre en Privacidad y seguridad → Accesibilidad." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システム設定の プライバシーとセキュリティ → アクセシビリティ が開きます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 설정의 개인정보 보호 및 보안 → 손쉬운 사용이 열립니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "“系统设置”会打开“隐私与安全性”→“辅助功能”。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「系統設定」會打開「隱私權與安全性」→「輔助使用」。" } }
+      }
+    },
+    "System Settings opens at Privacy & Security → Full Disk Access.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ajustes del Sistema se abre en Privacidad y seguridad → Acceso total al disco." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "システム設定の プライバシーとセキュリティ → フルディスクアクセス が開きます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "시스템 설정의 개인정보 보호 및 보안 → 전체 디스크 접근 권한이 열립니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "“系统设置”会打开“隐私与安全性”→“完全磁盘访问权限”。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「系統設定」會打開「隱私權與安全性」→「完全取用磁碟」。" } }
+      }
+    },
+    "The Finder extension is on.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "La extensión del Finder está activada." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder 機能拡張がオンになりました。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 확장 프로그램이 켜졌습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Finder 扩展已开启。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Finder 延伸功能已開啟。" } }
+      }
+    },
+    "The Helper is running.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "El Helper está en marcha." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Helper が動作しています。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Helper가 실행 중입니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Helper 正在运行。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Helper 正在執行。" } }
+      }
+    },
+    "Turn On": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Activar" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "オンにする" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "켜기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "開啟" } }
+      }
+    },
+    "Turn on Accessibility": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Activa la accesibilidad" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アクセシビリティをオンにする" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "손쉬운 사용 켜기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "开启辅助功能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "開啟輔助使用" } }
+      }
+    },
+    "Turn on MacHelper, then click Done.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Activa MacHelper y haz clic en OK." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper をオンにして「完了」をクリックします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper를 켠 다음 완료를 클릭하세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开 MacHelper，然后点按“完成”。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打開 MacHelper，然後按一下「完成」。" } }
+      }
+    },
+    "Turn on the Finder extension": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Activa la extensión del Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder 機能拡張をオンにする" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 확장 프로그램 켜기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "开启 Finder 扩展" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "開啟 Finder 延伸功能" } }
+      }
+    },
+    "Turn on the switch next to MacHelper and confirm with your password.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Activa el interruptor junto a MacHelper y confirma con tu contraseña." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper の横のスイッチをオンにし、パスワードで確定します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper 옆의 스위치를 켜고 암호로 확인하세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开 MacHelper 旁边的开关，并用密码确认。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打開 MacHelper 旁邊的開關，並以密碼確認。" } }
+      }
+    },
+    "Turn on the switch next to MacHelper.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Activa el interruptor junto a MacHelper." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper の横のスイッチをオンにします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper 옆의 스위치를 켜세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "打开 MacHelper 旁边的开关。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "打開 MacHelper 旁邊的開關。" } }
+      }
+    },
+    "Under “Allow in the Background”, turn on the switch next to MacHelper.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "En «Permitir en segundo plano», activa el interruptor junto a MacHelper." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「バックグラウンドでの実行を許可」で、MacHelper の横のスイッチをオンにします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "‘백그라운드에서 허용’에서 MacHelper 옆의 스위치를 켜세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在“允许在后台”下，打开 MacHelper 旁边的开关。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在「允許在背景執行」下，打開 MacHelper 旁邊的開關。" } }
+      }
+    },
+    "Used by": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Lo usa" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "使う機能" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "사용하는 기능" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "用于" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "用於" } }
+      }
+    },
+    "What happens next": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Qué pasará ahora" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "この後の流れ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "다음에 일어나는 일" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "接下来会发生什么" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "接下來會發生什麼" } }
+      }
+    },
+    "Without it": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Sin él" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ない場合" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "없으면" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "没有它时" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "沒有它時" } }
+      }
+    },
+    "You can change the style or turn them off later in System Settings → Notifications.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Puedes cambiar el estilo o desactivarlas más tarde en Ajustes del Sistema → Notificaciones." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "スタイルの変更やオフは、後でシステム設定 → 通知で行えます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "나중에 시스템 설정 → 알림에서 스타일을 바꾸거나 끌 수 있습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "之后可在“系统设置”→“通知”中更改样式或关闭通知。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "之後可以在「系統設定」→「通知」中更改樣式或關閉通知。" } }
+      }
+    },
+    "macOS adds the Helper to Login Items and shows a “Background Items Added” notification.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "macOS añade el Helper a los ítems de inicio y muestra la notificación «Ítems en segundo plano añadidos»." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS が Helper をログイン項目に追加し、「バックグラウンド項目が追加されました」という通知を表示します。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 Helper를 로그인 항목에 추가하고 ‘백그라운드 항목 추가됨’ 알림을 표시합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "macOS 会将 Helper 加入登录项，并显示“已添加后台项目”通知。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "macOS 會把 Helper 加入登入項目，並顯示「已加入背景項目」通知。" } }
+      }
+    },
+    "macOS asks whether MacHelper may control Finder. Click Allow.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "macOS pregunta si MacHelper puede controlar el Finder. Haz clic en Permitir." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS が MacHelper による Finder の制御を許可するか尋ねます。「許可」をクリックします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 MacHelper의 Finder 제어를 허용할지 묻습니다. 허용을 클릭하세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "macOS 会询问是否允许 MacHelper 控制 Finder。点按“允许”。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "macOS 會詢問是否允許 MacHelper 控制 Finder。按一下「允許」。" } }
+      }
+    },
+    "macOS may show an alert that MacHelper would like to control this computer. Choose Open System Settings, or close it.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "macOS puede mostrar un aviso de que MacHelper quiere controlar este ordenador. Elige Abrir Ajustes del Sistema o ciérralo." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS に「MacHelper がこのコンピュータの制御を求めています」という警告が出ることがあります。「システム設定を開く」を選ぶか、閉じてください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 MacHelper가 이 컴퓨터를 제어하려 한다는 경고를 표시할 수 있습니다. 시스템 설정 열기를 선택하거나 닫으세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "macOS 可能会提示 MacHelper 想要控制这台电脑。选择“打开系统设置”，或直接关闭提示。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "macOS 可能會提示 MacHelper 想要控制這部電腦。選擇「打開系統設定」，或直接關閉提示。" } }
+      }
+    },
+    "macOS shows a notification asking to allow MacHelper’s notifications. Click Allow; it may be under Options.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "macOS muestra una notificación que pide permitir las notificaciones de MacHelper. Haz clic en Permitir; puede estar en Opciones." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS が MacHelper の通知を許可するか尋ねる通知を表示します。「許可」をクリックします（「オプション」の中にある場合があります）。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 MacHelper 알림을 허용할지 묻는 알림을 표시합니다. 허용을 클릭하세요. 옵션 안에 있을 수 있습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "macOS 会显示一条通知，询问是否允许 MacHelper 的通知。点按“允许”；它可能在“选项”里。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "macOS 會顯示一則通知，詢問是否允許 MacHelper 的通知。按一下「允許」；它可能在「選項」裡。" } }
+      }
+    },
+    "MacHelper measures folders by name, size and date, and reads an app bundle’s metadata to recognise it. File contents are read only on this Mac, when you look for duplicate files or preview one. No file names, paths or contents are sent anywhere. There is no camera, microphone or screen recording access.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "MacHelper mide las carpetas por nombre, tamaño y fecha, y lee los metadatos del paquete de una app para reconocerla. El contenido de los archivos solo se lee en este Mac, cuando buscas archivos duplicados o previsualizas uno. No se envían nombres, rutas ni contenidos de archivos a ninguna parte. Tampoco tiene acceso a cámara, micrófono ni grabación de pantalla." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper は名前、サイズ、日付でフォルダを計測し、アプリを識別するためにバンドルのメタデータを読み取ります。ファイルの内容を読むのは、重複ファイルを探すときとプレビューするときだけで、この Mac の中で行います。ファイル名、パス、内容はどこにも送信しません。カメラ、マイク、画面収録の権限もありません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper는 이름, 크기, 날짜로 폴더를 측정하고 앱을 식별하기 위해 앱 번들의 메타데이터를 읽습니다. 파일 내용은 중복 파일을 찾거나 미리 볼 때만 이 Mac 안에서 읽습니다. 파일 이름, 경로, 내용은 어디로도 전송하지 않습니다. 카메라, 마이크, 화면 기록 권한도 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "MacHelper 按名称、大小与日期测量文件夹，并读取 App 包的元数据来识别 App。只有在查找重复文件或预览文件时，才会在这台 Mac 上读取文件内容。不会把文件名、路径或内容传送到任何地方；也没有相机、麦克风或屏幕录制权限。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "MacHelper 依名稱、大小與日期測量資料夾，並讀取 App 組合包的中繼資料來辨識 App。只有在尋找重複檔案或預覽檔案時，才會在這台 Mac 上讀取檔案內容。不會把檔名、路徑或內容傳送到任何地方；也沒有相機、麥克風或螢幕錄影權限。" } }
+      }
+    },
     "Menu Bar Item": {
       "localizations": {
         "es": { "stringUnit": { "state": "translated", "value": "Elemento de la barra de menús" } },
@@ -42525,46 +43119,6 @@
         }
       }
     },
-    "Open Helper setup and repair options": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open Helper setup and repair options"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abrir las opciones de configuración y reparación del Helper"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Helper の設定と修復のオプションを開く"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Helper 설정 및 복구 옵션 열기"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "打开 Helper 设置与修复选项"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "開啟 Helper 設定與修復選項"
-          }
-        }
-      }
-    },
     "Repair error: %@" : {
       "localizations" : {
         "es" : {
@@ -44430,15 +44984,6 @@
         "ko": { "stringUnit": { "state": "translated", "value": "디스크 분석과 최적화는 보호된 폴더를 건너뜁니다. 용량 수치에서 빠지고 캐시도 정리할 수 없습니다." } },
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "「磁盘分析」与「优化」会跳过受保护的文件夹：数字中少了它们的空间，其缓存也无法清理。" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "「磁碟分析」與「一鍵優化」會跳過受保護的資料夾：數字少了它們的空間，其快取也無法清理。" } }
-      }
-    },
-    "MacHelper measures folders by name, size and date, and reads an app bundle’s metadata to recognise it. It never opens your documents, and nothing is sent off this Mac. There is no camera, microphone or screen recording access.": {
-      "localizations": {
-        "es": { "stringUnit": { "state": "translated", "value": "MacHelper mide las carpetas por nombre, tamaño y fecha, y lee los metadatos del paquete de una app para reconocerla. Nunca abre tus documentos y nada sale de este Mac. Tampoco tiene acceso a cámara, micrófono ni grabación de pantalla." } },
-        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper は名前、サイズ、日付でフォルダを計測し、アプリを識別するためにバンドルのメタデータを読み取ります。書類を開くことはなく、この Mac の外へ何も送信しません。カメラ、マイク、画面収録の権限もありません。" } },
-        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper는 이름, 크기, 날짜로 폴더를 측정하고 앱을 식별하기 위해 앱 번들의 메타데이터를 읽습니다. 문서를 열지 않으며 이 Mac 밖으로 아무것도 전송하지 않습니다. 카메라, 마이크, 화면 기록 권한도 없습니다." } },
-        "zh-Hans": { "stringUnit": { "state": "translated", "value": "MacHelper 按名称、大小与日期测量文件夹，并读取 App 包的元数据来识别 App。它不会打开你的文稿，也不会把任何内容传出这台 Mac；也没有相机、麦克风或屏幕录制权限。" } },
-        "zh-Hant": { "stringUnit": { "state": "translated", "value": "MacHelper 依名稱、大小與日期測量資料夾，並讀取 App 組合包的中繼資料來辨識 App。它不會開啟你的文件，也不會把任何東西傳出這台 Mac；亦沒有相機、麥克風或螢幕錄影權限。" } }
       }
     },
     "Accessibility": {
