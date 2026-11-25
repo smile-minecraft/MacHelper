@@ -35,6 +35,17 @@ final class UninstallModel {
 
     var selectedApp: InstalledApp? { apps.first { $0.id == selectedAppID } }
 
+    /// The condition that enables the Uninstall button for the selected app. The Delete key asks
+    /// the same question, so it never opens the confirmation for an app the button would skip.
+    var canUninstallSelected: Bool {
+        guard !loadingPlan, let app = selectedApp, let plan, plan.app.id == app.id else { return false }
+        return app.canUninstall && !app.isRunning && plan.selectedSize > 0
+    }
+
+    /// An app dropped onto the page that the installed list doesn't cover; kept in the list while
+    /// it is selected so a background reload can't take its row away.
+    @ObservationIgnored private var droppedApp: InstalledApp?
+
     var visibleApps: [InstalledApp] {
         let filtered = search.isEmpty ? apps : apps.filter {
             $0.name.localizedCaseInsensitiveContains(search) || $0.bundleID.localizedCaseInsensitiveContains(search)
@@ -63,9 +74,42 @@ final class UninstallModel {
             refreshingApps = false
         }
         apps = await Task.detached(priority: .userInitiated) { AppUninstaller.installedApps() }.value
+        // A bundle dropped from another folder isn't in the Applications scan; keep its row while
+        // it is selected, and forget it once the bundle is gone.
+        if let dropped = droppedApp, !apps.contains(where: { $0.id == dropped.id }) {
+            if FileManager.default.fileExists(atPath: dropped.path) {
+                apps.append(dropped)
+                apps.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+            } else {
+                droppedApp = nil
+            }
+        }
         appsLoadedAt = Date()
         PageLoadProbe.mark(.uninstall, "apps")
         PageLoadProbe.mark(.uninstall, "refresh")
+    }
+
+    /// Opens the app a bundle was dropped for: the app tab, no search hiding its row, and the app
+    /// selected so its leftovers are listed. Bundles outside the Applications folders are added to
+    /// the list for as long as they are selected.
+    func openDroppedApp(_ url: URL) async {
+        let path = url.standardizedFileURL.path
+        if let existing = apps.first(where: { $0.path == path }) { selectForDrop(existing); return }
+        guard let app = await Task.detached(priority: .userInitiated, operation: {
+            AppUninstaller.app(at: url)
+        }).value else { return }
+        droppedApp = app
+        if !apps.contains(where: { $0.id == app.id }) {
+            apps.append(app)
+            apps.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        }
+        selectForDrop(app)
+    }
+
+    private func selectForDrop(_ app: InstalledApp) {
+        tab = .apps
+        search = ""
+        selectedAppID = app.id
     }
 
     private func loadPlan() async {

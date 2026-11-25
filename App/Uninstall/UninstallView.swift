@@ -3,6 +3,9 @@ import SwiftUI
 
 struct UninstallView: View {
     @Bindable var model: UninstallModel
+    /// Shared with the details pane: its Uninstall button and the Delete key open the same dialog.
+    @State private var confirmUninstall = false
+    @State private var dropTargeted = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,7 +32,24 @@ struct UninstallView: View {
             .animatesStates(model.tab)
         }
         .frame(minWidth: 700, minHeight: 520)
+        // Any app bundle can be dropped anywhere on the page, whichever tab is showing.
+        .dropDestination(for: URL.self) { urls, _ in
+            guard let url = urls.first(where: AppUninstaller.isAppBundle) else { return false }
+            Task { await model.openDroppedApp(url) }
+            return true
+        } isTargeted: { dropTargeted = $0 }
+        .overlay {
+            if dropTargeted {
+                ZStack {
+                    SurfaceShape(cornerRadius: Theme.cardRadius, style: .continuous).fill(Theme.accent.opacity(0.08))
+                    SurfaceShape(cornerRadius: Theme.cardRadius, style: .continuous).strokeBorder(Theme.accent, lineWidth: 2)
+                }
+                .allowsHitTesting(false)
+            }
+        }
         .task { await model.loadApps() }
+        // A dialog for one app must not carry over to the next one.
+        .onChange(of: model.selectedAppID) { confirmUninstall = false }
         // The list reload sits in the window toolbar, beside the app search.
         .focusedSceneValue(\.pageCommands, pageCommands.withSearch(model.tab == .apps))
     }
@@ -85,18 +105,23 @@ struct UninstallView: View {
                         .tag(app.id)
                     }
                     .scrollContentBackground(.hidden)
+                    // The Delete key asks the same question as the Uninstall button.
+                    .onDeleteCommand { if model.canUninstallSelected { confirmUninstall = true } }
                 }
             }
             .frame(minWidth: 300, idealWidth: 330, maxWidth: 420)
 
             Group {
                 if let app = model.selectedApp {
-                    AppDetail(model: model, app: app)
+                    AppDetail(model: model, app: app, confirm: $confirmUninstall)
                         .id(app.id)
                         .transition(.opacity)
                 } else {
                     PixelEmptyState(art: "px.empty.box", title: "Choose an App to Uninstall",
-                                    message: "MacHelper also finds the caches, settings and data it left behind, and you decide item by item what to delete.") { EmptyView() }
+                                    message: "MacHelper also finds the caches, settings and data it left behind, and you decide item by item what to delete.") {
+                        Text("Or drag an app from Finder onto this window.")
+                            .font(.mhCaption).foregroundStyle(Palette.textFaint)
+                    }
                 }
             }
             .frame(minWidth: 480, maxWidth: .infinity, maxHeight: .infinity)
@@ -109,7 +134,7 @@ struct UninstallView: View {
 private struct AppDetail: View {
     @Bindable var model: UninstallModel
     let app: InstalledApp
-    @State private var confirm = false
+    @Binding var confirm: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -255,6 +280,9 @@ private struct OrphansTab: View {
                     }
                 }
                 .scrollContentBackground(.hidden)
+                // Delete asks the same question as the Move to Trash button: only when something
+                // is checked, since the button is disabled otherwise.
+                .onDeleteCommand { if model.selectedOrphanBytes > 0 { confirm = true } }
                 .actionBar {
                     if let m = model.message { Text(m).font(.mhCaption).foregroundStyle(Palette.textMuted) }
                     Spacer(minLength: 8)

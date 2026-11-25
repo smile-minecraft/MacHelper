@@ -23914,6 +23914,40 @@
         }
       }
     },
+    "Or drag an app from Finder onto this window.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O arrastra una app desde el Finder a esta ventana."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "または Finder からこのウインドウに App をドラッグします。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "또는 Finder에서 이 윈도우로 앱을 끌어다 놓으십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或将 App 从 Finder 拖到此窗口。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或將 App 從 Finder 拖到此視窗。"
+          }
+        }
+      }
+    },
     "Orange (temperature)": {
       "localizations": {
         "es": {
