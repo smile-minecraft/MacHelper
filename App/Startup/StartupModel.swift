@@ -131,6 +131,6 @@ final class StartupModel {
     }
 
     func openLoginItems() {
-        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension")!)
+        SystemSettingsPane.loginItems.open()
     }
 }

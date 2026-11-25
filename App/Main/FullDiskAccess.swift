@@ -1,4 +1,3 @@
-import AppKit
 import Darwin
 import SwiftUI
 
@@ -21,10 +20,9 @@ enum FullDiskAccess {
         return !denied
     }
 
+    @MainActor
     static func openSettings() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
-            NSWorkspace.shared.open(url)
-        }
+        SystemSettingsPane.fullDiskAccess.open()
     }
 
     /// The onboarding sheet is offered once, on the first launch without access; never in snapshot runs.

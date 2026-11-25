@@ -44368,6 +44368,339 @@
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "查找…" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "尋找…" } }
       }
+    },
+    "MacHelper Helper": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Helper de MacHelper" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper Helper" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper Helper" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "MacHelper Helper" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "MacHelper Helper" } }
+      }
+    },
+    "Fan speeds, Deep Clean of system caches, logs and diagnostic reports, maintenance tasks, the full process list, system launch daemons, and moving system-wide leftovers to the Trash.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Velocidad de los ventiladores, Limpieza profunda (cachés, registros e informes de diagnóstico del sistema), tareas de mantenimiento, la lista completa de procesos, los demonios de arranque del sistema y mover los restos de todo el sistema a la Papelera." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ファン速度、ディープクリーン（システムキャッシュ、ログ、診断レポート）、メンテナンスタスク、すべてのプロセス一覧、システム起動デーモン、システム全体の残存ファイルのゴミ箱への移動。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "팬 속도, 딥 클린(시스템 캐시, 로그, 진단 보고서), 유지 관리 작업, 전체 프로세스 목록, 시스템 시동 데몬, 시스템 전역 잔여 항목의 휴지통 이동." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "风扇转速、深度优化（系统缓存、日志与诊断报告）、维护任务、完整的进程列表、系统启动守护进程，以及把系统级残留项目移到废纸篓。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "風扇轉速、深層優化（系統快取、日誌與診斷報告）、維護工作、完整的程序列表、系統啟動常駐程式，以及把系統層級的殘留項目移到垃圾桶。" } }
+      }
+    },
+    "MacHelper can still measure and clean your own caches, but it can’t change fan speeds, clean system folders, read other users’ process counters, change launch daemons or move system-wide leftovers.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "MacHelper puede seguir midiendo y limpiando tus propias cachés, pero no puede cambiar la velocidad de los ventiladores, limpiar carpetas del sistema, leer los contadores de procesos de otros usuarios, cambiar demonios de arranque ni mover restos de todo el sistema." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper は自分のキャッシュの計測と削除はできますが、ファン速度の変更、システムフォルダのクリーン、他ユーザーのプロセスカウンタの読み取り、起動デーモンの変更、システム全体の残存ファイルの移動はできません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper는 사용자 캐시를 측정하고 정리할 수는 있지만, 팬 속도 변경, 시스템 폴더 정리, 다른 사용자의 프로세스 카운터 읽기, 시동 데몬 변경, 시스템 전역 잔여 항목 이동은 할 수 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "MacHelper 仍可测量并清理你自己的缓存，但无法调节风扇转速、清理系统文件夹、读取其他用户的进程计数、更改启动守护进程，或移动系统级残留项目。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "MacHelper 仍可測量與清理你自己的快取，但無法調整風扇轉速、清理系統資料夾、讀取其他使用者的程序計數、變更啟動常駐程式，或移動系統層級的殘留項目。" } }
+      }
+    },
+    "The Helper deletes only the folders in its allowlist, and only when you ask. It reads CPU and memory counters, background item records and launch daemon settings — never your documents — and sends nothing off this Mac.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "El Helper solo borra las carpetas de su lista de permitidos y solo cuando tú lo pides. Lee contadores de CPU y memoria, registros de elementos en segundo plano y ajustes de demonios de arranque, nunca tus documentos, y no envía nada fuera de este Mac." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Helper は許可リストにあるフォルダだけを、あなたの指示があるときだけ削除します。読み取るのは CPU とメモリのカウンタ、バックグラウンド項目の記録、起動デーモンの設定で、あなたの書類は読みません。この Mac の外へ何も送信しません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Helper는 허용 목록에 있는 폴더만, 사용자가 요청할 때만 삭제합니다. 읽는 것은 CPU 및 메모리 카운터, 백그라운드 항목 기록, 시동 데몬 설정이며 문서는 읽지 않습니다. 이 Mac 밖으로 아무것도 전송하지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Helper 只会删除其允许清单中的文件夹，而且只在你要求时执行。它读取 CPU 与内存计数、后台项目记录与启动守护进程设置（不会读取你的文稿），也不会把任何内容传出这台 Mac。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Helper 只會刪除其允許清單中的資料夾，而且只在你要求時執行。它讀取 CPU 與記憶體計數、背景項目紀錄與啟動常駐程式設定（不會讀取你的文件），也不會把任何東西傳出這台 Mac。" } }
+      }
+    },
+    "Full Disk Access": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Acceso total al disco" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "フルディスクアクセス" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "전체 디스크 접근 권한" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "完全磁盘访问权限" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "完全取用磁碟" } }
+      }
+    },
+    "Measuring and cleaning the folders macOS protects: Mail downloads, Safari and browser caches, other apps’ containers, and the folders Disk Analysis can’t read without it.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Medir y limpiar las carpetas que macOS protege: descargas de Mail, cachés de Safari y otros navegadores, contenedores de otras apps y las carpetas que el Análisis de disco no puede leer sin este permiso." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS が保護しているフォルダの計測とクリーン: メールのダウンロード、Safari やブラウザのキャッシュ、他のアプリのコンテナ、そしてこれがないとディスク分析が読めないフォルダ。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 보호하는 폴더 측정 및 정리: 메일 다운로드, Safari 및 브라우저 캐시, 다른 앱의 컨테이너, 그리고 이것이 없으면 디스크 분석이 읽을 수 없는 폴더." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "测量并清理 macOS 保护的文件夹：邮件下载项、Safari 与浏览器缓存、其他 App 的容器，以及磁盘分析没有它就读取不到的文件夹。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "測量與清理 macOS 保護的資料夾：郵件下載項目、Safari 與瀏覽器快取、其他 App 的容器，以及磁碟分析沒有它就讀不到的資料夾。" } }
+      }
+    },
+    "Disk Analysis and Optimize skip protected folders: their space is missing from the numbers and their caches can’t be cleaned.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "El Análisis de disco y Optimizar omiten las carpetas protegidas: su espacio falta en las cifras y sus cachés no se pueden limpiar." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「ディスク分析」と「最適化」は保護されたフォルダをスキップします。数値にその容量が含まれず、キャッシュもクリーンできません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "디스크 분석과 최적화는 보호된 폴더를 건너뜁니다. 용량 수치에서 빠지고 캐시도 정리할 수 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "「磁盘分析」与「优化」会跳过受保护的文件夹：数字中少了它们的空间，其缓存也无法清理。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「磁碟分析」與「一鍵優化」會跳過受保護的資料夾：數字少了它們的空間，其快取也無法清理。" } }
+      }
+    },
+    "MacHelper measures folders by name, size and date, and reads an app bundle’s metadata to recognise it. It never opens your documents, and nothing is sent off this Mac. There is no camera, microphone or screen recording access.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "MacHelper mide las carpetas por nombre, tamaño y fecha, y lee los metadatos del paquete de una app para reconocerla. Nunca abre tus documentos y nada sale de este Mac. Tampoco tiene acceso a cámara, micrófono ni grabación de pantalla." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper は名前、サイズ、日付でフォルダを計測し、アプリを識別するためにバンドルのメタデータを読み取ります。書類を開くことはなく、この Mac の外へ何も送信しません。カメラ、マイク、画面収録の権限もありません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper는 이름, 크기, 날짜로 폴더를 측정하고 앱을 식별하기 위해 앱 번들의 메타데이터를 읽습니다. 문서를 열지 않으며 이 Mac 밖으로 아무것도 전송하지 않습니다. 카메라, 마이크, 화면 기록 권한도 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "MacHelper 按名称、大小与日期测量文件夹，并读取 App 包的元数据来识别 App。它不会打开你的文稿，也不会把任何内容传出这台 Mac；也没有相机、麦克风或屏幕录制权限。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "MacHelper 依名稱、大小與日期測量資料夾，並讀取 App 組合包的中繼資料來辨識 App。它不會開啟你的文件，也不會把任何東西傳出這台 Mac；亦沒有相機、麥克風或螢幕錄影權限。" } }
+      }
+    },
+    "Accessibility": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Accesibilidad" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アクセシビリティ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "손쉬운 사용" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "辅助功能" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "輔助使用" } }
+      }
+    },
+    "The keyboard and mouse tweaks: cut and paste in Finder, Dock click actions, window buttons, ⌘Tab restore, quit guard, the window menu and Mission Control buttons.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Los ajustes de teclado y ratón: cortar y pegar en el Finder, acción al hacer clic en el Dock, botones de las ventanas, restaurar con ⌘Tab, protección de la tecla de salida, el menú de ventanas y los botones de Mission Control." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "キーボードとマウスの調整: Finder でのカット＆ペースト、Dock アイコンのクリック動作、ウインドウのボタン、⌘Tab での復元、終了ショートカットのガード、ウインドウメニュー、Mission Control のボタン。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "키보드와 마우스 조정 기능: Finder 잘라내기·붙여넣기, Dock 아이콘 클릭 동작, 윈도우 버튼, ⌘Tab 복원, 종료 단축키 가드, 윈도우 메뉴, Mission Control 버튼." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "键盘与鼠标相关的调整功能：Finder 剪切粘贴、Dock 点击操作、窗口按钮、⌘Tab 恢复窗口、退出快捷键防护、窗口菜单与 Mission Control 按钮。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "鍵盤與滑鼠相關的調整功能：Finder 剪下貼上、Dock 點擊動作、視窗按鈕、⌘Tab 還原視窗、結束快捷鍵防誤觸、視窗選單與 Mission Control 按鈕。" } }
+      }
+    },
+    "Those tweaks stay inactive. Everything else in MacHelper works the same.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Esos ajustes quedan inactivos. El resto de MacHelper funciona igual." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "これらの調整は無効のままです。MacHelper のその他の機能は変わりません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "이 조정 기능은 비활성 상태로 남습니다. MacHelper의 나머지 기능은 그대로 작동합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "这些调整功能会保持停用，MacHelper 的其他功能不受影响。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "這些調整功能會保持停用，MacHelper 的其他功能不受影響。" } }
+      }
+    },
+    "Key presses and clicks only decide whether the event is passed on; they are never stored or sent. Window titles are read for the window menu and the Mission Control overlay.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Las pulsaciones y los clics solo deciden si el evento se deja pasar; nunca se guardan ni se envían. Los títulos de las ventanas se leen para el menú de ventanas y la capa de Mission Control." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "キー入力とクリックはイベントをそのまま通すかどうかの判断にだけ使い、保存も送信もしません。ウインドウのタイトルはウインドウメニューと Mission Control のオーバーレイ表示にだけ読み取ります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "키 입력과 클릭은 이벤트를 통과시킬지 판단하는 데만 쓰이며 저장되거나 전송되지 않습니다. 윈도우 제목은 윈도우 메뉴와 Mission Control 오버레이 표시에만 읽습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "按键与点击只用于判断是否放行事件，不会被存储或发送。窗口标题仅供窗口菜单与 Mission Control 浮层显示。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "按鍵與點擊只用來判斷是否放行事件，不會被儲存或傳送。視窗標題僅供視窗選單與 Mission Control 覆蓋層顯示。" } }
+      }
+    },
+    "Finder automation": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Automatización del Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder のオートメーション" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 자동화" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Finder 自动化" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Finder 自動化" } }
+      }
+    },
+    "New File in Finder asks Finder which folder its front window shows, so the new file lands in the folder you are looking at.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Nuevo archivo en el Finder pregunta al Finder qué carpeta muestra su ventana frontal, para crear el archivo en la carpeta que estás viendo." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「Finder で新規ファイル」は Finder の最前面ウインドウが表示しているフォルダを尋ね、いま見ているフォルダに新しいファイルを作ります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder에서 새 파일 만들기는 Finder 앞쪽 윈도우가 보여 주는 폴더를 물어, 보고 있는 폴더에 새 파일을 만듭니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "「在 Finder 中新建文件」会询问 Finder 最前方窗口显示哪个文件夹，让新文件创建在你正在看的文件夹。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "「在 Finder 中新增檔案」會問 Finder 最前方視窗顯示哪個資料夾，讓新檔案建立在你正在看的資料夾。" } }
+      }
+    },
+    "The New File shortcut can’t tell which folder is open and does nothing.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "El atajo Nuevo archivo no puede saber qué carpeta está abierta y no hace nada." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "新規ファイルのショートカットは開いているフォルダを特定できず、何も起きません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "새 파일 단축키는 열려 있는 폴더를 알 수 없어 아무 동작도 하지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "新建文件快捷键无法得知当前打开的文件夹，按下也没有反应。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "新增檔案快速鍵無法得知目前開啟的資料夾，按下也不會有反應。" } }
+      }
+    },
+    "Only the folder path of Finder’s front window is requested. MacHelper doesn’t read Finder’s files and doesn’t control other apps.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Solo se pide la ruta de la carpeta de la ventana frontal del Finder. MacHelper no lee los archivos del Finder ni controla otras apps." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder の最前面ウインドウのフォルダパスだけを尋ねます。Finder のファイルを読むことも、他のアプリを操作することもありません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 앞쪽 윈도우의 폴더 경로만 요청합니다. Finder의 파일을 읽지 않고 다른 앱도 제어하지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "只会向 Finder 询问最前方窗口的文件夹路径。MacHelper 不会读取 Finder 的文件，也不会控制其他 App。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "只會向 Finder 詢問最前方視窗的資料夾路徑。MacHelper 不會讀取 Finder 的檔案，也不會控制其他 App。" } }
+      }
+    },
+    "Finder extension": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Extensión del Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder 拡張機能" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 확장 기능" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Finder 扩展" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Finder 延伸功能" } }
+      }
+    },
+    "The MacHelper items in Finder’s context menu: New File, Copy Path, Open in Terminal and Cut.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Los elementos de MacHelper en el menú contextual del Finder: Nuevo archivo, Copiar ruta, Abrir en Terminal y Cortar." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder のコンテキストメニューに追加される MacHelper の項目: 新規ファイル、パスをコピー、ターミナルで開く、カット。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 컨텍스트 메뉴의 MacHelper 항목: 새 파일, 경로 복사, 터미널에서 열기, 잘라내기." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Finder 右键菜单中的 MacHelper 项目：新建文件、拷贝路径、在终端中打开与剪切。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Finder 右鍵選單中的 MacHelper 項目：新增檔案、拷貝路徑、在終端機中開啟與剪下。" } }
+      }
+    },
+    "Finder’s context menu has no MacHelper items. The menu bar window list and every other tweak keep working.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "El menú contextual del Finder no muestra los elementos de MacHelper. La lista de ventanas de la barra de menús y el resto de ajustes siguen funcionando." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder のコンテキストメニューに MacHelper の項目は出ません。メニューバーのウインドウリストと他の調整はそのまま使えます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 컨텍스트 메뉴에 MacHelper 항목이 표시되지 않습니다. 메뉴 막대 윈도우 목록과 다른 조정 기능은 그대로 작동합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "Finder 右键菜单不会有 MacHelper 项目。菜单栏的窗口列表与其他调整功能不受影响。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "Finder 右鍵選單不會有 MacHelper 項目。選單列的視窗列表與其他調整功能不受影響。" } }
+      }
+    },
+    "The extension adds menu items and hands the request to MacHelper. It has no file access of its own.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "La extensión añade elementos de menú y pasa la petición a MacHelper. No tiene acceso a archivos por sí misma." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "拡張機能はメニュー項目を追加して MacHelper に依頼を渡すだけで、独自のファイルアクセス権限はありません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "확장 기능은 메뉴 항목을 추가하고 요청을 MacHelper에 전달할 뿐, 자체 파일 접근 권한이 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "扩展只负责添加菜单项目并把请求交给 MacHelper，本身没有任何文件访问权限。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "延伸功能只負責加入選單項目並把請求交給 MacHelper，本身沒有任何檔案存取權限。" } }
+      }
+    },
+    "Notifications": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Notificaciones" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "通知" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "알림" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "通知" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "通知" } }
+      }
+    },
+    "The Monitor alerts you turn on (temperature, memory pressure, low disk space) and the warnings when the Helper stops.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Los avisos que actives en Monitor (temperatura, presión de memoria, poco espacio en disco) y los avisos cuando el Helper se detiene." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "「モニタ」でオンにしたアラート（温度、メモリプレッシャー、ディスク容量不足）と、Helper が止まったときの警告。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "모니터에서 켠 알림(온도, 메모리 압력, 디스크 공간 부족)과 Helper가 멈췄을 때의 경고." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "你在「监控」中开启的提醒（温度、内存压力、磁盘空间不足），以及 Helper 停止运行时的警告。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "你在「監控」中開啟的警示（溫度、記憶體壓力、磁碟空間不足），以及 Helper 停止運作時的警告。" } }
+      }
+    },
+    "Alerts stay inside MacHelper’s window. Nothing appears when a threshold is crossed or the Helper stops.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Los avisos se quedan en la ventana de MacHelper. No aparece nada cuando se cruza un umbral ni cuando el Helper se detiene." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アラートは MacHelper のウインドウ内だけに表示されます。しきい値を超えても、Helper が止まっても通知は出ません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "알림은 MacHelper 윈도우 안에만 표시됩니다. 임계값을 넘거나 Helper가 멈춰도 아무 알림도 뜨지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "提醒只会留在 MacHelper 窗口内。超过阈值或 Helper 停止时不会出现任何通知。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "警示只會留在 MacHelper 視窗內。跨越門檻或 Helper 停止時不會出現任何通知。" } }
+      }
+    },
+    "A notification carries only the reading that crossed its threshold or the Helper state; no file names, paths or contents.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Una notificación solo lleva la lectura que cruzó su umbral o el estado del Helper; nunca nombres, rutas ni contenido de archivos." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "通知に含まれるのはしきい値を超えた値か Helper の状態だけで、ファイル名、パス、内容は含みません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "알림에는 임계값을 넘은 수치나 Helper 상태만 담기며 파일 이름, 경로, 내용은 포함되지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "通知只包含超过阈值的读数或 Helper 状态，不含文件名称、路径或内容。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "通知只包含跨越門檻的讀數或 Helper 狀態，不含檔案名稱、路徑或內容。" } }
+      }
+    },
+    "Recording Monitor history while MacHelper is closed, so the charts have no gaps after you quit.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Registrar el historial de Monitor mientras MacHelper está cerrado, para que las gráficas no tengan huecos al salir." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper を終了している間も「モニタ」の履歴を記録し、終了後のグラフに隙間ができないようにします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper가 꺼져 있는 동안에도 모니터 기록을 계속해, 앱을 종료한 뒤에도 차트에 빈 구간이 없습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 MacHelper 关闭时继续记录「监控」历史，让你退出 App 后图表没有缺口。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 MacHelper 關閉時繼續記錄「監控」歷史，讓你結束 App 後圖表沒有缺口。" } }
+      }
+    },
+    "History is recorded only while MacHelper runs; the time after you quit is missing.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "El historial solo se registra mientras MacHelper se ejecuta; el tiempo posterior a cerrarlo falta." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "履歴は MacHelper の実行中だけ記録され、終了後の時間は抜けます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "기록은 MacHelper가 실행 중일 때만 남고, 앱을 종료한 뒤의 시간은 빠집니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "只有在 MacHelper 运行时才会记录历史，退出 App 后的时间会缺失。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "只有在 MacHelper 執行時才會記錄歷史，結束 App 後的時間會缺漏。" } }
+      }
+    },
+    "The local database holds readings and process names, without paths or command lines. Nothing leaves this Mac.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "La base de datos local guarda lecturas y nombres de procesos, sin rutas ni líneas de comandos. Nada sale de este Mac." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ローカルデータベースに保存するのは測定値とプロセス名だけで、パスやコマンドラインは含みません。この Mac の外へは出ません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "로컬 데이터베이스에는 측정값과 프로세스 이름만 저장되며 경로나 명령줄은 없습니다. 이 Mac 밖으로 나가지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "本地数据库只保存读数与进程名称，不含路径或命令行，也不会传出这台 Mac。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "本機資料庫只保存讀數與程序名稱，不含路徑或命令列，也不會傳出這台 Mac。" } }
+      }
+    },
+    "Running the scheduled low-risk clean while MacHelper is closed: caches, logs and developer build caches.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Ejecutar la limpieza programada de bajo riesgo mientras MacHelper está cerrado: cachés, registros y cachés de compilación de herramientas de desarrollo." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "MacHelper を終了している間に予定した低リスクのクリーンを実行します: キャッシュ、ログ、開発ツールのビルドキャッシュ。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "MacHelper가 꺼져 있는 동안 예약된 저위험 정리를 실행합니다: 캐시, 로그, 개발 도구 빌드 캐시." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "在 MacHelper 关闭时执行排定的低风险清理：缓存、日志与开发工具构建缓存。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "在 MacHelper 關閉時執行排定的低風險清理：快取、日誌與開發工具建置快取。" } }
+      }
+    },
+    "Cleaning happens only when you run it yourself.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "La limpieza solo ocurre cuando la ejecutas tú." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "クリーンは自分で実行したときだけ行われます。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "정리는 사용자가 직접 실행할 때만 이루어집니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "只有你自己运行时才会清理。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "只有你自己執行時才會清理。" } }
+      }
+    },
+    "Only low-risk caches and logs are deleted; documents, photos and downloads are never touched. Every deletion is listed in the operation log.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Solo se borran cachés y registros de bajo riesgo; los documentos, las fotos y las descargas no se tocan. Cada borrado queda en el registro de operaciones." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "削除するのは低リスクのキャッシュとログだけで、書類、写真、ダウンロードには触れません。削除はすべて操作ログに残ります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "저위험 캐시와 로그만 삭제하며, 문서·사진·다운로드는 건드리지 않습니다. 모든 삭제는 작업 기록에 남습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "只会删除低风险的缓存与日志，文稿、照片与下载项绝不会被改动。每次删除都会列在操作记录中。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "只會刪除低風險的快取與日誌，文件、照片與下載項目絕不會被動到。每次刪除都會列在操作紀錄中。" } }
+      }
+    },
+    "Starting MacHelper when you log in, so the menu bar item and its readings are there.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Iniciar MacHelper al iniciar sesión, para que el elemento de la barra de menús y sus lecturas estén listos." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ログイン時に MacHelper を起動し、メニューバー項目とその表示をすぐ使えるようにします。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "로그인할 때 MacHelper를 실행해 메뉴 막대 항목과 수치가 바로 준비되게 합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "登录时启动 MacHelper，让菜单栏图标与读数直接就位。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "登入時啟動 MacHelper，讓選單列圖示與讀數直接就位。" } }
+      }
+    },
+    "You open MacHelper yourself after logging in.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Tienes que abrir MacHelper tú mismo después de iniciar sesión." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "ログイン後に自分で MacHelper を開く必要があります。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "로그인한 뒤 MacHelper를 직접 열어야 합니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "登录后需要自己打开 MacHelper。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "登入後要自己開啟 MacHelper。" } }
+      }
+    },
+    "It only starts the app. It doesn’t register background services or start recording.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Solo inicia la app. No registra servicios en segundo plano ni empieza a registrar." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "アプリを起動するだけで、バックグラウンドサービスを登録したり記録を開始したりしません。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "앱을 실행할 뿐, 백그라운드 서비스를 등록하거나 기록을 시작하지 않습니다." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "只会启动 App，不会注册后台服务或开始记录。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "只會啟動 App，不會註冊背景服務或開始記錄。" } }
+      }
+    },
+    "Needs approval": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Requiere aprobación" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "許可が必要" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "승인 필요" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "需要批准" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "需要核准" } }
+      }
+    },
+    "Denied": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Rechazado" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "拒否済み" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "거부됨" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "已拒绝" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "已拒絕" } }
+      }
+    },
+    "Not granted": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Sin permiso" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "未許可" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "권한 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "未授权" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "未授權" } }
+      }
+    },
+    "Not needed": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "No es necesario" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "不要" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "필요 없음" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "不需要" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "不需要" } }
+      }
     }
   },
   "version": "1.0"
