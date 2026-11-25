@@ -44291,6 +44291,15 @@
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "主要操作" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "主要動作" } }
       }
+    },
+    "Find…": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Buscar…" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "検索…" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "찾기…" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "查找…" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "尋找…" } }
+      }
     }
   },
   "version": "1.0"

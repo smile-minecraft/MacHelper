@@ -85,7 +85,7 @@ struct StartupView: View {
                                                                             systemImage: "arrow.clockwise",
                                                                             isEnabled: !model.refreshing) {
             Task { if model.tab == .launchd { await model.load(forceRefresh: true) } else { await model.loadBackground(forceRefresh: true) } }
-        }))
+        }).withSearch())
         .confirmationDialog("Remove \(removing?.label ?? "")?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }),
                             titleVisibility: .visible) {
             Button("Stop and Move to Trash", role: .destructive) {

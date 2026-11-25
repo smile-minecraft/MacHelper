@@ -200,20 +200,29 @@ private struct GeneralSettings: View {
                 Picker("Dock icon", selection: Binding(
                     get: { dockMode },
                     set: { newValue in
-                        // The picker below disables the two modes that take the Dock icon away while
-                        // the menu bar item is hidden; refuse them here as well so no path can leave
-                        // the app with neither entry point.
+                        // The picker is disabled while the menu bar item is hidden; refuse the two
+                        // modes that take the Dock icon away here as well, so no path can leave the
+                        // app with neither entry point.
                         guard DockPolicy.allows(newValue, menuBarVisible: app.isMenuBarItemVisible) else { return }
                         withAnimation(Motion.stateChange) { dockMode = newValue }
                     }
                 )) {
                     Text("Always").tag(DockMode.always)
                     Text("While a window is open").tag(DockMode.whileWindowOpen)
-                        .disabled(!app.isMenuBarItemVisible)
                     Text("Never").tag(DockMode.never)
-                        .disabled(!app.isMenuBarItemVisible)
                 }
+                // Only Always is allowed while the menu bar item is hidden, so the whole choice is
+                // off; SwiftUI doesn't grey out single items of a menu picker.
+                .disabled(!app.isMenuBarItemVisible)
                 .onChange(of: dockMode) { AppModel.applyDockPreference() }
+                Group {
+                    if !app.isMenuBarItemVisible {
+                        Text("The Dock icon stays on while the menu bar item is hidden.")
+                            .settingsCaption()
+                    }
+                }
+                .transition(Motion.stateSwap)
+                .animatesStateChanges(app.isMenuBarItemVisible)
                 Toggle("Open at login", isOn: $openAtLogin)
                     .onChange(of: openAtLogin) { _, on in
                         do {
@@ -239,14 +248,6 @@ private struct GeneralSettings: View {
                 }
                 .transition(Motion.stateSwap)
                 .animatesStateChanges(dockMode)
-                Group {
-                    if !app.isMenuBarItemVisible {
-                        Text("The Dock icon stays on while the menu bar item is hidden.")
-                            .settingsCaption()
-                    }
-                }
-                .transition(Motion.stateSwap)
-                .animatesStateChanges(app.isMenuBarItemVisible)
             }
             Section {
                 LanguagePicker()

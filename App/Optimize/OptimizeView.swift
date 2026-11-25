@@ -31,7 +31,7 @@ struct OptimizeView: View {
         .frame(minWidth: 680, minHeight: 520)
         // The scan, clean and options buttons live in the window toolbar and the Actions menu,
         // built from the same state as the buttons on the page.
-        .focusedSceneValue(\.pageCommands, pageCommands)
+        .focusedSceneValue(\.pageCommands, pageCommands.withSearch())
         .searchable(text: $model.filter.text, placement: .toolbar, prompt: Text("Search names and paths"))
         .sheet(isPresented: $showAutoClean) { AutoCleanView(model: autoClean) }
         .sheet(isPresented: $showExclusions) { ExclusionsView(model: model) }
@@ -58,7 +58,7 @@ struct OptimizeView: View {
         }
         switch model.phase {
         case .idle:
-            return PageCommands(primary: PageCommand(id: "scan", title: "Start Scan", systemImage: "magnifyingglass") {
+            return PageCommands(primary: PageCommand(id: "scan", title: "Start Scan", systemImage: "play.circle") {
                 category = nil
                 Task { await model.scan() }
             }, options: options)

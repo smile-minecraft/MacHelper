@@ -52,7 +52,8 @@ struct DiskAnalysisView: View {
         .task { model.restoreSavedScanIfNeeded() }
         // Scan, rescan and stop live in the window toolbar; the Actions menu offers the same
         // through ⌘R, so the page itself defines no keyboard shortcut.
-        .focusedSceneValue(\.pageCommands, pageCommands)
+        // The search field is in the toolbar only while the Largest Files tab is showing.
+        .focusedSceneValue(\.pageCommands, pageCommands.withSearch(model.root != nil && sideTab == .largest))
     }
 
     /// The page's scan button and its stop twin. ⌘R runs the scan (Refresh in the Actions menu).
