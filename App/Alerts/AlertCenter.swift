@@ -23,9 +23,10 @@ final class AlertCenter {
     var settings: AlertSettings {
         didSet {
             if let data = try? JSONEncoder().encode(settings) { UserDefaults.standard.set(data, forKey: Self.key) }
-            if settings.anyEnabled { requestAuthorization() }
         }
     }
+    /// macOS refused MacHelper's notifications. Read, never requested, here: asking goes through
+    /// `PermissionFlow`, which explains first and only when the user turns an alert on.
     private(set) var authorizationDenied = false
 
     @ObservationIgnored nonisolated static let key = "alerts.settings"
@@ -77,15 +78,16 @@ final class AlertCenter {
         UNUserNotificationCenter.current().add(request)
     }
 
-    func requestAuthorization() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
-            Task { @MainActor in self.authorizationDenied = !granted }
-        }
+    /// The notification permission as macOS has it now, without asking.
+    func authorizationStatus() async -> UNAuthorizationStatus {
+        let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+        authorizationDenied = status == .denied
+        return status
     }
 
-    /// Sends one sample notification right away (Settings → Test).
+    /// Sends one sample notification right away (Settings → Test). The caller asks for permission
+    /// first when macOS has not been asked yet.
     func sendTest() {
-        requestAuthorization()
         let content = UNMutableNotificationContent()
         content.title = String(localized: "MacHelper alerts are on")
         content.body = String(localized: "You’ll be notified like this when a threshold is crossed.")

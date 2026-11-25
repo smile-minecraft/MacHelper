@@ -1,8 +1,11 @@
+import Permissions
 import SwiftUI
 import Tweaks
 
 struct TweaksView: View {
     @Bindable var model: TweakSettingsModel
+    /// The explanation shown before macOS asks for Accessibility, as on the Permissions tab.
+    @State private var prePrompt: PermissionID?
 
     var body: some View {
         Form {
@@ -25,6 +28,7 @@ struct TweaksView: View {
         .formStyle(.grouped)
         .settingsSurface()
         .navigationTitle(Text("Tweaks"))
+        .sheet(item: $prePrompt) { id in PermissionPrePromptSheet(id: id) }
         // Tweaks has no page commands; an empty set withdraws the previous page's.
         .focusedSceneValue(\.pageCommands, PageCommands())
     }
@@ -55,7 +59,9 @@ struct TweaksView: View {
                             .buttonStyle(.link)
                             .font(.mhCaption)
                     } else if needsAccessibility {
-                        Button(Self.grantAccessibilityTitle) { TweakEngine.requestAccessibility() }
+                        Button(Self.grantAccessibilityTitle) {
+                            Task { await PermissionFlow.shared.start(.accessibility) { prePrompt = $0 } }
+                        }
                             .buttonStyle(.link)
                             .font(.mhCaption)
                     }

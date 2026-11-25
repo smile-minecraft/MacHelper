@@ -210,5 +210,13 @@ final class AutoCleanModel {
         message = String(localized: "Cleaned \(config.lastItemCount) items.")
     }
 
-    func openLoginItems() { SMAppService.openSystemSettingsLoginItems() }
+    /// Registers the schedule again while Auto Clean is on, for when the registration went missing.
+    /// It goes through the same reconcile loop as the switch, so it never registers a schedule the
+    /// user turned off and never races an unregister that is still running.
+    func setUpAgain() async {
+        guard config.enabled, moduleEnabled else { refresh(); return }
+        pendingEnabledChange = true
+        await applyEnabledChange()
+        agentStatus = agent.status
+    }
 }
