@@ -41,6 +41,13 @@ enum FinderAutomation {
         }
     }
 
+    /// Asks macOS for the grant: the first time, the system shows its own alert. The call waits for
+    /// the answer, so callers run it off the main thread.
+    @discardableResult
+    static func requestPermission() -> Bool {
+        determinePermission(ask: true) == noErr
+    }
+
     /// The folder the front Finder window shows. Runs off the main thread: a slow Finder must not
     /// stall the app's window while the event loop waits for the reply.
     static func currentFolder() async throws -> URL {
