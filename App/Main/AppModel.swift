@@ -25,6 +25,25 @@ enum AppSection: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
+    /// The same title as a plain string, for AppKit surfaces such as the Dock menu: SwiftUI resolves
+    /// `title` when it draws, but `NSMenuItem` needs the words now. Both switches list the same
+    /// localization keys, which is what keeps the Dock menu and the window in step.
+    var localizedTitle: String {
+        switch self {
+        case .overview: String(localized: "Overview")
+        case .monitor: String(localized: "Monitor")
+        case .health: String(localized: "Health Check")
+        case .fans: String(localized: "Fans")
+        case .optimize: String(localized: "Optimize")
+        case .disk: String(localized: "Disk Analysis")
+        case .uninstall: String(localized: "Uninstall")
+        case .updates: String(localized: "Homebrew Updates")
+        case .startup: String(localized: "Startup Items")
+        case .tweaks: String(localized: "Tweaks")
+        case .cable: String(localized: "Cable")
+        }
+    }
+
     var icon: String {
         switch self {
         case .tweaks: "px.settings"
@@ -125,6 +144,14 @@ final class AppModel {
     /// Set by the main window's view; opens (or brings back) the main window.
     @ObservationIgnored var openMainWindow: (() -> Void)?
 
+    /// Set by the app shell; shows or hides the menu bar item.
+    @ObservationIgnored var applyMenuBarItemVisibility: ((Bool) -> Void)?
+
+    /// Whether the menu bar item is shown. The stored preference is the source of truth, because a
+    /// settings import can change it while the app runs; the Settings toggle and
+    /// `reloadMenuBarItemVisibility()` both go through the same path.
+    private(set) var isMenuBarItemVisible = MenuBarPreference.isVisible(.standard)
+
     private init() {
         store = MonitorStore(settings: settings)
         if DemoData.snapshot {
@@ -150,7 +177,7 @@ final class AppModel {
         if !TelemetryRuntime.isNonProduction() {
             Task { await telemetry.recordSectionView(section.rawValue) }
         }
-        if DockPreference.migrate(.standard) != .never {
+        if Self.dockMode != .never {
             NSApp.setActivationPolicy(.regular)
         }
         NSApp.activate()
@@ -164,7 +191,7 @@ final class AppModel {
     }
 
     func showSettings() {
-        if DockPreference.migrate(.standard) != .never {
+        if Self.dockMode != .never {
             NSApp.setActivationPolicy(.regular)
         }
         NSApp.activate()
@@ -208,18 +235,47 @@ final class AppModel {
     static func prepareDockPreference() {
         // `never` must start in the menu bar, while the other modes need the regular policy
         // long enough for the SwiftUI Window scene to order the main window in.
-        NSApp.setActivationPolicy(DockPreference.migrate(.standard) == .never ? .accessory : .regular)
+        NSApp.setActivationPolicy(dockMode == .never ? .accessory : .regular)
+    }
+
+    /// The Dock mode that applies now. A hidden menu bar item forces `always`, so the Dock icon and
+    /// its menu are still there to open the window with; see `DockPolicy`.
+    static var dockMode: DockMode {
+        DockPolicy.effectiveMode(requested: DockPreference.migrate(.standard),
+                                 menuBarVisible: MenuBarPreference.isVisible(.standard))
     }
 
     /// Applies the Dock mode to the current set of windows. A mode of `whileWindowOpen` keeps the
     /// regular policy while any ordinary window is visible or minimized; the menu bar panel is an
     /// `NSPanel`, so it never counts as a window here.
     static func applyDockPreference() {
-        let mode = DockPreference.migrate(.standard)
+        let mode = dockMode
         let hasOpenWindows = NSApp.windows.contains {
             $0.canBecomeMain && ($0.isVisible || $0.isMiniaturized)
         }
         NSApp.setActivationPolicy(mode.showsDockIcon(hasOpenWindows: hasOpenWindows) ? .regular : .accessory)
+    }
+
+    /// Shows or hides the menu bar item, without a relaunch.
+    ///
+    /// Hiding it writes the Dock mode as `always` first: the Dock menu is then the only way to open
+    /// a window, so an app with neither entry point would be unreachable. Showing the item again
+    /// leaves the Dock mode alone instead of guessing at the one the user had before.
+    func setMenuBarItemVisible(_ visible: Bool) {
+        MenuBarPreference.write(visible: visible, to: .standard)
+        if !visible { DockPreference.write(.always, to: .standard) }
+        reloadMenuBarItemVisibility()
+    }
+
+    /// Applies the stored menu bar item setting to the running app. A settings import writes the
+    /// same preference without going through the Settings toggle, so it calls this instead.
+    func reloadMenuBarItemVisibility() {
+        let visible = MenuBarPreference.isVisible(.standard)
+        if visible != isMenuBarItemVisible {
+            isMenuBarItemVisible = visible
+            applyMenuBarItemVisibility?(visible)
+        }
+        Self.applyDockPreference()
     }
 }
 
