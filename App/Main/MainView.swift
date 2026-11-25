@@ -11,6 +11,9 @@ struct MainView: View {
     @Bindable private var onboarding = OnboardingCenter.shared
     /// The Helper setup guide, opened by hand from the sidebar footer.
     @State private var showHelperSetup = false
+    /// Last measured height of the Helper warning floating over the detail area. Only used while
+    /// the warning shows; once hidden the overlay keeps just its 10 pt top padding.
+    @State private var bannerHeight: CGFloat = 0
 
     /// The window toolbar's own id; every item in it has an id too, which is what makes
     /// View → Customize Toolbar… available.
@@ -21,21 +24,30 @@ struct MainView: View {
             Sidebar(app: app, setUpHelper: { showHelperSetup = true })
                 .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
         } detail: {
-            VStack(spacing: 0) {
+            // The previous page leaves at once and the new one fades in, rising a few points, so a
+            // switch reads as one movement and two heavy pages are never blended mid-fade.
+            // With Reduce Motion it is a plain fade.
+            ZStack {
+                detail
+                    .id(app.section)
+                    .onAppear { PageLoadProbe.mark(app.section, "render") }
+                    .transition(Motion.pageIn)
+            }
+            .animation(Motion.pageSwitch, value: app.section)
+            // The banner view renders nothing once hidden, so its last measured height is ignored then.
+            .padding(.top, HelperHealthMonitor.shared.shouldShowBanner ? bannerHeight : 0)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // The Helper warning floats over the top of the detail area and the page moves down by
+            // its measured height. Stacked in a VStack (or a safe area inset) above the page, the
+            // banner grew the split view past the window instead, pushing every column, sidebar
+            // included, up under the title bar.
+            .overlay(alignment: .top) {
                 HelperRecoveryBanner()
                     .padding(.horizontal, 16)
                     .padding(.top, 10)
-                // The previous page leaves at once and the new one fades in, rising a few points, so a
-                // switch reads as one movement and two heavy pages are never blended mid-fade.
-                // With Reduce Motion it is a plain fade.
-                ZStack {
-                    detail
-                        .id(app.section)
-                        .onAppear { PageLoadProbe.mark(app.section, "render") }
-                        .transition(Motion.pageIn)
-                }
-                .animation(Motion.pageSwitch, value: app.section)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bannerHeight = $0 }
+                    // Read the warning before the page, as when it sat above it.
+                    .accessibilitySortPriority(1)
             }
             .background(Palette.base)
             .navigationTitle(Text(app.section.title))
