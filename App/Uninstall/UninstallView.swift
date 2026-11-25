@@ -31,7 +31,7 @@ struct UninstallView: View {
         .frame(minWidth: 700, minHeight: 520)
         .task { await model.loadApps() }
         // The list reload sits in the window toolbar, beside the app search.
-        .focusedSceneValue(\.pageCommands, pageCommands)
+        .focusedSceneValue(\.pageCommands, pageCommands.withSearch(model.tab == .apps))
     }
 
     /// Reloads the tab on screen: the installed app list, or the leftovers of removed apps.

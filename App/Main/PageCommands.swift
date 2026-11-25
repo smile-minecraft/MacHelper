@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// One command a page offers to the menu bar and to the main window's toolbar.
@@ -28,6 +29,15 @@ struct PageCommands {
     var refresh: PageCommand?
     /// The page's further actions, in the order its buttons show them.
     var options: [PageCommand] = []
+    /// Whether the page shows a search field in the toolbar right now; Edit → Find… (⌘F) focuses it.
+    var canSearch = false
+
+    /// The same commands, marked as having a toolbar search field or not.
+    func withSearch(_ on: Bool = true) -> PageCommands {
+        var commands = self
+        commands.canSearch = on
+        return commands
+    }
 }
 
 extension FocusedValues {
@@ -69,6 +79,39 @@ struct PageCommandsMenu: Commands {
     }
 }
 
+/// Edit → Find… (⌘F). SwiftUI's toolbar search field doesn't take ⌘F by itself, so the command
+/// moves the focus into it, and is disabled on pages without a search.
+struct PageFindCommands: Commands {
+    @FocusedValue(\.pageCommands) private var commands
+
+    var body: some Commands {
+        CommandGroup(after: .textEditing) {
+            Button("Find…") { ToolbarSearch.focus() }
+                .keyboardShortcut("f", modifiers: .command)
+                .disabled(commands?.canSearch != true)
+        }
+    }
+}
+
+/// Puts the keyboard focus in the key window's toolbar search field.
+@MainActor
+enum ToolbarSearch {
+    static func focus() {
+        guard let window = NSApp.keyWindow, let toolbar = window.toolbar else { return }
+        if let item = toolbar.items.lazy.compactMap({ $0 as? NSSearchToolbarItem }).first {
+            item.beginSearchInteraction()
+        } else if let field = toolbar.items.lazy.compactMap({ searchField(in: $0.view) }).first {
+            window.makeFirstResponder(field)
+        }
+    }
+
+    private static func searchField(in view: NSView?) -> NSSearchField? {
+        guard let view else { return nil }
+        if let field = view as? NSSearchField { return field }
+        return view.subviews.lazy.compactMap { searchField(in: $0) }.first
+    }
+}
+
 /// The page's items in the window toolbar, each with a fixed id so View → Customize Toolbar… can
 /// arrange them. The window has one toolbar, so the arrangement is shared by every page.
 struct PageToolbar: CustomizableToolbarContent {
@@ -90,13 +133,10 @@ struct PageToolbar: CustomizableToolbarContent {
                 PageToolbarButton(command: refresh)
             }
         }
-        if let options = commands?.options, !options.isEmpty {
-            // The page's further actions share one customizable item, so hiding it in the
-            // customization sheet removes exactly what the page added.
-            ToolbarItem(id: "page.options", placement: .primaryAction) {
-                HStack(spacing: 0) {
-                    ForEach(options) { PageToolbarButton(command: $0) }
-                }
+        // One item per action, so each keeps its own label for VoiceOver and the customization sheet.
+        ForEach(commands?.options ?? []) { option in
+            ToolbarItem(id: "page.option.\(option.id)", placement: .primaryAction) {
+                PageToolbarButton(command: option)
             }
         }
     }
