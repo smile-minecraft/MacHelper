@@ -20,6 +20,7 @@ let package = Package(
         .library(name: "Diagnostics", targets: ["Diagnostics"]),
         .library(name: "Cable", targets: ["Cable"]),
         .library(name: "Tweaks", targets: ["Tweaks"]),
+        .library(name: "Permissions", targets: ["Permissions"]),
         .executable(name: "machelper", targets: ["machelper"]),
         .executable(name: "mhprobe", targets: ["mhprobe"]),
     ],
@@ -62,6 +63,9 @@ let package = Package(
         .target(name: "Theming"),
         .target(name: "HelperProtocol", dependencies: ["SMCKit", "FanControl"], linkerSettings: [.linkedFramework("Security")]),
         .target(name: "Tweaks"),
+        // Permission states and requirements only: no AppKit, no TCC calls, so the rules stay
+        // unit-testable while the app owns the real reads and the System Settings links.
+        .target(name: "Permissions"),
         .executableTarget(name: "mhprobe", dependencies: ["SMCKit", "Metrics"]),
         .testTarget(name: "SMCKitTests", dependencies: ["SMCKit"]),
         .testTarget(name: "FanControlTests", dependencies: ["FanControl"]),
@@ -76,5 +80,6 @@ let package = Package(
         .testTarget(name: "SettingsPortabilityTests", dependencies: ["SettingsPortability", "CleanEngine", "FanControl"]),
         .testTarget(name: "CableTests", dependencies: ["Cable"], resources: [.copy("Fixtures")]),
         .testTarget(name: "TweaksTests", dependencies: ["Tweaks"]),
+        .testTarget(name: "PermissionsTests", dependencies: ["Permissions"]),
     ]
 )
