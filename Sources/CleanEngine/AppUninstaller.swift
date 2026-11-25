@@ -163,15 +163,6 @@ public enum AppUninstaller {
         .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
-    /// Reads one bundle at a URL, so a dropped app can be shown even when it lives outside the
-    /// Applications folders. Nil unless the URL is a `.app` bundle with a bundle identifier.
-    public static func app(at url: URL) -> InstalledApp? {
-        let path = url.standardizedFileURL.path
-        guard isAppBundle(url), let bundle = Bundle(path: path), let id = bundle.bundleIdentifier else { return nil }
-        return makeApp(path: path, bundle: bundle, id: id, size: CleanScanner.measure(path)?.size ?? 0,
-                       running: CleanScanner.runningBundleIDs())
-    }
-
     /// True for a folder the Uninstall page accepts when a bundle is dropped on it: a `.app`
     /// directory the system can read as a bundle. Cheap enough to answer while the drop lands.
     public static func isAppBundle(_ url: URL) -> Bool {
@@ -183,7 +174,26 @@ public enum AppUninstaller {
         return Bundle(path: path)?.bundleIdentifier != nil
     }
 
-    /// The row both the installed list and a dropped bundle show.
+    /// The installed row a bundle dropped from Finder stands for: the same bundle when it is in the
+    /// list, otherwise another copy of an installed app (the same bundle ID, dragged out of a DMG, a
+    /// download or a backup), preferring a copy in an Applications folder. The leftovers named after
+    /// the bundle ID and the bundle the uninstall moves are the installed copy's, so a second copy
+    /// never gets a row of its own. Nil when the app is not installed, so the page never lists a
+    /// bundle it cannot uninstall.
+    public static func installedApp(forDroppedBundle url: URL, in apps: [InstalledApp]) -> InstalledApp? {
+        let path = url.standardizedFileURL.path
+        if let sameBundle = apps.first(where: { $0.path == path }) { return sameBundle }
+        guard let id = Bundle(path: path)?.bundleIdentifier else { return nil }
+        let copies = apps.filter { $0.bundleID == id }
+        return copies.first(where: { isInAppFolder($0.path) }) ?? copies.first
+    }
+
+    /// True for a bundle path inside one of the Applications folders the installed list reads.
+    static func isInAppFolder(_ path: String) -> Bool {
+        appFolders.contains { path.hasPrefix($0 + "/") }
+    }
+
+    /// The row the installed list shows.
     private static func makeApp(path: String, bundle: Bundle, id: String, size: UInt64,
                                 running: Set<String>) -> InstalledApp {
         let info = bundle.infoDictionary ?? [:]

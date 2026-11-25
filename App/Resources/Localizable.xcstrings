@@ -7638,6 +7638,40 @@
         }
       }
     },
+    "MacHelper uninstalls apps from the Applications folders. Move %@ there first.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper desinstala las apps de las carpetas «Aplicaciones». Mueve %@ allí primero."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper は「アプリケーション」フォルダにある App をアンインストールします。先に %@ をそこへ移動してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper는 응용 프로그램 폴더에 있는 앱을 제거합니다. 먼저 %@을(를) 그 폴더로 옮기십시오."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 只会卸载「应用程序」文件夹里的 App。请先将 %@ 移到该文件夹。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 只會解除安裝「應用程式」檔案夾裡的 App。請先將 %@ 移到該檔案夾。"
+          }
+        }
+      }
+    },
     "Macintosh HD (Data)": {
       "localizations": {
         "es": {

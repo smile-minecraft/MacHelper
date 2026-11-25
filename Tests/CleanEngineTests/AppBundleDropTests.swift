@@ -2,8 +2,9 @@ import Foundation
 import Testing
 @testable import CleanEngine
 
-/// The Uninstall page accepts an app bundle dropped from Finder. These tests cover which URLs
-/// that drop accepts and what row the app gets, using throwaway bundles in a temporary folder.
+/// The Uninstall page accepts an app bundle dropped from Finder. These tests cover which URLs that
+/// drop accepts and which installed row a dropped bundle stands for, using throwaway bundles in a
+/// temporary folder.
 @Suite struct AppBundleDropTests {
     private func makeFolder() throws -> URL {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("machelper-drop-\(UUID().uuidString)")
@@ -29,21 +30,20 @@ import Testing
         return bundle
     }
 
+    /// A row of the installed list. The list itself is read from the real Applications folders, so
+    /// the rows a drop is matched against are built here instead.
+    private func row(_ path: String, bundleID: String) -> InstalledApp {
+        let name = ((path as NSString).lastPathComponent as NSString).deletingPathExtension
+        return InstalledApp(name: name, bundleID: bundleID, version: nil, path: path, size: 0, isAppStore: false,
+                            lastUsed: nil, isRunning: false, teamID: nil, protectedReason: nil)
+    }
+
     @Test func acceptsAnAppBundle() throws {
         let folder = try makeFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let bundle = try makeBundle(in: folder, name: "Dropped")
 
         #expect(AppUninstaller.isAppBundle(bundle))
-        let app = try #require(AppUninstaller.app(at: bundle))
-        #expect(app.path == bundle.standardizedFileURL.path)
-        #expect(app.bundleID == "com.example.dropped")
-        #expect(app.name == "Dropped")
-        #expect(app.version == "1.2.3")
-        #expect(app.size > 0)
-        #expect(app.canUninstall)
-        #expect(!app.isRunning)
-        #expect(!app.isAppStore)
     }
 
     @Test func acceptsTheFolderFormsFinderHandsOver() throws {
@@ -57,7 +57,6 @@ import Testing
 
         #expect(AppUninstaller.isAppBundle(upper))
         #expect(AppUninstaller.isAppBundle(URL(fileURLWithPath: upper.path + "/")))
-        #expect(AppUninstaller.app(at: URL(fileURLWithPath: upper.path + "/"))?.bundleID == "com.example.upper")
     }
 
     @Test func rejectsWhatIsNotAnAppBundle() throws {
@@ -67,46 +66,68 @@ import Testing
         let text = folder.appendingPathComponent("Note.txt")
         try Data("not an app".utf8).write(to: text)
         #expect(!AppUninstaller.isAppBundle(text))
-        #expect(AppUninstaller.app(at: text) == nil)
 
         // A folder with the right extension but no bundle behind it.
         let empty = folder.appendingPathComponent("Empty.app")
         try FileManager.default.createDirectory(at: empty, withIntermediateDirectories: true)
         #expect(!AppUninstaller.isAppBundle(empty))
-        #expect(AppUninstaller.app(at: empty) == nil)
 
         // A bundle without a bundle identifier.
         let broken = try makeBundle(in: folder, name: "Broken", bundleID: nil)
         #expect(!AppUninstaller.isAppBundle(broken))
-        #expect(AppUninstaller.app(at: broken) == nil)
 
         // A real bundle under another extension.
         let bundle = try makeBundle(in: folder, name: "Renamed")
         let renamed = folder.appendingPathComponent("Renamed.bundle")
         try FileManager.default.moveItem(at: bundle, to: renamed)
         #expect(!AppUninstaller.isAppBundle(renamed))
-        #expect(AppUninstaller.app(at: renamed) == nil)
 
         #expect(!AppUninstaller.isAppBundle(URL(string: "https://example.com/Foo.app")!))
         #expect(!AppUninstaller.isAppBundle(folder.appendingPathComponent("Missing.app")))
     }
 
-    @Test func keepsTheRulesTheAppListUses() throws {
+    @Test func aDroppedBundleSelectsItsOwnRow() throws {
         let folder = try makeFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
+        let bundle = try makeBundle(in: folder, name: "Slack", bundleID: "com.example.slack")
+        let installed = row(bundle.standardizedFileURL.path, bundleID: "com.example.slack")
 
-        let apple = try #require(AppUninstaller.app(at: makeBundle(in: folder, name: "Notes", bundleID: "com.apple.Notes")))
-        #expect(!apple.canUninstall)
-        #expect(apple.protectedReason != nil)
+        #expect(AppUninstaller.installedApp(forDroppedBundle: bundle, in: [installed]) == installed)
+        // Finder can hand the URL over with a trailing slash.
+        #expect(AppUninstaller.installedApp(forDroppedBundle: URL(fileURLWithPath: bundle.path + "/"),
+                                            in: [installed]) == installed)
+    }
 
-        let own = try #require(AppUninstaller.app(at: makeBundle(in: folder, name: "MacHelper", bundleID: "com.machelper.MacHelper")))
-        #expect(!own.canUninstall)
-        #expect(own.protectedReason != nil)
+    @Test func anotherCopyOfAnInstalledAppSelectsTheInstalledRow() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        // Slack is installed in /Applications and the user drags a second copy out of a DMG.
+        let installed = row("/Applications/Slack.app", bundleID: "com.example.slack")
+        let copy = try makeBundle(in: folder, name: "Slack", bundleID: "com.example.slack")
 
-        let store = try makeBundle(in: folder, name: "Store")
-        let receipt = store.appendingPathComponent("Contents/_MASReceipt")
-        try FileManager.default.createDirectory(at: receipt, withIntermediateDirectories: true)
-        try Data().write(to: receipt.appendingPathComponent("receipt"))
-        #expect(try #require(AppUninstaller.app(at: store)).isAppStore)
+        #expect(AppUninstaller.installedApp(forDroppedBundle: copy, in: [installed]) == installed)
+
+        // When both copies are in the list, the one in the Applications folder is the app.
+        let outside = row(folder.appendingPathComponent("Other/Slack.app").path, bundleID: "com.example.slack")
+        #expect(AppUninstaller.installedApp(forDroppedBundle: copy, in: [outside, installed]) == installed)
+        #expect(AppUninstaller.installedApp(forDroppedBundle: copy, in: [installed, outside]) == installed)
+
+        // With no Applications copy, the row that does exist is still the answer.
+        #expect(AppUninstaller.installedApp(forDroppedBundle: copy, in: [outside]) == outside)
+    }
+
+    @Test func aBundleThatIsNotInstalledHasNoRow() throws {
+        let folder = try makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let dropped = try makeBundle(in: folder, name: "Zoom", bundleID: "com.example.zoom")
+        let installed = row("/Applications/Slack.app", bundleID: "com.example.slack")
+
+        #expect(AppUninstaller.installedApp(forDroppedBundle: dropped, in: [installed]) == nil)
+        #expect(AppUninstaller.installedApp(forDroppedBundle: dropped, in: []) == nil)
+
+        // A folder that isn't a bundle can't stand for anything.
+        let plain = folder.appendingPathComponent("Notes.app")
+        try FileManager.default.createDirectory(at: plain, withIntermediateDirectories: true)
+        #expect(AppUninstaller.installedApp(forDroppedBundle: plain, in: [installed]) == nil)
     }
 }

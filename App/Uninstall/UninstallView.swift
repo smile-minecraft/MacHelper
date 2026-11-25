@@ -18,6 +18,7 @@ struct UninstallView: View {
             .padding(.horizontal, 12).padding(.vertical, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
+            if let notice = model.dropNotice { dropNoticeBar(notice) }
             ZStack {
                 switch model.tab {
                 case .apps:
@@ -32,11 +33,11 @@ struct UninstallView: View {
             .animatesStates(model.tab)
         }
         .frame(minWidth: 700, minHeight: 520)
+        .animatesStateChanges(model.dropNotice)
         // Any app bundle can be dropped anywhere on the page, whichever tab is showing.
         .dropDestination(for: URL.self) { urls, _ in
             guard let url = urls.first(where: AppUninstaller.isAppBundle) else { return false }
-            Task { await model.openDroppedApp(url) }
-            return true
+            return model.handleDrop(url)
         } isTargeted: { dropTargeted = $0 }
         .overlay {
             if dropTargeted {
@@ -68,6 +69,25 @@ struct UninstallView: View {
                 Task { await model.loadOrphans() }
             })
         }
+    }
+
+    /// Says why a dropped bundle isn't opened, right under the tabs, so a drop that can't be taken
+    /// doesn't look like nothing happened.
+    private func dropNoticeBar(_ notice: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Image(systemName: "info.circle")
+                .foregroundStyle(Theme.amber)
+                .accessibilityHidden(true)
+            Text(notice)
+                .font(.mhCallout)
+                .foregroundStyle(Palette.text)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 10)
+        .background(Palette.inset, in: SurfaceShape(cornerRadius: Theme.cardRadius, style: .continuous))
+        .padding(.horizontal, 12).padding(.bottom, 10)
+        .transition(Motion.stateSwap)
     }
 
     private var appsTab: some View {

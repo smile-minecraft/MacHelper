@@ -13,15 +13,15 @@ final class UninstallModel {
     /// it in the background after this age. Reading every bundle's size is the expensive part.
     static let appsMaxAge: TimeInterval = 120
 
-    var tab: Tab = .apps
+    var tab: Tab = .apps { didSet { dropNotice = nil } }
     var sort: Sort = .name
-    var search = ""
+    var search = "" { didSet { dropNotice = nil } }
     private(set) var apps: [InstalledApp] = []
     private(set) var loadingApps = false
     /// True while the old list stays on screen and a newer one is being read.
     private(set) var refreshingApps = false
     @ObservationIgnored private var appsLoadedAt: Date?
-    var selectedAppID: InstalledApp.ID? { didSet { Task { await loadPlan() } } }
+    var selectedAppID: InstalledApp.ID? { didSet { dropNotice = nil; Task { await loadPlan() } } }
     private(set) var plan: UninstallPlan?
     private(set) var loadingPlan = false
     var includeUserData = false { didSet { applyUserDataChoice() } }
@@ -42,9 +42,9 @@ final class UninstallModel {
         return app.canUninstall && !app.isRunning && plan.selectedSize > 0
     }
 
-    /// An app dropped onto the page that the installed list doesn't cover; kept in the list while
-    /// it is selected so a background reload can't take its row away.
-    @ObservationIgnored private var droppedApp: InstalledApp?
+    /// An explanation shown under the tabs when a dropped bundle can't be opened. The next drop,
+    /// app or tab choice, search or reload clears it, so it never stays in the way.
+    private(set) var dropNotice: String?
 
     var visibleApps: [InstalledApp] {
         let filtered = search.isEmpty ? apps : apps.filter {
@@ -60,6 +60,7 @@ final class UninstallModel {
     // MARK: Loading
 
     func loadApps(forceRefresh: Bool = false) async {
+        dropNotice = nil
         guard !loadingApps, !refreshingApps else { return }
         if !forceRefresh, !apps.isEmpty {
             PageLoadProbe.mark(.uninstall, "cache")
@@ -74,36 +75,41 @@ final class UninstallModel {
             refreshingApps = false
         }
         apps = await Task.detached(priority: .userInitiated) { AppUninstaller.installedApps() }.value
-        // A bundle dropped from another folder isn't in the Applications scan; keep its row while
-        // it is selected, and forget it once the bundle is gone.
-        if let dropped = droppedApp, !apps.contains(where: { $0.id == dropped.id }) {
-            if FileManager.default.fileExists(atPath: dropped.path) {
-                apps.append(dropped)
-                apps.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-            } else {
-                droppedApp = nil
-            }
-        }
         appsLoadedAt = Date()
         PageLoadProbe.mark(.uninstall, "apps")
         PageLoadProbe.mark(.uninstall, "refresh")
     }
 
-    /// Opens the app a bundle was dropped for: the app tab, no search hiding its row, and the app
-    /// selected so its leftovers are listed. Bundles outside the Applications folders are added to
-    /// the list for as long as they are selected.
-    func openDroppedApp(_ url: URL) async {
-        let path = url.standardizedFileURL.path
-        if let existing = apps.first(where: { $0.path == path }) { selectForDrop(existing); return }
-        guard let app = await Task.detached(priority: .userInitiated, operation: {
-            AppUninstaller.app(at: url)
-        }).value else { return }
-        droppedApp = app
-        if !apps.contains(where: { $0.id == app.id }) {
-            apps.append(app)
-            apps.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    /// Opens the app a bundle was dropped for and returns whether the drop was taken. Only a row of
+    /// the installed list is selected: a copy of an installed app (the same bundle ID, another
+    /// folder) opens the installed app, which owns that bundle and those leftovers. A bundle whose
+    /// app isn't installed is not added to the list — everything here is uninstalled from the
+    /// Applications folders — and the page says why instead.
+    func handleDrop(_ url: URL) -> Bool {
+        dropNotice = nil
+        guard !apps.isEmpty else {
+            // The first read of the app list is still running. Answer once the rows are there, so
+            // an installed app dropped right after the page opens isn't turned away.
+            Task {
+                await loadApps()
+                if !apps.isEmpty { takeDrop(url) }
+            }
+            return true
+        }
+        return takeDrop(url)
+    }
+
+    /// Selects the installed row the bundle stands for, or explains where the bundle has to be.
+    @discardableResult
+    private func takeDrop(_ url: URL) -> Bool {
+        guard let app = AppUninstaller.installedApp(forDroppedBundle: url, in: apps) else {
+            let path = url.standardizedFileURL.path
+            let name = ((path as NSString).lastPathComponent as NSString).deletingPathExtension
+            dropNotice = String(localized: "MacHelper uninstalls apps from the Applications folders. Move \(name) there first.")
+            return false
         }
         selectForDrop(app)
+        return true
     }
 
     private func selectForDrop(_ app: InstalledApp) {
