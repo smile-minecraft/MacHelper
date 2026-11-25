@@ -2,41 +2,6 @@
   "sourceLanguage": "en",
   "version": "1.0",
   "strings": {
-    "A small helper with administrator rights for fan control, cleaning system caches and logs, and reading system processes.": {
-      "extractionState": "manual",
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un pequeño ayudante con permisos de administrador para controlar ventiladores, limpiar cachés y registros del sistema y leer procesos del sistema."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "管理者権限で動く小さなヘルパーです。ファン制御、システムのキャッシュとログのクリーンアップ、システムプロセスの読み取りに使います。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "관리자 권한으로 실행되는 작은 도우미로, 팬 제어, 시스템 캐시와 로그 정리, 시스템 프로세스 읽기에 쓰입니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一个拥有管理员权限的小帮手，用来控制风扇、清理系统缓存与日志，以及读取系统进程。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一個擁有管理者權限的小幫手，用來控制風扇、清理系統快取與記錄檔，以及讀取系統行程。"
-          }
-        }
-      }
-    },
     "Add the machelper skill and ask Claude Code or Codex things like “free up some space” or “why is my Mac hot?”.": {
       "extractionState": "manual",
       "localizations": {
@@ -247,41 +212,6 @@
         }
       }
     },
-    "Allowed. MacHelper is checking that the Helper answers.": {
-      "extractionState": "manual",
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Permitido. MacHelper está comprobando que el Helper responde."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "許可されました。Helper が応答するか MacHelper が確認しています。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "허용되었습니다. MacHelper가 Helper의 응답을 확인하고 있습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已允许。MacHelper 正在确认 Helper 有响应。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已允許。MacHelper 正在確認 Helper 有回應。"
-          }
-        }
-      }
-    },
     "Also add the machelper command to Terminal": {
       "extractionState": "manual",
       "localizations": {
@@ -383,41 +313,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "上一步"
-          }
-        }
-      }
-    },
-    "Both are optional — skip anytime and MacHelper still works. Each one unlocks a little more.": {
-      "extractionState": "manual",
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ambos son opcionales: sáltalos cuando quieras y MacHelper seguirá funcionando. Cada uno desbloquea un poco más."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "どちらも任意です。いつでもスキップでき、MacHelper はそのまま使えます。許可するごとに使える機能が増えます。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "둘 다 선택 사항입니다. 언제든 건너뛰어도 MacHelper는 작동합니다. 하나씩 켤 때마다 기능이 늘어납니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "两个都是可选的——随时可以跳过，MacHelper 照样能用。每开一个就多解锁一些功能。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "兩個都是可選的——隨時可以略過，MacHelper 照樣能用。每開一個就多解鎖一些功能。"
           }
         }
       }
@@ -1542,41 +1437,6 @@
         }
       }
     },
-    "Lets MacHelper measure and clean Mail downloads, other apps’ caches and protected folders, so disk analysis sees everything.": {
-      "extractionState": "manual",
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Permite a MacHelper medir y limpiar las descargas de Mail, las cachés de otras apps y las carpetas protegidas, para que el análisis del disco lo vea todo."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "メールのダウンロード、ほかの App のキャッシュ、保護されたフォルダを MacHelper が計測・クリーンアップでき、ディスク分析ですべてを確認できます。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MacHelper가 Mail 다운로드, 다른 앱의 캐시, 보호된 폴더를 측정하고 정리할 수 있어 디스크 분석이 모든 것을 볼 수 있습니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "让 MacHelper 能测量和清理“邮件”下载项、其他 App 的缓存和受保护的文件夹，磁盘分析也能看到全部。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "讓 MacHelper 能測量和清理「郵件」下載項目、其他 App 的快取和受保護的資料夾，磁碟分析也能看到全部。"
-          }
-        }
-      }
-    },
     "Local-first privacy: scans, history and reports stay on your Mac. Optional anonymous telemetry can be reviewed in Settings anytime.": {
       "extractionState": "manual",
       "localizations": {
@@ -2627,41 +2487,6 @@
         }
       }
     },
-    "Privileged Helper": {
-      "extractionState": "manual",
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Helper con privilegios"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "特権 Helper"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "권한 있는 Helper"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "特权 Helper"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "特權 Helper"
-          }
-        }
-      }
-    },
     "Quiet or cool: fan curves that switch by themselves.": {
       "extractionState": "manual",
       "localizations": {
@@ -3047,41 +2872,6 @@
         }
       }
     },
-    "Starting…": {
-      "extractionState": "manual",
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iniciando…"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "起動中…"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "시작 중…"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "启动中…"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "啟動中…"
-          }
-        }
-      }
-    },
     "Step %lld of %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -3218,76 +3008,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "沒關係。之後安裝 Claude Code 或 Codex，再到「設定」→「一般」加入 Skill。"
-          }
-        }
-      }
-    },
-    "Turn on MacHelper in Privacy & Security → Full Disk Access. MacHelper notices by itself.": {
-      "extractionState": "manual",
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activa MacHelper en Privacidad y seguridad → Acceso total al disco. MacHelper lo detecta solo."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "「プライバシーとセキュリティ」→「フルディスクアクセス」で MacHelper をオンにしてください。MacHelper が自動で確認します。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "개인정보 보호 및 보안 → 전체 디스크 접근 권한에서 MacHelper를 켜세요. MacHelper가 알아서 확인합니다."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在“隐私与安全性”→“完全磁盘访问权限”中打开 MacHelper，MacHelper 会自己检测到。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在「隱私權與安全性」→「完全取用磁碟」中打開 MacHelper，MacHelper 會自己偵測到。"
-          }
-        }
-      }
-    },
-    "Two optional permissions": {
-      "extractionState": "manual",
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dos permisos opcionales"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "2 つの任意のアクセス権"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "선택 사항인 권한 두 가지"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "两个可选的权限"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "兩個可選的權限"
           }
         }
       }
@@ -3638,6 +3358,321 @@
           "stringUnit": {
             "state": "translated",
             "value": "你正在使用自訂外觀。在這裡選一個會取代它。"
+          }
+        }
+      }
+    },
+    "Start with the Helper": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empieza por el Helper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まずは Helper から"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper부터 시작하기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 Helper 开始"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從 Helper 開始"
+          }
+        }
+      }
+    },
+    "The Helper unlocks fan control, Deep Clean and system tasks. Every step here is optional: skip it now and finish anytime in Settings → Permissions.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper habilita el control de ventiladores, la limpieza profunda y las tareas del sistema. Cada paso es opcional: sáltalo ahora y termínalo cuando quieras en Ajustes → Permisos."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper があると、ファン制御、ディープクリーン、システム作業が使えます。どの手順も任意です。今はスキップして、いつでも 設定 → 権限 で完了できます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper가 있으면 팬 제어, 심층 정리, 시스템 작업을 쓸 수 있습니다. 모든 단계는 선택 사항이며, 지금 건너뛰고 언제든 설정 → 권한에서 마칠 수 있습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 可解锁风扇控制、深度清理与系统任务。这里每一步都是可选的：现在可以跳过，之后随时在“设置”→“权限”中完成。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 能解鎖風扇控制、深層清理與系統工作。這裡每一步都是選用的：現在可以先跳過，之後隨時到「設定」→「權限」完成。"
+          }
+        }
+      }
+    },
+    "Install the Helper": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instala el Helper"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper をインストール"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 설치"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装 Helper"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安裝 Helper"
+          }
+        }
+      }
+    },
+    "Allow it in System Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permítelo en Ajustes del Sistema"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "システム設定で許可"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시스템 설정에서 허용"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在系统设置中允许"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在系統設定中允許"
+          }
+        }
+      }
+    },
+    "MacHelper checked that the Helper answers.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper comprobó que el Helper responde."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper が Helper の応答を確認しました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper가 Helper의 응답을 확인했습니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 已确认 Helper 有响应。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacHelper 已確認 Helper 有回應。"
+          }
+        }
+      }
+    },
+    "The Helper is installed but not answering. Repair reinstalls it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Helper está instalado pero no responde. Reparar lo reinstala."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper はインストール済みですが応答しません。「修復」で再インストールします。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper가 설치되어 있지만 응답하지 않습니다. 복구하면 다시 설치합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 已安装但没有响应。“修复”会重新安装它。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 已安裝但沒有回應。「修復」會重新安裝它。"
+          }
+        }
+      }
+    },
+    "Checking the Helper…": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobando el Helper…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper を確認中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helper 확인 중…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在检查 Helper…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在檢查 Helper⋯"
+          }
+        }
+      }
+    },
+    "Step %lld: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paso %1$lld: %2$@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステップ %1$lld: %2$@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld단계: %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %1$lld 步：%2$@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %1$lld 步：%2$@"
+          }
+        }
+      }
+    },
+    "Current step": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paso actual"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在のステップ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "현재 단계"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前步骤"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前步驟"
           }
         }
       }

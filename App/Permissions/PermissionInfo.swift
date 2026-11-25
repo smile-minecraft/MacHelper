@@ -47,7 +47,7 @@ struct PermissionInfo: Identifiable, Equatable, Sendable {
                 title: String(localized: "Full Disk Access"),
                 purpose: String(localized: "Measuring and cleaning the folders macOS protects: Mail downloads, Safari and browser caches, other apps’ containers, and the folders Disk Analysis can’t read without it."),
                 withoutIt: String(localized: "Disk Analysis and Optimize skip protected folders: their space is missing from the numbers and their caches can’t be cleaned."),
-                neverAccessed: String(localized: "MacHelper measures folders by name, size and date, and reads an app bundle’s metadata to recognise it. It never opens your documents, and nothing is sent off this Mac. There is no camera, microphone or screen recording access."),
+                neverAccessed: String(localized: "MacHelper measures folders by name, size and date, and reads an app bundle’s metadata to recognise it. File contents are read only on this Mac, when you look for duplicate files or preview one. No file names, paths or contents are sent anywhere. There is no camera, microphone or screen recording access."),
                 grantMethod: .addAppManually,
                 settingsPane: .fullDiskAccess)
         case .accessibility:

@@ -1,6 +1,7 @@
 import AppKit
 import CleanEngine
 import Observation
+import Permissions
 import ServiceManagement
 import SwiftUI
 import Theming
@@ -114,13 +115,8 @@ final class OnboardingFlowModel {
     /// Direction of the last move, for the page transition.
     private(set) var forward = true
 
-    // Permissions
-    private(set) var fullDiskAccess = FullDiskAccess.isGranted
-    private(set) var helperStatus = HelperClient.shared.status
-    /// The Helper answered over XPC: allowed in System Settings and started by launchd.
-    private(set) var helperResponding = false
-    private(set) var helperWorking = false
-    private(set) var helperError: String?
+    // Permissions come from PermissionCenter, the same model as Settings → Permissions.
+    @ObservationIgnored private let permissions = PermissionCenter.shared
 
     // AI agents
     private(set) var agentTargets: [AgentSkill.Target] = AgentSkill.targets()
@@ -211,41 +207,30 @@ final class OnboardingFlowModel {
 
     // MARK: Permissions
 
-    var helperInstalled: Bool { helperStatus == .requiresApproval || helperStatus == .enabled }
+    var helperItem: PermissionCenter.Item? { permissions.item(.helper) }
+    var fullDiskAccessItem: PermissionCenter.Item? { permissions.item(.fullDiskAccess) }
+    /// Other grants, listed only when a feature that is on needs them.
+    var otherRequiredItems: [PermissionCenter.Item] {
+        permissions.items.filter { $0.isRequired && $0.id != .helper && $0.id != .fullDiskAccess }
+    }
 
-    /// Polls both permissions while the permissions step (or the summary) is on screen; the
-    /// switches are flipped in System Settings, outside the app.
+    var fullDiskAccess: Bool { fullDiskAccessItem?.state == .granted }
+    /// The Helper answered over XPC: allowed in System Settings and started by launchd.
+    var helperResponding: Bool { helperItem?.state == .granted }
+    var helperInstalled: Bool {
+        switch helperItem?.state {
+        case .granted, .needsApproval, .denied: true
+        default: false
+        }
+    }
+
+    /// Follows the grants while the permissions step (or the summary) is on screen; the switches
+    /// are flipped in System Settings, outside the app.
     func watchPermissions() async {
-        while !Task.isCancelled {
-            refreshPermissions()
-            if helperStatus == .enabled, !helperResponding {
-                helperResponding = (try? await HelperClient.shared.handshake()) != nil
-            } else if helperStatus != .enabled {
-                helperResponding = false
-            }
-            try? await Task.sleep(for: .seconds(1.5))
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { await PermissionCenter.shared.watch() }
+            group.addTask { await PermissionFlow.shared.followHelperApproval() }
         }
-    }
-
-    func refreshPermissions() {
-        let granted = FullDiskAccess.isGranted
-        if granted != fullDiskAccess { fullDiskAccess = granted }
-        let status = HelperClient.shared.status
-        if status != helperStatus { helperStatus = status }
-    }
-
-    func installHelper() {
-        helperWorking = true
-        helperError = nil
-        do {
-            try HelperClient.shared.register()
-            helperStatus = HelperClient.shared.currentStatus
-            // Registering normally needs approval; take the user straight to the switch.
-            if helperStatus == .requiresApproval { HelperClient.shared.openLoginItemsSettings() }
-        } catch {
-            helperError = error.localizedDescription
-        }
-        helperWorking = false
     }
 
     // MARK: AI agents
