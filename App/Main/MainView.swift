@@ -11,7 +11,8 @@ struct MainView: View {
     @Bindable private var onboarding = OnboardingCenter.shared
     /// The Helper setup guide, opened by hand from the sidebar footer.
     @State private var showHelperSetup = false
-    /// Height of the Helper warning floating over the detail area; zero while it is hidden.
+    /// Last measured height of the Helper warning floating over the detail area. Only used while
+    /// the warning shows; once hidden the overlay keeps just its 10 pt top padding.
     @State private var bannerHeight: CGFloat = 0
 
     /// The window toolbar's own id; every item in it has an id too, which is what makes
@@ -45,6 +46,8 @@ struct MainView: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 10)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bannerHeight = $0 }
+                    // Read the warning before the page, as when it sat above it.
+                    .accessibilitySortPriority(1)
             }
             .background(Palette.base)
             .navigationTitle(Text(app.section.title))
