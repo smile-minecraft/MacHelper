@@ -34,6 +34,13 @@ enum DemoSnapshotRenderer {
         return CGSize(width: parts[0], height: parts[1])
     }
 
+    /// `--snapshot-saved-scan` draws the Disk Analysis page as the restored scan it shows on the
+    /// next launch: with the "saved scan" strip and the actions that scan disables. The strip and
+    /// the notes that come with it are what a short window has to survive.
+    private static var savedScan: Bool {
+        CommandLine.arguments.contains("--snapshot-saved-scan")
+    }
+
     static func run(app: AppModel, to dir: URL) {
         Task { @MainActor in
             let pages = requestedSize.map { size in Self.pages.map { (section: $0.section, file: $0.file, size: size) } } ?? Self.pages
@@ -47,7 +54,8 @@ enum DemoSnapshotRenderer {
             app.healthModel.showDemo(report: DemoData.healthReport(), diskPoints: DemoData.diskPoints(),
                                      security: DemoData.security)
             app.diskModel.showDemo(root: DemoData.homeTree().makeDemoLiveTree(rootPath: DemoData.homePath),
-                                   volume: DemoData.volume, files: DemoData.scanFiles, elapsed: DemoData.scanElapsed)
+                                   volume: DemoData.volume, files: DemoData.scanFiles, elapsed: DemoData.scanElapsed,
+                                   restoredAt: savedScan ? Date().addingTimeInterval(-4 * 3_600) : nil)
             do {
                 try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
                 for page in pages {

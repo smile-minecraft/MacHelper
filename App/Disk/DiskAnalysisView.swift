@@ -10,6 +10,17 @@ struct DiskAnalysisView: View {
     @State private var dropTargeted = false
     @State private var showProtected = false
 
+    /// The smallest the chart is drawn when the window is too short for the notes above it and a
+    /// bigger square: it shrinks to the room they leave, and only a window too short for a readable
+    /// chart makes the notes scroll instead.
+    private static let chartMinHeight: CGFloat = 64
+    /// The least of the notes that stays on screen; below that the chart keeps its own minimum.
+    private static let notesMinHeight: CGFloat = 48
+    /// Height of the notes above the chart and of the line under it, so the chart takes exactly
+    /// the room they leave. Both settle on the first layout pass.
+    @State private var notesHeight: CGFloat = 0
+    @State private var hintHeight: CGFloat = 0
+
     enum SideTab: String, CaseIterable, Identifiable {
         case contents, largest, duplicates, changes, insights
         var id: String { rawValue }
@@ -146,71 +157,115 @@ struct DiskAnalysisView: View {
     }
 
     private func results(_ focus: DiskNode) -> some View {
-        HStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 8) {
-                breadcrumbs
-                summary
-                ZStack(alignment: .bottomLeading) {
-                    switch model.mode {
-                    case .sunburst: SunburstChart(model: model, focus: focus).transition(.opacity)
-                    case .treemap: TreemapChart(model: model, focus: focus).transition(.opacity)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .animation(Motion.fade, value: model.mode)
-                // A saved scan cannot be collected from; the banner explains why, so the
-                // collector hint would contradict the disabled actions.
-                if !model.isShowingSavedScan {
-                    Text(model.mode == .sunburst ? "Click a ring to open a folder, click the center to go up; right-click or drag items to the collector." : "Click a block to open its folder; right-click or drag items to the collector.")
-                        .font(.mhCaption).foregroundStyle(Palette.textMuted)
-                }
-            }
-            .padding(12)
-
-            Divider()
-
-            VStack(spacing: 0) {
-                // Five tab names don't fit the column in every language: fall back to a smaller
-                // control, then to a menu that still shows the full names.
-                ViewThatFits(in: .horizontal) {
-                    sideTabPicker
-                    sideTabPicker.controlSize(.small)
-                    Picker("", selection: $sideTab) {
-                        ForEach(SideTab.allCases, id: \.self) { tab in
-                            Label { Text(tab.title) } icon: { Image(systemName: tab.symbol) }.tag(tab)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .labelsHidden()
-                    .frame(maxWidth: .infinity)
-                }
-                .padding(8)
-                switch sideTab {
-                case .contents:
-                    List { ForEach(Array(focus.children.prefix(60))) { node in row(node, total: focus.size) } }
-                        .listStyle(.plain)
-                case .largest:
-                    // The search filters this list only, so it is in the toolbar while the tab is open.
-                    VStack(spacing: 0) {
-                        largestFilters
-                        List { ForEach(model.largestFiles(in: focus)) { node in row(node, total: focus.size) } }
-                            .listStyle(.plain)
-                    }
-                    .searchable(text: $model.searchText, placement: .toolbar, prompt: Text("Search names and paths"))
-                case .duplicates:
-                    DuplicatesList(model: model)
-                case .changes:
-                    ChangesList(model: model)
-                case .insights:
-                    InsightsList(model: model)
-                }
+        // Half a screen, and half of that again under the Helper strip: the notes a saved scan
+        // adds above the chart wrap to a dozen lines there. The columns keep the height the window
+        // gives them and scroll their own content, rather than asking the split view for more
+        // height than the window has — which pushes every column, sidebar included, up under the
+        // title bar.
+        GeometryReader { geo in
+            HStack(spacing: 0) {
+                leftColumn(focus, height: geo.size.height)
                 Divider()
-                collector
+                fileColumn(focus)
             }
-            // Half a screen: the chart keeps enough room to read and the list narrows, rather
-            // than the fixed column pushing the chart out of the window.
-            .frame(minWidth: 260, idealWidth: 340, maxWidth: 340)
         }
+    }
+
+    /// Path, scan figures, chart and the line under it, in exactly the height the window leaves.
+    /// The notes scroll when they would take the room the chart needs; the chart gives way only
+    /// as far as `chartMinHeight`, and the line under it is dropped before either is squeezed.
+    private func leftColumn(_ focus: DiskNode, height: CGFloat) -> some View {
+        let padding: CGFloat = 24          // 12 pt above and below the column
+        let gap: CGFloat = 8               // between the rows
+        // The line under the chart is the first thing a short window gives up: the notes then
+        // still keep a readable strip beside a chart of `chartMinHeight`.
+        let hasHint = !model.isShowingSavedScan
+        let hintWithGap = hasHint ? hintHeight + gap : 0
+        let notesWanted = min(notesHeight, Self.notesMinHeight)
+        let showsHint = hasHint && height - padding - gap - hintWithGap - Self.chartMinHeight >= notesWanted
+        let hint = showsHint ? hintWithGap : 0
+        let room = max(0, height - padding - gap - hint)
+        let notes = min(notesHeight, max(Self.notesMinHeight, room - Self.chartMinHeight))
+        let chart = max(Self.chartMinHeight, room - notes)
+
+        return VStack(alignment: .leading, spacing: gap) {
+            ScrollView(.vertical) {
+                VStack(alignment: .leading, spacing: gap) {
+                    breadcrumbs
+                    summary
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { notesHeight = $0 }
+            }
+            .frame(height: notes)
+            .scrollBounceBehavior(.basedOnSize)
+
+            ZStack(alignment: .bottomLeading) {
+                switch model.mode {
+                case .sunburst: SunburstChart(model: model, focus: focus).transition(.opacity)
+                case .treemap: TreemapChart(model: model, focus: focus).transition(.opacity)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: chart)
+            .animation(Motion.fade, value: model.mode)
+
+            // A saved scan cannot be collected from; the banner explains why, so the collector
+            // hint would contradict the disabled actions.
+            if showsHint {
+                Text(model.mode == .sunburst ? "Click a ring to open a folder, click the center to go up; right-click or drag items to the collector." : "Click a block to open its folder; right-click or drag items to the collector.")
+                    .font(.mhCaption).foregroundStyle(Palette.textMuted)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { hintHeight = $0 }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(padding / 2)
+        .frame(height: height, alignment: .top)
+    }
+
+    /// The files of the folder on screen, the tab that lists them and the collector.
+    private func fileColumn(_ focus: DiskNode) -> some View {
+        VStack(spacing: 0) {
+            // Five tab names don't fit the column in every language: fall back to a smaller
+            // control, then to a menu that still shows the full names.
+            ViewThatFits(in: .horizontal) {
+                sideTabPicker
+                sideTabPicker.controlSize(.small)
+                Picker("", selection: $sideTab) {
+                    ForEach(SideTab.allCases, id: \.self) { tab in
+                        Label { Text(tab.title) } icon: { Image(systemName: tab.symbol) }.tag(tab)
+                    }
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .frame(maxWidth: .infinity)
+            }
+            .padding(8)
+            switch sideTab {
+            case .contents:
+                List { ForEach(Array(focus.children.prefix(60))) { node in row(node, total: focus.size) } }
+                    .listStyle(.plain)
+            case .largest:
+                // The search filters this list only, so it is in the toolbar while the tab is open.
+                VStack(spacing: 0) {
+                    largestFilters
+                    List { ForEach(model.largestFiles(in: focus)) { node in row(node, total: focus.size) } }
+                        .listStyle(.plain)
+                }
+                .searchable(text: $model.searchText, placement: .toolbar, prompt: Text("Search names and paths"))
+            case .duplicates:
+                DuplicatesList(model: model)
+            case .changes:
+                ChangesList(model: model)
+            case .insights:
+                InsightsList(model: model)
+            }
+            Divider()
+            collector
+        }
+        // Half a screen: the chart keeps enough room to read and the list narrows, rather
+        // than the fixed column pushing the chart out of the window.
+        .frame(minWidth: 260, idealWidth: 340, maxWidth: 340)
     }
 
     private var sideTabPicker: some View {
@@ -271,16 +326,7 @@ struct DiskAnalysisView: View {
     }
 
     @ViewBuilder private var summary: some View {
-        HStack(spacing: 14) {
-            if let root = model.root {
-                Text("Found \(Fmt.bytes(Int64(clamping: root.size))) in \(model.progress.files.formatted()) files, \(String(format: "%.1f", model.elapsed)) s")
-            }
-            if let v = model.volume {
-                Text("Disk used \(Fmt.bytes(v.used)) of \(Fmt.bytes(v.total))")
-                if v.purgeable > 0 { Text("Purgeable \(Fmt.bytes(v.purgeable))").help("Space macOS frees automatically when needed (mostly local Time Machine snapshots and system caches).") }
-            }
-        }
-        .font(.mhCaption).foregroundStyle(Palette.textMuted)
+        stats
         if model.root != nil {
             Group {
                 spaceAccountingSummary
@@ -314,6 +360,28 @@ struct DiskAnalysisView: View {
                     .popover(isPresented: $showProtected, arrowEdge: .bottom) { ProtectedFoldersList(paths: model.unreadableFolders(.protectedBySystem)) }
             }
             .font(.mhCaption)
+        }
+    }
+
+    /// Found, disk used and purgeable: one row while the column is wide enough for a line each,
+    /// stacked as soon as half a screen leaves them too narrow to read. Wrapped inside a row they
+    /// grew to a dozen lines and made the page taller than the window.
+    private var stats: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 14) { statTexts }
+                .fixedSize(horizontal: true, vertical: false)
+            VStack(alignment: .leading, spacing: 2) { statTexts }
+        }
+        .font(.mhCaption).foregroundStyle(Palette.textMuted)
+    }
+
+    @ViewBuilder private var statTexts: some View {
+        if let root = model.root {
+            Text("Found \(Fmt.bytes(Int64(clamping: root.size))) in \(model.progress.files.formatted()) files, \(String(format: "%.1f", model.elapsed)) s")
+        }
+        if let v = model.volume {
+            Text("Disk used \(Fmt.bytes(v.used)) of \(Fmt.bytes(v.total))")
+            if v.purgeable > 0 { Text("Purgeable \(Fmt.bytes(v.purgeable))").help("Space macOS frees automatically when needed (mostly local Time Machine snapshots and system caches).") }
         }
     }
 
