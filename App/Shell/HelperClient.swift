@@ -286,7 +286,8 @@ final class HelperClient: @unchecked Sendable {
         throw lastError
     }
 
-    func openLoginItemsSettings() { SMAppService.openSystemSettingsLoginItems() }
+    @MainActor
+    func openLoginItemsSettings() { SystemSettingsPane.loginItems.open() }
 
     // MARK: Calls
 

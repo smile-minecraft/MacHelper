@@ -706,9 +706,7 @@ final class DiskAnalysisModel {
     }
 
     func openFullDiskAccessSettings() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
-            NSWorkspace.shared.open(url)
-        }
+        SystemSettingsPane.fullDiskAccess.open()
     }
 
     func hoverInfo(for node: DiskNode?, otherSize: UInt64 = 0, otherCount: Int = 0) -> HoverInfo? {
