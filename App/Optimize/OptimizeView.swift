@@ -8,7 +8,6 @@ struct OptimizeView: View {
     @State private var confirmDeepOnly = false
     @State private var showAutoClean = false
     @State private var showExclusions = false
-    @State private var showHelperSetup = false
     @State private var category: String?
     /// The verified Helper state (running, outdated, unresponsive…), not just its registration.
     @Bindable private var helperHealth = HelperHealthMonitor.shared
@@ -39,7 +38,6 @@ struct OptimizeView: View {
         .searchable(text: $model.filter.text, placement: .toolbar, prompt: Text("Search names and paths"))
         .sheet(isPresented: $showAutoClean) { AutoCleanView(model: autoClean) }
         .sheet(isPresented: $showExclusions) { ExclusionsView(model: model) }
-        .sheet(isPresented: $showHelperSetup) { HelperSetupSheet() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             model.recheckFullDiskAccess()
         }
@@ -126,7 +124,7 @@ struct OptimizeView: View {
                     if model.scanStopped { Text("Scan stopped before any results were ready.").font(.mhCaption).foregroundStyle(Palette.textMuted) }
                     if let e = model.loadError { Text(e).font(.mhCaption).foregroundStyle(Theme.rose) }
                     if !model.fullDiskAccess {
-                        Button("Allow Full Disk Access to see everything") { model.openFullDiskAccessSettings() }
+                        Button("Allow Full Disk Access to see everything") { PermissionFlow.shared.openGuided(.fullDiskAccess) }
                             .buttonStyle(.link).font(.mhCaption)
                     }
                     AutoCleanEntry(model: autoClean) { showAutoClean = true }
@@ -151,7 +149,7 @@ struct OptimizeView: View {
                 if helperHealth.state.needsAttention {
                     Text(helperHealth.summaryLabel).font(.mhCaption).foregroundStyle(Theme.amber)
                 }
-                Button("Set Up or Repair the Helper…") { showHelperSetup = true }.buttonStyle(.link).font(.mhCaption)
+                Button("Set Up or Repair the Helper…") { PermissionFlow.shared.showInSettings(.helper, start: true) }.buttonStyle(.link).font(.mhCaption)
             }
         }
     }
@@ -250,7 +248,7 @@ struct OptimizeView: View {
         }
         if model.hiddenByFullDiskAccess > 0 {
             NoticeBar(icon: "lock", text: String(localized: "\(model.hiddenByFullDiskAccess) places can’t be checked without Full Disk Access. MacHelper scans again once it’s on."),
-                      action: String(localized: "Open System Settings")) { model.openFullDiskAccessSettings() }
+                      action: String(localized: "Open System Settings")) { PermissionFlow.shared.openGuided(.fullDiskAccess) }
         }
     }
 
@@ -769,7 +767,7 @@ private struct RuleRow: View {
                 if let reason = result.skippedReason {
                     Text("Skipped: \(reason)").font(.mhCaption).foregroundStyle(Palette.textMuted)
                 } else if result.rule.needsFullDiskAccess {
-                    Button("Needs Full Disk Access") { model.openFullDiskAccessSettings() }.buttonStyle(.link).font(.mhCaption)
+                    Button("Needs Full Disk Access") { PermissionFlow.shared.openGuided(.fullDiskAccess) }.buttonStyle(.link).font(.mhCaption)
                 } else {
                     Text("Nothing to clean").font(.mhCaption).foregroundStyle(Palette.textFaint)
                 }

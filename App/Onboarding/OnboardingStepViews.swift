@@ -1,4 +1,5 @@
 import CleanEngine
+import Permissions
 import SwiftUI
 import Theming
 
@@ -332,99 +333,134 @@ struct OnboardingTourStep: View {
 
 struct OnboardingPermissionsStep: View {
     @Bindable var model: OnboardingFlowModel
+    @Bindable private var center = PermissionCenter.shared
+    @State private var prePrompt: PermissionID?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center, spacing: 14) {
-                OnboardingHeadline(title: onboardingText("Two optional permissions"),
-                                   subtitle: onboardingText("Both are optional — skip anytime and MacHelper still works. Each one unlocks a little more."))
+                OnboardingHeadline(title: onboardingText("Start with the Helper"),
+                                   subtitle: onboardingText("The Helper unlocks fan control, Deep Clean and system tasks. Every step here is optional: skip it now and finish anytime in Settings → Permissions."))
                 Spacer(minLength: 0)
                 SlimeMascot(mood: .init(level: .good, holdsSign: !allSet,
                                         reaction: model.helperResponding ? .helperConnected : nil), cell: 2)
                     .accessibilityHidden(true)
             }
 
-            permissionCard(
-                icon: "px.disk",
-                title: onboardingText("Full Disk Access"),
-                unlocks: onboardingText("Lets MacHelper measure and clean Mail downloads, other apps’ caches and protected folders, so disk analysis sees everything."),
-                status: model.fullDiskAccess ? .on(onboardingText("On")) : .off(onboardingText("Off")),
-                hint: model.fullDiskAccess ? nil : onboardingText("Turn on MacHelper in Privacy & Security → Full Disk Access. MacHelper notices by itself.")
-            ) {
-                if !model.fullDiskAccess {
-                    Button(onboardingText("Open System Settings")) { FullDiskAccess.openSettings() }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    if let helper = model.helperItem { helperCard(helper) }
+                    if let fullDiskAccess = model.fullDiskAccessItem { compactRow(fullDiskAccess) }
+                    ForEach(model.otherRequiredItems) { compactRow($0) }
+                    if let error = center.lastActionError {
+                        Label(error, systemImage: "exclamationmark.triangle.fill")
+                            .font(.mhCaption).foregroundStyle(Theme.amber)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
-
-            permissionCard(
-                icon: "px.fans",
-                title: onboardingText("Privileged Helper"),
-                unlocks: onboardingText("A small helper with administrator rights for fan control, cleaning system caches and logs, and reading system processes."),
-                status: helperBadge,
-                hint: helperHint
-            ) {
-                if !model.helperInstalled {
-                    Button(onboardingText("Install Helper")) { model.installHelper() }
-                        .disabled(model.helperWorking)
-                } else if !model.helperResponding {
-                    Button(onboardingText("Open Login Items")) { HelperClient.shared.openLoginItemsSettings() }
-                }
-            }
-
-            if let error = model.helperError {
-                Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .font(.mhCaption).foregroundStyle(Theme.amber)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            .scrollIndicators(.automatic)
         }
+        .sheet(item: $prePrompt) { id in PermissionPrePromptSheet(id: id) }
     }
 
-    private var allSet: Bool { model.fullDiskAccess && model.helperResponding }
-
-    private var helperBadge: OnboardingStatusBadge.Status {
-        if model.helperResponding { return .on(onboardingText("Running")) }
-        switch model.helperStatus {
-        case .enabled: return .waiting(onboardingText("Starting…"))
-        case .requiresApproval: return .waiting(onboardingText("Waiting for approval"))
-        default: return .off(onboardingText("Not installed"))
-        }
+    private var allSet: Bool {
+        model.fullDiskAccess && model.helperResponding && model.otherRequiredItems.allSatisfy { $0.state == .granted }
     }
 
-    private var helperHint: String? {
-        if model.helperResponding { return nil }
-        switch model.helperStatus {
-        case .requiresApproval:
-            return onboardingText("In General → Login Items & Extensions, turn on MacHelper under “Allow in the Background”.")
-        case .enabled:
-            return onboardingText("Allowed. MacHelper is checking that the Helper answers.")
-        default:
-            return onboardingText("macOS adds it to Login Items; nothing runs until you allow it.")
-        }
-    }
-
-    private func permissionCard(icon: String, title: String, unlocks: String, status: OnboardingStatusBadge.Status,
-                                hint: String?, @ViewBuilder actions: () -> some View) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+    /// The main line: explain, install, approve beside the floating guide, then see it running.
+    private func helperCard(_ item: PermissionCenter.Item) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                PixelIcon(name: icon, size: 24)
-                Text(title).font(.mhTitle3.weight(.semibold)).foregroundStyle(Palette.text)
-                Pill(text: onboardingText("Optional"), color: Palette.textMuted)
+                PixelIcon(name: "px.fans", size: 24)
+                Text(item.info.title).font(.mhTitle3.weight(.semibold)).foregroundStyle(Palette.text)
                 Spacer()
-                OnboardingStatusBadge(state: status)
+                PermissionStatusBadge(item: item)
             }
-            Text(unlocks).font(.mhCallout).foregroundStyle(Palette.textMuted)
+            Text(item.info.purpose).font(.mhCallout).foregroundStyle(Palette.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 6) {
+                progressStep(1, title: onboardingText("Install the Helper"), done: model.helperInstalled,
+                             active: !model.helperInstalled)
+                connector(done: model.helperInstalled)
+                progressStep(2, title: onboardingText("Allow it in System Settings"), done: model.helperResponding,
+                             active: model.helperInstalled && !model.helperResponding)
+                connector(done: model.helperResponding)
+                progressStep(3, title: onboardingText("Running"), done: model.helperResponding, active: false)
+            }
+            .accessibilityElement(children: .contain)
             HStack(alignment: .center, spacing: 10) {
-                if let hint {
-                    Text(hint).font(.mhCaption).foregroundStyle(Palette.textFaint)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                Text(helperHint(item)).font(.mhCaption).foregroundStyle(Palette.textFaint)
+                    .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 8)
-                actions()
+                PermissionActionButton(item: item, prominent: true) { prePrompt = $0 }
             }
         }
         .card()
-        .animation(Motion.standard, value: status)
+        .animation(Motion.standard, value: item.state)
+    }
+
+    private func helperHint(_ item: PermissionCenter.Item) -> String {
+        switch item.state {
+        case .granted: onboardingText("MacHelper checked that the Helper answers.")
+        case .needsApproval: onboardingText("In General → Login Items & Extensions, turn on MacHelper under “Allow in the Background”.")
+        case .denied: onboardingText("The Helper is installed but not answering. Repair reinstalls it.")
+        case .checking: onboardingText("Checking the Helper…")
+        case .notRequested, .notApplicable: onboardingText("macOS adds it to Login Items; nothing runs until you allow it.")
+        }
+    }
+
+    private func progressStep(_ number: Int, title: String, done: Bool, active: Bool) -> some View {
+        HStack(spacing: 6) {
+            ZStack {
+                SurfaceShape.capsule.fill(done ? Theme.mint : active ? Theme.accent.opacity(0.18) : Palette.text.opacity(0.06))
+                if done {
+                    Image(systemName: "checkmark").font(.mhCaption.weight(.bold)).foregroundStyle(Palette.base)
+                } else {
+                    Text(verbatim: "\(number)").font(.mhCaption.weight(.semibold))
+                        .foregroundStyle(active ? Palette.text : Palette.textMuted)
+                }
+            }
+            .frame(width: 20, height: 20)
+            Text(title).font(.mhCaption.weight(active || done ? .semibold : .regular))
+                .foregroundStyle(active || done ? Palette.text : Palette.textMuted)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(onboardingText(format: "Step %lld: %@", number, title))
+        .accessibilityValue(done ? onboardingText("Done") : active ? onboardingText("Current step") : "")
+    }
+
+    private func connector(done: Bool) -> some View {
+        SurfaceShape.capsule
+            .fill(done ? Theme.mint : Palette.hairline)
+            .frame(width: 18, height: 2)
+            .accessibilityHidden(true)
+    }
+
+    /// Full Disk Access and any other grant a feature in use needs, one line each.
+    private func compactRow(_ item: PermissionCenter.Item) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: PermissionSymbols.symbol(for: item.id))
+                .font(.mhTitle3)
+                .foregroundStyle(Theme.accent)
+                .frame(width: 24)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(item.info.title).font(.mhCallout.weight(.semibold)).foregroundStyle(Palette.text)
+                    PermissionStatusBadge(item: item)
+                }
+                Text(item.info.withoutIt).font(.mhCaption).foregroundStyle(Palette.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .accessibilityElement(children: .combine)
+            Spacer(minLength: 8)
+            PermissionActionButton(item: item) { prePrompt = $0 }
+        }
+        .card(padding: 12)
+        .animation(Motion.standard, value: item.state)
     }
 }
 
