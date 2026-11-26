@@ -1040,6 +1040,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             NSApp.activate()
             if popover.contentViewController == nil { popover.contentViewController = makePanel() }
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            // Let the panel join whichever Space the person is on, including another app's full
+            // screen. Without this its window was placed only on the Space of MacHelper's main
+            // window, so over a full-screen app it opened out of sight and the next click closed
+            // it. The popover creates its window during the first `show`, hence after it.
+            popover.contentViewController?.view.window?.collectionBehavior.insert([.canJoinAllSpaces, .fullScreenAuxiliary])
             clearInitialFocus()
         }
     }
