@@ -47,8 +47,10 @@ public struct TrafficLightOptions: Equatable, Sendable {
 /// thread stays a lookup, and so the table below can be tested without Accessibility permission.
 public enum TrafficLightRules {
     /// Height and width of the strip at the top left of a window where the buttons live. A click
-    /// anywhere else never reaches the accessibility hit test.
-    public static let titleBarStripHeight: Double = 30
+    /// anywhere else never reaches the accessibility hit test. Windows with a toolbar centre the
+    /// buttons in it: System Settings on macOS 27 puts them 18–34 pt below the top, and taller
+    /// unified toolbars lower them further, so the strip covers a toolbar's full height.
+    public static let titleBarStripHeight: Double = 56
     public static let titleBarStripWidth: Double = 160
 
     public static func button(forSubrole subrole: String?) -> TrafficLightButton? {

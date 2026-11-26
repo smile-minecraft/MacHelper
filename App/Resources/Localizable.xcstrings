@@ -45348,6 +45348,33 @@
         "zh-Hans": { "stringUnit": { "state": "translated", "value": "不需要" } },
         "zh-Hant": { "stringUnit": { "state": "translated", "value": "不需要" } }
       }
+    },
+    "macOS didn’t show its Finder prompt. Turn on Finder under MacHelper in Privacy & Security → Automation.": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "macOS no mostró su aviso para el Finder. En Privacidad y seguridad → Automatización, activa Finder debajo de MacHelper." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "macOS が Finder の許可ダイアログを表示しませんでした。「プライバシーとセキュリティ → オートメーション」で、MacHelper の下にある Finder をオンにしてください。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "macOS가 Finder 권한 요청을 표시하지 않았습니다. 개인정보 보호 및 보안 → 자동화에서 MacHelper 아래의 Finder를 켜세요." } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "macOS 没有显示 Finder 的授权提示。请前往“隐私与安全性 → 自动化”，在 MacHelper 下打开 Finder。" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "macOS 沒有顯示 Finder 的授權提示。請到「隱私權與安全性 → 自動化」，在 MacHelper 底下打開 Finder。" } }
+      }
+    },
+    "Turn On Finder Extension": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Activar la extensión del Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder 拡張機能をオンにする" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 확장 기능 켜기" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "开启 Finder 扩展" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "開啟 Finder 延伸功能" } }
+      }
+    },
+    "Allow Finder Control": {
+      "localizations": {
+        "es": { "stringUnit": { "state": "translated", "value": "Permitir controlar el Finder" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Finder の制御を許可" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "Finder 제어 허용" } },
+        "zh-Hans": { "stringUnit": { "state": "translated", "value": "允许控制 Finder" } },
+        "zh-Hant": { "stringUnit": { "state": "translated", "value": "允許控制 Finder" } }
+      }
     }
   },
   "version": "1.0"

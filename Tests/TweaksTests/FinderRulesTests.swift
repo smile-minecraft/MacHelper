@@ -244,6 +244,43 @@ import Tweaks
         #expect(FinderMenuRequestRules.validate(request, environment)?.paths == ["/Users/me/Desktop"])
     }
 
+    /// A right-click on files sends the files; New File then belongs in the folder holding them.
+    /// Before, every New File from the item menu failed with "selection no longer available".
+    @Test func newFileFromSelectedItemsUsesTheirFolder() {
+        let environment = FinderMenuRequestRules.Environment(
+            exists: { _ in true },
+            isDirectory: { $0 == "/Users/me/Desktop" || $0 == "/Users/me/Desktop/Project" },
+            isWritableDirectory: { $0 == "/Users/me/Desktop" || $0 == "/Users/me/Desktop/Project" })
+        let oneFile = FinderMenuRequest(action: .newFile, paths: ["/Users/me/Desktop/a.txt"], template: .markdown, id: "1")
+        let resolved = FinderMenuRequestRules.validate(oneFile, environment)
+        #expect(resolved?.paths == ["/Users/me/Desktop"])
+        #expect(resolved?.template == .markdown)
+        #expect(resolved?.id == "1")
+
+        let twoItems = FinderMenuRequest(action: .newFile,
+                                         paths: ["/Users/me/Desktop/a.txt", "/Users/me/Desktop/Project"], id: "2")
+        #expect(FinderMenuRequestRules.validate(twoItems, environment)?.paths == ["/Users/me/Desktop"])
+
+        // One folder on its own is the folder to create in.
+        let folder = FinderMenuRequest(action: .newFile, paths: ["/Users/me/Desktop/Project"], id: "3")
+        #expect(FinderMenuRequestRules.validate(folder, environment)?.paths == ["/Users/me/Desktop/Project"])
+
+        // The folder holding the items must still be writable and a user location.
+        let readOnlyParent = FinderMenuRequest(action: .newFile, paths: ["/Users/me/RO/a.txt"], id: "4")
+        #expect(FinderMenuRequestRules.validate(readOnlyParent, environment) == nil)
+        let systemParent = FinderMenuRequestRules.Environment(exists: { _ in true }, isDirectory: { _ in false },
+                                                               isWritableDirectory: { _ in true })
+        #expect(FinderMenuRequestRules.validate(FinderMenuRequest(action: .newFile, paths: ["/etc/hosts"], id: "5"),
+                                                systemParent) == nil)
+    }
+
+    @Test func newFileFolderRule() {
+        let isFolder: (String) -> Bool = { $0.hasSuffix("/Dir") }
+        #expect(FinderMenuRequestRules.newFileFolder(for: ["/Users/me/Dir"], isDirectory: isFolder) == "/Users/me/Dir")
+        #expect(FinderMenuRequestRules.newFileFolder(for: ["/Users/me/a.txt"], isDirectory: isFolder) == "/Users/me")
+        #expect(FinderMenuRequestRules.newFileFolder(for: ["/Users/me/Dir", "/Users/me/b"], isDirectory: isFolder) == "/Users/me")
+    }
+
     @Test func theTerminalOpensInTheFolderHoldingTheItem() {
         #expect(FinderMenuRequestRules.terminalDirectory(for: "/Users/me/Desktop", isDirectory: true) == "/Users/me/Desktop")
         #expect(FinderMenuRequestRules.terminalDirectory(for: "/Users/me/Desktop/a.txt", isDirectory: false) == "/Users/me/Desktop")

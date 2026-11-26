@@ -83,26 +83,43 @@ enum FinderMenuService {
     }
 }
 
-/// How the extension's request reaches the app: a `machelper://finder/…` URL. The handler is
-/// installed by the tweak engine, so it exists exactly when the tweaks run.
+/// How the extension's request reaches the app: a `machelper://finder/…` URL.
+///
+/// The handler is installed while the app is still launching, because a click in Finder's menu is
+/// often what launched MacHelper: AppKit hands that URL over before `applicationDidFinishLaunching`,
+/// and a handler installed later never sees it. Requests are only acted on once the tweak engine
+/// runs (`activate()`); until then they wait, and a diagnostic instance that never starts the engine
+/// never answers one.
 @MainActor
 final class FinderMenuChannel: NSObject {
     static let shared = FinderMenuChannel()
 
-    private var installed = false
+    private var active = false
+    /// Requests that arrived before the engine started. Only a few clicks can happen during a launch.
+    private var pending: [FinderMenuRequest] = []
+    private static let pendingLimit = 8
     /// Requests are identified by the id the extension put in the URL: a second delivery of the same
     /// click (for example when macOS reopens the URL) must not create a second file.
     private var seen: [String: Date] = [:]
     private let duplicateWindow: TimeInterval = 5
 
+    /// Idempotent. Called again when the engine starts, in case anything installed its own URL
+    /// handler during launch.
     func install() {
-        guard !installed else { return }
-        installed = true
         NSAppleEventManager.shared().setEventHandler(
             self,
             andSelector: #selector(handle(_:withReply:)),
             forEventClass: AEEventClass(kInternetEventClass),
             andEventID: AEEventID(kAEGetURL))
+    }
+
+    /// The tweak engine is running: act on what arrived during launch, and on everything after.
+    func activate() {
+        guard !active else { return }
+        active = true
+        let waiting = pending
+        pending.removeAll()
+        for request in waiting { deliver(request) }
     }
 
     @objc private func handle(_ event: NSAppleEventDescriptor, withReply reply: NSAppleEventDescriptor) {
@@ -113,6 +130,12 @@ final class FinderMenuChannel: NSObject {
     }
 
     func deliver(_ request: FinderMenuRequest) {
+        guard active else {
+            if pending.count < Self.pendingLimit, !pending.contains(where: { $0.id == request.id }) {
+                pending.append(request)
+            }
+            return
+        }
         let now = Date()
         seen = seen.filter { now.timeIntervalSince($0.value) < duplicateWindow }
         guard seen[request.id] == nil else { return }

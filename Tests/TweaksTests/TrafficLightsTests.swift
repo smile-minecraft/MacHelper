@@ -89,6 +89,18 @@ import Testing
         #expect(!TrafficLightRules.shouldQuitApp(quitIfLast: true, userWindowCount: 1, serverWindowCount: 2))
     }
 
+    /// Measured on macOS 27: System Settings draws its 16 pt buttons 18–34 pt below the window's
+    /// top. The old 30 pt strip passed the bottom of every button through untouched.
+    @Test func theStripCoversButtonsCentredInAToolbar() {
+        let window = CGRect(x: 0, y: 30, width: 754, height: 1410)
+        for dy in stride(from: 18.0, through: 34.0, by: 2) {
+            #expect(TrafficLightRules.isTitleBarClick(CGPoint(x: 26, y: 30 + dy), windowFrame: window))
+        }
+        // A taller unified toolbar centres the buttons lower still.
+        #expect(TrafficLightRules.isTitleBarClick(CGPoint(x: 26, y: 30 + 50), windowFrame: window))
+        #expect(!TrafficLightRules.isTitleBarClick(CGPoint(x: 26, y: 30 + 80), windowFrame: window))
+    }
+
     @Test func onlyClicksInTheTitleBarStripReachTheHitTest() {
         #expect(TrafficLightRules.isTitleBarClick(CGPoint(x: 120, y: 215), windowFrame: window))
         #expect(TrafficLightRules.isTitleBarClick(CGPoint(x: 100, y: 200), windowFrame: window))

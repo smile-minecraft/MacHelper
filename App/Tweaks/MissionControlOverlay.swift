@@ -211,6 +211,11 @@ private final class OverlayButton: NSButton {
         setAccessibilityLabel(action == .close ? String(localized: "Close Window") : String(localized: "Minimize Window"))
     }
 
+    /// MacHelper is never the active app while Mission Control shows, and a click on an inactive
+    /// app's window only brings it forward unless the view accepts the first mouse: without this
+    /// the button needs a second click, which Mission Control never waits for.
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
 }

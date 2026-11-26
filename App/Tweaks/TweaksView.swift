@@ -67,9 +67,25 @@ struct TweaksView: View {
                     }
                     if definition.permissions.contains(.finderExtension) {
                         Text("Requires Finder extension").settingsCaption()
+                        if enabled, model.status?.finderExtensionEnabled == false {
+                            Button("Turn On Finder Extension") {
+                                Task { await PermissionFlow.shared.start(.finderExtension) { prePrompt = $0 } }
+                            }
+                            .buttonStyle(.link)
+                            .font(.mhCaption)
+                        }
                     }
                     if definition.permissions.contains(.automationFinder) {
                         Text("Requires Finder automation").settingsCaption()
+                        // The tweak's own button: before, the only way to the Finder prompt was the
+                        // Permissions tab.
+                        if enabled, model.status?.automationFinderGranted != true {
+                            Button("Allow Finder Control") {
+                                Task { await PermissionFlow.shared.start(.finderAutomation) { prePrompt = $0 } }
+                            }
+                            .buttonStyle(.link)
+                            .font(.mhCaption)
+                        }
                     }
                 }
                 if definition.implemented, enabled {
@@ -126,10 +142,9 @@ struct TweaksView: View {
             }
             .font(.mhCallout)
         case .appList:
-            TextField(LocalizedStringKey(optionLabel(option.id)),
-                      text: Binding(get: { model.settings.stringList(option.id, for: id).joined(separator: ", ") },
-                                    set: { model.setValue(option.id, for: id, to: .stringList($0.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) })) }))
-                .font(.mhCallout)
+            AppListField(label: LocalizedStringKey(optionLabel(option.id)),
+                         stored: model.settings.stringList(option.id, for: id),
+                         save: { model.setValue(option.id, for: id, to: .stringList($0)) })
         }
     }
 
@@ -200,5 +215,35 @@ struct TweaksView: View {
         case "zoom": "System zoom"
         default: id
         }
+    }
+}
+
+/// A comma-separated list of bundle ids, saved when editing ends.
+///
+/// Saving on every keystroke cannot work for a list: the stored value is split and joined again, so
+/// the comma that starts the next id vanished the moment it was typed and only one app could ever
+/// be entered.
+private struct AppListField: View {
+    let label: LocalizedStringKey
+    let stored: [String]
+    let save: ([String]) -> Void
+    @State private var draft = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        TextField(label, text: $draft)
+            .font(.mhCallout)
+            .focused($focused)
+            .onSubmit(commit)
+            .onAppear { draft = TweakListText.format(stored) }
+            .onChange(of: focused) { _, isFocused in if !isFocused { commit() } }
+            // A change from the CLI or a reset shows up unless the person is typing.
+            .onChange(of: stored) { _, value in if !focused { draft = TweakListText.format(value) } }
+            .onDisappear(perform: commit)
+    }
+
+    private func commit() {
+        let parsed = TweakListText.parse(draft)
+        if parsed != stored { save(parsed) }
     }
 }
