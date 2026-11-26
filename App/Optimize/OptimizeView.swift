@@ -17,7 +17,9 @@ struct OptimizeView: View {
 
     var body: some View {
         ZStack {
-            // Each step replaces the last with a short fade instead of a cut.
+            // Each step replaces the last with a short fade instead of a cut. The old step leaves
+            // at once (`pageIn`): the preview's lists and the scanning art are heavy, and fading
+            // both steps over each other made the return to the start page stutter and shimmer.
             Group {
                 switch model.phase {
                 case .idle: start
@@ -27,7 +29,7 @@ struct OptimizeView: View {
                 case .finished: results
                 }
             }
-            .transition(Motion.swap)
+            .transition(Motion.pageIn)
         }
         .animatesStates(model.phase)
         // The page fills the detail column; the split view owns the window's minimum size, and

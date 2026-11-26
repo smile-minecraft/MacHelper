@@ -25,8 +25,8 @@ struct UninstallView: View {
                     // The search filters the app list only, so it leaves the toolbar with that tab.
                     appsTab
                         .searchable(text: $model.search, placement: .toolbar, prompt: Text("Search Apps"))
-                        .transition(Motion.swap)
-                case .orphans: OrphansTab(model: model).transition(Motion.swap)
+                        .transition(Motion.pageIn)
+                case .orphans: OrphansTab(model: model).transition(Motion.pageIn)
                 }
             }
             .frame(maxHeight: .infinity)
@@ -186,7 +186,9 @@ private struct AppDetail: View {
 
             if model.loadingPlan {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let plan = model.plan {
+            } else if let plan = model.plan, plan.app.id == app.id {
+                // Only this app's own plan: the page never lists another app's leftovers (and their
+                // sizes) under the app on screen, not even for the update between two selections.
                 Toggle("Also remove app data (Application Support, Containers, ~/.name: may contain your documents, settings or sign-in data)", isOn: $model.includeUserData)
                     .font(.mhCallout)
                     .padding(.horizontal, 16)

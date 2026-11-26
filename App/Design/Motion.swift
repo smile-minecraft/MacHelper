@@ -47,11 +47,15 @@ enum Motion {
         reduced || ThemeStore.shared.isPixel ? nil : .smooth(duration: duration)
     }
 
-    /// One state of a page replacing another (start screen → scanning → results): the new
-    /// state fades in, settling up a few points, while the old one fades out in place.
+    /// One small piece of a page replacing another in place (a row, a caption, a tile): both
+    /// versions cross-fade, the new one settling up a few points.
+    ///
+    /// Deliberately no scale. A scale re-rasterizes the whole subtree at a fractional size on
+    /// every frame of the fade, and text drawn that way shimmers for as long as the animation
+    /// runs. A whole page's states use `pageIn` instead.
     static var swap: AnyTransition {
         reduced ? .opacity : .asymmetric(
-            insertion: .opacity.combined(with: .offset(y: 6)).combined(with: .scale(scale: 0.995, anchor: .top)),
+            insertion: .opacity.combined(with: .offset(y: 6)),
             removal: .opacity)
     }
 
@@ -63,9 +67,11 @@ enum Motion {
             removal: .opacity)
     }
 
-    /// A whole page coming in after a sidebar switch. The old page leaves at once, so two heavy
-    /// pages are never composited on top of each other mid-fade (that double exposure is what
-    /// made page switches stutter); the new one fades in and rises a few points.
+    /// A whole page's content coming in: the window's page switch, and a page's own state swap
+    /// (one-click start → scanning → results). The old state leaves at once, so two heavy states
+    /// (lists, charts, scroll views) are never composited on top of each other mid-fade — that
+    /// double exposure re-renders both trees every frame and reads as a stutter. The new state
+    /// fades in and rises a few points. With Reduce Motion it is a plain fade.
     static var pageIn: AnyTransition {
         reduced ? .opacity : .asymmetric(insertion: .opacity.combined(with: .offset(y: 10)), removal: .identity)
     }

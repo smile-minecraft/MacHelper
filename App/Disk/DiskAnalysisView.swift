@@ -52,12 +52,16 @@ struct DiskAnalysisView: View {
             if let scannedAt = model.restoredAt { savedScanBanner(scannedAt) }
             Divider()
             ZStack {
-                content.transition(Motion.swap)
+                // The step on screen leaves at once and the next fades in (`pageIn`), so the chart
+                // and the lists of two steps are never drawn on top of each other.
+                content.transition(Motion.pageIn)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .animatesStates(model.phase)
         }
-        .animation(Motion.standard, value: model.restoredAt)
+        // No page-wide animation on `restoredAt`: the banner appears in the same update as the
+        // results it belongs to, and a second animation over the whole page animated the chart
+        // and the notes into their places twice, which is what made a restored scan jump.
         .quickLookPreview($model.previewURL)
         .task { model.restoreSavedScanIfNeeded() }
         // Scan, rescan and stop live in the window toolbar; the Actions menu offers the same

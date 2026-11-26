@@ -1,3 +1,4 @@
+import DiskScan
 import Foundation
 
 enum Fmt {
@@ -12,25 +13,13 @@ enum Fmt {
         return compactBytes(b)
     }
 
-    static func compactBytes(_ b: Double) -> String {
-        let units = ["B", "K", "M", "G", "T"]
-        var value = max(b, 0)
-        var i = 0
-        while value >= 1000, i < units.count - 1 {
-            value /= 1024
-            i += 1
-        }
-        let digits = value < 10 && i > 0 ? String(format: "%.1f", value) : String(format: "%.0f", value)
-        return digits + units[i]
-    }
+    static func compactBytes(_ b: Double) -> String { ByteSize.compact(b) }
 
-    static func bytes(_ b: Int64) -> String {
-        ByteCountFormatter.string(fromByteCount: b, countStyle: .file)
-    }
+    static func bytes(_ b: Int64) -> String { ByteSize.formatted(b) }
 
     /// RAM sizes use binary units, so 32 GiB reads "32 GB" like Activity Monitor (not "34.36 GB").
     static func memory(_ b: UInt64) -> String {
-        b == 0 ? "0" : ByteCountFormatter.string(fromByteCount: Int64(clamping: b), countStyle: .memory)
+        b == 0 ? "0" : ByteSize.formatted(b, style: .memory)
     }
 
     static func shortPath(_ p: String) -> String {
@@ -79,18 +68,8 @@ extension Fmt {
         return byteAmount(b) + "/s"
     }
 
-    /// "961 B", "12.4 MB", "2.6 GB" (decimal-free under 1 KB, one decimal below 100).
-    static func byteAmount(_ bytes: Double) -> String {
-        let units = ["B", "KB", "MB", "GB", "TB"]
-        var value = max(bytes, 0)
-        var i = 0
-        while value >= 1000, i < units.count - 1 {
-            value /= 1024
-            i += 1
-        }
-        let digits = i == 0 || value >= 100 ? String(format: "%.0f", value) : String(format: "%.1f", value)
-        return "\(digits) \(units[i])"
-    }
+    /// "961 B", "12.4 MB", "2.6 GB" (no decimal under 1 KB, one decimal below 100).
+    static func byteAmount(_ bytes: Double) -> String { ByteSize.amount(bytes) }
 
     /// "19.8 W" with a space, for the power page's large numbers.
     static func wattsLong(_ w: Double?) -> String {
