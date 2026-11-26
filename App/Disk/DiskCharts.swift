@@ -44,8 +44,6 @@ enum DiskPalette {
 }
 
 /// White label with a soft shadow, truncated to fit `width`.
-/// Shrinks a label a step at a time until it fits, instead of ellipsizing it: the centre of a
-/// narrow sunburst is only a few points wide, and "142.…" there says less than nothing.
 private func fittedLabel(_ ctx: GraphicsContext, _ text: String, font: Font, width: CGFloat,
                          color: Color = .white) -> GraphicsContext.ResolvedText? {
     var s = text
@@ -59,8 +57,9 @@ private func fittedLabel(_ ctx: GraphicsContext, _ text: String, font: Font, wid
     return nil
 }
 
-/// The same idea for text drawn in a shrinking space: the font steps down from `maxSize` and the
-/// text is dropped when even `minSize` does not fit.
+/// Shrinks a label a step at a time until it fits, instead of ellipsizing it: the centre of a
+/// narrow sunburst is only a few points wide, and "142.…" there says less than nothing. The font
+/// steps down from `maxSize` and the text is dropped when even `minSize` does not fit.
 private func shrinkingLabel(_ ctx: GraphicsContext, _ text: String, width: CGFloat, color: Color,
                             maxSize: CGFloat, weight: Font.Weight = .bold, minSize: CGFloat = 7) -> GraphicsContext.ResolvedText? {
     var size = maxSize
@@ -90,7 +89,9 @@ private func labelContext(_ ctx: GraphicsContext) -> GraphicsContext {
     var c = ctx
     c.addFilter(.shadow(color: .black.opacity(0.35), radius: 1.2, x: 0, y: 0.6))
     return c
-}/// Floating card next to the cursor.
+}
+
+/// Floating card next to the cursor.
 struct ChartTooltip: View {
     let info: HoverInfo
     let share: Double?
