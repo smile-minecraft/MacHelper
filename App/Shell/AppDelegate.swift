@@ -44,6 +44,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
         observeWindowVisibility()
         AppModel.prepareDockPreference()
+        // A Finder menu click that launches MacHelper arrives as a URL before launch finishes; the
+        // channel holds it until the tweak engine starts.
+        FinderMenuChannel.shared.install()
     }
 
     /// Re-evaluates the Dock mode whenever an ordinary window opens, closes, or leaves the Dock.

@@ -177,3 +177,29 @@ import Tweaks
         #expect(!badEnum && !badOption)
     }
 }
+
+/// The app-list text field on the Tweaks page and the CLI read lists the same way.
+@Suite struct TweakListTextTests {
+    @Test func aListSurvivesTheRoundTripThroughText() {
+        let list = ["com.apple.Terminal", "com.apple.Safari"]
+        #expect(TweakListText.parse(TweakListText.format(list)) == list)
+    }
+
+    /// The field used to save on every keystroke and show the parsed list back, so the comma that
+    /// starts a second id vanished as soon as it was typed. The field now saves when editing ends;
+    /// a trailing separator or blank entry is simply dropped at that point.
+    @Test func separatorsBlanksAndRepeatsAreDropped() {
+        #expect(TweakListText.parse("com.apple.Terminal,") == ["com.apple.Terminal"])
+        #expect(TweakListText.parse(" com.apple.Terminal ,, com.apple.Safari\ncom.apple.Notes ")
+                == ["com.apple.Terminal", "com.apple.Safari", "com.apple.Notes"])
+        #expect(TweakListText.parse("com.apple.Safari, com.apple.safari") == ["com.apple.Safari"])
+        #expect(TweakListText.parse("") == [])
+        #expect(TweakListText.parse(" , ") == [])
+    }
+
+    @Test func theCLIParsesListsWithTheSameRule() throws {
+        let excluded = try #require(TweakCatalog.definition(for: .inputQuitGuard).option("excludedApps"))
+        #expect(excluded.parse("com.apple.Terminal, com.apple.terminal, ,com.apple.Safari")
+                == .stringList(["com.apple.Terminal", "com.apple.Safari"]))
+    }
+}

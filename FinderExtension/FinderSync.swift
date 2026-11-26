@@ -85,7 +85,15 @@ final class FinderSync: FIFinderSync {
     private func send(_ action: FinderMenuAction, template: FinderFileTemplate? = nil) {
         let controller = FIFinderSyncController.default()
         let selected = askedKind == .contextualMenuForContainer ? [] : (controller.selectedItemURLs() ?? [])
-        let paths = (selected.isEmpty ? [controller.targetedURL()].compactMap { $0 } : selected).map(\.path)
+        let targets: [URL]
+        if action == .newFile, let folder = controller.targetedURL() {
+            // A new file goes into the folder the window shows, also when the right-click landed
+            // on a file: the selection names items, not the place to create one.
+            targets = [folder]
+        } else {
+            targets = selected.isEmpty ? [controller.targetedURL()].compactMap { $0 } : selected
+        }
+        let paths = targets.map(\.path)
         guard !paths.isEmpty else { return }
         let request = FinderMenuRequest(action: action, paths: paths, template: template)
         guard let url = FinderMenuURL.make(request) else { return }

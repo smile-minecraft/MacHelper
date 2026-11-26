@@ -212,7 +212,8 @@ prepare() {
     echo "→ Signing Sparkle.framework with the app's Developer ID"
     codesign --deep --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$sparkle" \
       || fail "Couldn't sign Sparkle.framework."
-    codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$app" \
+    # --force drops the entitlements the build signed in unless they are kept explicitly.
+    codesign --force --options runtime --timestamp --preserve-metadata=entitlements --sign "$SIGN_IDENTITY" "$app" \
       || fail "Couldn't re-sign the app after Sparkle."
   fi
 
@@ -228,6 +229,9 @@ prepare() {
     entitlements="$(codesign -d --entitlements - --xml "$target" 2>/dev/null || true)"
     if grep -q "get-task-allow" <<< "$entitlements"; then fail "$(basename "$target") still has get-task-allow."; fi
   done
+  # Under the Hardened Runtime the Finder automation prompt only exists with this entitlement.
+  grep -q "com.apple.security.automation.apple-events" <<< "$(codesign -d --entitlements - --xml "$app" 2>/dev/null || true)" \
+    || fail "MacHelper.app is missing the Apple Events entitlement."
   for exe in MacHelper MacHelperHelper machelper-cli; do
     [[ -x "$app/Contents/MacOS/$exe" ]] || fail "Missing $exe in the app."
   done

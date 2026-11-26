@@ -115,14 +115,24 @@ public enum FinderMenuRequestRules {
         }
         switch request.action {
         case .newFile:
-            // One folder to create the file in.
-            guard paths.count == 1, environment.isDirectory(paths[0]),
-                  environment.isWritableDirectory(paths[0]) else { return nil }
+            // One folder to create the file in. A right-click on files names the files, and the
+            // new file belongs next to them, in the folder the window shows.
+            let folder = newFileFolder(for: paths, isDirectory: environment.isDirectory)
+            guard isUserLocation(folder), environment.isWritableDirectory(folder) else { return nil }
+            paths = [folder]
         case .copyPath, .cut, .openTerminal:
             break
         }
         return FinderMenuRequest(action: request.action, paths: paths,
                                  template: request.template, id: request.id)
+    }
+
+    /// Where New File creates its file: the folder itself when one folder was sent (a right-click on
+    /// a folder's background or on one folder), otherwise the folder holding the first item.
+    public static func newFileFolder(for paths: [String], isDirectory: (String) -> Bool) -> String {
+        guard let first = paths.first else { return "/" }
+        if paths.count == 1, isDirectory(first) { return first }
+        return (first as NSString).deletingLastPathComponent
     }
 
     /// The folder `open-terminal` should show: the folder itself, or the one holding the file.

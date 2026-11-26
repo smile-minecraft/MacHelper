@@ -56,9 +56,11 @@ final class TweakEngine {
         settings = store.load()
         granted = AccessibilityAuthority.isGranted
         frontmostBundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-        // The extension's menu items arrive as URLs; the handler exists exactly while the tweak
-        // engine runs, so a snapshot or measurement instance never answers one.
+        // The extension's menu items arrive as URLs. The handler is installed before launch
+        // finishes (a click can be what launched MacHelper); requests are only acted on from here
+        // on, so a snapshot or measurement instance never answers one.
         FinderMenuChannel.shared.install()
+        FinderMenuChannel.shared.activate()
 
         observers.append(DistributedNotificationCenter.default().addObserver(
             forName: NSNotification.Name(TweakStore.changeNotification), object: nil, queue: .main
@@ -75,10 +77,17 @@ final class TweakEngine {
                 }
             })
         }
-        // Coming back from System Settings is when a grant has most likely just been made.
+        // Coming back from System Settings (or from the Finder alert) is when a grant has most
+        // likely just been made.
         observers.append(NotificationCenter.default.addObserver(
             forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main
-        ) { [weak self] _ in Task { @MainActor in self?.refreshFreshGrant() } })
+        ) { [weak self] _ in
+            Task { @MainActor in
+                guard let self else { return }
+                self.refreshFreshGrant()
+                if self.needsFinderStatus { self.refreshFinderStatus() }
+            }
+        })
         let workspace = NSWorkspace.shared.notificationCenter
         observers.append(workspace.addObserver(
             forName: NSWorkspace.didLaunchApplicationNotification, object: nil, queue: .main

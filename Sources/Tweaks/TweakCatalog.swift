@@ -105,8 +105,7 @@ public struct TweakOptionDefinition: Equatable, Sendable {
         case .double: value = Double(text).map(TweakValue.double)
         case .string, .enumeration: value = .string(text)
         case .appList:
-            let ids = text.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-            value = .stringList(ids)
+            value = .stringList(TweakListText.parse(text))
         }
         guard let value, isValid(value) else { return nil }
         return value

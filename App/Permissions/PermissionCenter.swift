@@ -134,7 +134,7 @@ final class PermissionCenter {
         async let extensionEnabled = Task.detached(priority: .utility) { FinderExtensionStatus.isEnabled() }.value
 
         next.fullDiskAccess = await fullDiskAccess
-        next.finderAutomation = Self.automationStatus(await automation)
+        next.finderAutomation = await automation
         next.finderExtension = (await extensionEnabled).map { $0 ? .enabled : .disabled } ?? .unknown
         next.accessibility = await accessibilityStatus()
 
@@ -226,15 +226,6 @@ final class PermissionCenter {
         }
     }
 
-    private static func automationStatus(_ permission: FinderAutomation.Permission) -> FinderAutomationStatus {
-        switch permission {
-        case .granted: .granted
-        case .denied: .denied
-        case .undetermined: .undetermined
-        case .unavailable: .unavailable
-        }
-    }
-
     private static func notificationStatus(_ status: UNAuthorizationStatus) -> NotificationAuthorizationStatus {
         switch status {
         case .notDetermined: .notDetermined
@@ -306,11 +297,44 @@ final class PermissionCenter {
         AccessibilityAuthority.requestPrompt()
     }
 
-    /// Asks macOS for the Automation grant; the system shows its own alert the first time.
-    func requestAutomation() async {
+    /// Asks macOS for the Automation grant; the system shows its own alert the first time. macOS can
+    /// only ask about a running Finder, so a Finder that isn't running is started first. When macOS
+    /// will not ask (refused before, or it declines to show the alert), Privacy & Security →
+    /// Automation opens instead, so the button never ends in silence.
+    @discardableResult
+    func requestAutomation() async -> FinderAutomationStatus {
         lastActionError = nil
-        _ = await Task.detached(priority: .userInitiated) { FinderAutomation.requestPermission() }.value
+        var canLaunchFinder = true
+        var outcome: (asked: FinderAutomationStatus, followUp: FinderAutomationFollowUp)
+        repeat {
+            outcome = await Self.askForAutomation(canLaunchFinder: canLaunchFinder)
+            guard outcome.followUp == .launchFinderAndRetry, await FinderAutomation.launchFinder() else { break }
+            canLaunchFinder = false
+        } while true
+        switch outcome.followUp {
+        case .done, .launchFinderAndRetry:
+            break
+        case .openSettings:
+            openSettings(for: .finderAutomation)
+        case .promptNotShown:
+            lastActionError = String(localized: "macOS didn’t show its Finder prompt. Turn on Finder under MacHelper in Privacy & Security → Automation.")
+            openSettings(for: .finderAutomation)
+        }
         await refresh()
+        return outcome.asked
+    }
+
+    /// One request with the prompt allowed, between two reads that never ask. The request waits for
+    /// the person's answer to the system alert, so none of it runs on the main thread.
+    private static func askForAutomation(canLaunchFinder: Bool) async
+        -> (asked: FinderAutomationStatus, followUp: FinderAutomationFollowUp) {
+        await Task.detached(priority: .userInitiated) {
+            let before = FinderAutomation.permission
+            let asked = FinderAutomation.requestPermission()
+            let recorded = FinderAutomation.permission
+            return (asked, FinderAutomationFollowUp.after(asked: asked, before: before, recorded: recorded,
+                                                          canLaunchFinder: canLaunchFinder))
+        }.value
     }
 
     func requestNotifications() async {
