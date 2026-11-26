@@ -57,6 +57,34 @@ private func fittedLabel(_ ctx: GraphicsContext, _ text: String, font: Font, wid
     return nil
 }
 
+/// Shrinks a label a step at a time until it fits, instead of ellipsizing it: the centre of a
+/// narrow sunburst is only a few points wide, and "142.…" there says less than nothing. The font
+/// steps down from `maxSize` and the text is dropped when even `minSize` does not fit.
+private func shrinkingLabel(_ ctx: GraphicsContext, _ text: String, width: CGFloat, color: Color,
+                            maxSize: CGFloat, weight: Font.Weight = .bold, minSize: CGFloat = 7) -> GraphicsContext.ResolvedText? {
+    var size = maxSize
+    while size >= minSize {
+        let resolved = ctx.resolve(Text(verbatim: text).font(.system(size: size, weight: weight)).foregroundStyle(color))
+        if resolved.measure(in: CGSize(width: 10_000, height: 100)).width <= width { return resolved }
+        size -= 1
+    }
+    return nil
+}
+
+/// A number for the same place: it never ellipsizes, so it is only drawn when it fits.
+private func fittedNumber(_ ctx: GraphicsContext, _ text: String, width: CGFloat,
+                          color: Color, maxSize: CGFloat = 12, minSize: CGFloat = 8) -> GraphicsContext.ResolvedText? {
+    var size = maxSize
+    while size >= minSize {
+        let resolved = ctx.resolve(Text(verbatim: text).font(.display(size, weight: .semibold).monospacedDigit())
+            .foregroundStyle(color))
+        if resolved.measure(in: CGSize(width: 10_000, height: 100)).width <= width { return resolved }
+        size -= 1
+    }
+    return nil
+}
+
+/// A shadow behind labels drawn over the rings, so a bright arc never washes one out.
 private func labelContext(_ ctx: GraphicsContext) -> GraphicsContext {
     var c = ctx
     c.addFilter(.shadow(color: .black.opacity(0.35), radius: 1.2, x: 0, y: 0.6))
@@ -265,18 +293,19 @@ struct SunburstChart: View {
             c.draw(label, at: .zero, anchor: .center)
         }
 
-        // Center: the focused folder; click to go up.
+        // Center: the focused folder; click to go up. A narrow chart makes a small disc, so both
+        // labels are drawn only when they fit inside it: an overlapping label is worse than none.
         let r = ring - 4
         let disc = Path(ellipseIn: CGRect(x: center.x - r, y: center.y - r, width: 2 * r, height: 2 * r))
         ctx.fill(disc, with: .color(Palette.card))
         ctx.stroke(disc, with: .color(Palette.stroke), lineWidth: 1)
-        if let title = fittedLabel(ctx, focus.name, font: .system(size: 13, weight: .bold), width: 2 * r - 14, color: Palette.text) {
-            ctx.draw(title, at: CGPoint(x: center.x, y: center.y - 10), anchor: .center)
+        if let title = shrinkingLabel(ctx, focus.name, width: 2 * r - 14, color: Palette.text, maxSize: 13) {
+            ctx.draw(title, at: CGPoint(x: center.x, y: center.y - 8), anchor: .center)
         }
-        ctx.draw(Text(Fmt.bytes(Int64(clamping: focus.size))).font(.display(12, weight: .semibold).monospacedDigit())
-                    .foregroundStyle(Palette.textMuted),
-                 at: CGPoint(x: center.x, y: center.y + 8), anchor: .center)
-        if focus.parent != nil {
+        if let bytes = fittedNumber(ctx, Fmt.bytes(Int64(clamping: focus.size)), width: 2 * r - 12, color: Palette.textMuted) {
+            ctx.draw(bytes, at: CGPoint(x: center.x, y: center.y + 8), anchor: .center)
+        }
+        if focus.parent != nil, r > 34 {
             ctx.draw(Text(verbatim: "↑").font(.mh(size: 11, weight: .bold)).foregroundStyle(Palette.textFaint),
                      at: CGPoint(x: center.x, y: center.y + 26), anchor: .center)
         }

@@ -8,6 +8,7 @@ struct MonitorView: View {
     let app: AppModel
     @AppStorage("monitor.range") private var range: Range = .live
     @AppStorage("monitor.fill") private var fill = true
+    @Environment(\.isCompactPage) private var compact
     @State private var samples: [MetricSample] = []
     /// The range whose data the charts show. It follows `range` only once that range's history has
     /// loaded, so switching ranges keeps the old charts up instead of flashing the empty state.
@@ -70,20 +71,7 @@ struct MonitorView: View {
         let _ = MonitorProbe.logContent("range=\(range.rawValue) chart=\(chartRange.rawValue) samples=\(samples.count)")
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    ChipBar(items: Range.allCases.map { ($0, $0.title) },
-                            selection: Binding(get: { range }, set: { newValue in
-                                MonitorProbe.log("range-set", newValue.rawValue)
-                                range = newValue
-                            }))
-                    Toggle("Fill under line", isOn: $fill)
-                        .toggleStyle(.checkbox)
-                        .font(.mhCaption)
-                    Spacer()
-                    Text(range == .live ? String(localized: "Last 5 minutes, updated live")
-                         : String(localized: "Averages per \(Duration.seconds(range.bucket).formatted(.units(allowed: [.minutes, .hours], width: .wide)))"))
-                        .font(.mhCaption).foregroundStyle(Palette.textMuted)
-                }
+                header
                 let shown = metrics.compactMap { m -> (Metric, [(String, [ChartPoint])])? in
                     let data = m.series.map { ($0.name, points($0.live, $0.stored)) }.filter { !$0.1.isEmpty }
                     return data.isEmpty ? nil : (m, data)
@@ -99,7 +87,7 @@ struct MonitorView: View {
                                         : "Turn on at least one metric in Settings → Menu Bar to record its history. Process usage history has its own switch in Settings → General → Data management.") { EmptyView() }
                         .frame(minHeight: 360)
                 } else {
-                    HairlinePanel(columns: 2) {
+                    HairlinePanel(columns: 2, minColumnWidth: 330) {
                         ForEach(shown, id: \.0.id) { m, data in chart(m, data) }
                     }
                 }
@@ -134,6 +122,48 @@ struct MonitorView: View {
 
     private var hasEnabledModules: Bool {
         MonitorModule.allCases.contains { store.isActive($0) }
+    }
+
+    /// The range chips, the fill switch and what the charts cover. Half a screen keeps the
+    /// sentence on its own line under them instead of squeezing all three.
+    @ViewBuilder private var header: some View {
+        if compact {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 12) {
+                    chips
+                    fillToggle
+                    Spacer(minLength: 0)
+                }
+                rangeCaption
+            }
+        } else {
+            HStack {
+                chips
+                fillToggle
+                Spacer()
+                rangeCaption
+            }
+        }
+    }
+
+    private var chips: some View {
+        ChipBar(items: Range.allCases.map { ($0, $0.title) },
+                selection: Binding(get: { range }, set: { newValue in
+                    MonitorProbe.log("range-set", newValue.rawValue)
+                    range = newValue
+                }))
+    }
+
+    private var fillToggle: some View {
+        Toggle("Fill under line", isOn: $fill)
+            .toggleStyle(.checkbox)
+            .font(.mhCaption)
+    }
+
+    private var rangeCaption: some View {
+        Text(range == .live ? String(localized: "Last 5 minutes, updated live")
+             : String(localized: "Averages per \(Duration.seconds(range.bucket).formatted(.units(allowed: [.minutes, .hours], width: .wide)))"))
+            .font(.mhCaption).foregroundStyle(Palette.textMuted)
     }
 
     /// Live series hold up to one point a second. Nine charts of 300 points each made switching to

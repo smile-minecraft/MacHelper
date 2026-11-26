@@ -35,7 +35,7 @@ struct ProcessHistoryView: View {
                 Text("Only each minute’s top 10 processes by CPU and by memory are kept, so a process missing from a minute may still have been running. Averages cover only the minutes a process appears in.")
                     .font(.mhCaption)
                     .foregroundStyle(Palette.textMuted)
-                HairlinePanel(columns: 2) {
+                HairlinePanel(columns: 2, minColumnWidth: 360) {
                     column("Top processes by CPU", ranks: usage.byCPU,
                            totalMinutes: usage.totalMinuteCount, showsMemory: false)
                     column("Top processes by memory", ranks: usage.byMemory,

@@ -5,6 +5,8 @@ struct CableView: View {
     let app: AppModel
     @Bindable var model: CableModel
     @State private var isOnScreen = false
+    /// Half a screen: the four summary cards read as a two-by-two grid.
+    @Environment(\.isCompactPage) private var compact
 
     var body: some View {
         ScrollView {
@@ -125,42 +127,63 @@ struct CableView: View {
             return first.name
         }()
 
-        return HStack(spacing: ThemeStore.shared.isSoft ? 14 : 12) {
-            StatCard(
-                title: "USB-C Ports",
-                value: "\(connectedCount) / \(totalPorts)",
-                detail: String(localized: "\(connectedCount) connected"),
-                detailColor: connectedCount > 0 ? Theme.mint : Palette.textMuted,
-                accent: Theme.blue,
-                symbol: "cable.connector",
-                compact: true
-            )
-            StatCard(
-                title: "Top Cable Rating",
-                value: peakValue,
-                detail: peakDetail,
-                detailColor: peakCable != nil ? Palette.textMuted : Palette.textFaint,
-                accent: Theme.amber,
-                symbol: "bolt.fill",
-                compact: true
-            )
-            StatCard(
-                title: "Connected Devices",
-                value: "\(totalDevices)",
-                detail: deviceDetail,
-                accent: Theme.cyan,
-                symbol: "point.3.connected.trianglepath.dotted",
-                compact: true
-            )
-            StatCard(
-                title: "Displays",
-                value: "\(content.displays.count)",
-                detail: displayDetail,
-                accent: Theme.violet,
-                symbol: "display",
-                compact: true
-            )
+        return Group {
+            if compact {
+                // Half a screen: two columns of two, so each card keeps a readable value.
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .top), count: 2),
+                          alignment: .leading, spacing: 12) {
+                    cards(connectedCount: connectedCount, totalPorts: totalPorts, peakValue: peakValue,
+                          peakDetail: peakDetail, peakCable: peakCable, totalDevices: totalDevices,
+                          deviceDetail: deviceDetail, displayDetail: displayDetail, content: content)
+                }
+            } else {
+                HStack(spacing: ThemeStore.shared.isSoft ? 14 : 12) {
+                    cards(connectedCount: connectedCount, totalPorts: totalPorts, peakValue: peakValue,
+                          peakDetail: peakDetail, peakCable: peakCable, totalDevices: totalDevices,
+                          deviceDetail: deviceDetail, displayDetail: displayDetail, content: content)
+                }
+            }
         }
+    }
+
+    @ViewBuilder
+    private func cards(connectedCount: Int, totalPorts: Int, peakValue: String, peakDetail: String,
+                       peakCable: CableSpec?, totalDevices: Int, deviceDetail: String,
+                       displayDetail: String, content: CableSnapshotContent) -> some View {
+        StatCard(
+            title: "USB-C Ports",
+            value: "\(connectedCount) / \(totalPorts)",
+            detail: String(localized: "\(connectedCount) connected"),
+            detailColor: connectedCount > 0 ? Theme.mint : Palette.textMuted,
+            accent: Theme.blue,
+            symbol: "cable.connector",
+            compact: true
+        )
+        StatCard(
+            title: "Top Cable Rating",
+            value: peakValue,
+            detail: peakDetail,
+            detailColor: peakCable != nil ? Palette.textMuted : Palette.textFaint,
+            accent: Theme.amber,
+            symbol: "bolt.fill",
+            compact: true
+        )
+        StatCard(
+            title: "Connected Devices",
+            value: "\(totalDevices)",
+            detail: deviceDetail,
+            accent: Theme.cyan,
+            symbol: "point.3.connected.trianglepath.dotted",
+            compact: true
+        )
+        StatCard(
+            title: "Displays",
+            value: "\(content.displays.count)",
+            detail: displayDetail,
+            accent: Theme.violet,
+            symbol: "display",
+            compact: true
+        )
     }
 
     // MARK: - Ports
@@ -180,7 +203,9 @@ struct CableView: View {
                 if !content.connectedPorts.isEmpty {
                     let gap: CGFloat = ThemeStore.shared.isSoft ? 14 : 12
                     let count = content.connectedPorts.count
-                    let columnCount = count == 4 ? 2 : min(max(count, 1), 3)
+                    // Half a screen fits one port card: two of them squeeze the "Connected" pill
+                    // into the port name. A full window keeps the wide pairs.
+                    let columnCount = compact ? 1 : count == 4 ? 2 : min(max(count, 1), 3)
                     let columns = Array(repeating: GridItem(.flexible(), spacing: gap, alignment: .top), count: columnCount)
                     LazyVGrid(columns: columns, alignment: .leading, spacing: gap) {
                         ForEach(content.connectedPorts, id: \.id) { port in

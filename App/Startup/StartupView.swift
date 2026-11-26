@@ -6,27 +6,12 @@ struct StartupView: View {
     @State private var removing: StartupItem?
     @State private var disablingDaemon: StartupItem?
     @State private var selectedID: StartupItem.ID?
+    /// Half a screen stacks the tab filters and narrows the item list.
+    @Environment(\.isCompactPage) private var compact
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                Picker("View", selection: $model.tab) {
-                    Text("Launch Agents").tag(StartupModel.Tab.launchd)
-                    Text("Login & Background Items").tag(StartupModel.Tab.background)
-                }
-                .pickerStyle(.segmented).labelsHidden().fixedSize()
-                if model.tab == .launchd {
-                    Toggle("Only items whose program is missing", isOn: $model.onlyBroken).toggleStyle(.checkbox)
-                } else {
-                    Toggle("Show disabled", isOn: $model.showDisabledBackground).toggleStyle(.checkbox)
-                }
-                Spacer()
-                if model.refreshing {
-                    ProgressView().controlSize(.small).help("Updating startup items…")
-                }
-            }
-            .padding(.horizontal, 12).padding(.vertical, 10)
-            .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
+            header
             ZStack {
                 if model.tab == .background {
                     BackgroundItemsList(model: model)
@@ -51,7 +36,7 @@ struct StartupView: View {
                         .scrollContentBackground(.hidden)
                         // Delete does what the row's own control does, after the same confirmation.
                         .onDeleteCommand { deleteSelected() }
-                        .frame(minWidth: 320, idealWidth: 380, maxWidth: 440)
+                        .frame(minWidth: 200, idealWidth: 300, maxWidth: 440)
                         Rectangle().fill(Palette.hairline).frame(width: 1)
                         Group {
                             if let item = model.items.first(where: { $0.id == selectedID }) {
@@ -78,7 +63,6 @@ struct StartupView: View {
                 Button("Open Login Items") { model.openLoginItems() }
             }
         }
-        .frame(minWidth: 680, minHeight: 480)
         .task { await model.load() }
         .task(id: model.tab) { if model.tab == .background && model.backgroundGroups.isEmpty { await model.loadBackground() } }
         // The search sits in the window toolbar (⌘F); the list reload sits beside it.
@@ -103,6 +87,54 @@ struct StartupView: View {
             }
         } message: {
             Text("This system daemon is stopped for all users and won’t start again until you enable it here. The app that installed it may stop working properly (for example its updater, VPN or network helper). The plist isn’t changed or removed.")
+        }
+    }
+
+    /// The tab switch and its filter. Half a screen keeps the long filter label on its own
+    /// line under the tab switch instead of pushing the refresh spinner out of the window.
+    @ViewBuilder private var header: some View {
+        if compact {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 10) {
+                    viewPicker
+                    Spacer()
+                    refreshingHint
+                }
+                filterToggle
+            }
+            .padding(.horizontal, 12).padding(.vertical, 10)
+            .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
+        } else {
+            HStack(spacing: 10) {
+                viewPicker
+                filterToggle
+                Spacer()
+                refreshingHint
+            }
+            .padding(.horizontal, 12).padding(.vertical, 10)
+            .overlay(alignment: .bottom) { Rectangle().fill(Palette.hairline).frame(height: 1) }
+        }
+    }
+
+    private var viewPicker: some View {
+        Picker("View", selection: $model.tab) {
+            Text("Launch Agents").tag(StartupModel.Tab.launchd)
+            Text("Login & Background Items").tag(StartupModel.Tab.background)
+        }
+        .pickerStyle(.segmented).labelsHidden().fixedSize()
+    }
+
+    @ViewBuilder private var filterToggle: some View {
+        if model.tab == .launchd {
+            Toggle("Only items whose program is missing", isOn: $model.onlyBroken).toggleStyle(.checkbox)
+        } else {
+            Toggle("Show disabled", isOn: $model.showDisabledBackground).toggleStyle(.checkbox)
+        }
+    }
+
+    @ViewBuilder private var refreshingHint: some View {
+        if model.refreshing {
+            ProgressView().controlSize(.small).help("Updating startup items…")
         }
     }
 

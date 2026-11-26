@@ -204,6 +204,11 @@ final class DiskAnalysisModel {
     /// moving to the Trash, and hashing file contents all need a live scan.
     var isShowingSavedScan: Bool {
         guard let root else { return false }
+        #if DEBUG
+        // `--snapshot-demo --snapshot-saved-scan` draws the page as the restored scan a person
+        // sees on the next launch; the tree itself is the demo's live one.
+        if demoIsSavedScan { return true }
+        #endif
         return !ScanCacheSafety.isLiveScan(root)
     }
 
@@ -565,9 +570,15 @@ final class DiskAnalysisModel {
     func node(atPath path: String) -> DiskNode? { root?.descendant(atPath: path) }
 
     #if DEBUG
+    /// True while `showDemo` was asked for the saved-scan presentation.
+    private var demoIsSavedScan = false
+
     /// Shows a synthetic tree as if a scan had just finished (`--snapshot-demo`). Nothing on
-    /// disk is scanned, restored or measured; the volume figures are the demo's too.
-    func showDemo(root: DiskNode, volume: VolumeSummary, files: Int, elapsed: TimeInterval) {
+    /// disk is scanned, restored or measured; the volume figures are the demo's too. Passing
+    /// `restoredAt` shows it the way a restored saved scan looks: with the strip that says when
+    /// it was taken and with collecting, removing and duplicate search turned off.
+    func showDemo(root: DiskNode, volume: VolumeSummary, files: Int, elapsed: TimeInterval,
+                  restoredAt: Date? = nil) {
         cancel()
         // The picker shows the home folder whatever location this Mac scanned last.
         if let home = targets.first(where: { $0.id == "home" }) { target = home }
@@ -576,7 +587,8 @@ final class DiskAnalysisModel {
         self.volume = volume
         progress = ScanProgress(files: files, directories: files / 9, bytes: root.size, unreadableDirectories: 0)
         self.elapsed = elapsed
-        restoredAt = nil
+        self.restoredAt = restoredAt
+        demoIsSavedScan = restoredAt != nil
         scanVolumeIdentifier = volume.identifier
         scanCoversVolume = false
         scanIsComplete = true

@@ -28,20 +28,7 @@ struct OverviewView: View {
                     if !ThemeStore.shared.isSoft {
                         Rectangle().fill(Palette.hairline).frame(height: 1)
                     }
-                    HStack(alignment: .top, spacing: ThemeStore.shared.isSoft ? 20 : 40) {
-                        if ThemeStore.shared.isSimple {
-                            CommonTools(app: app)
-                                .softCard(padding: 16)
-                                .frame(maxWidth: .infinity, alignment: .topLeading)
-                        } else {
-                            BusiestApps(store: store)
-                                .softCard(padding: 16)
-                                .frame(maxWidth: .infinity, alignment: .topLeading)
-                        }
-                        ToDoList(app: app)
-                            .softCard(padding: 16)
-                            .frame(maxWidth: .infinity, alignment: .topLeading)
-                    }
+                    LowerColumns(app: app, store: store)
                     MachineLine()
                 }
                 .padding(.horizontal, 40)
@@ -68,6 +55,7 @@ struct OverviewView: View {
 private struct Headline: View {
     let store: MonitorStore
     let app: AppModel
+    @Environment(\.isCompactPage) private var compact
 
     // System reactions: cooldowns and priorities live here so the slime only reacts when
     // OverviewView decides, and the frequency setting scales every cooldown.
@@ -204,74 +192,103 @@ private struct Headline: View {
 
     var body: some View {
         let v = verdict
-        HStack(alignment: .center, spacing: 24) {
-            SlimeMascot(mood: mood, cell: 4, frequency: MascotSettingsStore.shared.frequency)
-            VStack(alignment: .leading, spacing: 10) {
-                Text(styled(v)).font(.display(34, weight: .semibold)).foregroundStyle(Palette.text)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(detail).font(.mh(size: 14)).foregroundStyle(Palette.textMuted)
+        layout(v)
+            .onAppear {
+                previousHealthLevel = app.healthModel.score(store: store)?.level
+                previousHealthValue = app.healthModel.score(store: store)?.value
+                previousHelperEnabled = HelperClient.shared.status == .enabled
+                previousCharging = store.battery?.isCharging ?? false
+                previousOptimizePhase = app.optimizeModel.phase
+                evaluateSustained()
             }
-            Spacer(minLength: 16)
-            if AppSection.health.isVisible, let score = app.healthModel.score(store: store) {
-                HealthScoreBadge(score: score) { app.show(.health) }
+            .onChange(of: store.cpu?.total) { _, _ in evaluateSustained() }
+            .onChange(of: store.memory?.pressure) { _, _ in evaluateSustained() }
+            .onChange(of: store.cpuCelsius) { _, _ in evaluateSustained() }
+            .onChange(of: store.diskFreeBytes) { _, _ in evaluateSustained() }
+            .onChange(of: store.battery?.charge) { _, _ in evaluateSustained() }
+            .onChange(of: store.battery?.isCharging) { _, isCharging in
+                let charging = isCharging ?? false
+                if charging && !previousCharging { consider(.batteryCharging) }
+                previousCharging = charging
+                evaluateSustained()
             }
-            if let (title, section) = v.action {
-                Button { app.show(section) } label: { Text(title) }
-                    .buttonStyle(PrimaryButtonStyle())
+            .onChange(of: app.optimizeModel.phase) { _, phase in
+                if phase == .finished && previousOptimizePhase != .finished { consider(.cleanupFinished) }
+                previousOptimizePhase = phase
             }
-        }
-        .onAppear {
-            previousHealthLevel = app.healthModel.score(store: store)?.level
-            previousHealthValue = app.healthModel.score(store: store)?.value
-            previousHelperEnabled = HelperClient.shared.status == .enabled
-            previousCharging = store.battery?.isCharging ?? false
-            previousOptimizePhase = app.optimizeModel.phase
-            evaluateSustained()
-        }
-        .onChange(of: store.cpu?.total) { _, _ in evaluateSustained() }
-        .onChange(of: store.memory?.pressure) { _, _ in evaluateSustained() }
-        .onChange(of: store.cpuCelsius) { _, _ in evaluateSustained() }
-        .onChange(of: store.diskFreeBytes) { _, _ in evaluateSustained() }
-        .onChange(of: store.battery?.charge) { _, _ in evaluateSustained() }
-        .onChange(of: store.battery?.isCharging) { _, isCharging in
-            let charging = isCharging ?? false
-            if charging && !previousCharging { consider(.batteryCharging) }
-            previousCharging = charging
-            evaluateSustained()
-        }
-        .onChange(of: app.optimizeModel.phase) { _, phase in
-            if phase == .finished && previousOptimizePhase != .finished { consider(.cleanupFinished) }
-            previousOptimizePhase = phase
-        }
-        .onChange(of: app.healthModel.score(store: store)?.value) { _, value in
-            let newScore = app.healthModel.score(store: store)
-            if let oldLevel = previousHealthLevel, let newLevel = newScore?.level, newLevel != oldLevel {
-                consider(newLevel > oldLevel ? .healthWorsened : .healthImproved)
-            } else if let oldValue = previousHealthValue, let newValue = value, newValue - oldValue >= 5 {
-                consider(.healthImproved)
-            } else if let oldValue = previousHealthValue, let newValue = value, oldValue - newValue >= 5 {
-                consider(.healthWorsened)
-            }
-            previousHealthLevel = newScore?.level
-            previousHealthValue = value
-        }
-        .task {
-            if previousHelperEnabled == nil { previousHelperEnabled = HelperClient.shared.status == .enabled }
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(5))
-                let enabled = HelperClient.shared.status == .enabled
-                if let previous = previousHelperEnabled, previous != enabled {
-                    consider(enabled ? .helperConnected : .helperDisconnected)
+            .onChange(of: app.healthModel.score(store: store)?.value) { _, value in
+                let newScore = app.healthModel.score(store: store)
+                if let oldLevel = previousHealthLevel, let newLevel = newScore?.level, newLevel != oldLevel {
+                    consider(newLevel > oldLevel ? .healthWorsened : .healthImproved)
+                } else if let oldValue = previousHealthValue, let newValue = value, newValue - oldValue >= 5 {
+                    consider(.healthImproved)
+                } else if let oldValue = previousHealthValue, let newValue = value, oldValue - newValue >= 5 {
+                    consider(.healthWorsened)
                 }
-                previousHelperEnabled = enabled
+                previousHealthLevel = newScore?.level
+                previousHealthValue = value
             }
-        }
+            .task {
+                if previousHelperEnabled == nil { previousHelperEnabled = HelperClient.shared.status == .enabled }
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(5))
+                    let enabled = HelperClient.shared.status == .enabled
+                    if let previous = previousHelperEnabled, previous != enabled {
+                        consider(enabled ? .helperConnected : .helperDisconnected)
+                    }
+                    previousHelperEnabled = enabled
+                }
+            }
     }
 
     private func styled(_ v: Verdict) -> AttributedString {
         var a = AttributedString(v.sentence)
         if let value = v.value, let r = a.range(of: value) { a[r].foregroundColor = v.level.color }
         return a
+    }
+
+    /// The mascot, the sentence and the two things to the right of them. Half a screen is too
+    /// narrow for that one row, so there the score and the suggested action move below the
+    /// sentence instead of squeezing it into three lines.
+    @ViewBuilder private func layout(_ v: Verdict) -> some View {
+        if compact {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .center, spacing: 20) {
+                    mascot
+                    sentence(v)
+                }
+                HStack(spacing: 16) { trailing(v) }
+            }
+        } else {
+            HStack(alignment: .center, spacing: 24) {
+                mascot
+                sentence(v)
+                Spacer(minLength: 16)
+                trailing(v)
+            }
+        }
+    }
+
+    private var mascot: some View {
+        SlimeMascot(mood: mood, cell: 4, frequency: MascotSettingsStore.shared.frequency)
+    }
+
+    private func sentence(_ v: Verdict) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(styled(v)).font(.display(34, weight: .semibold)).foregroundStyle(Palette.text)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(detail).font(.mh(size: 14)).foregroundStyle(Palette.textMuted)
+        }
+    }
+
+    @ViewBuilder private func trailing(_ v: Verdict) -> some View {
+        if AppSection.health.isVisible, let score = app.healthModel.score(store: store) {
+            HealthScoreBadge(score: score) { app.show(.health) }
+        }
+        if let (title, section) = v.action {
+            Button { app.show(section) } label: { Text(title) }
+                .buttonStyle(PrimaryButtonStyle())
+        }
     }
 }
 
@@ -281,37 +298,51 @@ private struct Headline: View {
 private struct Readouts: View {
     let store: MonitorStore
     let advanced: Bool
+    @Environment(\.isCompactPage) private var compact
 
     var body: some View {
         let soft = ThemeStore.shared.isSoft
-        VStack(alignment: .leading, spacing: soft ? 16 : 28) {
-            HStack(alignment: .top, spacing: soft ? 16 : 32) {
-                Readout(title: "CPU", value: Fmt.percent(store.cpu?.total), reading: StatusRules.cpu(store.cpu?.total),
-                        series: store.history[.cpu], maxValue: 1)
-                Readout(title: "Memory", value: Fmt.percent(store.memoryFraction), reading: StatusRules.memory(store.memory),
-                        series: store.history[.memory], maxValue: 1)
-                Readout(title: "Temperature", value: Fmt.celsius(store.cpuCelsius), reading: StatusRules.temperature(store.cpuCelsius),
-                        series: store.history[.temperature], maxValue: nil)
-                Readout(title: "Free space", value: store.disk.map { Fmt.bytes($0.availableBytes) } ?? "–",
-                        reading: StatusRules.disk(freeBytes: store.diskFreeBytes), series: nil, maxValue: nil,
-                        bar: store.diskFreeFraction.map { 1 - $0 })
+        if compact {
+            // Two columns: a readout needs about 180 pt for its label, number and trend line.
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: soft ? 16 : 20, alignment: .top), count: 2),
+                      alignment: .leading, spacing: soft ? 16 : 20) {
+                basic
+                if advanced { extra }
             }
-            .fixedSize(horizontal: false, vertical: true)
-            if advanced {
-                HStack(alignment: .top, spacing: soft ? 16 : 32) {
-                    Readout(title: "GPU", value: Fmt.percent(store.gpu?.utilization),
-                            reading: StatusRules.fraction(store.gpu?.utilization).map { Reading(level: $0, word: "") },
-                            series: store.history[.gpu], maxValue: 1)
-                    Readout(title: "Network", value: store.network.map { "\(Fmt.rate($0.inBytesPerSecond))/s" } ?? "–",
-                            reading: nil, series: store.history[.netIn], maxValue: nil, note: store.network.map { String(localized: "Upload \(Fmt.rate($0.outBytesPerSecond))/s") })
-                    Readout(title: "Power", value: Fmt.watts(store.power?.systemWatts ?? store.power?.gpuWatts), reading: nil,
-                            series: store.history[.power], maxValue: nil)
-                    Readout(title: "Fans", value: store.fans.first.map { "\(Fmt.rpm($0.actualRPM)) rpm" } ?? "–", reading: nil,
-                            series: store.history[.fan], maxValue: store.fans.first?.maxRPM)
+        } else {
+            VStack(alignment: .leading, spacing: soft ? 16 : 28) {
+                HStack(alignment: .top, spacing: soft ? 16 : 32) { basic }
+                    .fixedSize(horizontal: false, vertical: true)
+                if advanced {
+                    HStack(alignment: .top, spacing: soft ? 16 : 32) { extra }
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    @ViewBuilder private var basic: some View {
+        Readout(title: "CPU", value: Fmt.percent(store.cpu?.total), reading: StatusRules.cpu(store.cpu?.total),
+                series: store.history[.cpu], maxValue: 1)
+        Readout(title: "Memory", value: Fmt.percent(store.memoryFraction), reading: StatusRules.memory(store.memory),
+                series: store.history[.memory], maxValue: 1)
+        Readout(title: "Temperature", value: Fmt.celsius(store.cpuCelsius), reading: StatusRules.temperature(store.cpuCelsius),
+                series: store.history[.temperature], maxValue: nil)
+        Readout(title: "Free space", value: store.disk.map { Fmt.bytes($0.availableBytes) } ?? "–",
+                reading: StatusRules.disk(freeBytes: store.diskFreeBytes), series: nil, maxValue: nil,
+                bar: store.diskFreeFraction.map { 1 - $0 })
+    }
+
+    @ViewBuilder private var extra: some View {
+        Readout(title: "GPU", value: Fmt.percent(store.gpu?.utilization),
+                reading: StatusRules.fraction(store.gpu?.utilization).map { Reading(level: $0, word: "") },
+                series: store.history[.gpu], maxValue: 1)
+        Readout(title: "Network", value: store.network.map { "\(Fmt.rate($0.inBytesPerSecond))/s" } ?? "–",
+                reading: nil, series: store.history[.netIn], maxValue: nil, note: store.network.map { String(localized: "Upload \(Fmt.rate($0.outBytesPerSecond))/s") })
+        Readout(title: "Power", value: Fmt.watts(store.power?.systemWatts ?? store.power?.gpuWatts), reading: nil,
+                series: store.history[.power], maxValue: nil)
+        Readout(title: "Fans", value: store.fans.first.map { "\(Fmt.rpm($0.actualRPM)) rpm" } ?? "–", reading: nil,
+                series: store.history[.fan], maxValue: store.fans.first?.maxRPM)
     }
 }
 
@@ -367,6 +398,37 @@ private struct Readout: View {
 }
 
 // MARK: - Lower columns
+
+/// The two cards under the readouts: the busiest apps (or the tools, in simple mode) and what
+/// needs attention. Half a screen stacks them instead of halving both.
+private struct LowerColumns: View {
+    let app: AppModel
+    let store: MonitorStore
+    @Environment(\.isCompactPage) private var compact
+
+    var body: some View {
+        let soft = ThemeStore.shared.isSoft
+        let layout = compact
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: soft ? 20 : 28))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: soft ? 20 : 40))
+        layout {
+            first
+                .softCard(padding: 16)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            ToDoList(app: app)
+                .softCard(padding: 16)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+    }
+
+    @ViewBuilder private var first: some View {
+        if ThemeStore.shared.isSimple {
+            CommonTools(app: app)
+        } else {
+            BusiestApps(store: store)
+        }
+    }
+}
 
 private struct BusiestApps: View {
     let store: MonitorStore
@@ -637,7 +699,7 @@ struct TopProcesses: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Processes").font(Theme.heading).foregroundStyle(Palette.text)
-            HairlinePanel(columns: 2) {
+            HairlinePanel(columns: 2, minColumnWidth: 360) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Top processes by CPU").font(Theme.label).foregroundStyle(Palette.textMuted)
                     ProcessTable(items: Array((store.processes?.byCPU ?? []).prefix(8)), sort: .cpu)
