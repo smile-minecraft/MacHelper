@@ -21,7 +21,18 @@ final class UninstallModel {
     /// True while the old list stays on screen and a newer one is being read.
     private(set) var refreshingApps = false
     @ObservationIgnored private var appsLoadedAt: Date?
-    var selectedAppID: InstalledApp.ID? { didSet { dropNotice = nil; Task { await loadPlan() } } }
+    /// Distinguishes plan reads, so a slow read of an app the page has left cannot replace the
+    /// plan of the app on screen.
+    @ObservationIgnored private var planGeneration = 0
+    var selectedAppID: InstalledApp.ID? {
+        didSet {
+            dropNotice = nil
+            // A plan belongs to one app. Drop the previous one as the selection changes, so the
+            // app just picked never shows the sizes of the app before it while its own plan is read.
+            plan = nil
+            Task { await loadPlan() }
+        }
+    }
     private(set) var plan: UninstallPlan?
     private(set) var loadingPlan = false
     var includeUserData = false { didSet { applyUserDataChoice() } }
@@ -120,14 +131,22 @@ final class UninstallModel {
 
     private func loadPlan() async {
         message = nil
-        guard let app = selectedApp else { plan = nil; return }
+        planGeneration += 1
+        let generation = planGeneration
+        guard let app = selectedApp else {
+            plan = nil
+            loadingPlan = false
+            return
+        }
         loadingPlan = true
         let others = apps
         let withData = includeUserData
         let p = await Task.detached(priority: .userInitiated) {
             AppUninstaller.plan(for: app, includeUserData: withData, otherApps: others)
         }.value
-        guard selectedAppID == app.id else { return }
+        // Only the newest request owns the plan and the spinner: an older one finishing late would
+        // otherwise leave the page spinning for good (or show another app's leftovers).
+        guard planGeneration == generation, selectedAppID == app.id else { return }
         plan = p
         helperEnabled = HelperClient.shared.status == .enabled
         systemSelection = helperEnabled ? Set(p.systemItems.filter { Self.isStrongSystemMatch($0, bundleID: app.bundleID) }) : []

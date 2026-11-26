@@ -733,7 +733,8 @@ struct ScrollingCenter<Content: View>: View {
 // MARK: - Page width
 /// The width a page is laid out at, published by `pageContentWidth()`.
 private struct ContentWidthKey: EnvironmentKey {
-    /// `.infinity` until the first measurement, so a page draws its wide layout first.
+    /// `.infinity` for any view that isn't inside the main window's page frame: it draws its wide
+    /// layout. Inside `pageContentWidth()` the real width is there from the first layout pass.
     static let defaultValue: CGFloat = .infinity
 }
 
@@ -755,18 +756,17 @@ extension View {
     /// Publishes the width this view is laid out at to its content through `\.contentWidth`.
     /// Apply it to the page's own content, inside its padding, so the number is the width the
     /// page's rows actually get.
+    ///
+    /// Reads the width from the layout pass itself rather than through a state measurement: a page
+    /// uses this number to pick between its wide and its narrow layout, and a measurement arrives
+    /// one update late, so every page first drew its wide layout and then reflowed into the narrow
+    /// one — a jump right after a sidebar switch, in the middle of the page transition. A
+    /// `GeometryReader` proposes the same size the page already gets and hands the number down
+    /// during the same pass, so the first frame is the final layout.
     func pageContentWidth() -> some View {
-        modifier(PageContentWidth())
-    }
-}
-
-private struct PageContentWidth: ViewModifier {
-    @State private var width: CGFloat = .infinity
-
-    func body(content: Content) -> some View {
-        content
-            .environment(\.contentWidth, width)
-            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+        GeometryReader { geo in
+            self.environment(\.contentWidth, geo.size.width)
+        }
     }
 }
 

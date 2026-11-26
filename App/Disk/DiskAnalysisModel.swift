@@ -115,6 +115,9 @@ final class DiskAnalysisModel {
     }
     private(set) var phase: Phase = .idle
     private(set) var progress = ScanProgress(files: 0, directories: 0, bytes: 0, unreadableDirectories: 0)
+    /// The figures on screen during a scan. Every reading goes through it, so the totals only grow
+    /// and a scan that replaces another starts from zero instead of keeping the old totals.
+    @ObservationIgnored private var readout = ScanProgressReadout()
     private(set) var root: DiskNode?
     private(set) var focus: DiskNode?
     private(set) var elapsed: TimeInterval = 0
@@ -157,6 +160,11 @@ final class DiskAnalysisModel {
     var previewURL: URL?
 
     @ObservationIgnored private var scanner: DiskScanner?
+    /// The one loop that copies the scanner's counters into `progress` while it runs. It belongs
+    /// to this model and is replaced by every scan, never left to two scans at once: two loops
+    /// writing two different scanners' counters made the figures on screen jump up and down for
+    /// the whole scan.
+    @ObservationIgnored private var progressTask: Task<Void, Never>?
     @ObservationIgnored private let cache = ScanResultCache()
     @ObservationIgnored private var restoreGeneration = 0
     @ObservationIgnored private var isLoadingSavedScan = false
@@ -381,7 +389,8 @@ final class DiskAnalysisModel {
         scanIsComplete = false
         root = nil
         focus = nil
-        progress = ScanProgress(files: 0, directories: 0, bytes: 0, unreadableDirectories: 0)
+        readout.reset()
+        progress = readout.progress
         elapsed = 0
         collector = []
         duplicates = nil
@@ -408,6 +417,10 @@ final class DiskAnalysisModel {
         restoredAt = nil
         root = nil
         focus = nil
+        // A new scan starts from zero. Leaving the previous scan's totals on screen let the page
+        // show another scan's figures until the first poll arrived.
+        readout.reset()
+        progress = readout.progress
         collector = []
         duplicates = nil
         duplicatesMessage = nil
@@ -425,11 +438,15 @@ final class DiskAnalysisModel {
         loadVolume()
         let cache = cache
 
-        // Progress poll.
-        Task { [weak self] in
-            while let self, self.phase == .scanning {
-                self.progress = scanner.progress
+        // Progress poll. One loop per scan, and it stops as soon as this scan is no longer the
+        // model's: a stopped or replaced scan must never write its counters over a newer scan's.
+        progressTask?.cancel()
+        progressTask = Task { [weak self] in
+            while !Task.isCancelled {
                 try? await Task.sleep(for: .milliseconds(200))
+                guard let self, !Task.isCancelled, self.scanner === scanner, self.phase == .scanning else { return }
+                self.readout.update(scanner.progress)
+                self.progress = self.readout.progress
             }
         }
         Task.detached(priority: .userInitiated) { [weak self] in
@@ -475,7 +492,8 @@ final class DiskAnalysisModel {
                     self.scanIsComplete = !result.cancelled
                     self.root = result.root
                     self.focus = result.root
-                    self.progress = result.progress
+                    self.readout.update(result.progress)
+                    self.progress = self.readout.progress
                     self.elapsed = result.elapsed
                     self.phase = result.cancelled ? .idle : .done
                     self.changes = changes
@@ -585,7 +603,9 @@ final class DiskAnalysisModel {
         self.root = root
         focus = root
         self.volume = volume
-        progress = ScanProgress(files: files, directories: files / 9, bytes: root.size, unreadableDirectories: 0)
+        readout.reset()
+        readout.update(ScanProgress(files: files, directories: files / 9, bytes: root.size, unreadableDirectories: 0))
+        progress = readout.progress
         self.elapsed = elapsed
         self.restoredAt = restoredAt
         demoIsSavedScan = restoredAt != nil
@@ -637,6 +657,8 @@ final class DiskAnalysisModel {
     }
 
     func cancel() {
+        progressTask?.cancel()
+        progressTask = nil
         scanner?.cancel()
         scanner = nil
         if phase == .scanning { phase = .idle }
