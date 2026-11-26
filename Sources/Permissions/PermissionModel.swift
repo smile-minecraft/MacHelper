@@ -65,12 +65,62 @@ public enum AccessibilityPermissionStatus: Equatable, Sendable {
     case notGranted
 }
 
-public enum FinderAutomationStatus: Equatable, Sendable {
+public enum FinderAutomationStatus: String, Equatable, Sendable {
     case granted
     case denied
     case undetermined
     /// Finder isn't running or did not answer, so macOS has no answer yet.
     case unavailable
+
+    /// What `AEDeterminePermissionToAutomateTarget` returned. Every code other than the three TCC
+    /// answers (procNotFound when Finder is not running, a timeout, a bad descriptor) means macOS
+    /// gave no answer.
+    public init(appleEventStatus status: Int32) {
+        switch status {
+        case 0: self = .granted                 // noErr
+        case -1743: self = .denied              // errAEEventNotPermitted
+        case -1744: self = .undetermined        // errAEEventWouldRequireUserConsent
+        default: self = .unavailable            // procNotFound (-600) and everything else
+        }
+    }
+}
+
+/// What the Finder automation request does after macOS answered the Continue button, so the button
+/// never ends in silence.
+public enum FinderAutomationFollowUp: Equatable, Sendable {
+    /// Granted, or the person just chose Don't Allow in macOS's alert: nothing more to do now. The
+    /// row offers System Settings from then on.
+    case done
+    /// Finder was not running, so macOS could not ask; start Finder and ask once more.
+    case launchFinderAndRetry
+    /// Refused before this request: macOS never asks twice, the switch is in Privacy & Security →
+    /// Automation.
+    case openSettings
+    /// macOS answered without showing its alert and recorded nothing (a build without the Apple
+    /// Events entitlement, or a TCC database that declines to ask). System Settings is the only way
+    /// left, and the person is told why nothing appeared.
+    case promptNotShown
+
+    /// - Parameters:
+    ///   - asked: the answer to the request made with the prompt allowed.
+    ///   - before: what macOS reported, without asking, right before that request.
+    ///   - recorded: what macOS reports, without asking, right after it. A refusal the person made
+    ///     is recorded; a refusal macOS made on its own without asking is not.
+    ///   - canLaunchFinder: false once Finder was already started for this request.
+    public static func after(asked: FinderAutomationStatus, before: FinderAutomationStatus,
+                             recorded: FinderAutomationStatus, canLaunchFinder: Bool) -> Self {
+        switch asked {
+        case .granted:
+            return .done
+        case .denied:
+            if before == .denied { return .openSettings }
+            return recorded == .denied ? .done : .promptNotShown
+        case .undetermined:
+            return .promptNotShown
+        case .unavailable:
+            return canLaunchFinder ? .launchFinderAndRetry : .promptNotShown
+        }
+    }
 }
 
 public enum NotificationAuthorizationStatus: Equatable, Sendable {

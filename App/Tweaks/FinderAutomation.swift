@@ -1,17 +1,19 @@
 import AppKit
 import ApplicationServices
 import Foundation
+import Permissions
 
 /// Finder automation: the one Apple Event the tweaks send (`insertion location`) and what macOS
 /// thinks about it. Automation is a separate TCC grant from Accessibility: without it Finder refuses
 /// the script with -1743, and the tweaks must say so instead of quietly doing nothing.
+///
+/// The app runs with the Hardened Runtime, so it also needs the
+/// `com.apple.security.automation.apple-events` entitlement (App/MacHelper.entitlements). Without
+/// it macOS never shows the consent alert: asking returns at once and every script fails with -1743.
 enum FinderAutomation {
-    enum Permission: String, Equatable, Sendable {
-        case granted
-        case denied
-        case undetermined
-        case unavailable
-    }
+    typealias Permission = FinderAutomationStatus
+
+    static let finderBundleID = "com.apple.finder"
 
     enum Failure: Error, Equatable, LocalizedError {
         case notPermitted
@@ -33,19 +35,39 @@ enum FinderAutomation {
 
     /// What macOS has already decided, without asking the person anything.
     static var permission: Permission {
-        switch determinePermission(ask: false) {
-        case noErr: return .granted
-        case -1743: return .denied        // errAEEventNotPermitted
-        case -1744: return .undetermined  // errAEEventWouldRequireUserConsent
-        default: return .unavailable      // Finder not running, or no reply
-        }
+        Permission(appleEventStatus: determinePermission(ask: false))
     }
 
     /// Asks macOS for the grant: the first time, the system shows its own alert. The call waits for
-    /// the answer, so callers run it off the main thread.
+    /// the answer, so callers run it off the main thread. `.unavailable` means Finder was not
+    /// running, so macOS had nothing to ask about.
     @discardableResult
-    static func requestPermission() -> Bool {
-        determinePermission(ask: true) == noErr
+    static func requestPermission() -> Permission {
+        Permission(appleEventStatus: determinePermission(ask: true))
+    }
+
+    /// Starts Finder without bringing it forward and waits until it accepts Apple Events (a few
+    /// seconds at most). False when it could not be started.
+    @MainActor
+    static func launchFinder() async -> Bool {
+        if NSRunningApplication.runningApplications(withBundleIdentifier: finderBundleID).contains(where: \.isFinishedLaunching) {
+            return true
+        }
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: finderBundleID) else { return false }
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = false
+        do {
+            _ = try await NSWorkspace.shared.openApplication(at: url, configuration: configuration)
+        } catch {
+            return false
+        }
+        for _ in 0..<20 {
+            if NSRunningApplication.runningApplications(withBundleIdentifier: finderBundleID).contains(where: \.isFinishedLaunching) {
+                return true
+            }
+            do { try await Task.sleep(for: .milliseconds(150)) } catch { return false }
+        }
+        return false
     }
 
     /// The folder the front Finder window shows. Runs off the main thread: a slow Finder must not
@@ -90,7 +112,7 @@ enum FinderAutomation {
     /// `AEDeterminePermissionToAutomateTarget` for Finder's bundle id. The event class/id only picks
     /// the target; the person grants (or refuses) automation per app.
     private static func determinePermission(ask: Bool) -> OSStatus {
-        guard let bundleID = "com.apple.finder".data(using: .utf8) else { return -1 }
+        guard let bundleID = finderBundleID.data(using: .utf8) else { return -1 }
         var target = AEAddressDesc()
         let created = bundleID.withUnsafeBytes { buffer -> OSStatus in
             guard let base = buffer.baseAddress else { return -1 }
