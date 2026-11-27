@@ -139,20 +139,23 @@ report_unattributed() {
 }
 
 # Reports every first-run failure as flaky or failed after its single rerun. Arguments: the
-# first-run failures and the rerun failures (parser output; the second may be empty) and the rerun
-# status. A test is flaky when the rerun passed, or when the rerun named its failures and this test
-# is not among them. A rerun that failed without naming its failures proves nothing passed.
+# first-run failures and the rerun failures (parser output; the second may be empty), the tests the
+# rerun showed passing (one per line), and which column of the failure list names a test in that
+# list (1: the filter, for app tests; 2: the display name, for package tests).
+#
+# A test is flaky only when the rerun shows it passing and does not list it as failed again. The
+# rerun's exit status proves nothing: a filter that matches no test (a failure inside a helper
+# function, a test with a display name) runs nothing and still exits 0.
 classify() {
-    local first="$1" again="$2" rerun_status="$3"
-    local filter name file line message
+    local first="$1" again="$2" passed="$3" column="$4"
+    local filter name file line message key
     while IFS=$'\t' read -r filter name file line message; do
         [ -n "$filter" ] || continue
-        if [ "$rerun_status" -eq 0 ]; then
+        if [ "$column" -eq 1 ]; then key="$filter"; else key="$name"; fi
+        if grep -qxF -- "$key" "$passed" && ! cut -f1 "$again" | grep -qxF -- "$filter"; then
             report_flaky "$name" "$file" "$line"
-        elif [ ! -s "$again" ] || cut -f1 "$again" | grep -qxF -- "$filter"; then
-            report_failed "$name" "$file" "$line" "$message"
         else
-            report_flaky "$name" "$file" "$line"
+            report_failed "$name" "$file" "$line" "$message"
         fi
     done < "$first"
 }
@@ -192,10 +195,12 @@ if [ "$swift_status" -ne 0 ]; then
         rerun_failures="$LOGS/swift-rerun-failures.tsv"
         : > "$rerun_failures"
         if [ "$rerun_status" -ne 0 ]; then
-            python3 "$PARSER" swift-log "$rerun_log" > "$rerun_failures" || : > "$rerun_failures"
+            python3 "$PARSER" swift-log "$rerun_log" > "$rerun_failures" || true
         fi
+        rerun_passed="$LOGS/swift-rerun-passed.txt"
+        python3 "$PARSER" swift-passed "$rerun_log" > "$rerun_passed" || : > "$rerun_passed"
         before=${#failed_rows[@]}
-        classify "$swift_failures" "$rerun_failures" "$rerun_status"
+        classify "$swift_failures" "$rerun_failures" "$rerun_passed" 2
         [ "${#failed_rows[@]}" -gt "$before" ] && failed=1
     fi
 fi
@@ -235,10 +240,12 @@ if [ "$app_status" -ne 0 ]; then
         rerun_failures="$LOGS/app-rerun-failures.tsv"
         : > "$rerun_failures"
         if [ "$rerun_status" -ne 0 ]; then
-            python3 "$PARSER" xcresult "$APP_RERUN_RESULT" > "$rerun_failures" || : > "$rerun_failures"
+            python3 "$PARSER" xcresult "$APP_RERUN_RESULT" > "$rerun_failures" || true
         fi
+        rerun_passed="$LOGS/app-rerun-passed.txt"
+        python3 "$PARSER" xcresult-passed "$APP_RERUN_RESULT" > "$rerun_passed" || : > "$rerun_passed"
         before=${#failed_rows[@]}
-        classify "$app_failures" "$rerun_failures" "$rerun_status"
+        classify "$app_failures" "$rerun_failures" "$rerun_passed" 1
         [ "${#failed_rows[@]}" -gt "$before" ] && failed=1
     fi
 fi

@@ -14,6 +14,11 @@ Subcommands:
     swift-log <log>          parse the output of `swift test`
     xcresult <bundle>        read a result bundle with `xcrun xcresulttool`
     summary-errors <log>     print the error lines of a log that could not be parsed
+    swift-passed <log>       print the display name of every test a `swift test` log shows passing
+    xcresult-passed <bundle> print the `-only-testing:` identifier of every passed test in a bundle
+
+The two `-passed` commands let the caller prove a rerun really ran a test: a filter that matches
+nothing still exits 0, so a zero exit status alone never makes a failed test flaky.
 """
 
 from __future__ import annotations
@@ -46,6 +51,9 @@ UNATTRIBUTABLE = re.compile(
     r"^\S+\.swift:\d+:\d+: error:|Exited with (?:unexpected )?signal|Fatal error:|"
     r"error: fatalError|Test runner hung|encountered an error"
 )
+# Swift Testing: `✔ Test name() passed after 0.1 seconds.` XCTest: `Test Case '-[M.Class test]' passed`.
+SWIFT_TESTING_PASSED = re.compile(r"Test (?P<name>.+?) passed after ")
+XCTEST_PASSED = re.compile(r"Test Case '-\[(?P<module>\w+)\.(?P<cls>\w+) (?P<test>\w+)\]' passed")
 FUNC = re.compile(r"\bfunc\s+(?P<name>[A-Za-z_]\w*)\s*[(<]")
 IDENTIFIER_CALL = re.compile(r"^(?P<name>[A-Za-z_]\w*)\(")
 
@@ -249,6 +257,55 @@ def parse_xcresult(bundle: str) -> int:
     return 0
 
 
+def swift_passed(log_path: str) -> int:
+    """Display names in the same form `parse_swift_log` puts in its second column."""
+    with open(log_path, encoding="utf-8", errors="replace") as handle:
+        lines = handle.read().splitlines()
+    names: list[str] = []
+    for raw in lines:
+        line = raw.strip()
+        match = SWIFT_TESTING_PASSED.search(line)
+        if match:
+            name = match.group("name")
+        else:
+            match = XCTEST_PASSED.search(line)
+            if not match:
+                continue
+            name = f"{match.group('cls')}.{match.group('test')}"
+        if name not in names:
+            names.append(name)
+    print("\n".join(names))
+    return 0
+
+
+def xcresult_passed(bundle: str) -> int:
+    """Identifiers in the same form `failures_from_test_results` puts in its first column. A
+    bundle only the legacy format can read lists nothing, so its tests count as not rerun."""
+    if not os.path.isdir(bundle):
+        return 0
+    try:
+        data = xcresulttool("get", "test-results", "tests", "--path", bundle)
+    except (RuntimeError, json.JSONDecodeError):
+        return 0
+    passed: list[str] = []
+
+    def walk(node: dict, target: str | None) -> None:
+        if node.get("nodeType") == "Unit test bundle":
+            target = node.get("name")
+        if node.get("nodeType") == "Test Case":
+            identifier = node.get("nodeIdentifier") or ""
+            if node.get("result") == "Passed" and target and "/" in identifier:
+                passed.append(f"{target}/{identifier}")
+            return
+        for child in node.get("children", []):
+            walk(child, target)
+
+    for node in data.get("testNodes", []):
+        walk(node, None)
+    print("\n".join(dict.fromkeys(passed)))
+    return 0
+
+
 def summary_errors(log_path: str) -> int:
     try:
         with open(log_path, encoding="utf-8", errors="replace") as handle:
@@ -279,6 +336,10 @@ def main(argv: list[str]) -> int:
         return parse_xcresult(target)
     if command == "summary-errors":
         return summary_errors(target)
+    if command == "swift-passed":
+        return swift_passed(target)
+    if command == "xcresult-passed":
+        return xcresult_passed(target)
     print(__doc__, file=sys.stderr)
     return 64
 
