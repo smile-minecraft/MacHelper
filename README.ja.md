@@ -188,7 +188,7 @@ macOS 14 以降を搭載した Intel Mac と Apple Silicon Mac の両方に対�
 make setup      # ツール確認、Sparkle のダウンロード、MacHelper.xcodeproj の生成
 make open       # Xcode でプロジェクトを開き、⌘R でビルド＆実行
 make run        # または Debug ビルドを build/ に作成して起動
-make test       # Swift パッケージのユニットテストを実行
+make test       # パッケージのテストに続き、アプリの MacHelperTests を実行
 make install    # Release ビルド → /Applications/MacHelper.app へ配置して再起動
 ```
 
