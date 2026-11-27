@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 @testable import Metrics
+import Metrics
 
 /// Fixtures shared by the production-module lifecycle tests. The tests stub the kernel read with a
 /// counter so they can see every sampling round the model starts; nothing here touches the disk.

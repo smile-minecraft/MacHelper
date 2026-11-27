@@ -8,7 +8,23 @@ struct PanelNetworkTab: View {
     let store: MonitorStore
     @State private var model = NetworkPanelModel()
     @State private var history = PanelHistory()
-    @AppStorage("panel.network.range") private var range: PanelRange = .live
+    @AppStorage("panel.network.range", store: TestHost.defaults) private var range: PanelRange = .live
+
+    var body: some View {
+        // The content is a view of its own so the page can be drawn without starting the live
+        // samplers below (offscreen snapshots and the unit tests render just the content).
+        PanelNetworkTabContent(store: store, model: model, history: history, range: $range)
+            .onAppear { model.start() }
+            .onDisappear { model.stop() }
+            .task(id: range) { await history.run(range, history: store.persistentHistory) }
+    }
+}
+
+struct PanelNetworkTabContent: View {
+    let store: MonitorStore
+    let model: NetworkPanelModel
+    let history: PanelHistory
+    @Binding var range: PanelRange
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -21,9 +37,6 @@ struct PanelNetworkTab: View {
                 NetworkDetailsContent(snapshot: details)
             }
         }
-        .onAppear { model.start() }
-        .onDisappear { model.stop() }
-        .task(id: range) { await history.run(range, history: store.persistentHistory) }
     }
 
     // MARK: Rates
@@ -233,7 +246,7 @@ private struct RateCard: View {
 /// Busiest apps by network use, from `nettop` snapshots. A helper process counts toward its app.
 struct NetworkTrafficSources: View {
     let snapshot: ProcessNetworkSnapshot?
-    @AppStorage("panel.network.sort") private var sort: Sort = .rate
+    @AppStorage("panel.network.sort", store: TestHost.defaults) private var sort: Sort = .rate
 
     enum Sort: String, CaseIterable { case rate, download, upload, total }
 

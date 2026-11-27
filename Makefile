@@ -46,8 +46,8 @@ run: ## Build and open the app from build/; ARGS=--demo-battery previews a batte
 	@$(MAKE) --no-print-directory build
 	@open $(APP) $(if $(ARGS),--args $(ARGS))
 
-test: ## Run the unit tests of the Swift packages
-	@$(ENV) swift test
+test: ## Run the package tests, then the app tests (MacHelperTests) in an inert app
+	@scripts/ci/run-tests.sh
 
 screenshots: ## Redraw the README screenshots in docs/images from made-up data (Debug build)
 	@CONFIGURATION=Debug $(MAKE) --no-print-directory build

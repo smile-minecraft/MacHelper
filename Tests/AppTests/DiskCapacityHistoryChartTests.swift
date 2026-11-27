@@ -3,7 +3,7 @@ import Foundation
 import Storage
 import SwiftUI
 import Testing
-@testable import DiskCapacityHistoryFeature
+@testable import MacHelper
 
 /// The chart is tested from synthetic points only. Nothing here reads the disk, opens the
 /// history database, starts the app or the helper, or touches user preferences. The rendering
@@ -112,24 +112,24 @@ import Testing
 
     // MARK: - Values and summary
 
-    @Test func summaryUsesTheFilteredValues() {
+    @Test func summaryUsesTheFilteredValues() throws {
         let series = DiskCapacityHistorySeries(points: [
             point(hoursAgo: 3, free: 100 * gigabyte),
             point(hoursAgo: 2, free: 150 * gigabyte),
             point(hoursAgo: 1, free: 120 * gigabyte),
         ], volumeID: "disk-a", now: now)
         let english = Locale(identifier: "en_US_POSIX")
-        #expect(series.accessibilityValue(locale: english)
+        #expect(series.accessibilityValue(locale: english, bundle: try AppTestResources.english)
                 == "Latest 120 GB, lowest 100 GB, highest 150 GB")
     }
 
-    @Test func singleAndEmptySummariesAreClear() {
+    @Test func singleAndEmptySummariesAreClear() throws {
         let english = Locale(identifier: "en_US_POSIX")
         let single = DiskCapacityHistorySeries(points: [point(hoursAgo: 1, free: 120 * gigabyte)],
                                                volumeID: "disk-a", now: now)
-        #expect(single.accessibilityValue(locale: english) == "One reading: 120 GB")
+        #expect(single.accessibilityValue(locale: english, bundle: try AppTestResources.english) == "One reading: 120 GB")
         let empty = DiskCapacityHistorySeries(points: [], volumeID: "disk-a", now: now)
-        #expect(empty.accessibilityValue(locale: english) == "No capacity readings in the last seven days")
+        #expect(empty.accessibilityValue(locale: english, bundle: try AppTestResources.english) == "No capacity readings in the last seven days")
     }
 
     @Test func formatsBytesWithDecimalUnitsAndTheCallersLocale() {
@@ -147,8 +147,7 @@ import Testing
     // MARK: - Dedicated catalog
 
     @Test func catalogCoversEveryTextInEveryLanguage() throws {
-        let resources = try resourcesURL()
-        let data = try Data(contentsOf: resources.appendingPathComponent("DiskCapacityHistory.xcstrings"))
+        let data = try Data(contentsOf: AppTestResources.catalogSource("DiskCapacityHistory"))
         let object = try JSONSerialization.jsonObject(with: data)
         let document = try #require(object as? [String: Any])
         #expect(document["sourceLanguage"] as? String == "en")
@@ -172,8 +171,7 @@ import Testing
     }
 
     @Test func formatTranslationsKeepTheirPlaceholders() throws {
-        let resources = try resourcesURL()
-        let data = try Data(contentsOf: resources.appendingPathComponent("DiskCapacityHistory.xcstrings"))
+        let data = try Data(contentsOf: AppTestResources.catalogSource("DiskCapacityHistory"))
         let document = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
         let strings = try #require(document["strings"] as? [String: Any])
         for key in ["One reading: %@", "Latest %@, lowest %@, highest %@"] {
@@ -190,10 +188,8 @@ import Testing
     }
 
     @Test func catalogSpotChecksUseTheRightLanguage() throws {
-        let resources = try resourcesURL()
         func localized(_ text: DiskCapacityHistoryText, _ language: String) throws -> String {
-            let bundle = try #require(Bundle(url: resources.appendingPathComponent("Localizations/\(language).lproj")))
-            return text.localized(in: bundle)
+            text.localized(in: try AppTestResources.localization(language))
         }
         #expect(try localized(.title, "ja") == "空き容量（過去7日間）")
         #expect(try localized(.title, "zh-Hant") == "可用空間，最近 7 天")
@@ -203,12 +199,11 @@ import Testing
     }
 
     @Test func compiledTablesResolveEveryTextForEveryLanguage() throws {
-        let resources = try resourcesURL()
         let languages = ["es", "ja", "ko", "zh-Hans", "zh-Hant"]
         let keys = Set(DiskCapacityHistoryText.allCases.map(\.rawValue))
         for language in languages {
-            let lproj = resources.appendingPathComponent("Localizations/\(language).lproj")
-            let bundle = try #require(Bundle(url: lproj), "\(language) bundle is missing")
+            let lproj = try AppTestResources.resources.appendingPathComponent("\(language).lproj")
+            let bundle = try AppTestResources.localization(language)
             let table = try #require(NSDictionary(contentsOf: lproj.appendingPathComponent("DiskCapacityHistory.strings")) as? [String: String],
                                      "\(language) table is missing")
             #expect(Set(table.keys) == keys, "\(language) table keys differ")
@@ -222,9 +217,13 @@ import Testing
 
     // MARK: - Rendered at the menu width
 
+    /// The marks are drawn in this red, which nothing else in the chart uses, so counting red
+    /// pixels counts marks whatever the theme's cyan is.
+    private static let markTint = Color(red: 0.9, green: 0.1, blue: 0.1)
+
     @Test @MainActor func singleReadingDrawsAVisiblePoint() throws {
         let chart = DiskCapacityHistoryChart(points: [point(hoursAgo: 36, free: 500 * gigabyte)],
-                                             volumeID: "disk-a", now: now)
+                                             volumeID: "disk-a", now: now, tint: Self.markTint)
         let image = try render(chart)
         let pixels = redPixelCount(image, rows: plotRows(image))
         #expect(pixels > 0, "a single hourly reading must draw a visible point")
@@ -233,7 +232,7 @@ import Testing
     @Test @MainActor func singleReadingAtTheWindowEdgesStaysVisible() throws {
         for hoursAgo in [0.0, 168.0] {
             let chart = DiskCapacityHistoryChart(points: [point(hoursAgo: hoursAgo, free: 500 * gigabyte)],
-                                                 volumeID: "disk-a", now: now)
+                                                 volumeID: "disk-a", now: now, tint: Self.markTint)
             let image = try render(chart)
             let pixels = redPixelCount(image, rows: plotRows(image))
             #expect(pixels > 0, "a single reading at \(hoursAgo) hours ago must be visible")
@@ -247,7 +246,7 @@ import Testing
             point(hoursAgo: 48, free: 500 * gigabyte),
             point(hoursAgo: 47, free: 500 * gigabyte),
         ]
-        let chart = DiskCapacityHistoryChart(points: points, volumeID: "disk-a", now: now)
+        let chart = DiskCapacityHistoryChart(points: points, volumeID: "disk-a", now: now, tint: Self.markTint)
         let image = try render(chart)
         let rows = plotRows(image)
         let columns = redColumns(image, rows: rows)
@@ -262,13 +261,13 @@ import Testing
     }
 
     @Test @MainActor func emptyAndSingleStatesRenderAtTheMenuWidth() throws {
-        let empty = try render(DiskCapacityHistoryChart(points: [], volumeID: "disk-a", now: now))
+        let empty = try render(DiskCapacityHistoryChart(points: [], volumeID: "disk-a", now: now, tint: Self.markTint))
         #expect(empty.size.width == 460)
         #expect(empty.size.height > 0)
         #expect(redPixelCount(empty, rows: plotRows(empty)) == 0)
 
         let single = try render(DiskCapacityHistoryChart(points: [point(hoursAgo: 12, free: 500 * gigabyte)],
-                                                        volumeID: "disk-a", now: now))
+                                                        volumeID: "disk-a", now: now, tint: Self.markTint))
         #expect(single.size.width == 460)
         // The single-reading note sits below the plot, so this state is taller than the
         // empty state's fixed-height explanation.
@@ -277,15 +276,18 @@ import Testing
 
     @Test @MainActor func rendersAtALargerTextSize() throws {
         // The app's text-size setting can grow the labels; the chart must still render at the
-        // menu width. The stub scales the font without reading ThemeStore.
-        DiskCapacityHistoryTestFontScale.value = 1.6
-        defer { DiskCapacityHistoryTestFontScale.value = 1 }
+        // menu width. A test host keeps its preferences in its own domain, so this does not
+        // change the person's setting, and it is restored afterwards.
+        let store = ThemeStore.shared
+        let original = store.settings.textScale
+        store.settings.textScale = 1.6
+        defer { store.settings.textScale = original }
 
         let full = DiskCapacityHistoryChart(points: [
             point(hoursAgo: 3, free: 400 * gigabyte),
             point(hoursAgo: 2, free: 500 * gigabyte),
-        ], volumeID: "disk-a", now: now)
-        let empty = DiskCapacityHistoryChart(points: [], volumeID: "disk-a", now: now)
+        ], volumeID: "disk-a", now: now, tint: Self.markTint)
+        let empty = DiskCapacityHistoryChart(points: [], volumeID: "disk-a", now: now, tint: Self.markTint)
         for image in [try render(full), try render(empty)] {
             #expect(image.size.width == 460)
             #expect(image.size.height > 0)
@@ -296,7 +298,7 @@ import Testing
         let chart = DiskCapacityHistoryChart(points: [
             point(hoursAgo: 3, free: 400 * gigabyte),
             point(hoursAgo: 2, free: 500 * gigabyte),
-        ], volumeID: "disk-a", now: now)
+        ], volumeID: "disk-a", now: now, tint: Self.markTint)
         let image = try render(chart, width: 420)
         #expect(image.size.width == 420)
         #expect(redPixelCount(image, rows: plotRows(image)) > 0)
@@ -311,6 +313,7 @@ import Testing
             view
         }
         .frame(width: width)
+        .environment(\.colorScheme, .light)
         let renderer = ImageRenderer(content: content)
         renderer.scale = 1
         let image = try #require(renderer.nsImage, "ImageRenderer produced no image")
@@ -357,12 +360,4 @@ import Testing
             && c.blueComponent < 0.35
     }
 
-    // MARK: - Resources
-
-    private func resourcesURL() throws -> URL {
-        let bundle = Bundle.module
-        let url = try #require(bundle.resourceURL?.appendingPathComponent("Resources"),
-                               "test resources are missing")
-        return url
-    }
 }

@@ -188,7 +188,7 @@ machelper clean --json                   # 預覽清理；加上 --yes 前先向
 make setup      # 檢查工具、下載 Sparkle、產生 MacHelper.xcodeproj
 make open       # 用 Xcode 打開專案，按 ⌘R 建置並執行
 make run        # 或建置 Debug 版到 build/ 並直接開啟
-make test       # 執行 Swift 套件的單元測試
+make test       # 先跑套件測試，再跑 App 的 MacHelperTests
 make install    # Release 建置 → /Applications/MacHelper.app 並重新啟動
 ```
 

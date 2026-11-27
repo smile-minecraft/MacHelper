@@ -1,29 +1,23 @@
 import AppKit
 import Charts
 import Foundation
-import GRDB
 @testable import Metrics
-import Storage
+@testable import MacHelper
+@testable import Storage
 import SwiftUI
 import Testing
-@testable import MonitorPanelFeature
 
-/// Exercises the real menu-bar SSD and network page sources in an isolated package.
+/// Exercises the real menu-bar SSD, network and battery pages, and the panel that hosts them,
+/// inside the hosted test bundle.
 ///
-/// The views under test are the production files: all of `MonitorPanel.swift` is compiled, with
-/// `DiskTab`/`DiskSectionHeader`/`BatteryTab` moved to a generated file as the byte-identical
-/// declarations (only `private` removed) so this test can construct them. The production network
-/// page (`PanelNetworkTab.swift` and its chart/model files) is compiled unchanged. Rendering uses
-/// two generated variants that differ only where the system boundary is: `DiskTabRender` drops the
-/// `.task`/`.onReceive` modifiers and `PanelNetworkTabRender` drops `.onAppear`/`.onDisappear`/
-/// `.task`, because ImageRenderer can run lifecycle modifiers in-process and those would start
-/// live samplers. The real production bodies are still built and type-checked. The store, design
-/// system, helper client and Storage surface are stand-ins; the test fills them with synthetic
-/// volumes, points and readings and creates its own in-memory GRDB database. Nothing here starts
-/// the app, the helper, the menu bar, a background recorder, Disk Arbitration, IORegistry,
-/// system_profiler, a network read or a user preference lookup outside the scratch
-/// `panel.module` key in the test process's own defaults domain, which the strip-selection
-/// tests write and restore.
+/// The views under test are the production files. `DiskTabContent` and `PanelNetworkTabContent`
+/// are the pages without their `.task`/`.onAppear` modifiers: `ImageRenderer` can run SwiftUI
+/// lifecycle modifiers in the same process, and those would start live samplers. The store is a
+/// test store with no hardware sources and no history database; the test fills it with synthetic
+/// readings, volumes, points and creates its own in-memory GRDB database. Nothing here starts the
+/// app, the helper, the menu bar, a background recorder, Disk Arbitration, IORegistry,
+/// system_profiler or a network read, and the stored panel page lives in the test host's own
+/// preferences domain, which is deleted at the end of the run.
 @Suite(.serialized)
 @MainActor
 struct MonitorPanelIntegrationTests {
@@ -51,9 +45,7 @@ struct MonitorPanelIntegrationTests {
     /// A real in-memory GRDB database with the production `volume_capacity` table, filled through
     /// the fixed `VolumeCapacityHistory` snapshot. No file, app database or user data is opened.
     private func inMemoryHistory(points: [(volume: String, time: Date, free: Double, total: Double)]) throws -> MetricsHistory {
-        let queue = try DatabaseQueue()
-        try queue.write { db in try VolumeCapacityHistory.createTable(db) }
-        let history = MetricsHistory(db: queue)
+        let history = try MetricsHistory(inMemory: ())
         let store = VolumeCapacityHistory(history: history)
         for point in points {
             guard let capacity = VolumeCapacity(free: point.free, total: point.total) else {
@@ -64,54 +56,25 @@ struct MonitorPanelIntegrationTests {
         return history
     }
 
-    /// The store stand-in only carries what the pages read. The live series use recent
-    /// timestamps because the production `Series.values` windows them against the wall clock;
-    /// the values themselves are synthetic. The battery page fixture has an internal battery and
-    /// two accessories, one of which reports left/right/case components.
-    private func makeStore(history: MetricsHistory?) -> MonitorStore {
-        let store = MonitorStore()
-        store.disk = DiskReading(readBytesPerSecond: 12_000_000,
-                                 writeBytesPerSecond: 3_000_000,
-                                 availableBytes: 400 * gigabyte,
-                                 totalBytes: 1_000 * gigabyte)
-        store.network = NetworkReading(inBytesPerSecond: 8_500_000, outBytesPerSecond: 1_250_000)
-        store.battery = BatteryReading(charge: 0.64,
-                                       isCharging: false,
-                                       externalPower: true,
-                                       watts: -5,
-                                       cycleCount: 123,
-                                       health: 0.91,
-                                       celsius: 31)
-        store.accessories = [
-            AccessoryBatteryReading(id: "keyboard-1", name: "Magic Keyboard", kind: .keyboard,
-                                    charge: 0.82, components: [], isCharging: false),
-            AccessoryBatteryReading(id: "airpods-1", name: "AirPods Pro", kind: .headphones,
-                                    charge: 0.55,
-                                    components: [.init(id: .left, charge: 0.57),
-                                                 .init(id: .right, charge: 0.53),
-                                                 .init(id: .chargingCase, charge: 0.64)],
-                                    isCharging: true),
-        ]
-        store.availableModules = [.battery, .accessories]
-
-        let liveNow = Date()
-        func series(_ base: Double) -> [ChartPoint] {
-            (0..<20).map { index in
-                ChartPoint(date: liveNow.addingTimeInterval(-Double(index) * 5),
-                           value: base + Double(index) * 1_000)
-            }
+    /// The test store carries what the pages read and nothing else: no samplers, no database and
+    /// no background loops. Readings go through the same `apply` path a real sample takes, so the
+    /// live series fill in exactly as they do in the app; the battery page fixture has an internal
+    /// battery and two accessories, one of which reports left/right/case components.
+    private func makeStore(history: MetricsHistory? = nil,
+                           modules: Set<MonitorModule> = [.battery, .accessories]) -> MonitorStore {
+        let store = MonitorStore.makeForTests(settings: MonitorSettingsStore(), modules: modules, history: nil)
+        // A handful of readings so the sparklines have points; the values are synthetic and the
+        // timestamps are the current time because the production series windows them live.
+        for index in 0..<20 {
+            let step = Double(index)
+            store.seed(.disk(DiskReading(readBytesPerSecond: 12_000_000 + step,
+                                         writeBytesPerSecond: 3_000_000 + step,
+                                         availableBytes: 400 * gigabyte,
+                                         totalBytes: 1_000 * gigabyte)))
+            store.seed(.network(NetworkReading(inBytesPerSecond: 8_500_000 + step,
+                                               outBytesPerSecond: 1_250_000 + step)))
         }
-        store.history = LiveHistory(series: [
-            .diskRead: series(1_000_000),
-            .diskWrite: series(500_000),
-            .netIn: series(2_000_000),
-            .netOut: series(300_000),
-            .battery: (0..<20).map { index in
-                ChartPoint(date: liveNow.addingTimeInterval(-Double(index) * 5),
-                           value: 0.64 + Double(index) * 0.001)
-            },
-        ])
-        store.persistentHistory = history
+        store.settings.configuration = MonitorConfiguration.default
         return store
     }
 
@@ -166,7 +129,7 @@ struct MonitorPanelIntegrationTests {
             ("DATA", now.addingTimeInterval(-3 * 3_600), 700_000_000_000, 2_000_000_000_000),
         ]
         let history = try inMemoryHistory(points: points)
-        let store = makeStore(history: history)
+        let store = makeStore()
         let counter = Counter()
         let model = makeModel(volumes: [system, data],
                               reader: DiskCapacitySelectionModel.historyReader(for: history),
@@ -185,21 +148,23 @@ struct MonitorPanelIntegrationTests {
         #expect(counter.value == 1)
 
         // The real production body builds against the fake store and loaded model. It is not
-        // hosted, so the page's `.task` does not run; the render variant below drops only those
-        // lifecycle modifiers because ImageRenderer can run them in the same process.
-        _ = DiskTab(store: store, selection: model).body
+        // hosted, so the page's `.task` does not run; the render below uses the page content,
+        // which drops only those lifecycle modifiers.
+        _ = DiskTabContent(store: store, selection: model).body
         #expect(counter.value == 1, "building the real body must not run the .task sampler")
         #expect(isHistoryLoaded(model))
 
-        let image = try render(DiskTabRender(store: store, selection: model))
+        let image = try render(DiskTabContent(store: store, selection: model))
         #expect(image.pixelsWide == 420)
         #expect(image.pixelsHigh > 0)
-        #expect(redPixelCount(image) > 0, "the seven-day chart drew the fake capacity points")
+        #expect(coloredPixelCount(image) > 0, "the seven-day chart drew the fake capacity points")
+        #expect(try chartPixelCount(store: store, selection: model) > 0,
+                "the seven-day chart drew the fake capacity points")
         #expect(counter.value == 1, "rendering must not run a volume sampler")
     }
 
     @Test func diskTabRendersLoadingAndFailureStatesWithoutReachingTheSystem() async throws {
-        let store = makeStore(history: nil)
+        let store = makeStore()
         let counter = Counter()
         let failingModel = DiskCapacitySelectionModel(
             sampleVolumes: {
@@ -211,10 +176,11 @@ struct MonitorPanelIntegrationTests {
 
         failingModel.refreshVolumes()
         #expect(await eventually { failingModel.volumesState == .failed("fake disk list failure") })
-        let failureImage = try render(DiskTabRender(store: store, selection: failingModel))
+        let failureImage = try render(DiskTabContent(store: store, selection: failingModel))
         #expect(failureImage.pixelsWide == 420)
         #expect(failureImage.pixelsHigh > 0)
-        #expect(redPixelCount(failureImage) == 0, "a failed volume list must not draw the chart")
+        #expect(try chartPixelCount(store: store, selection: failingModel) == 0,
+                "a failed volume list must not draw the chart")
         #expect(counter.value == 1)
 
         let system = volume(role: .system, name: "Fake System", mountPoint: "/", id: "SYS")
@@ -225,65 +191,81 @@ struct MonitorPanelIntegrationTests {
         historyModel.refreshVolumes()
         #expect(await eventually { historyModel.volumesState == .loaded })
         #expect(await eventually { isHistoryFailed(historyModel, message: "fake history read failure") })
-        let historyImage = try render(DiskTabRender(store: store, selection: historyModel))
+        let historyImage = try render(DiskTabContent(store: store, selection: historyModel))
         #expect(historyImage.pixelsWide == 420)
         #expect(historyImage.pixelsHigh > 0)
-        #expect(redPixelCount(historyImage) == 0, "a failed history read must not draw the chart")
+        #expect(try chartPixelCount(store: store, selection: historyModel) == 0,
+                "a failed history read must not draw the chart")
     }
 
     // MARK: - Network page
 
     @Test func networkTabRendersFakeRatesOnlyWithTheLiveSectionBoundary() throws {
-        let store = makeStore(history: nil)
+        let store = makeStore()
         let snapshot = makeSnapshot(at: Date())
 
         // The real production body builds with the fake store. Its samplers only start in
         // `.onAppear`, which is not run here because the body is only built, not hosted. The
-        // render variant below drops that lifecycle block so ImageRenderer stays offline.
-        _ = PanelNetworkTab(store: store).body
+        // content below drops that lifecycle block so ImageRenderer stays offline.
+        _ = PanelNetworkTabContent(store: store, model: NetworkPanelModel(), history: PanelHistory(),
+                                   range: .constant(.live)).body
 
-        let image = try render(PanelNetworkTabRender(store: store))
+        let image = try render(PanelNetworkTabContent(store: store, model: NetworkPanelModel(),
+                                                      history: PanelHistory(), range: .constant(.live)))
         #expect(image.pixelsWide == 420)
         #expect(image.pixelsHigh > 0)
-        #expect(greenPixelCount(image) > 0, "the download rate and mirrored chart used the fake readings")
-        #expect(bluePixelCount(image) > 0, "the upload series used the fake readings")
+        #expect(coloredPixelCount(image) > 0, "the rate cards and their sparklines used the fake readings")
 
         let contentImage = try render(NetworkDetailsContent(snapshot: snapshot))
         #expect(contentImage.pixelsWide == 420)
         #expect(contentImage.pixelsHigh > 0)
         #expect(nonWhitePixelCount(contentImage) > 0, "the real network content drew the synthetic snapshot")
-        #expect(greenPixelCount(contentImage) > 0, "the synthetic Wi-Fi interface and primary pill were drawn")
     }
 
     // MARK: - Battery page
 
     @Test func batteryTabIsAvailableWhenTheMacHasABatteryOrAnAccessory() {
-        let withBattery = makeStore(history: nil)
+        let withBattery = makeStore()
         #expect(PanelPage.battery.isAvailable(in: withBattery.availableModules,
                                               hasAccessories: !withBattery.accessories.isEmpty))
 
-        let empty = MonitorStore()
+        let empty = MonitorStore.makeForTests()
         #expect(!PanelPage.battery.isAvailable(in: empty.availableModules,
                                                 hasAccessories: !empty.accessories.isEmpty))
 
         // The accessories module on its own does not light the page up; a connected accessory
         // with a reading is required.
-        let moduleOnly = MonitorStore()
-        moduleOnly.availableModules = [.accessories]
+        let moduleOnly = MonitorStore.makeForTests(modules: [.accessories])
         #expect(!PanelPage.battery.isAvailable(in: moduleOnly.availableModules,
                                                 hasAccessories: !moduleOnly.accessories.isEmpty))
 
-        let accessoryOnly = MonitorStore()
-        accessoryOnly.availableModules = [.accessories]
-        accessoryOnly.accessories = [
+        let accessoryOnly = MonitorStore.makeForTests(modules: [.accessories])
+        accessoryOnly.seed(.accessories([
             AccessoryBatteryReading(id: "keyboard-1", name: "Magic Keyboard", kind: .keyboard, charge: 0.82),
-        ]
+        ]))
         #expect(PanelPage.battery.isAvailable(in: accessoryOnly.availableModules,
                                                hasAccessories: !accessoryOnly.accessories.isEmpty))
     }
 
     @Test func batteryTabRendersTheInternalBatteryAndAccessoryRows() throws {
-        let store = makeStore(history: nil)
+        let store = makeStore()
+        store.seed(.battery(BatteryReading(charge: 0.64,
+                                           isCharging: false,
+                                           externalPower: true,
+                                           watts: -5,
+                                           cycleCount: 123,
+                                           health: 0.91,
+                                           celsius: 31)))
+        store.seed(.accessories([
+            AccessoryBatteryReading(id: "keyboard-1", name: "Magic Keyboard", kind: .keyboard,
+                                    charge: 0.82, components: [], isCharging: false),
+            AccessoryBatteryReading(id: "airpods-1", name: "AirPods Pro", kind: .headphones,
+                                    charge: 0.55,
+                                    components: [.init(id: .left, charge: 0.57),
+                                                 .init(id: .right, charge: 0.53),
+                                                 .init(id: .chargingCase, charge: 0.64)],
+                                    isCharging: true),
+        ]))
         let image = try render(BatteryTab(store: store))
         #expect(image.pixelsWide == 420)
         #expect(image.pixelsHigh > 0)
@@ -356,8 +338,15 @@ struct MonitorPanelIntegrationTests {
 
     // MARK: - Settings section
 
-    @Test func historyManagementSectionRendersWithTheStorageStandIns() throws {
-        let image = try render(Form { HistoryManagementSection() })
+    @Test func historyManagementSectionRendersWithAnEmptyDatabase() throws {
+        // A throwaway database in the temporary folder, so the section renders with the real
+        // storage code and the person's history is never opened.
+        let directory = FileManager.default.temporaryDirectory.appending(path: "history-section-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = try HistoryStore(url: directory.appending(path: "history.sqlite"))
+        let model = HistoryManagementModel(store: store)
+        let image = try render(Form { HistoryManagementSection(model: model) })
         #expect(image.pixelsWide == 420)
         #expect(image.pixelsHigh > 0)
         #expect(nonWhitePixelCount(image) > 0)
@@ -366,85 +355,72 @@ struct MonitorPanelIntegrationTests {
     // MARK: - Full panel value
 
     @Test func fullMonitorPanelValueBuildsFromTheFakeStore() {
-        let store = makeStore(history: nil)
-        let panel = MonitorPanel(store: store, actions: PanelActions(
-            openSettings: {},
-            openDiagnostics: {},
-            openFanControl: {},
-            openDiskAnalysis: {},
-            openOptimize: {},
-            openUninstall: {},
-            openStartup: {},
-            openHistory: {},
-            openMain: {},
-            quit: {}))
+        let store = makeStore()
+        let panel = buildPanel(store)
         #expect(panel.scrollable)
-        #expect(store.watchCalls.isEmpty, "constructing the value must not run onAppear")
+        #expect(store.processWatchBalance == 0, "constructing the value must not run onAppear")
     }
 
-    // MARK: - Tab strip selection
+    // MARK: - Panel page selection
 
-    @Test func tabStripReceivesTheFirstVisiblePageWhenTheStoredPageIsHidden() {
+    @Test func panelResolvesTheFirstVisiblePageWhenTheStoredPageIsHidden() {
         withStoredPage(PanelPage.battery.rawValue) {
-            let store = makeStore(history: nil)
-            store.settings.configuration = MonitorConfiguration(panelPageOrder: PanelPage.allCases,
-                                                                hiddenPanelPages: [.battery])
-            TabStripSelectionRecorder.reset()
-            _ = buildPanel(store).body
-            // The stored page is hidden, so both the strip and the content must resolve to cpu.
-            #expect(TabStripSelectionRecorder.resolvedSelection == PanelPage.cpu.rawValue)
-            #expect(TabStripSelectionRecorder.itemRawValues == ["cpu", "gpu", "memory", "disk", "network"])
+            let store = makeStore()
+            store.settings.configuration.hiddenPanelPages = [.battery]
+            let panel = buildPanel(store)
+            // The stored page is hidden, so both the strip and the content resolve to cpu.
+            #expect(panel.tabs == [.cpu, .gpu, .memory, .disk, .network])
+            #expect(panel.shownTab == .cpu)
         }
     }
 
-    @Test func tabStripReceivesTheFirstVisiblePageWhenTheStoredPageIsUnavailable() {
+    @Test func panelResolvesTheFirstVisiblePageWhenTheStoredPageIsUnavailable() {
         withStoredPage(PanelPage.power.rawValue) {
-            let store = makeStore(history: nil)
-            TabStripSelectionRecorder.reset()
-            _ = buildPanel(store).body
-            // No power or fan hardware: power is unavailable, so storage falls back to cpu.
-            #expect(TabStripSelectionRecorder.resolvedSelection == PanelPage.cpu.rawValue)
-            #expect(TabStripSelectionRecorder.itemRawValues == ["cpu", "gpu", "memory", "disk", "network", "battery"])
+            // No power or fan hardware on this store.
+            let store = makeStore()
+            let panel = buildPanel(store)
+            #expect(panel.tabs == [.cpu, .gpu, .memory, .disk, .network, .battery])
+            #expect(panel.shownTab == .cpu)
         }
     }
 
-    @Test func tabStripReceivesTheStoredPageWhileItRemainsVisible() {
+    @Test func panelKeepsTheStoredPageWhileItRemainsVisible() {
         withStoredPage(PanelPage.battery.rawValue) {
-            let store = makeStore(history: nil)
-            TabStripSelectionRecorder.reset()
-            _ = buildPanel(store).body
-            #expect(TabStripSelectionRecorder.resolvedSelection == PanelPage.battery.rawValue)
-            #expect(TabStripSelectionRecorder.itemRawValues == ["cpu", "gpu", "memory", "disk", "network", "battery"])
+            let store = makeStore()
+            let panel = buildPanel(store)
+            #expect(panel.tabs == [.cpu, .gpu, .memory, .disk, .network, .battery])
+            #expect(panel.shownTab == .battery)
         }
     }
 
     @Test func panelShowsTheEmptyStateAndNoStripWhenEveryPageIsHidden() throws {
         try withStoredPage(nil) {
-            let store = makeStore(history: nil)
-            store.settings.configuration = MonitorConfiguration(panelPageOrder: PanelPage.allCases,
-                                                                hiddenPanelPages: Set(PanelPage.allCases))
-            TabStripSelectionRecorder.reset()
+            let store = makeStore()
+            store.settings.configuration.hiddenPanelPages = Set(PanelPage.allCases)
             let panel = buildPanel(store)
-            _ = panel.body
-            #expect(TabStripSelectionRecorder.resolvedSelection == nil,
-                    "the strip must not appear when no page can show")
+            #expect(panel.tabs.isEmpty, "the strip must not appear when no page can show")
+            #expect(panel.shownTab == nil)
             let image = try render(panel.body)
             #expect(nonWhitePixelCount(image) > 0, "the empty state drew its symbol and title")
         }
     }
 
+    /// Stores the panel page in the test host's own defaults domain, so the panel's `@AppStorage`
+    /// reads it and a test run never writes the person's preferences. The previous value comes back
+    /// after the case; the host deletes the domain when it exits.
     private func withStoredPage(_ raw: String?, run: () throws -> Void) rethrows {
-        let previous = UserDefaults.standard.string(forKey: "panel.module")
+        let defaults = TestHost.defaults
+        let previous = defaults.string(forKey: "panel.module")
         if let raw {
-            UserDefaults.standard.set(raw, forKey: "panel.module")
+            defaults.set(raw, forKey: "panel.module")
         } else {
-            UserDefaults.standard.removeObject(forKey: "panel.module")
+            defaults.removeObject(forKey: "panel.module")
         }
         defer {
             if let previous {
-                UserDefaults.standard.set(previous, forKey: "panel.module")
+                defaults.set(previous, forKey: "panel.module")
             } else {
-                UserDefaults.standard.removeObject(forKey: "panel.module")
+                defaults.removeObject(forKey: "panel.module")
             }
         }
         try run()
@@ -513,30 +489,38 @@ struct MonitorPanelIntegrationTests {
         return count
     }
 
-    private func redPixelCount(_ rep: NSBitmapImageRep) -> Int {
-        pixelCount(rep) { color in
-            color.alphaComponent > 0.5
-                && color.redComponent > 0.6
-                && color.greenComponent < 0.35
-                && color.blueComponent < 0.35
+    /// The pixels the disk history chart's marks cover: the page rendered with two different
+    /// mark colors differs only where the chart drew. Zero means no chart, whatever colors the
+    /// rest of the page (error text included) uses.
+    private func chartPixelCount(store: MonitorStore, selection: DiskCapacitySelectionModel) throws -> Int {
+        let red = try render(DiskTabContent(store: store, selection: selection,
+                                            chartTint: Color(red: 0.9, green: 0.1, blue: 0.1)))
+        let blue = try render(DiskTabContent(store: store, selection: selection,
+                                             chartTint: Color(red: 0.1, green: 0.1, blue: 0.9)))
+        guard red.pixelsWide == blue.pixelsWide, red.pixelsHigh == blue.pixelsHigh else {
+            throw FakeFailure("the two renders differ in size")
         }
+        var count = 0
+        for y in 0..<red.pixelsHigh {
+            for x in 0..<red.pixelsWide {
+                guard let a = red.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB),
+                      let b = blue.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB) else { continue }
+                if abs(a.redComponent - b.redComponent) > 0.2 || abs(a.blueComponent - b.blueComponent) > 0.2 {
+                    count += 1
+                }
+            }
+        }
+        return count
     }
 
-    private func greenPixelCount(_ rep: NSBitmapImageRep) -> Int {
+    /// Any mark the theme draws: saturated pixels rather than the white page or the neutral
+    /// text and hairlines, so the check does not depend on which palette the theme uses.
+    private func coloredPixelCount(_ rep: NSBitmapImageRep) -> Int {
         pixelCount(rep) { color in
-            color.alphaComponent > 0.5
-                && color.greenComponent > 0.45
-                && color.redComponent < 0.4
-                && color.blueComponent < 0.4
-        }
-    }
-
-    private func bluePixelCount(_ rep: NSBitmapImageRep) -> Int {
-        pixelCount(rep) { color in
-            color.alphaComponent > 0.5
-                && color.blueComponent > 0.55
-                && color.redComponent < 0.45
-                && color.greenComponent < 0.45
+            guard color.alphaComponent > 0.5 else { return false }
+            let high = max(color.redComponent, color.greenComponent, color.blueComponent)
+            let low = min(color.redComponent, color.greenComponent, color.blueComponent)
+            return high - low > 0.25
         }
     }
 

@@ -17,6 +17,12 @@ final class HistoryManagementModel {
 
     @ObservationIgnored private var store: HistoryStore?
 
+    /// The store is opened on first use. A test (or a preview) can hand over one that points at a
+    /// throwaway database instead of the person's history.
+    init(store: HistoryStore? = nil) {
+        self.store = store
+    }
+
     func load() {
         do {
             let store = try self.store ?? HistoryStore()
@@ -112,10 +118,14 @@ final class HistoryManagementModel {
 }
 
 struct HistoryManagementSection: View {
-    @State private var model = HistoryManagementModel()
+    @State private var model: HistoryManagementModel
     @State private var confirmClear = false
     @State private var confirmClearProcesses = false
     @State private var confirmClearSeries = false
+
+    init(model: HistoryManagementModel = HistoryManagementModel()) {
+        _model = State(initialValue: model)
+    }
 
     var body: some View {
         Section("Data management") {

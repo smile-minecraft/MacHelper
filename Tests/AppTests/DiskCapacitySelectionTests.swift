@@ -1,10 +1,10 @@
 import Darwin
 import Dispatch
 import Foundation
+@testable import Metrics
 import Storage
 import Testing
-@testable import DiskCapacitySelectionFeature
-@testable import Metrics
+@testable import MacHelper
 
 /// The selection model is tested with fake volumes and a fake history reader only. Nothing here
 /// samples a real disk, opens the history database, starts the app or the helper, or touches
@@ -248,7 +248,7 @@ import Testing
         #expect(await gate.requestCount() == 0)
 
         let english = Locale(identifier: "en_US_POSIX")
-        let title = model.volumes[0].pickerTitle(in: Bundle.module, locale: english)
+        let title = model.volumes[0].pickerTitle(in: try AppTestResources.english, locale: english)
         #expect(title == "Backup — Local disk")
     }
 
@@ -741,10 +741,10 @@ import Testing
         let english = Locale(identifier: "en_US_POSIX")
         let systemOption = try #require(model.volumes.first { $0.volume.role == .system })
         let dataOption = try #require(model.volumes.first { $0.volume.role == .data })
-        #expect(systemOption.pickerTitle(in: Bundle.module, locale: english) == "Macintosh HD — System disk")
-        #expect(dataOption.pickerTitle(in: Bundle.module, locale: english) == "Macintosh HD — Data disk")
-        #expect(systemOption.pickerTitle(in: Bundle.module, locale: english)
-                != dataOption.pickerTitle(in: Bundle.module, locale: english))
+        #expect(systemOption.pickerTitle(in: try AppTestResources.english, locale: english) == "Macintosh HD — System disk")
+        #expect(dataOption.pickerTitle(in: try AppTestResources.english, locale: english) == "Macintosh HD — Data disk")
+        #expect(systemOption.pickerTitle(in: try AppTestResources.english, locale: english)
+                != dataOption.pickerTitle(in: try AppTestResources.english, locale: english))
     }
 
     // MARK: - Dedicated catalog
@@ -791,9 +791,7 @@ import Testing
 
     @Test func catalogSpotChecksUseTheRightLanguage() throws {
         func localized(_ text: DiskVolumeSelectionText, _ language: String) throws -> String {
-            let bundle = try #require(Bundle(url: try resourcesURL()
-                .appendingPathComponent("Localizations/\(language).lproj")))
-            return text.localized(in: bundle)
+            return text.localized(in: try AppTestResources.localization(language))
         }
         #expect(try localized(.systemDisk, "ja") == "システムディスク")
         #expect(try localized(.dataDisk, "zh-Hant") == "資料磁碟")
@@ -803,12 +801,11 @@ import Testing
     }
 
     @Test func compiledTablesResolveEveryTextForEveryLanguage() throws {
-        let resources = try resourcesURL()
         let languages = ["es", "ja", "ko", "zh-Hans", "zh-Hant"]
         let keys = Set(DiskVolumeSelectionText.allCases.map(\.rawValue))
         for language in languages {
-            let lproj = resources.appendingPathComponent("Localizations/\(language).lproj")
-            let bundle = try #require(Bundle(url: lproj), "\(language) bundle is missing")
+            let lproj = try AppTestResources.resources.appendingPathComponent("\(language).lproj")
+            let bundle = try AppTestResources.localization(language)
             let table = try #require(NSDictionary(contentsOf: lproj.appendingPathComponent("DiskVolumeSelection.strings")) as? [String: String],
                                      "\(language) table is missing")
             #expect(Set(table.keys) == keys, "\(language) table keys differ")
@@ -829,16 +826,11 @@ import Testing
     // MARK: - Helpers
 
     private func catalogDocument() throws -> [String: Any] {
-        let data = try Data(contentsOf: try resourcesURL().appendingPathComponent("DiskVolumeSelection.xcstrings"))
+        let data = try Data(contentsOf: AppTestResources.catalogSource("DiskVolumeSelection"))
         let object = try JSONSerialization.jsonObject(with: data)
         return try #require(object as? [String: Any])
     }
 
-    private func resourcesURL() throws -> URL {
-        let bundle = Bundle.module
-        return try #require(bundle.resourceURL?.appendingPathComponent("Resources"),
-                            "test resources are missing")
-    }
 }
 
 // MARK: - Test doubles
@@ -852,7 +844,7 @@ private struct GateError: LocalizedError {
     var errorDescription: String? { message }
 }
 
-private struct WaitTimeout: Error, CustomStringConvertible {
+private struct SelectionWaitTimeout: Error, CustomStringConvertible {
     let description: String
 }
 
@@ -1001,7 +993,7 @@ private func waitUntil(_ what: String,
     let deadline = ContinuousClock.now.advanced(by: timeout)
     while !condition() {
         if ContinuousClock.now > deadline {
-            throw WaitTimeout(description: "timed out waiting for \(what)")
+            throw SelectionWaitTimeout(description: "timed out waiting for \(what)")
         }
         try await Task.sleep(for: .milliseconds(2))
     }
@@ -1012,7 +1004,7 @@ private func waitForRequestCount(_ gate: HistoryGate, _ count: Int) async throws
     let deadline = ContinuousClock.now.advanced(by: .seconds(5))
     while await gate.requestCount() < count {
         if ContinuousClock.now > deadline {
-            throw WaitTimeout(description: "timed out waiting for \(count) history requests")
+            throw SelectionWaitTimeout(description: "timed out waiting for \(count) history requests")
         }
         try await Task.sleep(for: .milliseconds(2))
     }

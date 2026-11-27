@@ -13,6 +13,9 @@ configFiles:
   Release: Config/Signing.xcconfig
 
 settings:
+  configs:
+    Debug:
+      ENABLE_TESTABILITY: YES
   base:
     SWIFT_VERSION: "6.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
@@ -31,6 +34,30 @@ packages:
   ArgumentParser:
     url: https://github.com/apple/swift-argument-parser
     from: 1.5.0
+
+# One shared scheme, so `xcodebuild test -scheme MacHelper` runs the hosted unit tests both in
+# Xcode and in CI. `--unit-tests` is the explicit test-host signal the app checks in TestHost.
+schemes:
+  MacHelper:
+    build:
+      targets:
+        MacHelper: all
+        MacHelperHelper: all
+        machelper-cli: all
+        FinderExtension: all
+        MacHelperTests: [test]
+    run:
+      config: Debug
+      executable: MacHelper
+    test:
+      config: Debug
+      gatherCoverageData: false
+      macroExpansion: MacHelper
+      targets:
+        - MacHelperTests
+      commandLineArguments:
+        "--unit-tests": true
+
 targets:
   MacHelper:
     type: application
@@ -110,6 +137,45 @@ targets:
         # it macOS never shows the Finder consent alert and every Apple Event to Finder fails with
         # -1743. New file in Finder depends on it.
         CODE_SIGN_ENTITLEMENTS: App/MacHelper.entitlements
+
+  # Unit tests for the app layer. The bundle runs inside MacHelper.app, so it can
+  # `@testable import MacHelper` and exercise the real views, models and stores.
+  MacHelperTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/AppTests
+      # Verbatim copies of the catalog source documents the completeness tests compare with what
+      # the app ships. A copy-files phase keeps them as JSON instead of compiling them.
+      - path: App/Resources/DiskCapacityHistory.xcstrings
+        buildPhase:
+          copyFiles:
+            destination: resources
+            subpath: CatalogSources
+      - path: App/Resources/DiskVolumeSelection.xcstrings
+        buildPhase:
+          copyFiles:
+            destination: resources
+            subpath: CatalogSources
+      - path: App/Resources/NetworkDetails.xcstrings
+        buildPhase:
+          copyFiles:
+            destination: resources
+            subpath: CatalogSources
+    dependencies:
+      # The package modules are linked into the app only. The bundle reaches them through the
+      # app (BUNDLE_LOADER); linking them here as well makes Xcode turn every package product into
+      # a dynamic framework, which changes how the app itself is built.
+      - target: MacHelper
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.machelper.MacHelperTests
+        # Hosted in the app: the tests load into MacHelper.app, which stays inert while they run
+        # (see TestHost).
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/MacHelper.app/Contents/MacOS/MacHelper"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        GENERATE_INFOPLIST_FILE: YES
+        SKIP_INSTALL: YES
 
   MacHelperHelper:
     type: tool

@@ -2,8 +2,8 @@ import AppKit
 import Foundation
 import SwiftUI
 import Testing
-@testable import DiskActivityFeature
-@testable import Metrics
+import Metrics
+@testable import MacHelper
 
 /// Lifecycle of the production `DiskActivityModel`.
 ///

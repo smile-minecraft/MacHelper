@@ -188,7 +188,7 @@ Requisitos: un Mac (Apple Silicon o Intel), Xcode 26 o posterior y [XcodeGen](ht
 make setup      # comprueba herramientas, descarga Sparkle y genera MacHelper.xcodeproj
 make open       # abre el proyecto en Xcode para compilar y ejecutar con ⌘R
 make run        # o compila una copia Debug en build/ y la abre
-make test       # ejecuta las pruebas unitarias de los paquetes Swift
+make test       # ejecuta las pruebas de los paquetes y luego MacHelperTests de la app
 make install    # compilación Release → /Applications/MacHelper.app y reinicio
 ```
 

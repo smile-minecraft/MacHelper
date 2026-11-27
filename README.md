@@ -192,9 +192,11 @@ Requirements: a Mac (Apple Silicon or Intel), Xcode 26 or later, and [XcodeGen](
 make setup      # check tools, download Sparkle, generate MacHelper.xcodeproj
 make open       # open the project in Xcode, then build and run with ⌘R
 make run        # or build a Debug copy under build/ and open it
-make test       # run unit tests for the Swift packages
+make test       # run the package tests, then the app's MacHelperTests bundle
 make install    # Release build → /Applications/MacHelper.app, then relaunch
 ```
+
+`make test` runs `scripts/ci/run-tests.sh`, the same script CI uses: `swift test` for the packages, then `xcodebuild test` for `MacHelperTests` (`Tests/AppTests`), which runs inside an inert copy of the app that opens no window and leaves your preferences alone. The script fails if the `com.machelper.MacHelper` preferences changed during the run, and skips that check with a warning while your own MacHelper is open. On a checkout outside the startup disk the app tests build under `~/Library/Developer/MacHelper/TestDerivedData`.
 
 Day-to-day builds target `build/` without modifying `/Applications`. Quit any installed copy of MacHelper before running from `build/`, since both share settings and data. Testing root Helper changes (fan control, system cleanup) is easiest with `make install`. Run `make project` after adding or removing source files, or `make run ARGS=--demo-battery` to simulate battery readings on desktop Macs.
 

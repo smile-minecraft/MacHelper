@@ -188,7 +188,7 @@ macOS 14 이상이 설치된 Intel Mac과 Apple Silicon Mac 모두 지원합니�
 make setup      # 도구 확인, Sparkle 다운로드, MacHelper.xcodeproj 생성
 make open       # Xcode에서 프로젝트 열기 (⌘R로 빌드 및 실행)
 make run        # 또는 Debug 빌드를 build/에 생성해 바로 실행
-make test       # Swift 패키지 단위 테스트 실행
+make test       # 패키지 테스트에 이어 앱의 MacHelperTests 실행
 make install    # Release 빌드 → /Applications/MacHelper.app 설치 및 재실행
 ```
 

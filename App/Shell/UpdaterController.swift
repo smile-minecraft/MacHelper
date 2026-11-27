@@ -97,6 +97,9 @@ final class UpdaterController {
             updaterDelegate: delegate,
             userDriverDelegate: userDriverDelegate
         )
+        // A unit-test host draws views that show the update button, which creates this
+        // controller; it must neither write the app's preferences nor check for updates.
+        if TestHost.isRunningTests { return }
         // 0.3.0 and 0.3.1 turned on automatic installs at every launch, so updates went in silently
         // on quit and the user never saw them. Turn that off once; installs always ask now.
         if !UserDefaults.standard.bool(forKey: Self.silentInstallMigrationKey) {

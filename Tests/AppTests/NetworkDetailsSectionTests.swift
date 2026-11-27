@@ -2,7 +2,7 @@ import Dispatch
 import Foundation
 import Metrics
 import Testing
-@testable import NetworkDetailsFeature
+@testable import MacHelper
 
 /// Exercises the section's state machine, not the native menu UI. Every snapshot is synthetic and
 /// every system read goes through `ControlledProvider`; nothing calls `getifaddrs`, `sysctl`,

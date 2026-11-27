@@ -1,7 +1,7 @@
 import CleanEngine
 import Foundation
 import Testing
-@testable import UpdatesFeature
+@testable import MacHelper
 
 private final class TempDir {
     let url: URL

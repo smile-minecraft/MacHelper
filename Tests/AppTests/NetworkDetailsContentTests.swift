@@ -5,7 +5,7 @@ import SwiftUI
 import SystemConfiguration
 import Testing
 @testable import Metrics
-@testable import NetworkDetailsFeature
+@testable import MacHelper
 
 /// The view is tested from synthetic snapshots only. Nothing here calls `getifaddrs`, `sysctl`,
 /// SystemConfiguration or any other system reader, and nothing starts the app or the helper.
@@ -174,8 +174,7 @@ import Testing
         #expect(detail.localizedCaseInsensitiveContains("primary interface"))
         #expect(detail.localizedCaseInsensitiveContains("tunnel"))
 
-        let resources = try resourcesURL()
-        let data = try Data(contentsOf: resources.appendingPathComponent("NetworkDetails.xcstrings"))
+        let data = try Data(contentsOf: AppTestResources.catalogSource("NetworkDetails"))
         let object = try JSONSerialization.jsonObject(with: data)
         let document = try #require(object as? [String: Any])
         let strings = try #require(document["strings"] as? [String: Any])
@@ -229,8 +228,7 @@ import Testing
         #expect(NetworkDetailsText.notListed.rawValue == "Not listed")
 
         // The Traditional Chinese copy the app ships must not carry the same contradiction.
-        let resources = try resourcesURL()
-        let data = try Data(contentsOf: resources.appendingPathComponent("NetworkDetails.xcstrings"))
+        let data = try Data(contentsOf: AppTestResources.catalogSource("NetworkDetails"))
         let object = try JSONSerialization.jsonObject(with: data)
         let document = try #require(object as? [String: Any])
         let strings = try #require(document["strings"] as? [String: Any])
@@ -463,8 +461,7 @@ import Testing
     // MARK: - Dedicated catalog
 
     @Test func catalogCoversEveryTextInEveryLanguage() throws {
-        let resources = try resourcesURL()
-        let data = try Data(contentsOf: resources.appendingPathComponent("NetworkDetails.xcstrings"))
+        let data = try Data(contentsOf: AppTestResources.catalogSource("NetworkDetails"))
         let object = try JSONSerialization.jsonObject(with: data)
         let document = try #require(object as? [String: Any])
         #expect(document["sourceLanguage"] as? String == "en")
@@ -488,10 +485,8 @@ import Testing
     }
 
     @Test func catalogSpotChecksUseTheRightLanguage() throws {
-        let resources = try resourcesURL()
         func localized(_ text: NetworkDetailsText, _ language: String) throws -> String {
-            let bundle = try #require(Bundle(url: resources.appendingPathComponent("Localizations/\(language).lproj")))
-            return text.localized(in: bundle)
+            text.localized(in: try AppTestResources.localization(language))
         }
         #expect(try localized(.linkSpeed, "ja") == "リンク速度")
         #expect(try localized(.linkSpeed, "zh-Hant") == "連結速度")
@@ -505,12 +500,11 @@ import Testing
     }
 
     @Test func compiledTablesResolveEveryTextForEveryLanguage() throws {
-        let resources = try resourcesURL()
         let languages = ["es", "ja", "ko", "zh-Hans", "zh-Hant"]
         let keys = Set(NetworkDetailsText.allCases.map(\.rawValue))
         for language in languages {
-            let lproj = resources.appendingPathComponent("Localizations/\(language).lproj")
-            let bundle = try #require(Bundle(url: lproj), "\(language) bundle is missing")
+            let lproj = try AppTestResources.resources.appendingPathComponent("\(language).lproj")
+            let bundle = try AppTestResources.localization(language)
             let table = try #require(NSDictionary(contentsOf: lproj.appendingPathComponent("NetworkDetails.strings")) as? [String: String],
                                      "\(language) table is missing")
             #expect(Set(table.keys) == keys, "\(language) table keys differ")
@@ -671,12 +665,6 @@ import Testing
 
     // MARK: - Resources
 
-    private func resourcesURL() throws -> URL {
-        let bundle = Bundle.module
-        let url = try #require(bundle.resourceURL?.appendingPathComponent("Resources"),
-                               "test resources are missing")
-        return url
-    }
 }
 
 private extension NetworkDetailsDisplay {
