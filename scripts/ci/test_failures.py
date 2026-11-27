@@ -274,7 +274,8 @@ def swift_passed(log_path: str) -> int:
             name = f"{match.group('cls')}.{match.group('test')}"
         if name not in names:
             names.append(name)
-    print("\n".join(names))
+    for name in names:
+        print(name)
     return 0
 
 
@@ -302,7 +303,8 @@ def xcresult_passed(bundle: str) -> int:
 
     for node in data.get("testNodes", []):
         walk(node, None)
-    print("\n".join(dict.fromkeys(passed)))
+    for identifier in dict.fromkeys(passed):
+        print(identifier)
     return 0
 
 
