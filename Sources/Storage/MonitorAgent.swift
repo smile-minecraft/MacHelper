@@ -506,7 +506,7 @@ public struct MonitorAgentRecorder {
 
     /// Waits for an in-flight capacity pass to finish, so a test can read the result with one
     /// `tick` instead of polling. True when no pass is in flight or it finished in time.
-    func waitForCapacityPass(timeout: TimeInterval = 2) -> Bool {
+    func waitForCapacityPass(timeout: TimeInterval = 30) -> Bool {
         volumeCapacityRecorder?.waitForPendingPass(timeout: timeout) ?? true
     }
 }

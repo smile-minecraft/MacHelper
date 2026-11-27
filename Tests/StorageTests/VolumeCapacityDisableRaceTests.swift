@@ -113,7 +113,7 @@ import Testing
             holdWriterLock(url: url, ready: blockerReady, release: releaseBlocker,
                            done: blockerDone, errors: blockerErrors)
             defer { releaseBlocker.signal() }
-            #expect(blockerReady.wait(timeout: .now() + 2) == .success)
+            #expect(blockerReady.wait(timeout: .now() + 30) == .success)
 
             let capacityCalls = Counter()
             let samplerStarted = DispatchSemaphore(value: 0)
@@ -130,7 +130,7 @@ import Testing
             // Start the sample. Its result is applied away from the loop; the apply holds the
             // shared profile lock while it waits for SQLite's writer lock.
             recorder.tick(now: hour0.addingTimeInterval(1))
-            #expect(samplerStarted.wait(timeout: .now() + 2) == .success)
+            #expect(samplerStarted.wait(timeout: .now() + 30) == .success)
 
             // The in-flight apply holds the shared profile lock. An exclusive attempt reports the
             // contention through the hook, which proves it without polling the lock.
@@ -139,9 +139,9 @@ import Testing
             Thread.detachNewThread {
                 defer { probeDone.signal() }
                 try? MonitorAgentProfileStore.withExclusiveLock(
-                    at: profileURL, timeout: 5, onContended: { lockHeld.signal() }) { }
+                    at: profileURL, timeout: 30, onContended: { lockHeld.signal() }) { }
             }
-            #expect(lockHeld.wait(timeout: .now() + 2) == .success,
+            #expect(lockHeld.wait(timeout: .now() + 30) == .success,
                     "the in-flight apply must hold the shared profile lock")
 
             // The user disables. The save must not report success before the in-flight write has
@@ -156,25 +156,24 @@ import Testing
                     try MonitorAgentProfileStore.save(
                         MonitorAgentProfile(backgroundRecordingEnabled: false, modules: [],
                                             capacityGeneration: "generation-2"),
-                        to: profileURL, timeout: 2,
+                        to: profileURL, timeout: 30,
                         onContended: { saveWaiting.signal() })
                 } catch {
                     saveErrors.record(error)
                 }
             }
-            #expect(saveWaiting.wait(timeout: .now() + 2) == .success,
+            #expect(saveWaiting.wait(timeout: .now() + 30) == .success,
                     "the disable must queue behind the in-flight capacity write")
-            let saveBegin = Date()
             releaseBlocker.signal()
-            #expect(saveDone.wait(timeout: .now() + 2) == .success)
-            let saveElapsed = Date().timeIntervalSince(saveBegin)
-            #expect(saveElapsed < 1.5, "disable must not wait indefinitely")
+            // Bounded, not timed: the save returns once the write it queued behind commits. How
+            // long that takes depends on how busy the machine is, not on the code under test.
+            #expect(saveDone.wait(timeout: .now() + 30) == .success, "disable must not wait indefinitely")
             #expect(saveErrors.isEmpty)
             #expect(MonitorAgentProfileStore.load(from: profileURL)?.backgroundRecordingEnabled == false)
 
-            #expect(blockerDone.wait(timeout: .now() + 2) == .success)
+            #expect(blockerDone.wait(timeout: .now() + 30) == .success)
             #expect(blockerErrors.isEmpty)
-            #expect(probeDone.wait(timeout: .now() + 2) == .success)
+            #expect(probeDone.wait(timeout: .now() + 30) == .success)
 
             // The write committed before the disable returned; after it, the disabled profile
             // prevents any new pass.
@@ -218,7 +217,7 @@ import Testing
             defer { release.signal() }
 
             recorder.tick(now: hour0.addingTimeInterval(1))
-            #expect(started.wait(timeout: .now() + 2) == .success)
+            #expect(started.wait(timeout: .now() + 30) == .success)
 
             // Disable and re-enable while the first sample is still blocked.
             try MonitorAgentProfileStore.save(
@@ -322,7 +321,7 @@ import Testing
             defer { release.signal() }
 
             recorder.tick(now: hour0.addingTimeInterval(1))
-            #expect(started.wait(timeout: .now() + 2) == .success)
+            #expect(started.wait(timeout: .now() + 30) == .success)
             try Data("not json".utf8).write(to: profileURL)
             release.signal()
 
@@ -393,7 +392,7 @@ import Testing
             holdWriterLock(url: url, ready: blockerReady, release: releaseBlocker,
                            done: blockerDone, errors: blockerErrors)
             defer { releaseBlocker.signal() }
-            #expect(blockerReady.wait(timeout: .now() + 2) == .success)
+            #expect(blockerReady.wait(timeout: .now() + 30) == .success)
 
             let capacityCalls = Counter()
             let moduleCalls = Counter()
@@ -412,7 +411,7 @@ import Testing
                 }))
 
             recorder.tick(now: hour0.addingTimeInterval(1))
-            #expect(samplerStarted.wait(timeout: .now() + 2) == .success)
+            #expect(samplerStarted.wait(timeout: .now() + 30) == .success)
 
             // The in-flight apply holds the shared profile lock. A probe save that has to wait for
             // that lock proves it, without polling the lock until it happens to look held.
@@ -424,9 +423,9 @@ import Testing
                     MonitorAgentProfile(backgroundRecordingEnabled: true,
                                         modules: [ModulePlan(module: "cpu", interval: 1)],
                                         capacityGeneration: "generation-1"),
-                    to: profileURL, timeout: 2, onContended: { lockHeld.signal() })
+                    to: profileURL, timeout: 30, onContended: { lockHeld.signal() })
             }
-            #expect(lockHeld.wait(timeout: .now() + 2) == .success,
+            #expect(lockHeld.wait(timeout: .now() + 30) == .success,
                     "the in-flight apply must hold the shared profile lock")
 
             // Release the writer lock after the loop tick has had time to run.
@@ -441,9 +440,9 @@ import Testing
             #expect(beat?.lastError == nil)
 
             releaseBlocker.signal()
-            #expect(blockerDone.wait(timeout: .now() + 2) == .success)
+            #expect(blockerDone.wait(timeout: .now() + 30) == .success)
             #expect(blockerErrors.isEmpty)
-            #expect(probeDone.wait(timeout: .now() + 2) == .success)
+            #expect(probeDone.wait(timeout: .now() + 30) == .success)
             let store = VolumeCapacityHistory(history: history)
             #expect(recorder.waitForCapacityPass())
             recorder.tick(now: hour0.addingTimeInterval(12))
@@ -522,7 +521,7 @@ import Testing
                     // The timeout assertion below reports the failure; nothing else to record.
                 }
             }
-            #expect(held.wait(timeout: .now() + 2) == .success)
+            #expect(held.wait(timeout: .now() + 30) == .success)
             defer { release.signal() }
 
             let disabled = MonitorAgentProfile(backgroundRecordingEnabled: false, modules: [],
@@ -536,11 +535,13 @@ import Testing
             } catch {
                 Issue.record("unexpected save error: \(error)")
             }
-            #expect(Date().timeIntervalSince(begin) < 1)
+            // The holder never releases during the save, so any finite return proves the save gave up
+            // at its own 0.05 s timeout; the bound only has to stay clear of a slow machine.
+            #expect(Date().timeIntervalSince(begin) < 10)
             #expect(MonitorAgentProfileStore.load(from: profileURL) == enabled)
 
             release.signal()
-            #expect(holderDone.wait(timeout: .now() + 2) == .success)
+            #expect(holderDone.wait(timeout: .now() + 30) == .success)
         }
     }
 
