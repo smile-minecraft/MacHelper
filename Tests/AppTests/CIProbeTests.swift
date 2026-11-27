@@ -3,10 +3,6 @@ import Testing
 
 // Temporary: proves the CI rerun and reporting. Removed before merging.
 @Suite struct CIProbeTests {
-    @Test func alwaysFails() {
-        #expect(1 + 1 == 3, "this probe always fails")
-    }
-
     @Test func failsOnlyTheFirstTime() throws {
         let marker = FileManager.default.temporaryDirectory
             .appending(path: "machelper-ci-probe-first-run-done")
