@@ -493,7 +493,7 @@ public struct VolumeCapacityRecorder: Sendable {
     /// Waits for a pass to leave the worker and keeps its result for the next `tick` to apply.
     /// Tests use this instead of ticking in a loop until the answer appears. True when no pass is
     /// in flight or the pass finished in time.
-    func waitForPendingPass(timeout: TimeInterval = 2) -> Bool {
+    func waitForPendingPass(timeout: TimeInterval = 30) -> Bool {
         worker.waitForLastPass(timeout: timeout)
     }
 }

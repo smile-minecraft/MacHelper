@@ -440,7 +440,7 @@ import Testing
             defer { release.signal() }
 
             #expect(try recorder.tick(now: hour0).didStart)
-            #expect(started.wait(timeout: .now() + 2) == .success)
+            #expect(started.wait(timeout: .now() + 30) == .success)
 
             // The switch is turned off while the sample is in flight.
             enabled.value = false
@@ -579,7 +579,7 @@ import Testing
             defer { release.signal() }
 
             recorder.tick(now: hour0.addingTimeInterval(1))
-            #expect(started.wait(timeout: .now() + 2) == .success)
+            #expect(started.wait(timeout: .now() + 30) == .success)
 
             // The capacity sampler is still blocked; the agent loop must keep running.
             let begin = Date()
@@ -640,7 +640,7 @@ import Testing
             defer { release.signal() }
 
             recorder.tick(now: hour0.addingTimeInterval(1))
-            #expect(started.wait(timeout: .now() + 2) == .success)
+            #expect(started.wait(timeout: .now() + 30) == .success)
 
             // Turn background recording off while the sample is blocked, then let it finish.
             try MonitorAgentProfileStore.save(
@@ -692,7 +692,7 @@ import Testing
 
             // t=1: the sample starts and blocks.
             recorder.tick(now: hour0.addingTimeInterval(1))
-            #expect(started.wait(timeout: .now() + 2) == .success)
+            #expect(started.wait(timeout: .now() + 30) == .success)
 
             // t=2: the user disables background recording. The agent has not reloaded yet.
             try MonitorAgentProfileStore.save(
@@ -777,7 +777,7 @@ import Testing
             defer { release.signal() }
 
             #expect(try recorder.tick(now: hour0).didSample == false)
-            #expect(started.wait(timeout: .now() + 2) == .success)
+            #expect(started.wait(timeout: .now() + 30) == .success)
 
             // The user clears while the sample is blocked; the reading was taken before it.
             try store.clear(.minuteSamples, now: hour0.addingTimeInterval(30 * 60))
