@@ -22,4 +22,12 @@ import Testing
         #expect(first!.byCPU.count == second!.byCPU.count)
         #expect(first!.byMemory.count == second!.byMemory.count)
     }
+
+    /// A process can end between the counters a sample reads and the path lookup that names it.
+    /// It then has no name left to show, and the sampler drops it rather than rendering a blank
+    /// row — a pid that cannot be resolved stands in for that race here.
+    @Test func aProcessWithNoReadableNameResolvesToNothing() {
+        #expect(ProcessSampler.name(Int32.max).isEmpty)
+        #expect(ProcessSampler.path(Int32.max) == nil)
+    }
 }

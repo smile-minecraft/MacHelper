@@ -40,6 +40,12 @@ private final class FakeBrew {
     var partialUpdate = false { didSet { rewrite() } }
     /// When true, `brew info` announces that it started and waits for `releaseInfo()`.
     var infoGate = false { didSet { rewrite() } }
+    /// Kills `brew outdated` with this signal before it prints anything, the way it dies when the
+    /// system or another program stops it.
+    var outdatedSignal: Int32? { didSet { rewrite() } }
+    /// Leaves a background child of `brew outdated` alive for this many seconds after the shell
+    /// exits. Such a child inherits the output pipe, so the reader must not wait for its EOF.
+    var outdatedLinger: Double = 0 { didSet { rewrite() } }
 
     init(root: URL) throws {
         executable = root.appending(path: "bin/brew")
@@ -137,11 +143,17 @@ private final class FakeBrew {
           exit \(updateStatus)
           ;;
         outdated)
+          if [ \(outdatedSignal ?? 0) -gt 0 ]; then
+            kill -\(outdatedSignal ?? 0) $$
+          fi
           if [ -n "$HOMEBREW_NO_AUTO_UPDATE" ]; then
             sleep \(outdatedDelay)
           else
             sleep \(autoUpdateDelay)
             sleep \(outdatedDelay)
+          fi
+          if [ \(outdatedLinger > 0 ? 1 : 0) -eq 1 ]; then
+            sleep \(outdatedLinger) &
           fi
           if [ -f '\(updatedMarker.path)' ] && [ -f '\(outdatedAfterJSON.path)' ]; then
             cat '\(outdatedAfterJSON.path)'
@@ -270,6 +282,44 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         case .failure(.notInstalled):
             Issue.record("the fake brew is installed")
         }
+    }
+
+    @Test func aBrewThatDiesWithoutOutputSaysHowItEnded() throws {
+        let t = try TempDir()
+        let brew = try FakeBrew(root: t.url)
+        // Something stopped `brew outdated` before it printed a single byte. That must reach the
+        // caller as a reason, never as an empty failure message.
+        brew.outdatedSignal = SIGTERM
+        guard case .failure(.failed(let killed)) = check(brew) else {
+            Issue.record("a killed brew must not look like a successful check")
+            return
+        }
+        #expect(killed == "brew outdated --cask --json=v2 was terminated by signal 15")
+
+        // A brew that exits successfully but prints nothing is a failure too, and has to say so.
+        brew.outdatedSignal = nil
+        try brew.setOutdated("")
+        guard case .failure(.failed(let silent)) = check(brew) else {
+            Issue.record("an empty catalogue must not look like a successful check")
+            return
+        }
+        #expect(silent == "brew outdated --cask --json=v2 exited with status 0 and printed nothing")
+    }
+
+    @Test func aBackgroundChildOfBrewDoesNotHoldTheCheck() throws {
+        let t = try TempDir()
+        let brew = try FakeBrew(root: t.url)
+        try brew.setOutdated(outdatedFixture)
+        try brew.setInfo(infoFixture)
+        try brew.setIndexAge(hours: 1)
+        // A helper a real brew leaves behind inherits the output pipe. The check must return what
+        // the command printed instead of waiting for an EOF that only arrives with that helper.
+        brew.outdatedLinger = 5
+        let start = Date()
+        let result = try check(brew).get()
+        #expect(Date().timeIntervalSince(start) < 3,
+                "a helper left behind must not hold the check for its whole lifetime")
+        #expect(result.casks.map(\.token).sorted() == ["gstreamer-runtime", "obs"])
     }
 
     @Test func emptyCatalogIsSuccessAndSkipsInfo() throws {
@@ -418,7 +468,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
 
-        #expect(all.count == 2)
+        try #require(all.count == 2)
         #expect(all[0].detailsPending && all[0].willRefresh && !all[0].isFinal)
         #expect(all[0].unconfirmedTokens == ["obs", "gstreamer-runtime"])
         #expect(all[0].casks.first { $0.token == "obs" }?.name == "obs")
@@ -444,7 +494,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
 
-        #expect(all.count == 2)
+        try #require(all.count == 2)
         #expect(all[1].isFinal && !all[1].indexRefreshed)
         #expect(all[1].refreshAttempted, "a failed update is still an attempted refresh")
         #expect(all[1].refreshFailure == "offline")
@@ -465,6 +515,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
 
+        try #require(all.count == 2)
         #expect(all[1].isFinal && all[1].indexRefreshed)
         #expect(all[1].refreshFailure == nil)
         #expect(all[1].refreshWarning?.contains("falling back to cached version") == true)
@@ -482,7 +533,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
 
-        #expect(all.count == 2)
+        try #require(all.count == 2)
         #expect(all[1].isFinal && all[1].indexRefreshed)
         #expect(all[1].detailsFailure?.contains("Could not load cask metadata") == true)
         #expect(all[1].unconfirmedTokens == ["obs", "gstreamer-runtime"])
@@ -524,6 +575,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
                                                       excludingAppBundleNames: ["MacHelper.app"]))
         let all = await snapshots(stream)
 
+        try #require(all.count == 2)
         #expect(Set(all[0].casks.map(\.token)) == ["own-cask", "obs"])
         #expect(Set(all[1].casks.map(\.token)) == ["obs"],
                 "the refreshed definition installs MacHelper.app, so it must disappear")
@@ -540,7 +592,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
 
-        #expect(all.count == 2)
+        try #require(all.count == 2)
         #expect(all[0].detailsPending && !all[0].willRefresh && !all[0].isFinal)
         #expect(all[0].unconfirmedTokens == ["obs", "gstreamer-runtime"])
         #expect(all[1].isFinal && !all[1].detailsPending && !all[1].indexRefreshed)
@@ -560,7 +612,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
 
-        #expect(all.count == 1)
+        try #require(all.count == 1)
         #expect(all[0].isFinal && !all[0].detailsPending)
         #expect(all[0].casks.isEmpty)
         #expect(brew.count("info") == 0)
@@ -619,7 +671,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: true))
         let all = await snapshots(stream)
 
-        #expect(all.count == 2)
+        try #require(all.count == 2)
         #expect(all[0].detailsPending && !all[0].willRefresh)
         #expect(all[1].isFinal)
         #expect(all[1].refreshFailure == "offline")
@@ -639,7 +691,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: true))
         let all = await snapshots(stream)
 
-        #expect(all.count == 2)
+        try #require(all.count == 2)
         #expect(all[0].detailsPending && all[0].indexRefreshed)
         #expect(all[1].isFinal && all[1].indexRefreshed && all[1].refreshFailure == nil)
         #expect(brew.invocations.first == "update --quiet")
@@ -658,7 +710,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: true))
         let all = await snapshots(stream)
 
-        #expect(all.count == 1)
+        try #require(all.count == 1)
         #expect(all[0].isFinal)
         #expect(all[0].failure == "the list could not be read")
         #expect(all[0].indexRefreshed,
@@ -682,7 +734,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
 
-        #expect(all.count == 2)
+        try #require(all.count == 2)
         #expect(all[0].detailsPending && all[0].willRefresh)
         #expect(all[1].isFinal)
         #expect(all[1].failure == "network is down")
@@ -710,7 +762,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
 
-        #expect(all.count == 2)
+        try #require(all.count == 2)
         #expect(all[0].detailsPending && all[0].willRefresh)
         #expect(all[1].isFinal)
         #expect(all[1].failure == "the list could not be read")
