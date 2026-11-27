@@ -88,25 +88,33 @@ public struct CleanExecutor: Sendable {
     public let alwaysTrash: Bool
 
     let removal: RemovalBackend
+    /// Where the per-item guard reads "is it running?" from. Re-read for every item, never a
+    /// snapshot from the start of the batch.
+    let running: RunningApplications
 
     public init(safety: PathSafety, log: OperationLog = .shared, permanent: Bool = false, alwaysTrash: Bool = false) {
-        self.init(safety: safety, log: log, permanent: permanent, alwaysTrash: alwaysTrash, removal: .system)
+        self.init(safety: safety, log: log, permanent: permanent, alwaysTrash: alwaysTrash, removal: .system,
+                  running: .system)
     }
 
-    /// Test-only entry point. `removal` and `log` have no defaults, so a test that omits either
-    /// fails to compile instead of silently using the system Trash or the shared operations log.
+    /// Test-only entry point. `removal`, `log` and `running` have no defaults, so a test that omits
+    /// one fails to compile instead of silently using the system Trash, the shared operations log
+    /// or this machine's process table.
     static func injected(safety: PathSafety, log: OperationLog, removal: RemovalBackend,
+                         running: RunningApplications,
                          permanent: Bool = false, alwaysTrash: Bool = false) -> CleanExecutor {
-        CleanExecutor(safety: safety, log: log, permanent: permanent, alwaysTrash: alwaysTrash, removal: removal)
+        CleanExecutor(safety: safety, log: log, permanent: permanent, alwaysTrash: alwaysTrash, removal: removal,
+                      running: running)
     }
 
     private init(safety: PathSafety, log: OperationLog, permanent: Bool, alwaysTrash: Bool,
-                 removal: RemovalBackend) {
+                 removal: RemovalBackend, running: RunningApplications) {
         self.safety = safety
         self.log = log
         self.permanent = permanent
         self.alwaysTrash = alwaysTrash
         self.removal = removal
+        self.running = running
     }
 
     static let trashDirectory = MacHelperPaths.home.appending(path: ".Trash").path
@@ -123,11 +131,11 @@ public struct CleanExecutor: Sendable {
     /// skip the query entirely.
     private func busyMarker(for item: RemovalItem) -> String? {
         if !item.skipIfRunning.isEmpty,
-           let app = item.skipIfRunning.first(where: CleanScanner.runningBundleIDs().contains) { return app }
+           let app = item.skipIfRunning.first(where: running.bundleIDs().contains) { return app }
         if !item.skipIfProcessRunning.isEmpty {
-            let running = Set(CleanScanner.runningProcessNames().map { $0.lowercased() })
+            let runningNames = Set(running.processNames().map { $0.lowercased() })
             return item.skipIfProcessRunning.first {
-                running.contains(String($0.prefix(CleanScanner.processNameLength)).lowercased())
+                runningNames.contains(String($0.prefix(CleanScanner.processNameLength)).lowercased())
             }
         }
         return nil

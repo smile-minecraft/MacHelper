@@ -35,7 +35,7 @@ import Testing
         options.openFiles = openFiles
         options.log = OperationLog(url: log)
         options.executor = CleanExecutor.injected(safety: safety, log: OperationLog(url: log),
-                                                  removal: backend.backend)
+                                                  removal: backend.backend, running: nothingRunning)
         return options
     }
 
@@ -327,7 +327,8 @@ import Testing
                     try Data("new".utf8).write(to: later.appending(path: "child.txt"))
                 }
                 try FileManager.default.removeItem(at: url)
-            }))
+            }),
+            running: nothingRunning)
 
         let result = ExpiredTempClean.run(options: options)
         #expect(result.deletedCount == 1)
@@ -408,7 +409,8 @@ import Testing
                 // The temp root is swapped right after this removal: same path, different directory.
                 try FileManager.default.removeItem(at: s.root)
                 try FileManager.default.createDirectory(at: s.root, withIntermediateDirectories: true)
-            }))
+            }),
+            running: nothingRunning)
 
         let result = ExpiredTempClean.run(options: options)
         #expect(result.deletedCount == 1, "the removal already happened; the report must keep counting it")
@@ -471,7 +473,7 @@ import Testing
         options.useTrash = false
         let backend = TestTrashBackend(trashDirectory: s.trash)
         let safety = PathSafety(protectedPaths: [], whitelist: [], allowedRoots: [s.root.path], minimumDepth: 1)
-        options.executor = CleanExecutor.injected(safety: safety, log: OperationLog(url: s.log), removal: backend.backend)
+        options.executor = CleanExecutor.injected(safety: safety, log: OperationLog(url: s.log), removal: backend.backend, running: nothingRunning)
 
         let result = ExpiredTempClean.run(options: options)
         #expect(result.deletedCount == 1)
@@ -493,7 +495,7 @@ import Testing
         let backend = TestTrashBackend(trashDirectory: s.trash)
         var options = options(root: s.root, trash: s.trash, log: s.log)   // useTrash defaults to true
         let safety = PathSafety(protectedPaths: [], whitelist: [], allowedRoots: [s.root.path], minimumDepth: 1)
-        options.executor = CleanExecutor.injected(safety: safety, log: OperationLog(url: s.log), removal: backend.backend)
+        options.executor = CleanExecutor.injected(safety: safety, log: OperationLog(url: s.log), removal: backend.backend, running: nothingRunning)
 
         let result = ExpiredTempClean.run(options: options)
         #expect(result.trashedCount == 1)
@@ -530,7 +532,9 @@ import Testing
         #expect(ExpiredTempClean.parseOpenFilesOutput(Data("p1\0garbage".utf8)) == nil, "an unterminated/unknown field rejects the output")
     }
 
-    @Test func openFileWithNewlineInPathIsListed() throws {
+    /// Live: the listing comes from this machine's lsof and process table.
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["MACHELPER_LIVE_TESTS"] == "1"))
+    func openFileWithNewlineInPathIsListed() throws {
         let s = try makeSandbox()
         defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
         let dir = s.root.appendingPathComponent("cardiary-context-Xy12AB", isDirectory: true)
@@ -553,7 +557,9 @@ import Testing
                 "Darwin lsof renders LF in names as a two-byte escape; observe and pin it")
     }
 
-    @Test func cwdWithNewlineIsListed() throws {
+    /// Live: spawns a process and asks this machine's lsof for its cwd.
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["MACHELPER_LIVE_TESTS"] == "1"))
+    func cwdWithNewlineIsListed() throws {
         let s = try makeSandbox()
         defer { try? fileManager.removeItem(at: s.root.deletingLastPathComponent()) }
         let dir = s.root.appendingPathComponent("cwd\nwith-newline", isDirectory: true)
@@ -569,6 +575,7 @@ import Testing
         let deadline = Date().addingTimeInterval(5)
         let parentPrefix = PathSafety.normalize(s.root.path) + "/"
         while !found, Date() < deadline {
+            // Live-only (MACHELPER_LIVE_TESTS): lsof needs a moment to see the process it lists.
             Thread.sleep(forTimeInterval: 0.1)
             found = ExpiredTempClean.systemOpenFiles(uid: getuid())?.contains {
                 // First component only; the newline inside the directory name is escape-rendered.

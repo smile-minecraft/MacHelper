@@ -9,7 +9,9 @@ import Testing
         return try JSONDecoder().decode(CleanRule.self, from: JSONSerialization.data(withJSONObject: json))
     }
 
-    @Test func seesItsOwnProcess() {
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["MACHELPER_LIVE_TESTS"] == "1"))
+    func seesItsOwnProcess() {
+        // Live: reads this machine's process table, which no fake can stand in for.
         let own = String(ProcessInfo.processInfo.processName.prefix(CleanScanner.processNameLength))
         #expect(CleanScanner.runningProcessNames().contains(own))
     }
@@ -18,13 +20,14 @@ import Testing
         let t = try TempDir()
         try t.file("cache/pkg/a.bin", bytes: 20_000)
         let safety = PathSafety(protectedPaths: [], whitelist: [], allowedRoots: [t.path], minimumDepth: 2)
-        let own = ProcessInfo.processInfo.processName
+        let own = "someagent"
         let busy = try rule("busy", _paths: [t.path + "/cache/*"], processes: [own])
         let idle = try rule("idle", _paths: [t.path + "/cache/*"], processes: ["no-such-process-\(UUID().uuidString.prefix(6))"])
 
-        let skipped = CleanScanner(rules: [busy], safety: safety).scan().results[0]
+        let running = FakeRunningApplications(processNames: [own])
+        let skipped = CleanScanner(rules: [busy], safety: safety, running: running.source).scan().results[0]
         #expect(skipped.candidates.isEmpty && skipped.skippedReason != nil)
-        let found = CleanScanner(rules: [idle], safety: safety).scan().results[0]
+        let found = CleanScanner(rules: [idle], safety: safety, running: running.source).scan().results[0]
         #expect(found.candidates.map(\.path) == [t.path + "/cache/pkg"])
     }
 
