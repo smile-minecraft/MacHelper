@@ -7,14 +7,16 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # A newer push replaces a pull request's run, but every commit on main is checked to the end:
+  # cancelling there let a release commit hide the result of the merge before it.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   test:
     # macOS minutes are billed (10x) on private repositories; CI starts once the repository is public.
     if: ${{ !github.event.repository.private }}
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - name: Use the newest Xcode on the runner
@@ -25,8 +27,17 @@ jobs:
       # The same make targets contributors run, so the documented setup is what CI checks.
       - name: Install XcodeGen
         run: brew install xcodegen
-      - name: Test the Swift packages
+      # Package tests, then the app's MacHelperTests bundle. A failed test is rerun once: one that
+      # passes then is reported as flaky, and the job summary lists every failed or flaky test.
+      - name: Run the unit tests
         run: make test
+      - name: Keep the app test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-test-results
+          path: build/TestResults
+          if-no-files-found: ignore
       - name: Build the universal app (ad-hoc signed)
         run: |
           make build CONFIGURATION=Release \
