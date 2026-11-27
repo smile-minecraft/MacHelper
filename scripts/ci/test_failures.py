@@ -144,11 +144,14 @@ def parse_swift_log(log_path: str) -> int:
     return 0
 
 
-def xcresulttool(*args: str) -> object:
+def xcresulttool(*args: str) -> dict:
     out = subprocess.run(["xcrun", "xcresulttool", *args], capture_output=True, text=True)
     if out.returncode != 0:
         raise RuntimeError(out.stderr.strip() or f"xcresulttool exited {out.returncode}")
-    return json.loads(out.stdout)
+    data = json.loads(out.stdout)
+    if not isinstance(data, dict):
+        raise RuntimeError("xcresulttool returned something other than a JSON object")
+    return data
 
 
 def first_failure(node: dict) -> tuple[str, str, str]:
@@ -195,7 +198,7 @@ def failures_from_test_results(bundle: str) -> tuple[list[tuple[str, str, str, s
         for child in node.get("children", []):
             walk(child, target)
 
-    for node in data.get("testNodes", []):  # type: ignore[union-attr]
+    for node in data.get("testNodes", []):
         walk(node, None)
     return rows, unattributed
 
@@ -203,7 +206,7 @@ def failures_from_test_results(bundle: str) -> tuple[list[tuple[str, str, str, s
 def failures_from_legacy(bundle: str) -> tuple[list[tuple[str, str, str, str, str]], bool]:
     """Older Xcode: `xcresulttool get --legacy --format json`."""
     data = xcresulttool("get", "--legacy", "--format", "json", "--path", bundle)
-    summaries = (data.get("issues", {})  # type: ignore[union-attr]
+    summaries = (data.get("issues", {})
                  .get("testFailureSummaries", {}).get("_values", []))
     rows: list[tuple[str, str, str, str, str]] = []
     unattributed = False
