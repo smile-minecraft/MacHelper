@@ -85,7 +85,7 @@ private extension RemovalBackend {
                           permanent: Bool = false, alwaysTrash: Bool = false) -> CleanExecutor {
         CleanExecutor.injected(safety: safety(for: t),
                                log: log ?? OperationLog(url: t.url.appending(path: "operations.jsonl")),
-                               removal: backend.backend,
+                               removal: backend.backend, running: nothingRunning,
                                permanent: permanent, alwaysTrash: alwaysTrash)
     }
 
@@ -99,7 +99,8 @@ private extension RemovalBackend {
         let injected = CleanExecutor.injected(
             safety: .forCleaning(whitelist: []),
             log: OperationLog(url: URL(fileURLWithPath: "/nonexistent-test-log")),
-            removal: TestTrashBackend(trashDirectory: URL(fileURLWithPath: "/nonexistent-test-trash")).backend
+            removal: TestTrashBackend(trashDirectory: URL(fileURLWithPath: "/nonexistent-test-trash")).backend,
+            running: nothingRunning
         )
         #expect(!injected.removal.isSystem, "the test initializer requires a backend and does not fall back")
     }
@@ -175,7 +176,7 @@ private extension RemovalBackend {
         let file = try t.file("top.bin")
         let backend = TestTrashBackend(trashDirectory: t.url.appending(path: "test-trash"))
         let log = OperationLog(url: t.url.appending(path: "operations.jsonl"))
-        let report = CleanExecutor.injected(safety: safety(for: t, minimumDepth: 2), log: log, removal: backend.backend)
+        let report = CleanExecutor.injected(safety: safety(for: t, minimumDepth: 2), log: log, removal: backend.backend, running: nothingRunning)
             .execute([RemovalItem(path: file, source: "r", bytes: 1, action: .trash)], dryRun: false, command: "test")
 
         #expect(report.items.map(\.result) == [.skipped])

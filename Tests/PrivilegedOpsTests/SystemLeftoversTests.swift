@@ -130,7 +130,9 @@ import Testing
 }
 
 @Suite struct ProcessCountersTests {
-    @Test func readsOwnProcess() throws {
+    /// Live: reads this machine's process table and its own counters.
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["MACHELPER_LIVE_TESTS"] == "1"))
+    func readsOwnProcess() throws {
         let me = try #require(ProcessCounters.read(getpid()))
         #expect(me.pid == getpid())
         #expect(me.footprint > 0)

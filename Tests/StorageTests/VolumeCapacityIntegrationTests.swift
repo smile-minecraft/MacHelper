@@ -254,30 +254,20 @@ import Testing
         }
     }
 
-    /// Polls `body` until it returns true or the timeout elapses. The capacity worker runs on
-    /// its own queue, so tests wait for the result instead of assuming it is synchronous.
-    private func waitUntil(timeout: TimeInterval = 2, _ body: () throws -> Bool) rethrows -> Bool {
-        let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
-            if try body() { return true }
-            Thread.sleep(forTimeInterval: 0.01)
+    /// Ticks the recorder once its in-flight pass has finished, and returns whether that tick
+    /// reported a write failure. The worker signals when its pass leaves the queue, so the tick
+    /// always sees the finished result instead of polling until it happens to appear.
+    private func tickForFailure(_ recorder: inout VolumeCapacityRecorder, now: Date) -> Bool {
+        guard recorder.waitForPendingPass() else {
+            Issue.record("the capacity pass never finished")
+            return false
         }
-        return try body()
-    }
-
-    /// Ticks until the recorder throws a write failure, or returns false on timeout.
-    private func waitForFailure(_ recorder: inout VolumeCapacityRecorder,
-                                now: Date, timeout: TimeInterval = 2) -> Bool {
-        let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
-            do {
-                _ = try recorder.tick(now: now)
-            } catch {
-                return true
-            }
-            Thread.sleep(forTimeInterval: 0.01)
+        do {
+            _ = try recorder.tick(now: now)
+            return false
+        } catch {
+            return true
         }
-        return false
     }
 
     @Test func recorderSamplesOncePerHourAndSkipsUnmeasurableVolumes() throws {
@@ -298,10 +288,8 @@ import Testing
 
             // The first tick starts the sample on the worker; a later tick applies it.
             #expect(try recorder.tick(now: hour0.addingTimeInterval(1)).didSample == false)
-            let firstApplied = try waitUntil {
-                try recorder.tick(now: hour0.addingTimeInterval(1)).didSample
-            }
-            #expect(firstApplied)
+            #expect(recorder.waitForPendingPass())
+            #expect(try recorder.tick(now: hour0.addingTimeInterval(1)).didSample)
             #expect(counter.value == 1)
 
             // Every tick inside the same hour is a no-op; the loop can run every second.
@@ -312,10 +300,8 @@ import Testing
 
             // The next hour starts and applies a second sample.
             #expect(try recorder.tick(now: hour0.addingTimeInterval(3_601)).didSample == false)
-            let secondApplied = try waitUntil {
-                try recorder.tick(now: hour0.addingTimeInterval(3_601)).didSample
-            }
-            #expect(secondApplied)
+            #expect(recorder.waitForPendingPass())
+            #expect(try recorder.tick(now: hour0.addingTimeInterval(3_601)).didSample)
             #expect(counter.value == 2)
 
             let store = VolumeCapacityHistory(history: history)
@@ -341,7 +327,7 @@ import Testing
             // The first tick starts the sample; the write failure is reported on the tick
             // that applies the result.
             #expect(try recorder.tick(now: hour0).didSample == false)
-            #expect(waitForFailure(&recorder, now: hour0))
+            #expect(tickForFailure(&recorder, now: hour0))
             #expect(counter.value == 1)
 
             // Before the retry interval the recorder does not sample again.
@@ -351,7 +337,7 @@ import Testing
 
             // After it, the same hour is attempted again.
             #expect(try recorder.tick(now: hour0.addingTimeInterval(61)).didSample == false)
-            #expect(waitForFailure(&recorder, now: hour0.addingTimeInterval(61)))
+            #expect(tickForFailure(&recorder, now: hour0.addingTimeInterval(61)))
             #expect(counter.value == 2)
         }
     }
@@ -372,11 +358,9 @@ import Testing
 
             #expect(try recorder.tick(now: hour0.addingTimeInterval(5 * 60)).didSample == false)
             let capacityStore = VolumeCapacityHistory(history: history)
-            let recorded = try waitUntil {
-                _ = try recorder.tick(now: hour0.addingTimeInterval(5 * 60))
-                return try capacityStore.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1
-            }
-            #expect(recorded)
+            #expect(recorder.waitForPendingPass())
+            _ = try recorder.tick(now: hour0.addingTimeInterval(5 * 60))
+            #expect(try capacityStore.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1)
 
             // The user clears the history after this process already completed the hour. The
             // recorder must not write the hour back from its in-memory "done" state.
@@ -387,11 +371,9 @@ import Testing
 
             // The next hour is new data and records normally.
             #expect(try recorder.tick(now: hour0.addingTimeInterval(3_605)).didSample == false)
-            let nextRecorded = try waitUntil {
-                _ = try recorder.tick(now: hour0.addingTimeInterval(3_605))
-                return try capacityStore.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1
-            }
-            #expect(nextRecorded)
+            #expect(recorder.waitForPendingPass())
+            _ = try recorder.tick(now: hour0.addingTimeInterval(3_605))
+            #expect(try capacityStore.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1)
             #expect(counter.value == 2)
         }
     }
@@ -426,12 +408,14 @@ import Testing
             #expect(try app.tick(now: hour0).didSample == false)
             #expect(try agent.tick(now: hour0).didSample == false)
             appGate.signal()
-            #expect(try waitUntil { try app.tick(now: hour0).didSample })
+            #expect(app.waitForPendingPass())
+            #expect(try app.tick(now: hour0).didSample)
             #expect(try store.points(volume: "volume:AAAA/media:1111",
                                      since: hour0, until: hour0.addingTimeInterval(3_600)).map(\.free) == [70])
 
             agentGate.signal()
-            #expect(try waitUntil { try agent.tick(now: hour0).didSample })
+            #expect(agent.waitForPendingPass())
+            #expect(try agent.tick(now: hour0).didSample)
             #expect(try store.points(volume: "volume:AAAA/media:1111",
                                      since: hour0, until: hour0.addingTimeInterval(3_600)).map(\.free) == [70])
         }
@@ -462,15 +446,10 @@ import Testing
             enabled.value = false
             release.signal()
 
-            var discarded: VolumeCapacityTickOutcome?
-            let deadline = Date().addingTimeInterval(2)
-            while Date() < deadline {
-                let outcome = try recorder.tick(now: hour0)
-                if outcome.didDiscard { discarded = outcome; break }
-                Thread.sleep(forTimeInterval: 0.01)
-            }
-            #expect(discarded?.didDiscard == true)
-            #expect(discarded?.didSample == false)
+            #expect(recorder.waitForPendingPass())
+            let discarded = try recorder.tick(now: hour0)
+            #expect(discarded.didDiscard)
+            #expect(discarded.didSample == false)
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).isEmpty)
 
             // While disabled, no new pass starts.
@@ -500,16 +479,15 @@ import Testing
                 }))
 
             recorder.tick(now: hour0.addingTimeInterval(1))
-            #expect(waitUntil { counter.value == 1 })
+            #expect(recorder.waitForCapacityPass())
+            #expect(counter.value == 1)
 
-            // The first tick started the background sample; poll the agent loop until the
-            // applied result is written.
+            // The first tick started the background sample; the next tick applies its result once
+            // the worker reports the pass finished.
             let store = VolumeCapacityHistory(history: history)
-            let recorded = waitUntil {
-                recorder.tick(now: hour0.addingTimeInterval(2))
-                return (try? store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count) == 1
-            }
-            #expect(recorded)
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(2))
+            #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1)
             #expect(counter.value == 1)
 
             // The same hour does not sample again, even though the loop ticks every second.
@@ -553,11 +531,10 @@ import Testing
                 }))
 
             recorder.tick(now: hour0.addingTimeInterval(1))
-            let failed = waitUntil {
-                recorder.tick(now: hour0.addingTimeInterval(1))
-                return MonitorAgentHeartbeatStore.load(from: heartbeatURL)?
-                    .lastError?.contains("volume capacity history write failed") == true
-            }
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(1))
+            let failed = MonitorAgentHeartbeatStore.load(from: heartbeatURL)?
+                .lastError?.contains("volume capacity history write failed") == true
             #expect(failed)
             let heartbeat = MonitorAgentHeartbeatStore.load(from: heartbeatURL)
             #expect(heartbeat?.lastError?.contains("volume capacity history write failed") == true)
@@ -627,11 +604,9 @@ import Testing
             // Releasing the sampler lets the result arrive; the point keeps the sample time.
             release.signal()
             let store = VolumeCapacityHistory(history: history)
-            let recorded = waitUntil {
-                recorder.tick(now: hour0.addingTimeInterval(31))
-                return (try? store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count) == 1
-            }
-            #expect(recorded)
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(31))
+            #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1)
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).first?.time == hour0)
 
             // The next heartbeat carries the capacity signal.
@@ -672,11 +647,8 @@ import Testing
                 MonitorAgentProfile(backgroundRecordingEnabled: false, modules: []), to: profileURL)
             recorder.tick(now: hour0.addingTimeInterval(6))
             release.signal()
-            let deadline = Date().addingTimeInterval(2)
-            while Date() < deadline {
-                recorder.tick(now: hour0.addingTimeInterval(7))
-                Thread.sleep(forTimeInterval: 0.01)
-            }
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(7))
 
             let store = VolumeCapacityHistory(history: history)
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).isEmpty)
@@ -728,11 +700,8 @@ import Testing
 
             // t=3: the result arrives before the five-second reload. It must be discarded.
             release.signal()
-            let deadline = Date().addingTimeInterval(2)
-            while Date() < deadline {
-                recorder.tick(now: hour0.addingTimeInterval(3))
-                Thread.sleep(forTimeInterval: 0.01)
-            }
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(3))
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).isEmpty)
             #expect(capacityCalls.value == 1)
 
@@ -745,11 +714,9 @@ import Testing
             try MonitorAgentProfileStore.save(
                 MonitorAgentProfile(backgroundRecordingEnabled: true, modules: []), to: profileURL)
             recorder.tick(now: hour0.addingTimeInterval(12))
-            let recorded = waitUntil {
-                recorder.tick(now: hour0.addingTimeInterval(13))
-                return (try? store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count) == 1
-            }
-            #expect(recorded)
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(13))
+            #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1)
             #expect(capacityCalls.value == 2)
         }
     }
@@ -769,15 +736,11 @@ import Testing
 
             // The first pass is empty. It counts as a sample but must not close the hour, or a
             // login before Disk Arbitration is ready would delay the first point by an hour.
-            var firstOutcome: VolumeCapacityTickOutcome?
             #expect(try recorder.tick(now: hour0).didSample == false)
-            let applied = try waitUntil {
-                let outcome = try recorder.tick(now: hour0)
-                if outcome.didSample { firstOutcome = outcome; return true }
-                return false
-            }
-            #expect(applied)
-            #expect(firstOutcome?.hourCompleted == false)
+            #expect(recorder.waitForPendingPass())
+            let firstOutcome = try recorder.tick(now: hour0)
+            #expect(firstOutcome.didSample)
+            #expect(firstOutcome.hourCompleted == false)
             #expect(calls.value == 1)
             let store = VolumeCapacityHistory(history: history)
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).isEmpty)
@@ -788,11 +751,9 @@ import Testing
 
             // After it, the same hour is sampled again and the point is written.
             #expect(try recorder.tick(now: hour0.addingTimeInterval(61)).didSample == false)
-            let recorded = try waitUntil {
-                _ = try recorder.tick(now: hour0.addingTimeInterval(61))
-                return try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1
-            }
-            #expect(recorded)
+            #expect(recorder.waitForPendingPass())
+            _ = try recorder.tick(now: hour0.addingTimeInterval(61))
+            #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1)
             #expect(calls.value == 2)
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).first?.time == hour0)
         }
@@ -823,20 +784,12 @@ import Testing
             release.signal()
 
             let capacityStore = VolumeCapacityHistory(history: history)
-            let deadline = Date().addingTimeInterval(2)
-            var applied = false
-            var recorded = false
-            while Date() < deadline {
-                let outcome = try recorder.tick(now: hour0.addingTimeInterval(31 * 60))
-                if outcome.didSample { applied = true }
-                recorded = try capacityStore.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1
-                if recorded { break }
-                Thread.sleep(forTimeInterval: 0.01)
-            }
+            #expect(recorder.waitForPendingPass())
+            let outcome = try recorder.tick(now: hour0.addingTimeInterval(31 * 60))
             // The blocked result really came back; the clear boundary, not a lost sample,
             // is what kept it out of the table.
-            #expect(applied)
-            #expect(!recorded)
+            #expect(outcome.didSample)
+            #expect(try capacityStore.points(volume: "volume:AAAA/media:1111", since: .distantPast).isEmpty)
             #expect(try capacityStore.points(volume: "volume:AAAA/media:1111", since: .distantPast).isEmpty)
         }
     }

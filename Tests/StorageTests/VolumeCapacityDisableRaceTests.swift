@@ -59,15 +59,6 @@ import Testing
         }
     }
 
-    private func waitUntil(timeout: TimeInterval = 2, _ body: () throws -> Bool) rethrows -> Bool {
-        let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
-            if try body() { return true }
-            Thread.sleep(forTimeInterval: 0.01)
-        }
-        return try body()
-    }
-
     private func poolConfiguration() -> Configuration {
         var config = Configuration()
         config.journalMode = .wal
@@ -125,11 +116,13 @@ import Testing
             #expect(blockerReady.wait(timeout: .now() + 2) == .success)
 
             let capacityCalls = Counter()
+            let samplerStarted = DispatchSemaphore(value: 0)
             var recorder = MonitorAgentRecorder(
                 profileURL: profileURL, heartbeatURL: heartbeatURL, history: history,
                 sampler: { _ in [:] },
                 volumeCapacity: VolumeCapacityCollection(sample: {
                     capacityCalls.increment()
+                    samplerStarted.signal()
                     return [VolumeCapacityReading(volume: "volume:AAAA/media:1111",
                                                   capacity: VolumeCapacity(free: 100, total: 1_000))]
                 }))
@@ -137,42 +130,51 @@ import Testing
             // Start the sample. Its result is applied away from the loop; the apply holds the
             // shared profile lock while it waits for SQLite's writer lock.
             recorder.tick(now: hour0.addingTimeInterval(1))
-            #expect(waitUntil { capacityCalls.value == 1 })
-            let holdsSharedLock = waitUntil {
+            #expect(samplerStarted.wait(timeout: .now() + 2) == .success)
+
+            // The in-flight apply holds the shared profile lock. An exclusive attempt reports the
+            // contention through the hook, which proves it without polling the lock.
+            let lockHeld = DispatchSemaphore(value: 0)
+            let probeDone = DispatchSemaphore(value: 0)
+            Thread.detachNewThread {
+                defer { probeDone.signal() }
+                try? MonitorAgentProfileStore.withExclusiveLock(
+                    at: profileURL, timeout: 5, onContended: { lockHeld.signal() }) { }
+            }
+            #expect(lockHeld.wait(timeout: .now() + 2) == .success,
+                    "the in-flight apply must hold the shared profile lock")
+
+            // The user disables. The save must not report success before the in-flight write has
+            // finished. The lock tells us the save is queued behind that write, without a sleep
+            // that hopes both sides meet at the right moment.
+            let saveWaiting = DispatchSemaphore(value: 0)
+            let saveDone = DispatchSemaphore(value: 0)
+            let saveErrors = ErrorBox()
+            Thread.detachNewThread {
+                defer { saveDone.signal() }
                 do {
-                    try MonitorAgentProfileStore.withExclusiveLock(at: profileURL, timeout: 0.01) { }
-                    return false
-                } catch MonitorAgentProfileStoreError.lockTimeout {
-                    return true
+                    try MonitorAgentProfileStore.save(
+                        MonitorAgentProfile(backgroundRecordingEnabled: false, modules: [],
+                                            capacityGeneration: "generation-2"),
+                        to: profileURL, timeout: 2,
+                        onContended: { saveWaiting.signal() })
                 } catch {
-                    return false
+                    saveErrors.record(error)
                 }
             }
-            #expect(holdsSharedLock, "the in-flight apply must hold the shared profile lock")
-
-            // The user disables. The save must not report success before the in-flight write
-            // has finished. Release the blocker from another thread so the save itself is the
-            // call that waits; without the shared lock it would return immediately.
-            Thread.detachNewThread {
-                Thread.sleep(forTimeInterval: 0.2)
-                releaseBlocker.signal()
-            }
+            #expect(saveWaiting.wait(timeout: .now() + 2) == .success,
+                    "the disable must queue behind the in-flight capacity write")
             let saveBegin = Date()
-            do {
-                try MonitorAgentProfileStore.save(
-                    MonitorAgentProfile(backgroundRecordingEnabled: false, modules: [],
-                                        capacityGeneration: "generation-2"),
-                    to: profileURL)
-            } catch {
-                Issue.record("the disable save failed: \(error)")
-            }
+            releaseBlocker.signal()
+            #expect(saveDone.wait(timeout: .now() + 2) == .success)
             let saveElapsed = Date().timeIntervalSince(saveBegin)
-            #expect(saveElapsed >= 0.15, "disable must wait for the in-flight capacity write")
             #expect(saveElapsed < 1.5, "disable must not wait indefinitely")
+            #expect(saveErrors.isEmpty)
             #expect(MonitorAgentProfileStore.load(from: profileURL)?.backgroundRecordingEnabled == false)
 
             #expect(blockerDone.wait(timeout: .now() + 2) == .success)
             #expect(blockerErrors.isEmpty)
+            #expect(probeDone.wait(timeout: .now() + 2) == .success)
 
             // The write committed before the disable returned; after it, the disabled profile
             // prevents any new pass.
@@ -230,21 +232,19 @@ import Testing
             release.signal()
 
             let store = VolumeCapacityHistory(history: history)
-            let settled = waitUntil {
-                recorder.tick(now: hour0.addingTimeInterval(2))
-                return calls.value >= 1
-            }
-            #expect(settled)
+            // The pre-disable sample really came back; waiting for the worker places the next tick
+            // after its result instead of guessing when it is ready.
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(2))
+            #expect(calls.value >= 1)
             // The pre-disable sample is dropped even though the profile is enabled again.
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).isEmpty)
 
             // The re-enabled session takes its own sample and stores that value.
             recorder.tick(now: hour0.addingTimeInterval(10))
-            let recorded = try waitUntil {
-                recorder.tick(now: hour0.addingTimeInterval(11))
-                return try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1
-            }
-            #expect(recorded)
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(11))
+            #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1)
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).first?.free == 200)
             #expect(calls.value == 2)
         }
@@ -272,8 +272,8 @@ import Testing
                                                   capacity: VolumeCapacity(free: 70, total: 1_000))]
                 })
             #expect(try app.tick(now: hour0).didSample == false)
-            let appRecorded = try waitUntil { try app.tick(now: hour0.addingTimeInterval(1)).didSample }
-            #expect(appRecorded)
+            #expect(app.waitForPendingPass())
+            #expect(try app.tick(now: hour0.addingTimeInterval(1)).didSample)
             let store = VolumeCapacityHistory(history: history)
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).map(\.free) == [70])
 
@@ -327,11 +327,8 @@ import Testing
             release.signal()
 
             let store = VolumeCapacityHistory(history: history)
-            let deadline = Date().addingTimeInterval(2)
-            while Date() < deadline {
-                recorder.tick(now: hour0.addingTimeInterval(2))
-                Thread.sleep(forTimeInterval: 0.01)
-            }
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(2))
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).isEmpty)
             #expect(calls.value == 1)
         }
@@ -364,11 +361,10 @@ import Testing
                 }))
 
             recorder.tick(now: hour0.addingTimeInterval(1))
-            let failed = waitUntil {
-                recorder.tick(now: hour0.addingTimeInterval(2))
-                return MonitorAgentHeartbeatStore.load(from: heartbeatURL)?
-                    .lastError?.contains("volume capacity history write failed") == true
-            }
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(2))
+            let failed = MonitorAgentHeartbeatStore.load(from: heartbeatURL)?
+                .lastError?.contains("volume capacity history write failed") == true
             #expect(failed)
             let store = VolumeCapacityHistory(history: history)
             #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).isEmpty)
@@ -401,6 +397,7 @@ import Testing
 
             let capacityCalls = Counter()
             let moduleCalls = Counter()
+            let samplerStarted = DispatchSemaphore(value: 0)
             var recorder = MonitorAgentRecorder(
                 profileURL: profileURL, heartbeatURL: heartbeatURL, history: history,
                 sampler: { module in
@@ -409,29 +406,30 @@ import Testing
                 },
                 volumeCapacity: VolumeCapacityCollection(sample: {
                     capacityCalls.increment()
+                    samplerStarted.signal()
                     return [VolumeCapacityReading(volume: "volume:AAAA/media:1111",
                                                   capacity: VolumeCapacity(free: 100, total: 1_000))]
                 }))
 
             recorder.tick(now: hour0.addingTimeInterval(1))
-            #expect(waitUntil { capacityCalls.value == 1 })
-            let holdsSharedLock = waitUntil {
-                do {
-                    try MonitorAgentProfileStore.withExclusiveLock(at: profileURL, timeout: 0.01) { }
-                    return false
-                } catch MonitorAgentProfileStoreError.lockTimeout {
-                    return true
-                } catch {
-                    return false
-                }
+            #expect(samplerStarted.wait(timeout: .now() + 2) == .success)
+
+            // The in-flight apply holds the shared profile lock. A probe save that has to wait for
+            // that lock proves it, without polling the lock until it happens to look held.
+            let lockHeld = DispatchSemaphore(value: 0)
+            let probeDone = DispatchSemaphore(value: 0)
+            Thread.detachNewThread {
+                defer { probeDone.signal() }
+                try? MonitorAgentProfileStore.save(
+                    MonitorAgentProfile(backgroundRecordingEnabled: true,
+                                        modules: [ModulePlan(module: "cpu", interval: 1)],
+                                        capacityGeneration: "generation-1"),
+                    to: profileURL, timeout: 2, onContended: { lockHeld.signal() })
             }
-            #expect(holdsSharedLock, "the in-flight apply must hold the shared profile lock")
+            #expect(lockHeld.wait(timeout: .now() + 2) == .success,
+                    "the in-flight apply must hold the shared profile lock")
 
             // Release the writer lock after the loop tick has had time to run.
-            Thread.detachNewThread {
-                Thread.sleep(forTimeInterval: 0.5)
-                releaseBlocker.signal()
-            }
             let begin = Date()
             recorder.tick(now: hour0.addingTimeInterval(11))
             let elapsed = Date().timeIntervalSince(begin)
@@ -442,14 +440,14 @@ import Testing
             #expect(beat?.lastSampleAt == hour0.addingTimeInterval(11))
             #expect(beat?.lastError == nil)
 
+            releaseBlocker.signal()
             #expect(blockerDone.wait(timeout: .now() + 2) == .success)
             #expect(blockerErrors.isEmpty)
+            #expect(probeDone.wait(timeout: .now() + 2) == .success)
             let store = VolumeCapacityHistory(history: history)
-            let recorded = try waitUntil {
-                recorder.tick(now: hour0.addingTimeInterval(12))
-                return try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1
-            }
-            #expect(recorded)
+            #expect(recorder.waitForCapacityPass())
+            recorder.tick(now: hour0.addingTimeInterval(12))
+            #expect(try store.points(volume: "volume:AAAA/media:1111", since: .distantPast).count == 1)
         }
     }
 

@@ -36,7 +36,9 @@ import Testing
         #expect(GPUProcessSampler.usage(previous: [1: 0], current: [1: 5], elapsedNanos: 0).isEmpty)
     }
 
-    @Test func firstSampleIsEmptyThenReadsThisMac() throws {
+    /// The registry read is the live part: needs this Mac's real GPU clients.
+    @Test(.enabled(if: MetricsLiveTests.enabled))
+    func liveFirstSampleIsEmptyThenReadsThisMac() throws {
         let sampler = GPUProcessSampler()
         #expect(sampler.sample().isEmpty, "needs a baseline")
         let after = sampler.sample(top: 5)
@@ -50,11 +52,16 @@ import Testing
 
 @Suite struct PrivilegedProcessMergeTests {
     @Test func helperCountersFillInUnreadableProcesses() {
-        // launchd (pid 1) belongs to root: a normal user can't read it.
-        let plain = ProcessSampler().sample(top: 10_000)
-        guard !plain.byCPU.contains(where: { $0.pid == 1 }) else { return }  // running as root
-        let merged = ProcessSampler().sample(top: 10_000, privileged: [1: (cpuNanos: 5_000, footprint: 123_456)])
+        // Another user's process, the way launchd looks to a normal user: no counters, no name
+        // from proc_name, but the Helper's counters fill in both.
+        let table = FakeProcessTable([
+            1: .init(cpuNanos: 0, footprint: 0, path: "/sbin/launchd", name: "", readable: false),
+        ])
+        let plain = ProcessSampler(source: table).sample(top: 10_000)
+        #expect(plain.hiddenCount == 1)
+        let merged = ProcessSampler(source: table)
+            .sample(top: 10_000, privileged: [1: (cpuNanos: 5_000, footprint: 123_456)])
         #expect(merged.byMemory.contains { $0.pid == 1 && $0.memoryBytes == 123_456 })
-        #expect(merged.hiddenCount == plain.hiddenCount - 1 || merged.hiddenCount < plain.hiddenCount)
+        #expect(merged.hiddenCount == plain.hiddenCount - 1)
     }
 }

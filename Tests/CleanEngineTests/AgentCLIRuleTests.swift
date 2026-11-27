@@ -173,7 +173,8 @@ import Testing
 
         let backend = TestTrashBackend(trashDirectory: t.url.appending(path: "test-trash"))
         let log = OperationLog(url: t.url.appending(path: "operations.jsonl"))
-        let report = CleanExecutor.injected(safety: safety(t), log: log, removal: backend.backend)
+        let report = CleanExecutor.injected(safety: safety(t), log: log, removal: backend.backend,
+                                           running: nothingRunning)
             .execute(items, dryRun: false, command: "test")
         let byPath = Dictionary(uniqueKeysWithValues: report.items.map { ($0.path, $0) })
 
@@ -199,7 +200,8 @@ import Testing
         var rule = try syntheticRule("ai.codex-temp", home: t)
         rule.skipIfProcessRunning = [guardName.uppercased()]
 
-        let plan = CleanScanner(rules: [rule], safety: safety(t)).scan()
+        let running = FakeRunningApplications()
+        let plan = CleanScanner(rules: [rule], safety: safety(t), running: running.source).scan()
         let items = plan.removalItems
         try #require(items.count == 1, "the guarded rule produced candidates while nothing ran")
         #expect(items[0].path == file)
@@ -207,21 +209,12 @@ import Testing
                 "the plan must carry the rule's guard to the executor")
 
         // The agent appears only now, after the preview was built.
-        let binDir = t.url.appending(path: "procbin")
-        try FileManager.default.createDirectory(at: binDir, withIntermediateDirectories: true)
-        let exe = binDir.appending(path: guardName)
-        try FileManager.default.copyItem(at: URL(fileURLWithPath: "/bin/sleep"), to: exe)
-        let agent = Process()
-        agent.executableURL = exe
-        agent.arguments = ["60"]
-        try agent.run()
-        defer { if agent.isRunning { agent.terminate() }; agent.waitUntilExit() }
-        try #require(waitUntil { CleanScanner.runningProcessNames().contains(guardName) },
-                     "the synthetic agent process never became visible")
+        running.start(process: guardName)
 
         let backend = TestTrashBackend(trashDirectory: t.url.appending(path: "test-trash"))
         let log = OperationLog(url: t.url.appending(path: "operations.jsonl"))
-        let executor = CleanExecutor.injected(safety: safety(t), log: log, removal: backend.backend)
+        let executor = CleanExecutor.injected(safety: safety(t), log: log, removal: backend.backend,
+                                              running: running.source)
 
         let preview = executor.execute(items, dryRun: true, command: "test")
         #expect(preview.items.map(\.result) == [.skipped], "a dry run reports the guard as skipped too")
@@ -236,10 +229,7 @@ import Testing
         #expect(log.read().map(\.result) == ["skipped"], "the dry run above is not logged")
 
         // Once the agent is gone the same item can be removed; the guard is a pause, not a block.
-        agent.terminate()
-        agent.waitUntilExit()
-        try #require(waitUntil { !CleanScanner.runningProcessNames().contains(guardName) },
-                     "the synthetic agent process never went away")
+        running.stop(process: guardName)
         let after = executor.execute(items, dryRun: false, command: "test")
         #expect(after.items.map(\.result) == [.deleted])
         #expect(!t.exists(".codex/tmp/old.bin"))
@@ -254,20 +244,16 @@ import Testing
         let guardName = "mhguard" + UUID().uuidString.prefix(8).lowercased()
         var rule = try syntheticRule("ai.codex-temp", home: t)
         rule.skipIfProcessRunning = [guardName.uppercased()]
-        let items = CleanScanner(rules: [rule], safety: safety(t)).scan().removalItems
+        let running = FakeRunningApplications()
+        let items = CleanScanner(rules: [rule], safety: safety(t), running: running.source).scan().removalItems
         try #require(items.count == 2)
         #expect(items.map(\.path) == [first, second])
 
-        let binDir = t.url.appending(path: "procbin")
-        try FileManager.default.createDirectory(at: binDir, withIntermediateDirectories: true)
-        let exe = binDir.appending(path: guardName)
-        try FileManager.default.copyItem(at: URL(fileURLWithPath: "/bin/sleep"), to: exe)
-
         // The agent starts while the batch is already running: during the first item's removal.
-        let backend = MidBatchAgentBackend(agentExecutable: exe, launchOnFirstDeleteOf: first)
-        defer { backend.agentProcess?.terminate() }
+        let backend = MidBatchAgentBackend(running: running, agentName: guardName, launchOnFirstDeleteOf: first)
         let log = OperationLog(url: t.url.appending(path: "operations.jsonl"))
-        let report = CleanExecutor.injected(safety: safety(t), log: log, removal: backend.backend)
+        let report = CleanExecutor.injected(safety: safety(t), log: log, removal: backend.backend,
+                                            running: running.source)
             .execute(items, dryRun: false, command: "test")
 
         #expect(report.items.map(\.result) == [.deleted, .skipped])
@@ -281,22 +267,13 @@ import Testing
     @Test func guardNamesMatchCaseInsensitively() throws {
         let t = try TempDir()
         try t.file("cache/pkg/a.bin", bytes: 20_000)
-        // The scanner's own process: running for sure, and its name spelled in the other case.
-        let own = ProcessInfo.processInfo.processName
+        // A guard in the other case than the name the table reports.
+        let running = FakeRunningApplications(processNames: ["someagent"])
         let rule = CleanRule(id: "case", title: "case", description: "", category: "test", risk: .low,
-                             paths: [t.path + "/cache/*"], skipIfProcessRunning: [own.uppercased()])
-        let result = CleanScanner(rules: [rule], safety: safety(t)).scan().results[0]
+                             paths: [t.path + "/cache/*"], skipIfProcessRunning: ["SOMEAGENT"])
+        let result = CleanScanner(rules: [rule], safety: safety(t), running: running.source).scan().results[0]
         #expect(result.candidates.isEmpty && result.skippedReason != nil,
                 "a guard in upper case must still pause the rule")
-    }
-
-    private func waitUntil(_ condition: () -> Bool, timeout: TimeInterval = 5) -> Bool {
-        let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
-            if condition() { return true }
-            Thread.sleep(forTimeInterval: 0.05)
-        }
-        return condition()
     }
 
     @Test func everyRuleIsTranslatedInAllSixLanguages() throws {
@@ -326,17 +303,19 @@ import Testing
 }
 
 /// A removal backend for the mid-batch test: it removes files like the real one and, while the
-/// batch is already running, starts the synthetic agent process during the first item's removal —
-/// the moment a real agent would start while a clean is executing.
+/// batch is already running, starts the synthetic agent in the guard's process table during the
+/// first item's removal — the moment a real agent would start while a clean is executing.
 final class MidBatchAgentBackend: @unchecked Sendable {
-    let agentExecutable: URL
+    let running: FakeRunningApplications
+    let agentName: String
     let launchOnFirstDeleteOf: String
     private let lock = NSLock()
-    private var launchedAgent: Process?
+    private var launchedAgent = false
     private var deleted: [String] = []
 
-    init(agentExecutable: URL, launchOnFirstDeleteOf: String) {
-        self.agentExecutable = agentExecutable
+    init(running: FakeRunningApplications, agentName: String, launchOnFirstDeleteOf: String) {
+        self.running = running
+        self.agentName = agentName
         self.launchOnFirstDeleteOf = launchOnFirstDeleteOf
     }
 
@@ -345,27 +324,17 @@ final class MidBatchAgentBackend: @unchecked Sendable {
     }
 
     var deletions: [String] { locked { deleted } }
-    var agentProcess: Process? { locked { launchedAgent } }
+    var agentStarted: Bool { locked { launchedAgent } }
 
     private func remove(_ url: URL) throws {
         try FileManager.default.removeItem(at: url)
         let launch = locked {
             deleted.append(url.path)
-            return url.path == launchOnFirstDeleteOf && launchedAgent == nil
+            return url.path == launchOnFirstDeleteOf && !launchedAgent
         }
-        if launch { try launchAgentAndWaitUntilVisible() }
-    }
-
-    private func launchAgentAndWaitUntilVisible() throws {
-        let agent = Process()
-        agent.executableURL = agentExecutable
-        agent.arguments = ["60"]
-        try agent.run()
-        locked { launchedAgent = agent }
-        let name = agentExecutable.lastPathComponent
-        let deadline = Date().addingTimeInterval(5)
-        while Date() < deadline && !CleanScanner.runningProcessNames().contains(name) {
-            Thread.sleep(forTimeInterval: 0.05)
+        if launch {
+            running.start(process: agentName)
+            locked { launchedAgent = true }
         }
     }
 

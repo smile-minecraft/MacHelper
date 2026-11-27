@@ -289,6 +289,10 @@ final class VolumeCapacitySampleWorker: @unchecked Sendable {
     private var generation: UInt64 = 0
     private var running = false
     private var finished: (generation: UInt64, result: VolumeCapacityWorkResult)?
+    /// Signalled when the pass started last leaves the worker, and set when it has. A test waits
+    /// for it instead of polling; production never looks at it.
+    private var passDone: DispatchSemaphore?
+    private var passFinished = true
 
     init(sampler: @escaping @Sendable () -> [VolumeCapacityReading],
          apply: @escaping Apply) {
@@ -306,9 +310,18 @@ final class VolumeCapacitySampleWorker: @unchecked Sendable {
             return nil
         }
         running = true
+        let done = DispatchSemaphore(value: 0)
+        passDone = done
+        passFinished = false
         let token = generation
         lock.unlock()
         queue.async { [self] in
+            defer {
+                lock.lock()
+                passFinished = true
+                lock.unlock()
+                done.signal()
+            }
             let readings = sampler()
             lock.lock()
             // A cancel while the sampler was blocked makes this result obsolete; do not keep
@@ -335,6 +348,17 @@ final class VolumeCapacitySampleWorker: @unchecked Sendable {
             lock.unlock()
         }
         return token
+    }
+
+    /// Waits for the pass started last to leave the worker, whether it applied, failed or was
+    /// dropped by a cancel. Tests use this to run their next `tick` after the result is ready
+    /// instead of sleeping and hoping it is; nothing in production calls it.
+    func waitForLastPass(timeout: TimeInterval) -> Bool {
+        lock.lock()
+        let done = passFinished ? nil : passDone
+        lock.unlock()
+        guard let done else { return true }
+        return done.wait(timeout: .now() + timeout) == .success
     }
 
     /// The finished result for `generation`, if it is ready. Clears it so it is applied once.
@@ -464,5 +488,12 @@ public struct VolumeCapacityRecorder: Sendable {
         pending = nil
         completedHour = nil
         lastAttemptAt = nil
+    }
+
+    /// Waits for a pass to leave the worker and keeps its result for the next `tick` to apply.
+    /// Tests use this instead of ticking in a loop until the answer appears. True when no pass is
+    /// in flight or the pass finished in time.
+    func waitForPendingPass(timeout: TimeInterval = 2) -> Bool {
+        worker.waitForLastPass(timeout: timeout)
     }
 }
