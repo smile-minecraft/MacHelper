@@ -158,6 +158,8 @@ struct MonitorPanelIntegrationTests {
         #expect(image.pixelsWide == 420)
         #expect(image.pixelsHigh > 0)
         #expect(coloredPixelCount(image) > 0, "the seven-day chart drew the fake capacity points")
+        #expect(try chartPixelCount(store: store, selection: model) > 0,
+                "the seven-day chart drew the fake capacity points")
         #expect(counter.value == 1, "rendering must not run a volume sampler")
     }
 
@@ -177,6 +179,8 @@ struct MonitorPanelIntegrationTests {
         let failureImage = try render(DiskTabContent(store: store, selection: failingModel))
         #expect(failureImage.pixelsWide == 420)
         #expect(failureImage.pixelsHigh > 0)
+        #expect(try chartPixelCount(store: store, selection: failingModel) == 0,
+                "a failed volume list must not draw the chart")
         #expect(counter.value == 1)
 
         let system = volume(role: .system, name: "Fake System", mountPoint: "/", id: "SYS")
@@ -190,6 +194,8 @@ struct MonitorPanelIntegrationTests {
         let historyImage = try render(DiskTabContent(store: store, selection: historyModel))
         #expect(historyImage.pixelsWide == 420)
         #expect(historyImage.pixelsHigh > 0)
+        #expect(try chartPixelCount(store: store, selection: historyModel) == 0,
+                "a failed history read must not draw the chart")
     }
 
     // MARK: - Network page
@@ -478,6 +484,30 @@ struct MonitorPanelIntegrationTests {
             for x in 0..<rep.pixelsWide {
                 guard let color = rep.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB) else { continue }
                 if predicate(color) { count += 1 }
+            }
+        }
+        return count
+    }
+
+    /// The pixels the disk history chart's marks cover: the page rendered with two different
+    /// mark colors differs only where the chart drew. Zero means no chart, whatever colors the
+    /// rest of the page (error text included) uses.
+    private func chartPixelCount(store: MonitorStore, selection: DiskCapacitySelectionModel) throws -> Int {
+        let red = try render(DiskTabContent(store: store, selection: selection,
+                                            chartTint: Color(red: 0.9, green: 0.1, blue: 0.1)))
+        let blue = try render(DiskTabContent(store: store, selection: selection,
+                                             chartTint: Color(red: 0.1, green: 0.1, blue: 0.9)))
+        guard red.pixelsWide == blue.pixelsWide, red.pixelsHigh == blue.pixelsHigh else {
+            throw FakeFailure("the two renders differ in size")
+        }
+        var count = 0
+        for y in 0..<red.pixelsHigh {
+            for x in 0..<red.pixelsWide {
+                guard let a = red.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB),
+                      let b = blue.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB) else { continue }
+                if abs(a.redComponent - b.redComponent) > 0.2 || abs(a.blueComponent - b.blueComponent) > 0.2 {
+                    count += 1
+                }
             }
         }
         return count

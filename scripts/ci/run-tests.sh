@@ -250,6 +250,17 @@ if [ "$app_status" -ne 0 ]; then
     fi
 fi
 
+# A scheme or target that stops reaching the test bundle still exits 0, so a green run must
+# also show that the bundle's tests ran.
+if [ "$app_status" -eq 0 ]; then
+    app_ran="$(python3 "$PARSER" xcresult-passed "$APP_RESULT" 2>/dev/null | wc -l | tr -d ' ')"
+    if [ "${app_ran:-0}" -eq 0 ]; then
+        echo "::error title=No app tests ran::xcodebuild test succeeded but $APP_RESULT records no passed tests"
+        error_lines+=("**xcodebuild test** succeeded but \`$APP_RESULT\` records no passed tests.")
+        failed=1
+    fi
+fi
+
 # MARK: - Preferences guard
 
 defaults_after="$(export_domain)"

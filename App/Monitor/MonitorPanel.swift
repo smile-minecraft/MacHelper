@@ -527,6 +527,9 @@ private struct DiskTab: View {
 struct DiskTabContent: View {
     let store: MonitorStore
     let selection: DiskCapacitySelectionModel
+    /// The history chart's mark color; the rendering tests pass one no other part of the page
+    /// uses, so they can tell whether the chart was drawn.
+    var chartTint: Color?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -734,7 +737,8 @@ struct DiskTabContent: View {
             if let volumeID = selection.historyVolumeID {
                 DiskCapacityHistoryChart(points: selection.historyPoints,
                                          volumeID: volumeID,
-                                         now: selection.historyNow)
+                                         now: selection.historyNow,
+                                         tint: chartTint)
             }
         case .failed(_, let message):
             VStack(alignment: .leading, spacing: 4) {

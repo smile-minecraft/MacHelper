@@ -10,7 +10,6 @@ enum MacHelperMain {
     static func main() {
         if TestHost.isRunningTests {
             TestHost.runBareApplication()
-            return
         }
         MacHelperApp.main()
     }
