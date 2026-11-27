@@ -69,6 +69,28 @@ import Testing
     /// Holds SQLite's writer lock from a second connection until `releaseBlocker` is
     /// signalled. This is the same lock the agent's capacity insert waits on. The blocker
     /// gets its own thread so a waiting test never starves a bounded thread pool.
+    /// Waits until the in-flight capacity apply holds the shared profile lock. The sampler
+    /// signals when the sample starts, but the apply takes the lock only after the sample
+    /// returns, on another thread, so one exclusive attempt can arrive first, get the lock and
+    /// prove nothing. Each try here takes the exclusive lock without waiting and gives it back
+    /// at once; the first try that finds the lock held is the proof. The tries are spaced out
+    /// so they never keep the apply from taking its lock.
+    private func waitUntilTheApplyHoldsTheProfileLock(at profileURL: URL,
+                                                       timeout: TimeInterval = 30) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            do {
+                try MonitorAgentProfileStore.withExclusiveLock(at: profileURL, timeout: 0) { }
+            } catch MonitorAgentProfileStoreError.lockTimeout(path: _) {
+                return true
+            } catch {
+                return false
+            }
+            Thread.sleep(forTimeInterval: 0.01)
+        }
+        return false
+    }
+
     private func holdWriterLock(url: URL,
                                 ready: DispatchSemaphore,
                                 release: DispatchSemaphore,
@@ -132,16 +154,7 @@ import Testing
             recorder.tick(now: hour0.addingTimeInterval(1))
             #expect(samplerStarted.wait(timeout: .now() + 30) == .success)
 
-            // The in-flight apply holds the shared profile lock. An exclusive attempt reports the
-            // contention through the hook, which proves it without polling the lock.
-            let lockHeld = DispatchSemaphore(value: 0)
-            let probeDone = DispatchSemaphore(value: 0)
-            Thread.detachNewThread {
-                defer { probeDone.signal() }
-                try? MonitorAgentProfileStore.withExclusiveLock(
-                    at: profileURL, timeout: 30, onContended: { lockHeld.signal() }) { }
-            }
-            #expect(lockHeld.wait(timeout: .now() + 30) == .success,
+            #expect(waitUntilTheApplyHoldsTheProfileLock(at: profileURL),
                     "the in-flight apply must hold the shared profile lock")
 
             // The user disables. The save must not report success before the in-flight write has
@@ -173,7 +186,6 @@ import Testing
 
             #expect(blockerDone.wait(timeout: .now() + 30) == .success)
             #expect(blockerErrors.isEmpty)
-            #expect(probeDone.wait(timeout: .now() + 30) == .success)
 
             // The write committed before the disable returned; after it, the disabled profile
             // prevents any new pass.
@@ -413,19 +425,7 @@ import Testing
             recorder.tick(now: hour0.addingTimeInterval(1))
             #expect(samplerStarted.wait(timeout: .now() + 30) == .success)
 
-            // The in-flight apply holds the shared profile lock. A probe save that has to wait for
-            // that lock proves it, without polling the lock until it happens to look held.
-            let lockHeld = DispatchSemaphore(value: 0)
-            let probeDone = DispatchSemaphore(value: 0)
-            Thread.detachNewThread {
-                defer { probeDone.signal() }
-                try? MonitorAgentProfileStore.save(
-                    MonitorAgentProfile(backgroundRecordingEnabled: true,
-                                        modules: [ModulePlan(module: "cpu", interval: 1)],
-                                        capacityGeneration: "generation-1"),
-                    to: profileURL, timeout: 30, onContended: { lockHeld.signal() })
-            }
-            #expect(lockHeld.wait(timeout: .now() + 30) == .success,
+            #expect(waitUntilTheApplyHoldsTheProfileLock(at: profileURL),
                     "the in-flight apply must hold the shared profile lock")
 
             // Release the writer lock after the loop tick has had time to run.
@@ -442,7 +442,6 @@ import Testing
             releaseBlocker.signal()
             #expect(blockerDone.wait(timeout: .now() + 30) == .success)
             #expect(blockerErrors.isEmpty)
-            #expect(probeDone.wait(timeout: .now() + 30) == .success)
             let store = VolumeCapacityHistory(history: history)
             #expect(recorder.waitForCapacityPass())
             recorder.tick(now: hour0.addingTimeInterval(12))
