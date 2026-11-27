@@ -18,17 +18,31 @@ enum TestHost {
         || CommandLine.arguments.contains("--unit-tests")
 
     /// The defaults domain the test host writes to. It is separate from the app's real domain so
-    /// a test can exercise the stores that persist settings without changing the person's Mac;
-    /// the domain is deleted when the host terminates.
+    /// a test can exercise the stores that persist settings without changing the person's Mac.
     static let defaultsSuiteName = "com.machelper.MacHelper.unit-tests"
+
+    /// Where every test-run preferences file lives: a folder of this run in the temporary
+    /// directory, deleted when the host exits. A suite named by a path keeps its file there
+    /// instead of in ~/Library/Preferences, where the preferences daemon would recreate an empty
+    /// file after the domain was removed.
+    static let defaultsDirectory: URL = FileManager.default.temporaryDirectory
+        .appending(path: "MacHelperUnitTests-\(getpid())", directoryHint: .isDirectory)
+
+    /// The suite name of a throwaway preferences domain called `name`, inside `defaultsDirectory`.
+    static func scratchSuiteName(_ name: String) -> String {
+        try? FileManager.default.createDirectory(at: defaultsDirectory, withIntermediateDirectories: true)
+        return defaultsDirectory.appending(path: name).path
+    }
 
     /// Every preference read and write the views and stores make during a test run goes here.
     /// Production uses the app's own domain.
     nonisolated(unsafe) static let defaults: UserDefaults = {
         guard isRunningTests else { return .standard }
-        guard let suite = UserDefaults(suiteName: defaultsSuiteName) else { return .standard }
-        // A crashed run can leave the suite behind; start every run from the shipped defaults.
-        suite.removePersistentDomain(forName: defaultsSuiteName)
+        let name = scratchSuiteName(defaultsSuiteName)
+        // Never fall back to the person's own domain while tests run.
+        guard let suite = UserDefaults(suiteName: name) else {
+            fatalError("MacHelper: could not open the test preferences at \(name)")
+        }
         return suite
     }()
 
@@ -44,19 +58,22 @@ enum TestHost {
         self.delegate = delegate
         application.delegate = delegate
         application.setActivationPolicy(.accessory)
+        // XCTest ends the host with exit() once the tests finished, so the delegate never hears
+        // `applicationWillTerminate`; clean up on exit as well.
+        atexit { TestHost.removeDefaults() }
         application.run()
         exit(EXIT_SUCCESS)
     }
 
-    /// Deletes the throwaway domain, so a finished run leaves no preference file on the Mac.
+    /// Deletes this run's preferences folder, so a finished run leaves no preference file behind.
     static func removeDefaults() {
         guard isRunningTests else { return }
-        UserDefaults.standard.removePersistentDomain(forName: defaultsSuiteName)
+        try? FileManager.default.removeItem(at: defaultsDirectory)
     }
 }
 
-/// The whole delegate of a test host: `NSApplication` needs one to run, and the run has to leave
-/// the throwaway preferences domain behind it.
+/// The whole delegate of a test host: `NSApplication` needs one to run, and the run must not leave
+/// its throwaway preferences behind.
 final class TestHostDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         TestHost.removeDefaults()

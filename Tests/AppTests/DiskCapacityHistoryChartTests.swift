@@ -112,24 +112,24 @@ import Testing
 
     // MARK: - Values and summary
 
-    @Test func summaryUsesTheFilteredValues() {
+    @Test func summaryUsesTheFilteredValues() throws {
         let series = DiskCapacityHistorySeries(points: [
             point(hoursAgo: 3, free: 100 * gigabyte),
             point(hoursAgo: 2, free: 150 * gigabyte),
             point(hoursAgo: 1, free: 120 * gigabyte),
         ], volumeID: "disk-a", now: now)
         let english = Locale(identifier: "en_US_POSIX")
-        #expect(series.accessibilityValue(locale: english)
+        #expect(series.accessibilityValue(locale: english, bundle: try AppTestResources.english)
                 == "Latest 120 GB, lowest 100 GB, highest 150 GB")
     }
 
-    @Test func singleAndEmptySummariesAreClear() {
+    @Test func singleAndEmptySummariesAreClear() throws {
         let english = Locale(identifier: "en_US_POSIX")
         let single = DiskCapacityHistorySeries(points: [point(hoursAgo: 1, free: 120 * gigabyte)],
                                                volumeID: "disk-a", now: now)
-        #expect(single.accessibilityValue(locale: english) == "One reading: 120 GB")
+        #expect(single.accessibilityValue(locale: english, bundle: try AppTestResources.english) == "One reading: 120 GB")
         let empty = DiskCapacityHistorySeries(points: [], volumeID: "disk-a", now: now)
-        #expect(empty.accessibilityValue(locale: english) == "No capacity readings in the last seven days")
+        #expect(empty.accessibilityValue(locale: english, bundle: try AppTestResources.english) == "No capacity readings in the last seven days")
     }
 
     @Test func formatsBytesWithDecimalUnitsAndTheCallersLocale() {
@@ -217,9 +217,13 @@ import Testing
 
     // MARK: - Rendered at the menu width
 
+    /// The marks are drawn in this red, which nothing else in the chart uses, so counting red
+    /// pixels counts marks whatever the theme's cyan is.
+    private static let markTint = Color(red: 0.9, green: 0.1, blue: 0.1)
+
     @Test @MainActor func singleReadingDrawsAVisiblePoint() throws {
         let chart = DiskCapacityHistoryChart(points: [point(hoursAgo: 36, free: 500 * gigabyte)],
-                                             volumeID: "disk-a", now: now)
+                                             volumeID: "disk-a", now: now, tint: Self.markTint)
         let image = try render(chart)
         let pixels = redPixelCount(image, rows: plotRows(image))
         #expect(pixels > 0, "a single hourly reading must draw a visible point")
@@ -228,7 +232,7 @@ import Testing
     @Test @MainActor func singleReadingAtTheWindowEdgesStaysVisible() throws {
         for hoursAgo in [0.0, 168.0] {
             let chart = DiskCapacityHistoryChart(points: [point(hoursAgo: hoursAgo, free: 500 * gigabyte)],
-                                                 volumeID: "disk-a", now: now)
+                                                 volumeID: "disk-a", now: now, tint: Self.markTint)
             let image = try render(chart)
             let pixels = redPixelCount(image, rows: plotRows(image))
             #expect(pixels > 0, "a single reading at \(hoursAgo) hours ago must be visible")
@@ -242,7 +246,7 @@ import Testing
             point(hoursAgo: 48, free: 500 * gigabyte),
             point(hoursAgo: 47, free: 500 * gigabyte),
         ]
-        let chart = DiskCapacityHistoryChart(points: points, volumeID: "disk-a", now: now)
+        let chart = DiskCapacityHistoryChart(points: points, volumeID: "disk-a", now: now, tint: Self.markTint)
         let image = try render(chart)
         let rows = plotRows(image)
         let columns = redColumns(image, rows: rows)
@@ -257,13 +261,13 @@ import Testing
     }
 
     @Test @MainActor func emptyAndSingleStatesRenderAtTheMenuWidth() throws {
-        let empty = try render(DiskCapacityHistoryChart(points: [], volumeID: "disk-a", now: now))
+        let empty = try render(DiskCapacityHistoryChart(points: [], volumeID: "disk-a", now: now, tint: Self.markTint))
         #expect(empty.size.width == 460)
         #expect(empty.size.height > 0)
         #expect(redPixelCount(empty, rows: plotRows(empty)) == 0)
 
         let single = try render(DiskCapacityHistoryChart(points: [point(hoursAgo: 12, free: 500 * gigabyte)],
-                                                        volumeID: "disk-a", now: now))
+                                                        volumeID: "disk-a", now: now, tint: Self.markTint))
         #expect(single.size.width == 460)
         // The single-reading note sits below the plot, so this state is taller than the
         // empty state's fixed-height explanation.
@@ -282,8 +286,8 @@ import Testing
         let full = DiskCapacityHistoryChart(points: [
             point(hoursAgo: 3, free: 400 * gigabyte),
             point(hoursAgo: 2, free: 500 * gigabyte),
-        ], volumeID: "disk-a", now: now)
-        let empty = DiskCapacityHistoryChart(points: [], volumeID: "disk-a", now: now)
+        ], volumeID: "disk-a", now: now, tint: Self.markTint)
+        let empty = DiskCapacityHistoryChart(points: [], volumeID: "disk-a", now: now, tint: Self.markTint)
         for image in [try render(full), try render(empty)] {
             #expect(image.size.width == 460)
             #expect(image.size.height > 0)
@@ -294,7 +298,7 @@ import Testing
         let chart = DiskCapacityHistoryChart(points: [
             point(hoursAgo: 3, free: 400 * gigabyte),
             point(hoursAgo: 2, free: 500 * gigabyte),
-        ], volumeID: "disk-a", now: now)
+        ], volumeID: "disk-a", now: now, tint: Self.markTint)
         let image = try render(chart, width: 420)
         #expect(image.size.width == 420)
         #expect(redPixelCount(image, rows: plotRows(image)) > 0)
@@ -309,6 +313,7 @@ import Testing
             view
         }
         .frame(width: width)
+        .environment(\.colorScheme, .light)
         let renderer = ImageRenderer(content: content)
         renderer.scale = 1
         let image = try #require(renderer.nsImage, "ImageRenderer produced no image")

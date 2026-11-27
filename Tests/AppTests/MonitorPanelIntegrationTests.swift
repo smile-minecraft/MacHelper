@@ -400,8 +400,8 @@ struct MonitorPanelIntegrationTests {
     }
 
     /// Stores the panel page in the test host's own defaults domain, so the panel's `@AppStorage`
-    /// reads it and a test run never writes the person's preferences. The domain is deleted after
-    /// the case.
+    /// reads it and a test run never writes the person's preferences. The previous value comes back
+    /// after the case; the host deletes the domain when it exits.
     private func withStoredPage(_ raw: String?, run: () throws -> Void) rethrows {
         let defaults = TestHost.defaults
         let previous = defaults.string(forKey: "panel.module")
@@ -416,7 +416,6 @@ struct MonitorPanelIntegrationTests {
             } else {
                 defaults.removeObject(forKey: "panel.module")
             }
-            defaults.removePersistentDomain(forName: TestHost.defaultsSuiteName)
         }
         try run()
     }

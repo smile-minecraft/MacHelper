@@ -145,10 +145,28 @@ targets:
     platform: macOS
     sources:
       - path: Tests/AppTests
+      # Verbatim copies of the catalog source documents the completeness tests compare with what
+      # the app ships. A copy-files phase keeps them as JSON instead of compiling them.
+      - path: App/Resources/DiskCapacityHistory.xcstrings
+        buildPhase:
+          copyFiles:
+            destination: resources
+            subpath: CatalogSources
+      - path: App/Resources/DiskVolumeSelection.xcstrings
+        buildPhase:
+          copyFiles:
+            destination: resources
+            subpath: CatalogSources
+      - path: App/Resources/NetworkDetails.xcstrings
+        buildPhase:
+          copyFiles:
+            destination: resources
+            subpath: CatalogSources
     dependencies:
+      # The package modules are linked into the app only. The bundle reaches them through the
+      # app (BUNDLE_LOADER); linking them here as well makes Xcode turn every package product into
+      # a dynamic framework, which changes how the app itself is built.
       - target: MacHelper
-      - package: MacHelperKit
-        products: [HelperProtocol, PrivilegedOps, Theming, SMCKit, Metrics, FanControl, DiskScan, CleanEngine, Storage, Telemetry, SettingsPortability, Diagnostics, Cable, Tweaks, Permissions]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.machelper.MacHelperTests

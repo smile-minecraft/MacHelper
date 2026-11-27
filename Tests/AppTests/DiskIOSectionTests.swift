@@ -5,10 +5,8 @@ import Testing
 @testable import MacHelper
 @testable import Metrics
 
-/// The production `DiskIOSection`, with only its display dependencies substituted (see
-/// DiskIOSectionDisplayStandins.swift; the isolated verification package links those instead
-/// of the app's design system). The section itself is the unmodified production source: it owns
-/// the model and the `.task` that runs sampling.
+/// The production `DiskIOSection` with the app's own design system. The section owns the model
+/// and the `.task` that runs sampling.
 ///
 /// The mount test hosts the real section in a window that is never ordered front or activated,
 /// so mounting starts the `.task` and closing it cancels the loop, exactly what leaving the SSD

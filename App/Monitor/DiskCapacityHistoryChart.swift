@@ -166,6 +166,11 @@ struct DiskCapacityHistoryChart: View {
     let now: Date
     var window: TimeInterval = DiskCapacityHistorySeries.sevenDays
     var maxGap: TimeInterval = DiskCapacityHistorySeries.hourlyInterval
+    /// The color of the marks and the latest value; the theme's cyan unless a caller (the
+    /// rendering tests) needs a color no other part of the chart uses.
+    var tint: Color?
+
+    private var markColor: Color { tint ?? Theme.cyan }
 
     var body: some View {
         let series = DiskCapacityHistorySeries(points: points,
@@ -199,7 +204,7 @@ struct DiskCapacityHistoryChart: View {
             if let latest = series.latest {
                 Text(DiskCapacityHistoryFormat.bytes(latest.free))
                     .font(Theme.smallNumeral)
-                    .foregroundStyle(Theme.cyan)
+                    .foregroundStyle(markColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                     .accessibilityLabel(Text(verbatim: DiskCapacityHistoryText.latest.localized()))
@@ -217,13 +222,13 @@ struct DiskCapacityHistoryChart: View {
                     PointMark(x: .value("Time", point.time),
                               y: .value("Free space", point.free))
                         .symbolSize(36)
-                        .foregroundStyle(Theme.cyan)
+                        .foregroundStyle(markColor)
                 } else {
                     ForEach(segment.points, id: \.time) { point in
                         LineMark(x: .value("Time", point.time),
                                  y: .value("Free space", point.free),
                                  series: .value("Segment", segment.id))
-                            .foregroundStyle(Theme.cyan)
+                            .foregroundStyle(markColor)
                             .interpolationMethod(.linear)
                             .lineStyle(StrokeStyle(lineWidth: 1.6))
                     }
@@ -232,7 +237,7 @@ struct DiskCapacityHistoryChart: View {
                                  y: .value("Free space", point.free),
                                  series: .value("Segment", segment.id))
                             .foregroundStyle(LinearGradient(
-                                colors: [Theme.cyan.opacity(0.22), Theme.cyan.opacity(0.02)],
+                                colors: [markColor.opacity(0.22), markColor.opacity(0.02)],
                                 startPoint: .top, endPoint: .bottom))
                             .interpolationMethod(.linear)
                     }

@@ -7,7 +7,7 @@ struct PanelPowerTab: View {
     let store: MonitorStore
     var openFanControl: () -> Void = {}
     @State private var history = PanelHistory()
-    @AppStorage("panel.power.range") private var range: PanelRange = .live
+    @AppStorage("panel.power.range", store: TestHost.defaults) private var range: PanelRange = .live
 
     var body: some View {
         VStack(alignment: .leading, spacing: ThemeStore.shared.isSoft ? 14 : 10) {

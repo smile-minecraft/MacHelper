@@ -38,7 +38,8 @@ private struct DummyError: Error {
 @MainActor
 @Suite struct AutoCleanScheduleTests {
     private func freshDefaults() -> (UserDefaults, String) {
-        let suite = "autoclean-schedule-tests-\(UUID().uuidString)"
+        // A domain in the test host's own folder, never a file in ~/Library/Preferences.
+        let suite = TestHost.scratchSuiteName("autoclean-schedule-tests-\(UUID().uuidString)")
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         return (defaults, suite)
@@ -191,9 +192,7 @@ private struct DummyError: Error {
         // The migration only moves existing installs to the plist embedded in the app bundle, so
         // the shipped trigger and `AutoCleanAgentScheduleVersion.current` must change together —
         // otherwise existing installs silently keep their old trigger forever.
-        let plist = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-            .appending(path: "App/Launchd/com.machelper.MacHelper.AutoClean.plist")
+        let plist = try AppTestResources.shippedLaunchAgent("com.machelper.MacHelper.AutoClean")
         let data = try Data(contentsOf: plist)
         let contents = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
         let interval = contents?["StartInterval"] as? Int

@@ -9,7 +9,7 @@ struct PanelFanSection: View {
     let store: MonitorStore
     var openFanControl: () -> Void
     @State private var history = PanelHistory()
-    @AppStorage("panel.fan.range") private var range: PanelRange = .live
+    @AppStorage("panel.fan.range", store: TestHost.defaults) private var range: PanelRange = .live
 
     private var fanModel: FanControlModel { AppModel.shared.fanModel }
 

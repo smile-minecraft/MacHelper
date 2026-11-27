@@ -248,7 +248,7 @@ import Testing
         #expect(await gate.requestCount() == 0)
 
         let english = Locale(identifier: "en_US_POSIX")
-        let title = model.volumes[0].pickerTitle(in: Bundle.main, locale: english)
+        let title = model.volumes[0].pickerTitle(in: try AppTestResources.english, locale: english)
         #expect(title == "Backup — Local disk")
     }
 
@@ -741,10 +741,10 @@ import Testing
         let english = Locale(identifier: "en_US_POSIX")
         let systemOption = try #require(model.volumes.first { $0.volume.role == .system })
         let dataOption = try #require(model.volumes.first { $0.volume.role == .data })
-        #expect(systemOption.pickerTitle(in: Bundle.main, locale: english) == "Macintosh HD — System disk")
-        #expect(dataOption.pickerTitle(in: Bundle.main, locale: english) == "Macintosh HD — Data disk")
-        #expect(systemOption.pickerTitle(in: Bundle.main, locale: english)
-                != dataOption.pickerTitle(in: Bundle.main, locale: english))
+        #expect(systemOption.pickerTitle(in: try AppTestResources.english, locale: english) == "Macintosh HD — System disk")
+        #expect(dataOption.pickerTitle(in: try AppTestResources.english, locale: english) == "Macintosh HD — Data disk")
+        #expect(systemOption.pickerTitle(in: try AppTestResources.english, locale: english)
+                != dataOption.pickerTitle(in: try AppTestResources.english, locale: english))
     }
 
     // MARK: - Dedicated catalog

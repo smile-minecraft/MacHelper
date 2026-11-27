@@ -21,12 +21,32 @@ enum AppTestResources {
                      "\(language).lproj is missing from the app")
     }
 
-    /// The `.xcstrings` source document in the checkout (`App/Resources`).
-    static func catalogSource(_ name: String) -> URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()   // Tests/AppTests
-            .deletingLastPathComponent()   // Tests
-            .deletingLastPathComponent()   // repository root
-            .appending(path: "App/Resources/\(name).xcstrings")
+    /// The app's English strings. Tests that compare English text look strings up here: the
+    /// main bundle follows the Mac's preferred languages, which differ between machines.
+    static var english: Bundle {
+        get throws { try localization("en") }
+    }
+
+    /// The `.xcstrings` source document of a catalog, as it is in `App/Resources`.
+    ///
+    /// The test bundle carries a verbatim copy (see the MacHelperTests target in project.yml), so
+    /// the tests never read the checkout itself: the test host may not be allowed to read files
+    /// outside the build products, for example when the checkout is on an external volume.
+    static func catalogSource(_ name: String) throws -> URL {
+        let bundle = Bundle(for: BundleToken.self)
+        return try #require(bundle.url(forResource: name, withExtension: "xcstrings",
+                                       subdirectory: "CatalogSources"),
+                            "\(name).xcstrings is missing from the test bundle")
+    }
+
+    /// The launchd agent that MacHelper.app ships in `Contents/Library/LaunchAgents`.
+    static func shippedLaunchAgent(_ label: String) throws -> URL {
+        let url = Bundle.main.bundleURL
+            .appending(path: "Contents/Library/LaunchAgents/\(label).plist")
+        try #require(FileManager.default.fileExists(atPath: url.path),
+                     "\(label).plist is missing from the app")
+        return url
     }
 }
+
+private final class BundleToken {}
