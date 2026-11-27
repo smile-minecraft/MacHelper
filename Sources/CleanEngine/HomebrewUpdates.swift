@@ -397,22 +397,25 @@ public enum HomebrewUpdates {
         }
     }
 
-    /// Set once the timeout has terminated the command, so a failure can say it timed out instead of
-    /// reporting a bare signal.
+    /// Marks the command as having run past its timeout, so a failure can say it timed out instead
+    /// of reporting a bare signal.
     private final class Timeout: @unchecked Sendable {
         private let lock = NSLock()
-        private var expired: TimeInterval?
+        private let limit: TimeInterval
+        private var expired = false
 
-        func markExpired(_ seconds: TimeInterval) {
+        init(seconds: TimeInterval) { limit = seconds }
+
+        func markExpired() {
             lock.lock()
-            expired = seconds
+            expired = true
             lock.unlock()
         }
 
         var seconds: TimeInterval? {
             lock.lock()
             defer { lock.unlock() }
-            return expired
+            return expired ? limit : nil
         }
     }
 
@@ -437,36 +440,40 @@ public enum HomebrewUpdates {
         }
         // Reap the command on its own thread: its exit is what tells the pipe reads below that it
         // cannot write any more, so they must see it without waiting for the timeout.
+        //
+        // Dedicated threads, not the shared global queue. Several checks can be in flight at once,
+        // and a queue whose threads are all busy must not be able to hold a command's exit or its
+        // pipe read hostage: a starved queue once turned a command that ends in milliseconds into a
+        // reported 180 s timeout.
         let exit = ChildExit()
+        let expired = Timeout(seconds: timeout)
+        let deadline = DispatchTime.now() + timeout
         let reaped = DispatchGroup()
         reaped.enter()
-        DispatchQueue.global().async {
+        let reaper = Thread {
             p.waitUntilExit()
             exit.markExited()
             reaped.leave()
         }
-        let expired = Timeout()
-        let timer = DispatchWorkItem {
-            if p.isRunning {
-                expired.markExpired(timeout)
-                p.terminate()
-            }
-        }
-        DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: timer)
+        reaper.name = "brew exit"
+        reaper.start()
         // Read both pipes at once so a full buffer in either one cannot block the command, and stop
         // at the command's own end rather than at an EOF that a helper it left behind may hold open
         // for its whole lifetime.
         nonisolated(unsafe) var errData = Data()
         let readers = DispatchGroup()
         readers.enter()
-        DispatchQueue.global().async {
-            errData = read(err.fileHandleForReading, until: exit)
+        let errReader = Thread {
+            errData = read(err.fileHandleForReading, until: exit, deadline: deadline,
+                           process: p, expired: expired)
             readers.leave()
         }
-        let outData = read(out.fileHandleForReading, until: exit)
+        errReader.name = "brew stderr"
+        errReader.start()
+        let outData = read(out.fileHandleForReading, until: exit, deadline: deadline,
+                           process: p, expired: expired)
         readers.wait()
         reaped.wait()
-        timer.cancel()
         return RunResult(status: p.terminationStatus,
                          stdout: String(decoding: outData, as: UTF8.self),
                          stderr: String(decoding: errData, as: UTF8.self),
@@ -478,11 +485,14 @@ public enum HomebrewUpdates {
     /// in the pipe. Waiting for EOF alone is not enough: a command that dies before writing, or a
     /// helper that inherits the write end, leaves a pipe that EOF never reports here, and a check
     /// once stalled for its entire timeout on exactly that. Polling slices bound the read by the
-    /// command's lifetime instead.
-    private static func read(_ handle: FileHandle, until exit: ChildExit) -> Data {
+    /// command's lifetime instead, and end the command when its own timeout passes so a reader can
+    /// never outlive it.
+    private static func read(_ handle: FileHandle, until exit: ChildExit, deadline: DispatchTime,
+                             process: Process, expired: Timeout) -> Data {
         let fd = handle.fileDescriptor
         var data = Data()
         var buffer = [UInt8](repeating: 0, count: 64 * 1024)
+        var cutOff = deadline
         while true {
             var descriptor = pollfd(fd: fd, events: Int16(POLLIN), revents: 0)
             let ready = poll(&descriptor, 1, 100)
@@ -495,6 +505,11 @@ public enum HomebrewUpdates {
                 // it is gone, everything it wrote has already been read and its helpers no longer
                 // matter for the result.
                 if exit.hasExited { break }
+                if DispatchTime.now() >= cutOff {
+                    expired.markExpired()
+                    process.terminate()
+                    cutOff = .distantFuture
+                }
                 continue
             }
             let count = buffer.withUnsafeMutableBytes { Darwin.read(fd, $0.baseAddress, $0.count) }
