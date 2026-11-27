@@ -365,9 +365,9 @@ import Testing
     /// 實機路徑：只在 MACHELPER_LIVE_HIDPP=1 時執行。在 c547 接收器上查詢所有
     /// device index，把日誌寫到 MACHELPER_LIVE_HIDPP_LOG 指定的檔案。
     /// 沒有裝置或不支援時「回空」是正確結果，不是失敗。
-    @Test func liveQueryOnReceiver() throws {
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["MACHELPER_LIVE_HIDPP"] == "1"))
+    func liveQueryOnReceiver() throws {
         let env = ProcessInfo.processInfo.environment
-        guard env["MACHELPER_LIVE_HIDPP"] == "1" else { return }
         let started = Date()
         var lines: [String] = []
         let readings = HIDppQuery.queryAll { lines.append($0) }
@@ -384,9 +384,9 @@ import Testing
 
     /// 實機驗證快取與背景查詢：第一次 readings() 必須立刻回傳（不阻塞取樣），
     /// 之後背景查詢把結果補進快取。裝置休眠時補不到是正常結果，只記錄不判定失敗。
-    @Test func liveSamplerFillsCacheInBackground() throws {
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["MACHELPER_LIVE_HIDPP"] == "1"))
+    func liveSamplerFillsCacheInBackground() throws {
         let env = ProcessInfo.processInfo.environment
-        guard env["MACHELPER_LIVE_HIDPP"] == "1" else { return }
         let sampler = LogitechHIDPPSampler.shared
         let started = Date()
         _ = sampler.readings()
@@ -397,6 +397,8 @@ import Testing
         while Date() < waitUntil {
             readings = sampler.readings()
             if !readings.isEmpty { break }
+            // Live-only (MACHELPER_LIVE_HIDPP): the real receiver's background query has no
+            // completion hook, so this test polls the cache it fills.
             Thread.sleep(forTimeInterval: 0.1)
         }
         let totalElapsed = Date().timeIntervalSince(started)

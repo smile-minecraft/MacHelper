@@ -8,98 +8,85 @@ private let infoFixture = #"{"casks":[{"token":"obs","name":["OBS"],"auto_update
 
 private let infoAfterFixture = #"{"casks":[{"token":"obs","name":["OBS Studio"],"auto_updates":false,"artifacts":[{"pkg":["OBS.pkg"]}]},{"token":"gstreamer-runtime","name":["GStreamer runtime package"],"auto_updates":null,"artifacts":[{"pkg":["gstreamer.pkg"]}]}]}"#
 
-/// A fake `brew` that logs its arguments and can be told how long each subcommand takes.
-/// The tests never run the user's Homebrew; every command goes through this executable.
-/// A successful `update` leaves a marker, after which `outdated` and `info` answer with the
-/// "after" files, so a test can simulate a catalog refresh that changed a cask definition.
-private final class FakeBrew {
-    let executable: URL
-    let log: URL
+/// A fake `brew` that answers from memory and records its arguments. No test starts a process or
+/// waits on a pipe, so a check cannot be slowed down or timed out by what else the machine is
+/// doing. A gate can hold `outdated` or `info` open while a test observes what the session does.
+private final class FakeBrew: @unchecked Sendable {
+    let executable = URL(fileURLWithPath: "/fake/homebrew/bin/brew")
     let repository: URL
-    let outdatedJSON: URL
-    let infoJSON: URL
-    let outdatedAfterJSON: URL
-    let infoAfterJSON: URL
-    private let outdatedErr: URL
-    private let infoErr: URL
-    private let updateErr: URL
-    private let updateWarning: URL
-    private let updatedMarker: URL
-    let infoStarted: URL
-    let infoRelease: URL
+    /// Signalled when a gated `info` starts waiting.
+    private let infoStarted = DispatchSemaphore(value: 0)
+    /// Signalled when a gated `update` starts waiting.
+    private let updateStarted = DispatchSemaphore(value: 0)
 
-    var outdatedDelay: Double = 0 { didSet { rewrite() } }
-    var autoUpdateDelay: Double = 0 { didSet { rewrite() } }
-    var infoDelay: Double = 0 { didSet { rewrite() } }
-    var updateDelay: Double = 0 { didSet { rewrite() } }
-    var outdatedStatus: Int = 0 { didSet { rewrite() } }
-    var outdatedAfterStatus: Int = 0 { didSet { rewrite() } }
-    var infoStatus: Int = 0 { didSet { rewrite() } }
-    var updateStatus: Int = 0 { didSet { rewrite() } }
+    private let lock = NSLock()
+    private var log: [String] = []
+    private var outdatedJSON = ""
+    private var infoJSON = ""
+    private var outdatedAfterJSON = ""
+    private var infoAfterJSON = ""
+    private var outdatedError = ""
+    private var infoError = ""
+    private var updateError = ""
+    private var updateWarning = ""
+    private var updated = false
+
+    /// When set, `brew outdated` waits for it before answering.
+    var outdatedGate: DispatchSemaphore?
+    /// When set, `brew info` signals `infoStarted` and then waits for it.
+    var infoGate: DispatchSemaphore?
+    /// When set, `brew update` signals `updateStarted` and then waits for it.
+    var updateGate: DispatchSemaphore?
+
+    var outdatedStatus = 0
+    var outdatedAfterStatus = 0
+    var infoStatus = 0
+    var updateStatus = 0
     /// Simulates a failed `brew update` that already wrote part of the catalog.
-    var partialUpdate = false { didSet { rewrite() } }
-    /// When true, `brew info` announces that it started and waits for `releaseInfo()`.
-    var infoGate = false { didSet { rewrite() } }
-    /// Kills `brew outdated` with this signal before it prints anything, the way it dies when the
-    /// system or another program stops it.
-    var outdatedSignal: Int32? { didSet { rewrite() } }
-    /// Leaves a background child of `brew outdated` alive for this many seconds after the shell
-    /// exits. Such a child inherits the output pipe, so the reader must not wait for its EOF.
-    var outdatedLinger: Double = 0 { didSet { rewrite() } }
+    var partialUpdate = false
+    /// Kills `brew outdated` with this signal before it prints anything.
+    var outdatedSignal: Int32?
+
+    /// The runner to hand to a check or a session. It answers from memory; nothing is executed.
+    var runner: HomebrewUpdates.HomebrewCommandRunner {
+        HomebrewUpdates.HomebrewCommandRunner { [self] _, args, _, _ in run(args) }
+    }
 
     init(root: URL) throws {
-        executable = root.appending(path: "bin/brew")
-        log = root.appending(path: "brew.log")
         repository = root.appending(path: "repo")
-        outdatedJSON = root.appending(path: "outdated.json")
-        infoJSON = root.appending(path: "info.json")
-        outdatedAfterJSON = root.appending(path: "outdated-after.json")
-        infoAfterJSON = root.appending(path: "info-after.json")
-        outdatedErr = root.appending(path: "outdated.err")
-        infoErr = root.appending(path: "info.err")
-        updateErr = root.appending(path: "update.err")
-        updateWarning = root.appending(path: "update.warning")
-        updatedMarker = root.appending(path: "updated")
-        infoStarted = root.appending(path: "info-started")
-        infoRelease = root.appending(path: "info-release")
-
-        try FileManager.default.createDirectory(at: executable.deletingLastPathComponent(),
-                                                withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: repository.appending(path: ".git"),
                                                 withIntermediateDirectories: true)
-        for file in [log, outdatedJSON, infoJSON, outdatedErr, infoErr, updateErr, updateWarning] {
-            try Data().write(to: file)
-        }
         try Data().write(to: repository.appending(path: ".git/FETCH_HEAD"))
-        try writeScript()
     }
 
-    func setOutdated(_ json: String) throws { try Data(json.utf8).write(to: outdatedJSON) }
-    func setInfo(_ json: String) throws { try Data(json.utf8).write(to: infoJSON) }
-    func setOutdatedAfter(_ json: String) throws { try Data(json.utf8).write(to: outdatedAfterJSON) }
-    func setInfoAfter(_ json: String) throws { try Data(json.utf8).write(to: infoAfterJSON) }
-    func setOutdatedError(_ text: String) throws { try Data(text.utf8).write(to: outdatedErr) }
-    func setInfoError(_ text: String) throws { try Data(text.utf8).write(to: infoErr) }
-    func setUpdateError(_ text: String) throws { try Data(text.utf8).write(to: updateErr) }
-    func setUpdateWarning(_ text: String) throws { try Data(text.utf8).write(to: updateWarning) }
+    func setOutdated(_ json: String) { outdatedJSON = json }
+    func setInfo(_ json: String) { infoJSON = json }
+    func setOutdatedAfter(_ json: String) { outdatedAfterJSON = json }
+    func setInfoAfter(_ json: String) { infoAfterJSON = json }
+    func setOutdatedError(_ text: String) { outdatedError = text }
+    func setInfoError(_ text: String) { infoError = text }
+    func setUpdateError(_ text: String) { updateError = text }
+    func setUpdateWarning(_ text: String) { updateWarning = text }
 
-    func resetUpdateMarker() { try? FileManager.default.removeItem(at: updatedMarker) }
+    func resetUpdateMarker() { updated = false }
 
-    func releaseInfo() { try? Data().write(to: infoRelease) }
-
-    func resetInfoGate() {
-        try? FileManager.default.removeItem(at: infoStarted)
-        try? FileManager.default.removeItem(at: infoRelease)
+    /// Waits until a gated `info` has announced that it started and is blocked on the gate.
+    func waitForInfoToStart(timeout: TimeInterval = 2) async -> Bool {
+        await awaitSignal(infoStarted, timeout: timeout)
     }
 
-    /// Waits until the fake `brew info` has announced that it started and is blocked on the gate.
-    func waitForInfoToStart(timeout: TimeInterval = 10) async -> Bool {
-        let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
-            if FileManager.default.fileExists(atPath: infoStarted.path) { return true }
-            try? await Task.sleep(for: .milliseconds(10))
+    /// Waits until a gated `update` has announced that it started and is blocked on the gate.
+    func waitForUpdateToStart(timeout: TimeInterval = 2) async -> Bool {
+        await awaitSignal(updateStarted, timeout: timeout)
+    }
+
+    private func awaitSignal(_ semaphore: DispatchSemaphore, timeout: TimeInterval) async -> Bool {
+        // A semaphore cannot be awaited from an async context; the wait itself is short and bounded.
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global().async {
+                continuation.resume(returning: semaphore.wait(timeout: .now() + timeout) == .success)
+            }
         }
-        return false
     }
 
     /// Moves Homebrew's FETCH_HEAD so the catalog looks older (or newer) than its auto-update window.
@@ -110,87 +97,61 @@ private final class FakeBrew {
     }
 
     var invocations: [String] {
-        ((try? String(contentsOf: log, encoding: .utf8)) ?? "")
-            .split(separator: "\n").map(String.init)
+        locked { log }
     }
 
     func count(_ command: String) -> Int {
         invocations.filter { $0 == command || $0.hasPrefix(command + " ") }.count
     }
 
-    private func rewrite() {
-        try? writeScript()
+    private func run(_ args: [String]) -> HomebrewUpdates.RunResult {
+        locked { log.append(args.joined(separator: " ")) }
+        switch args.first {
+        case "--repository":
+            return .init(status: 0, stdout: repository.path + "\n", stderr: "", signal: nil, timedOut: nil)
+        case "update":
+            if let gate = updateGate {
+                updateStarted.signal()
+                gate.wait()
+            }
+            let writes = updateStatus == 0 || partialUpdate
+            if writes {
+                locked { updated = true }
+                try? FileManager.default.setAttributes([.modificationDate: Date()],
+                                                       ofItemAtPath: repository.appending(path: ".git/FETCH_HEAD").path)
+            }
+            return .init(status: Int32(updateStatus), stdout: "", stderr: updateWarning + updateError,
+                         signal: nil, timedOut: nil)
+        case "outdated":
+            if let signal = outdatedSignal {
+                return .init(status: signal, stdout: "", stderr: "", signal: signal, timedOut: nil)
+            }
+            outdatedGate?.wait()
+            let refreshed = locked { updated } && !outdatedAfterJSON.isEmpty
+            return .init(status: Int32(refreshed ? outdatedAfterStatus : outdatedStatus),
+                         stdout: refreshed ? outdatedAfterJSON : outdatedJSON,
+                         stderr: outdatedError, signal: nil, timedOut: nil)
+        case "info":
+            if let gate = infoGate {
+                infoStarted.signal()
+                gate.wait()
+            }
+            let refreshed = locked { updated } && !infoAfterJSON.isEmpty
+            return .init(status: Int32(infoStatus),
+                         stdout: refreshed ? infoAfterJSON : infoJSON,
+                         stderr: infoError, signal: nil, timedOut: nil)
+        case "upgrade":
+            return .init(status: 0, stdout: "", stderr: "", signal: nil, timedOut: nil)
+        default:
+            return .init(status: 64, stdout: "", stderr: "unexpected: \(args.joined(separator: " "))",
+                         signal: nil, timedOut: nil)
+        }
     }
 
-    private func writeScript() throws {
-        let script = """
-        #!/bin/sh
-        log='\(log.path)'
-        printf '%s\\n' "$*" >> "$log"
-        case "$1" in
-        --repository)
-          printf '%s\\n' '\(repository.path)'
-          exit 0
-          ;;
-        update)
-          sleep \(updateDelay)
-          if [ \(updateStatus) -eq 0 ] || [ \(partialUpdate ? 1 : 0) -eq 1 ]; then
-            : > '\(updatedMarker.path)'
-            touch '\(repository.appending(path: ".git/FETCH_HEAD").path)'
-          fi
-          cat '\(updateWarning.path)' >&2
-          cat '\(updateErr.path)' >&2
-          exit \(updateStatus)
-          ;;
-        outdated)
-          if [ \(outdatedSignal ?? 0) -gt 0 ]; then
-            kill -\(outdatedSignal ?? 0) $$
-          fi
-          if [ -n "$HOMEBREW_NO_AUTO_UPDATE" ]; then
-            sleep \(outdatedDelay)
-          else
-            sleep \(autoUpdateDelay)
-            sleep \(outdatedDelay)
-          fi
-          if [ \(outdatedLinger > 0 ? 1 : 0) -eq 1 ]; then
-            sleep \(outdatedLinger) &
-          fi
-          if [ -f '\(updatedMarker.path)' ] && [ -f '\(outdatedAfterJSON.path)' ]; then
-            cat '\(outdatedAfterJSON.path)'
-            cat '\(outdatedErr.path)' >&2
-            exit \(outdatedAfterStatus)
-          else
-            cat '\(outdatedJSON.path)'
-            cat '\(outdatedErr.path)' >&2
-            exit \(outdatedStatus)
-          fi
-          ;;
-        info)
-          if [ \(infoGate ? 1 : 0) -eq 1 ]; then
-            : > '\(infoStarted.path)'
-            i=0
-            while [ ! -f '\(infoRelease.path)' ] && [ $i -lt 1000 ]; do
-              sleep 0.01
-              i=$((i + 1))
-            done
-          fi
-          sleep \(infoDelay)
-          if [ -f '\(updatedMarker.path)' ] && [ -f '\(infoAfterJSON.path)' ]; then
-            cat '\(infoAfterJSON.path)'
-          else
-            cat '\(infoJSON.path)'
-          fi
-          cat '\(infoErr.path)' >&2
-          exit \(infoStatus)
-          ;;
-        *)
-          printf 'unexpected: %s\\n' "$*" >&2
-          exit 64
-          ;;
-        esac
-        """
-        try Data(script.utf8).write(to: executable)
-        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: executable.path)
+    private func locked<T>(_ body: () -> T) -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return body()
     }
 }
 
@@ -200,7 +161,8 @@ private func check(_ brew: FakeBrew, greedy: Bool = false, autoUpdate: Bool = fa
     HomebrewUpdates.check(greedy: greedy, autoUpdate: autoUpdate,
                           excludingAppBundleNames: excludingAppBundleNames,
                           excludingTokens: excludingTokens,
-                          brew: brew.executable.path, repository: brew.repository)
+                          brew: brew.executable.path, repository: brew.repository,
+                          runner: brew.runner)
 }
 
 private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
@@ -214,8 +176,8 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func detailsAreFetchedOnEveryCheckAndFollowDefinitionChanges() throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
         try brew.setIndexAge(hours: 1)
 
         let first = try check(brew).get()
@@ -225,7 +187,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         #expect(brew.count("info") == 1)
 
         // Same token, same versions, changed definition: the app must not reuse the old details.
-        try brew.setInfo(infoAfterFixture)
+        brew.setInfo(infoAfterFixture)
         let second = try check(brew).get()
         #expect(second.casks.first { $0.token == "obs" }?.name == "OBS Studio")
         #expect(second.casks.first { $0.token == "obs" }?.needsAdmin == true)
@@ -238,9 +200,9 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func infoFailureMarksRowsUnconfirmedInsteadOfSafe() throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
+        brew.setOutdated(outdatedFixture)
         brew.infoStatus = 1
-        try brew.setInfoError("Could not load cask metadata")
+        brew.setInfoError("Could not load cask metadata")
 
         let result = try check(brew).get()
         #expect(result.unconfirmedTokens == ["obs", "gstreamer-runtime"])
@@ -254,14 +216,14 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
         let ownToken = HomebrewUpdates.appCaskToken
-        try brew.setOutdated("""
+        brew.setOutdated("""
         {"formulae":[],"casks":[
           {"name":"\(ownToken)","installed_versions":["0.3.0"],"current_version":"0.3.2","pinned":false},
           {"name":"obs","installed_versions":["33.0.0"],"current_version":"33.0.1","pinned":false}
         ]}
         """)
         brew.infoStatus = 1
-        try brew.setInfoError("Could not load cask metadata")
+        brew.setInfoError("Could not load cask metadata")
 
         let result = try check(brew, excludingTokens: [ownToken]).get()
         #expect(result.casks.map(\.token) == ["obs"])
@@ -272,7 +234,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
         brew.outdatedStatus = 1
-        try brew.setOutdatedError("network is down")
+        brew.setOutdatedError("network is down")
 
         switch check(brew) {
         case .success:
@@ -298,7 +260,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
 
         // A brew that exits successfully but prints nothing is a failure too, and has to say so.
         brew.outdatedSignal = nil
-        try brew.setOutdated("")
+        brew.setOutdated("")
         guard case .failure(.failed(let silent)) = check(brew) else {
             Issue.record("an empty catalogue must not look like a successful check")
             return
@@ -306,17 +268,41 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         #expect(silent == "brew outdated --cask --json=v2 exited with status 0 and printed nothing")
     }
 
-    @Test func aBackgroundChildOfBrewDoesNotHoldTheCheck() throws {
+    /// Live: a real shell starts a real child that keeps the output pipe open after the shell
+    /// exits. The reader must return what the shell printed instead of waiting for the child.
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["MACHELPER_LIVE_TESTS"] == "1"))
+    func aBackgroundChildOfBrewDoesNotHoldTheCheck() throws {
         let t = try TempDir()
-        let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
-        try brew.setIndexAge(hours: 1)
-        // A helper a real brew leaves behind inherits the output pipe. The check must return what
-        // the command printed instead of waiting for an EOF that only arrives with that helper.
-        brew.outdatedLinger = 5
+        let bin = try TempDir()
+        let script = bin.url.appending(path: "brew")
+        let outdatedJSON = bin.url.appending(path: "outdated.json")
+        let infoJSON = bin.url.appending(path: "info.json")
+        try Data(outdatedFixture.utf8).write(to: outdatedJSON)
+        try Data(infoFixture.utf8).write(to: infoJSON)
+        // The shell prints the list, leaves a child holding the pipe, and exits.
+        try Data("""
+        #!/bin/sh
+        case "$1" in
+        outdated)
+          sleep 5 &
+          cat '\(outdatedJSON.path)'
+          exit 0
+          ;;
+        info)
+          cat '\(infoJSON.path)'
+          exit 0
+          ;;
+        esac
+        exit 64
+        """.utf8).write(to: script)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: script.path)
+        let repository = t.url.appending(path: "repo")
+        try FileManager.default.createDirectory(at: repository.appending(path: ".git"),
+                                                withIntermediateDirectories: true)
+        try Data().write(to: repository.appending(path: ".git/FETCH_HEAD"))
+
         let start = Date()
-        let result = try check(brew).get()
+        let result = try HomebrewUpdates.check(greedy: false, brew: script.path, repository: repository).get()
         #expect(Date().timeIntervalSince(start) < 3,
                 "a helper left behind must not hold the check for its whole lifetime")
         #expect(result.casks.map(\.token).sorted() == ["gstreamer-runtime", "obs"])
@@ -325,7 +311,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func emptyCatalogIsSuccessAndSkipsInfo() throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(#"{"formulae":[],"casks":[]}"#)
+        brew.setOutdated(#"{"formulae":[],"casks":[]}"#)
         let result = try check(brew).get()
 
         #expect(result.casks.isEmpty)
@@ -338,7 +324,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
         let ownToken = HomebrewUpdates.appCaskToken
-        try brew.setOutdated("""
+        brew.setOutdated("""
         {"formulae":[],"casks":[
           {"name":"\(ownToken)","installed_versions":["0.3.0"],"current_version":"0.3.2","pinned":false},
           {"name":"own-cask","installed_versions":["1.0"],"current_version":"2.0","pinned":false},
@@ -347,7 +333,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
           {"name":"-rf","installed_versions":["1"],"current_version":"2","pinned":false}
         ]}
         """)
-        try brew.setInfo("""
+        brew.setInfo("""
         {"casks":[
           {"token":"\(ownToken)","name":["MacHelper"],"artifacts":[{"app":["MacHelper.app"]}]},
           {"token":"own-cask","name":["MacHelper"],"artifacts":[{"app":["MacHelper.app"]}]},
@@ -368,8 +354,8 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func greedyPassesTheFlagAndIndexTimeComesFromFetchHead() throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
         try brew.setIndexAge(hours: 5)
 
         let result = try check(brew, greedy: true).get()
@@ -381,8 +367,8 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func repositoryPathAsksACustomBrew() throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        #expect(HomebrewUpdates.repositoryPath(for: brew.executable.path, environment: [:])?.path
-                == brew.repository.path)
+        #expect(HomebrewUpdates.repositoryPath(for: brew.executable.path, environment: [:],
+                                               runner: brew.runner)?.path == brew.repository.path)
         #expect(brew.invocations.contains("--repository"))
     }
 
@@ -458,12 +444,13 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func staleIndexYieldsTheFirstListThenVerifiesTheRefreshedDefinition() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
-        try brew.setOutdatedAfter(outdatedFixture)
-        try brew.setInfoAfter(infoAfterFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
+        brew.setOutdatedAfter(outdatedFixture)
+        brew.setInfoAfter(infoAfterFixture)
         try brew.setIndexAge(hours: 48)
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -484,12 +471,13 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func refreshFailureKeepsTheExistingListAndItsDetails() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
         brew.updateStatus = 1
-        try brew.setUpdateError("offline")
+        brew.setUpdateError("offline")
         try brew.setIndexAge(hours: 48)
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -506,11 +494,12 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func refreshWarningIsReportedWithoutFailingTheUpdate() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
-        try brew.setUpdateWarning("update failed, falling back to cached version.")
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
+        brew.setUpdateWarning("update failed, falling back to cached version.")
         try brew.setIndexAge(hours: 48)
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -524,11 +513,12 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func refreshSuccessWithInfoFailureDoesNotAssumeNoAdmin() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
+        brew.setOutdated(outdatedFixture)
         brew.infoStatus = 1
-        try brew.setInfoError("Could not load cask metadata")
+        brew.setInfoError("Could not load cask metadata")
         try brew.setIndexAge(hours: 48)
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -544,32 +534,33 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func refreshedDetailsExcludeTheAppBundleTheCaskNowInstalls() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated("""
+        brew.setOutdated("""
         {"formulae":[],"casks":[
           {"name":"own-cask","installed_versions":["1.0"],"current_version":"2.0","pinned":false},
           {"name":"obs","installed_versions":["33.0.0"],"current_version":"33.0.1","pinned":false}
         ]}
         """)
-        try brew.setInfo("""
+        brew.setInfo("""
         {"casks":[
           {"token":"own-cask","name":["Own"],"artifacts":[{"app":["Other.app"]}]},
           {"token":"obs","name":["OBS"],"artifacts":[{"app":["OBS.app"]}]}
         ]}
         """)
-        try brew.setOutdatedAfter("""
+        brew.setOutdatedAfter("""
         {"formulae":[],"casks":[
           {"name":"own-cask","installed_versions":["1.0"],"current_version":"2.0","pinned":false},
           {"name":"obs","installed_versions":["33.0.0"],"current_version":"33.0.1","pinned":false}
         ]}
         """)
-        try brew.setInfoAfter("""
+        brew.setInfoAfter("""
         {"casks":[
           {"token":"own-cask","name":["Own"],"artifacts":[{"app":["MacHelper.app"]}]},
           {"token":"obs","name":["OBS"],"artifacts":[{"app":["OBS.app"]}]}
         ]}
         """)
         try brew.setIndexAge(hours: 48)
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false,
                                                       excludingAppBundleNames: ["MacHelper.app"]))
@@ -584,10 +575,11 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func freshIndexYieldsTheProvisionalListThenTheDetails() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
         try brew.setIndexAge(hours: 1)
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -605,9 +597,10 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func emptyFreshListFinishesWithoutInfo() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(#"{"formulae":[],"casks":[]}"#)
+        brew.setOutdated(#"{"formulae":[],"casks":[]}"#)
         try brew.setIndexAge(hours: 1)
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -622,16 +615,21 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func repeatedTriggerWhileRunningIsIgnored() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
         try brew.setIndexAge(hours: 1)
-        brew.outdatedDelay = 0.4
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        // Hold the first check inside `brew outdated`: it owns the session until released.
+        let gate = DispatchSemaphore(value: 0)
+        brew.outdatedGate = gate
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let first = await session.check(greedy: false, refresh: false)
         let second = await session.check(greedy: false, refresh: false)
         #expect(first != nil)
         #expect(second == nil, "a second check must not start another brew process")
+        gate.signal()
+        brew.outdatedGate = nil
         if let first { for await _ in first {} }
 
         let third = await session.check(greedy: false, refresh: false)
@@ -643,30 +641,37 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func waitUntilIdleWaitsForTheRunningCheck() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
         try brew.setIndexAge(hours: 1)
-        brew.outdatedDelay = 0.4
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        // The check cannot finish until the gate opens, so `waitUntilIdle` can only return after
+        // that: it is a causal wait, not a wait that happens to be long enough.
+        let gate = DispatchSemaphore(value: 0)
+        brew.outdatedGate = gate
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let first = try #require(await session.check(greedy: false, refresh: false))
-        let start = Date()
+        Task.detached { gate.signal() }
         await session.waitUntilIdle()
-        #expect(Date().timeIntervalSince(start) > 0.2)
-        for await _ in first {}
+        // Idle means a new check starts at once; a `waitUntilIdle` that returned early would leave
+        // the session busy and this nil.
+        brew.outdatedGate = nil
         let next = await session.check(greedy: false, refresh: false)
         #expect(next != nil)
         if let next { for await _ in next {} }
+        for await _ in first {}
     }
 
     @Test func explicitRefreshReportsFailureAndKeepsTheList() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
         brew.updateStatus = 1
-        try brew.setUpdateError("offline")
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        brew.setUpdateError("offline")
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: true))
         let all = await snapshots(stream)
@@ -684,9 +689,10 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func explicitRefreshSuccessMarksTheIndexRefreshed() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: true))
         let all = await snapshots(stream)
@@ -701,11 +707,12 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func explicitRefreshSuccessThenListFailureReportsTheRefresh() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
         brew.outdatedStatus = 1
-        try brew.setOutdatedError("the list could not be read")
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        brew.setOutdatedError("the list could not be read")
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: true))
         let all = await snapshots(stream)
@@ -723,13 +730,14 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func automaticRefreshSuccessThenListFailureReportsTheRefresh() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
-        try brew.setOutdatedAfter(outdatedFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
+        brew.setOutdatedAfter(outdatedFixture)
         try brew.setIndexAge(hours: 48)
         brew.outdatedAfterStatus = 1
-        try brew.setOutdatedError("network is down")
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        brew.setOutdatedError("network is down")
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -748,16 +756,17 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     @Test func failedUpdateThatMayHaveWrittenDoesNotClaimRefreshOrKeepOldRows() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
-        try brew.setOutdatedAfter(outdatedFixture)
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
+        brew.setOutdatedAfter(outdatedFixture)
         try brew.setIndexAge(hours: 48)
         brew.partialUpdate = true
         brew.updateStatus = 1
-        try brew.setUpdateError("update failed after writing")
+        brew.setUpdateError("update failed after writing")
         brew.outdatedAfterStatus = 1
-        try brew.setOutdatedError("the list could not be read")
-        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
+        brew.setOutdatedError("the list could not be read")
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -773,132 +782,78 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
     }
 }
 
-/// Same fake brew and the same synthetic delays for every path. This measures where the time goes,
-/// not Homebrew's real speed. `brew info` waits at a gate, so the test proves causally that the
-/// provisional list arrives before the details finish instead of relying on a small timing margin.
-/// Enabled explicitly:
-///   MACHELPER_PERF_TEST=1 swift test --filter firstResultArrivesBeforeTheRefreshFinishes
-@Suite struct HomebrewUpdatesPerformanceTests {
-    @Test(.enabled(if: ProcessInfo.processInfo.environment["MACHELPER_PERF_TEST"] == "1"))
-    func firstResultArrivesBeforeTheRefreshFinishes() async throws {
+/// The provisional list must arrive while the details are still being read, and the final one
+/// after them. A gate inside the fake's `info` proves the order causally instead of comparing
+/// elapsed times, so a busy machine cannot make it fail.
+@Suite(.serialized) struct HomebrewUpdatesFirstResultTests {
+    @Test func firstResultArrivesBeforeTheRefreshFinishes() async throws {
         let t = try TempDir()
         let brew = try FakeBrew(root: t.url)
-        try brew.setOutdated(outdatedFixture)
-        try brew.setInfo(infoFixture)
-        try brew.setOutdatedAfter(outdatedFixture)
-        try brew.setInfoAfter(infoFixture)
-        // Synthetic delays, in seconds. The gate, not these numbers, proves the ordering; the
-        // delays only separate the phases for the printed comparison.
-        brew.outdatedDelay = 0.3
-        brew.autoUpdateDelay = 1.0
-        brew.infoDelay = 0.8
-        brew.updateDelay = 1.0
+        brew.setOutdated(outdatedFixture)
+        brew.setInfo(infoFixture)
+        brew.setOutdatedAfter(outdatedFixture)
+        brew.setInfoAfter(infoAfterFixture)
+        try brew.setIndexAge(hours: 48)
+        // Hold the catalog refresh open: the provisional list is only useful if it reaches the
+        // caller while `brew update` is still running, not after it finishes.
+        let updateGate = DispatchSemaphore(value: 0)
+        brew.updateGate = updateGate
+        let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
+                                            runner: brew.runner)
 
-        var oldStale: [Double] = []
-        var firstStale: [Double] = []
-        var completeStale: [Double] = []
-        var oldFresh: [Double] = []
-        var firstFresh: [Double] = []
-        var completeFresh: [Double] = []
-
-        for _ in 0..<3 {
-            // Stale index, old blocking path: waits for Homebrew's auto-update, outdated, and info.
-            // It runs synchronously; the causal gate is only needed for the new provisional result.
-            brew.infoGate = false
-            brew.resetUpdateMarker()
-            try brew.setIndexAge(hours: 48)
-            brew.autoUpdateDelay = 1.0
-            let oldStart = Date()
-            _ = try check(brew, autoUpdate: true).get()
-            oldStale.append(Date().timeIntervalSince(oldStart))
-
-            // Stale index, new path: the first snapshot must arrive while info is still blocked.
-            brew.infoGate = true
-            brew.resetUpdateMarker()
-            brew.resetInfoGate()
-            let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
-            let stream = try #require(await session.check(greedy: false, refresh: false))
-            let sessionStart = Date()
-            var times: [Double] = []
-            var released = false
-            for await snapshot in stream {
-                if times.isEmpty {
-                    times.append(Date().timeIntervalSince(sessionStart))
-                    #expect(snapshot.detailsPending, "the first snapshot must be provisional")
-                    #expect(!released, "the first snapshot must arrive before info is released")
-                    let reachedInfo = await brew.waitForInfoToStart()
-                    #expect(reachedInfo, "the provisional list must lead to brew info")
-                    brew.releaseInfo()
-                    released = true
-                } else {
-                    times.append(Date().timeIntervalSince(sessionStart))
-                    #expect(!snapshot.detailsPending, "the final snapshot must have details")
+        let stream = try #require(await session.check(greedy: false, refresh: false))
+        var seen: [HomebrewUpdateSession.Snapshot] = []
+        for await snapshot in stream {
+            seen.append(snapshot)
+            if seen.count == 1 {
+                // The first result reached us while the refresh had not finished: either it had not
+                // started yet or it is blocked on the gate below.
+                #expect(snapshot.detailsPending && snapshot.willRefresh && !snapshot.isFinal)
+                if brew.count("update") > 0 {
+                    #expect(await brew.waitForUpdateToStart(),
+                            "a started refresh must be the blocked one, not a finished one")
                 }
+                updateGate.signal()
             }
-            #expect(times.count == 2)
-            firstStale.append(times[0])
-            completeStale.append(times[1])
-
-            // Fresh index, old blocking path: Homebrew skips its auto-update, but the old path still
-            // waits for outdated and info before it can show anything.
-            brew.infoGate = false
-            brew.resetUpdateMarker()
-            try brew.setIndexAge(hours: 1)
-            brew.autoUpdateDelay = 0
-            let freshOldStart = Date()
-            _ = try check(brew, autoUpdate: true).get()
-            oldFresh.append(Date().timeIntervalSince(freshOldStart))
-
-            // Fresh index, new path: the same causal check as the stale case.
-            brew.infoGate = true
-            brew.resetUpdateMarker()
-            brew.resetInfoGate()
-            let freshSession = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository)
-            let freshStream = try #require(await freshSession.check(greedy: false, refresh: false))
-            let freshStart = Date()
-            var freshTimes: [Double] = []
-            var freshReleased = false
-            for await snapshot in freshStream {
-                if freshTimes.isEmpty {
-                    freshTimes.append(Date().timeIntervalSince(freshStart))
-                    #expect(snapshot.detailsPending)
-                    #expect(!freshReleased)
-                    let reachedInfo = await brew.waitForInfoToStart()
-                    #expect(reachedInfo)
-                    brew.releaseInfo()
-                    freshReleased = true
-                } else {
-                    freshTimes.append(Date().timeIntervalSince(freshStart))
-                    #expect(!snapshot.detailsPending)
-                }
-            }
-            #expect(freshTimes.count == 2)
-            firstFresh.append(freshTimes[0])
-            completeFresh.append(freshTimes[1])
         }
+        #expect(seen.count == 2)
+        #expect(seen[1].isFinal && seen[1].indexRefreshed && !seen[1].detailsPending)
+        #expect(seen[1].casks.first { $0.token == "obs" }?.name == "OBS Studio")
+        #expect(brew.invocations == ["outdated --cask --json=v2", "update --quiet",
+                                     "outdated --cask --json=v2",
+                                     "info --cask --json=v2 obs gstreamer-runtime"])
+    }
+}
 
-        let mean = { (v: [Double]) in v.reduce(0, +) / Double(v.count) }
-        print("Homebrew update check (fake brew, synthetic delays; not real Homebrew): " +
-              "old blocking path, stale index mean \(String(format: "%.2f", mean(oldStale)))s; " +
-              "new first result, stale index mean \(String(format: "%.2f", mean(firstStale)))s; " +
-              "new complete, stale index mean \(String(format: "%.2f", mean(completeStale)))s; " +
-              "old complete, fresh index mean \(String(format: "%.2f", mean(oldFresh)))s; " +
-              "new first result, fresh index mean \(String(format: "%.2f", mean(firstFresh)))s; " +
-              "new complete, fresh index mean \(String(format: "%.2f", mean(completeFresh)))s")
-        // The gate proves the ordering; these means only guard against a future change that stops
-        // showing the first result early. The synthetic delays leave at least 0.8s between means.
-        #expect(mean(firstStale) < mean(oldStale) - 0.5,
-                "the first list must arrive before the old blocking path finishes")
-        #expect(mean(completeStale) > mean(firstStale) + 0.5,
-                "the complete refreshed result must be later than the first result")
-        #expect(mean(firstFresh) < mean(oldFresh) - 0.5,
-                "a fresh index must show its unconfirmed list before the old path finishes")
-        #expect(mean(firstFresh) < mean(completeFresh) - 0.5,
-                "the fresh first result must arrive before the confirmed details")
-        #expect(mean(completeFresh) <= mean(oldFresh) + 0.3,
-                "a fresh index does the same outdated + info work as before; no material regression")
-        #expect(brew.count("update") == 3)
-        #expect(brew.count("outdated") == 15)
-        #expect(brew.count("info") == 12)
+/// The pipe reader, exercised with a real pipe but no process: the two conditions that used to
+/// make a check wait for its whole timeout are set from the test instead of from the machine.
+@Suite struct HomebrewPipeReaderTests {
+    /// A writer that never closes its end must not hold the read once the command has exited.
+    @Test func readEndsWithTheCommandNotWithALingeringWriter() throws {
+        let pipe = Pipe()
+        try pipe.fileHandleForWriting.write(contentsOf: Data("[]".utf8))
+        // Keep the write end open, the way a helper a brew leaves behind does.
+        defer { try? pipe.fileHandleForWriting.close() }
+        let data = HomebrewUpdates.read(pipe.fileHandleForReading, hasExited: { true },
+                                        deadline: .now() + 30,
+                                        onDeadline: { Issue.record("the read waited for the deadline") })
+        #expect(String(decoding: data, as: UTF8.self) == "[]")
+    }
+
+    /// Once the deadline passes the reader must end the command and stop, instead of reading a
+    /// pipe that keeps looking open.
+    @Test func anExpiredDeadlineEndsTheRead() throws {
+        let pipe = Pipe()
+        var deadlineHit = false
+        let data = HomebrewUpdates.read(pipe.fileHandleForReading, hasExited: { false },
+                                        deadline: .now() + 0.05,
+                                        onDeadline: {
+                                            deadlineHit = true
+                                            // The real call terminates the command, which closes the
+                                            // pipe; this is what its EOF would do here.
+                                            try? pipe.fileHandleForWriting.close()
+                                        })
+        #expect(deadlineHit, "the deadline must be noticed")
+        #expect(data.isEmpty)
     }
 }

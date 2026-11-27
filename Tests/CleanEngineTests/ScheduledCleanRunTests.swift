@@ -55,7 +55,7 @@ import Testing
 
         // The executor's Trash is this test's own directory, so nothing can reach the user's Trash.
         let testTrash = TestTrashBackend(trashDirectory: t.url.appending(path: "test-trash"))
-        let executor = CleanExecutor.injected(safety: safety, log: log, removal: testTrash.backend)
+        let executor = CleanExecutor.injected(safety: safety, log: log, removal: testTrash.backend, running: nothingRunning)
         let report = executor.execute(removed, dryRun: false, command: "isolated-combination-check")
 
         try #require(report.items.count == 2)

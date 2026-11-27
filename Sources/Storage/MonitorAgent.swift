@@ -156,7 +156,9 @@ public enum MonitorAgentProfileStoreError: Error, LocalizedError, Equatable {
 /// result. The lock is released by the system if a process crashes.
 enum MonitorAgentProfileLock {
     static func withLock<T>(at profileURL: URL, exclusive: Bool,
-                            timeout: TimeInterval, _ body: () throws -> T) throws -> T {
+                            timeout: TimeInterval,
+                            onContended: (@Sendable () -> Void)? = nil,
+                            _ body: () throws -> T) throws -> T {
         let path = profileURL.path + ".lock"
         let descriptor = open(path, O_CREAT | O_RDWR | O_CLOEXEC, 0o600)
         guard descriptor >= 0 else {
@@ -171,6 +173,9 @@ enum MonitorAgentProfileLock {
                 if Date() >= deadline {
                     throw MonitorAgentProfileStoreError.lockTimeout(path: path)
                 }
+                // The lock is held elsewhere. `onContended` is how a test learns that a write is
+                // queued behind an in-flight one; production passes nil.
+                onContended?()
                 Thread.sleep(forTimeInterval: 0.01)
                 continue
             }
@@ -204,9 +209,10 @@ public enum MonitorAgentProfileStore {
     /// failure, so a disable is never mistaken for a completed one. Tests use a short timeout
     /// to prove the failure is bounded.
     static func save(_ profile: MonitorAgentProfile, to url: URL,
-                     timeout: TimeInterval) throws {
+                     timeout: TimeInterval,
+                     onContended: (@Sendable () -> Void)? = nil) throws {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try withExclusiveLock(at: url, timeout: timeout) {
+        try withExclusiveLock(at: url, timeout: timeout, onContended: onContended) {
             try JSONEncoder().encode(profile).write(to: url, options: .atomic)
         }
     }
@@ -222,8 +228,10 @@ public enum MonitorAgentProfileStore {
     /// Runs `body` while holding the exclusive sidecar lock. Used by the profile writer and
     /// by tests that need to observe whether a capacity write is in flight.
     static func withExclusiveLock<T>(at url: URL, timeout: TimeInterval = 2,
+                                     onContended: (@Sendable () -> Void)? = nil,
                                      _ body: () throws -> T) throws -> T {
-        try MonitorAgentProfileLock.withLock(at: url, exclusive: true, timeout: timeout, body)
+        try MonitorAgentProfileLock.withLock(at: url, exclusive: true, timeout: timeout,
+                                             onContended: onContended, body)
     }
 
     /// The generation a capacity pass must belong to, or nil when background recording is
@@ -494,6 +502,12 @@ public struct MonitorAgentRecorder {
             tick()
             Thread.sleep(forTimeInterval: 1)
         }
+    }
+
+    /// Waits for an in-flight capacity pass to finish, so a test can read the result with one
+    /// `tick` instead of polling. True when no pass is in flight or it finished in time.
+    func waitForCapacityPass(timeout: TimeInterval = 2) -> Bool {
+        volumeCapacityRecorder?.waitForPendingPass(timeout: timeout) ?? true
     }
 }
 

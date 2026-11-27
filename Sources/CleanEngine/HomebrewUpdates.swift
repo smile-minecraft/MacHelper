@@ -134,13 +134,14 @@ public enum HomebrewUpdates {
     static func check(greedy: Bool, autoUpdate: Bool = false,
                       excludingAppBundleNames: Set<String> = [],
                       excludingTokens: Set<String> = [],
-                      brew: String, repository: URL? = nil) -> Result<OutdatedCheck, Failure> {
-        switch list(greedy: greedy, autoUpdate: autoUpdate, brew: brew, repository: repository) {
+                      brew: String, repository: URL? = nil,
+                      runner: HomebrewCommandRunner = .system) -> Result<OutdatedCheck, Failure> {
+        switch list(greedy: greedy, autoUpdate: autoUpdate, brew: brew, repository: repository, runner: runner) {
         case .failure(let failure):
             return .failure(failure)
         case .success(let list):
             let tokens = list.rows.map(\.token).filter(isValidToken)
-            let (details, detailsFailure) = details(for: tokens, brew: brew)
+            let (details, detailsFailure) = details(for: tokens, brew: brew, runner: runner)
             return .success(makeCheck(list, details: details, detailsFailure: detailsFailure,
                                       refreshed: false, refreshFailure: nil, refreshWarning: nil,
                                       excludingAppBundleNames: excludingAppBundleNames,
@@ -149,22 +150,25 @@ public enum HomebrewUpdates {
     }
 
     /// One `brew outdated` run. Never updates the catalog unless `autoUpdate` is true.
-    static func list(greedy: Bool, autoUpdate: Bool, brew: String, repository: URL?)
+    static func list(greedy: Bool, autoUpdate: Bool, brew: String, repository: URL?,
+                     runner: HomebrewCommandRunner = .system)
         -> Result<OutdatedList, Failure> {
-        let result = run(brew, ["outdated", "--cask", "--json=v2"] + (greedy ? ["--greedy"] : []),
-                         timeout: 180, autoUpdate: autoUpdate)
+        let result = runner.run(brew, ["outdated", "--cask", "--json=v2"] + (greedy ? ["--greedy"] : []),
+                                180, autoUpdate)
         guard result.status == 0, let rows = parseOutdated(Data(result.stdout.utf8)) else {
             return .failure(.failed(result.failureMessage("brew outdated --cask --json=v2")))
         }
-        let indexUpdatedAt = (repository ?? repositoryPath(for: brew)).flatMap(Self.indexUpdatedAt(repository:))
+        let indexUpdatedAt = (repository ?? repositoryPath(for: brew, runner: runner))
+            .flatMap(Self.indexUpdatedAt(repository:))
         return .success(OutdatedList(rows: rows, indexUpdatedAt: indexUpdatedAt, checkedAt: Date()))
     }
 
     /// `brew info` for every listed token. A failure returns no details and the reason, so the
     /// caller can mark the rows as unconfirmed instead of assuming they need no administrator.
-    static func details(for tokens: [String], brew: String) -> (details: [String: Details], failure: String?) {
+    static func details(for tokens: [String], brew: String,
+                        runner: HomebrewCommandRunner = .system) -> (details: [String: Details], failure: String?) {
         guard !tokens.isEmpty else { return ([:], nil) }
-        let info = run(brew, ["info", "--cask", "--json=v2"] + tokens, timeout: 60, autoUpdate: false)
+        let info = runner.run(brew, ["info", "--cask", "--json=v2"] + tokens, 60, false)
         guard info.status == 0 else {
             return ([:], info.failureMessage("brew info --cask --json=v2"))
         }
@@ -211,21 +215,22 @@ public enum HomebrewUpdates {
     /// could execute the machine's Homebrew.
     static func outdated(greedy: Bool, refresh: Bool,
                          excludingAppBundleNames: Set<String>, excludingTokens: Set<String>,
-                         dependency: BrewDependency) -> Result<[OutdatedCask], Failure> {
+                         dependency: BrewDependency,
+                         runner: HomebrewCommandRunner = .system) -> Result<[OutdatedCask], Failure> {
         guard case .installed(let brew) = dependency else { return .failure(.notInstalled) }
         if refresh {
-            let update = refreshIndex(brew: brew)
+            let update = refreshIndex(brew: brew, runner: runner)
             if !update.ok { return .failure(.failed(update.message ?? "")) }
         }
         return check(greedy: greedy, autoUpdate: !refresh,
                      excludingAppBundleNames: excludingAppBundleNames, excludingTokens: excludingTokens,
-                     brew: brew, repository: nil).map(\.casks)
+                     brew: brew, repository: nil, runner: runner).map(\.casks)
     }
 
     /// Runs `brew update --quiet` and reports success or failure; never throws. The executable is
     /// required: a nil fallback here once ran the user's real Homebrew during a test.
-    static func refreshIndex(brew: String) -> RefreshResult {
-        let result = run(brew, ["update", "--quiet"], timeout: 180, autoUpdate: true)
+    static func refreshIndex(brew: String, runner: HomebrewCommandRunner = .system) -> RefreshResult {
+        let result = runner.run(brew, ["update", "--quiet"], 180, true)
         let ok = result.status == 0
         // Homebrew exits 0 after falling back to a cached API file and warns about it. That warning
         // means the catalog is usable but not fully re-downloaded, so it is kept separate from both
@@ -247,13 +252,14 @@ public enum HomebrewUpdates {
     /// standard install locations are known without another process; a test or custom brew answers
     /// `--repository`.
     static func repositoryPath(for brew: String,
-                               environment: [String: String] = ProcessInfo.processInfo.environment) -> URL? {
+                               environment: [String: String] = ProcessInfo.processInfo.environment,
+                               runner: HomebrewCommandRunner = .system) -> URL? {
         if let env = environment["HOMEBREW_REPOSITORY"], !env.isEmpty {
             return URL(filePath: env)
         }
         if brew.hasPrefix("/opt/homebrew/") { return URL(filePath: "/opt/homebrew") }
         if brew.hasPrefix("/usr/local/") { return URL(filePath: "/usr/local/Homebrew") }
-        let result = run(brew, ["--repository"], timeout: 10, autoUpdate: false)
+        let result = runner.run(brew, ["--repository"], 10, false)
         guard result.status == 0 else { return nil }
         let path = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
         return path.isEmpty ? nil : URL(filePath: path)
@@ -356,6 +362,22 @@ public enum HomebrewUpdates {
     }
 
     // MARK: Running brew
+
+    /// Runs one Homebrew command. Production starts the executable and reads its pipes; a test
+    /// supplies a closure, so a check never starts a process, waits on a pipe, or races a clock.
+    struct HomebrewCommandRunner: Sendable {
+        typealias Run = @Sendable (_ tool: String, _ args: [String], _ timeout: TimeInterval,
+                                   _ autoUpdate: Bool) -> RunResult
+        let run: Run
+
+        static let system = HomebrewCommandRunner { tool, args, timeout, autoUpdate in
+            HomebrewUpdates.run(tool, args, timeout: timeout, autoUpdate: autoUpdate)
+        }
+
+        init(_ run: @escaping Run) {
+            self.run = run
+        }
+    }
 
     struct RunResult {
         let status: Int32
@@ -464,14 +486,20 @@ public enum HomebrewUpdates {
         let readers = DispatchGroup()
         readers.enter()
         let errReader = Thread {
-            errData = read(err.fileHandleForReading, until: exit, deadline: deadline,
-                           process: p, expired: expired)
+            errData = read(err.fileHandleForReading, hasExited: { exit.hasExited }, deadline: deadline,
+                           onDeadline: {
+                               expired.markExpired()
+                               p.terminate()
+                           })
             readers.leave()
         }
         errReader.name = "brew stderr"
         errReader.start()
-        let outData = read(out.fileHandleForReading, until: exit, deadline: deadline,
-                           process: p, expired: expired)
+        let outData = read(out.fileHandleForReading, hasExited: { exit.hasExited }, deadline: deadline,
+                           onDeadline: {
+                               expired.markExpired()
+                               p.terminate()
+                           })
         readers.wait()
         reaped.wait()
         return RunResult(status: p.terminationStatus,
@@ -485,10 +513,11 @@ public enum HomebrewUpdates {
     /// in the pipe. Waiting for EOF alone is not enough: a command that dies before writing, or a
     /// helper that inherits the write end, leaves a pipe that EOF never reports here, and a check
     /// once stalled for its entire timeout on exactly that. Polling slices bound the read by the
-    /// command's lifetime instead, and end the command when its own timeout passes so a reader can
-    /// never outlive it.
-    private static func read(_ handle: FileHandle, until exit: ChildExit, deadline: DispatchTime,
-                             process: Process, expired: Timeout) -> Data {
+    /// command's lifetime instead, and `onDeadline` ends the command when its own timeout passes
+    /// so a reader can never outlive it. Both callbacks are supplied by the caller, so the loop
+    /// itself can be exercised without a process.
+    static func read(_ handle: FileHandle, hasExited: () -> Bool, deadline: DispatchTime,
+                     onDeadline: () -> Void) -> Data {
         let fd = handle.fileDescriptor
         var data = Data()
         var buffer = [UInt8](repeating: 0, count: 64 * 1024)
@@ -504,10 +533,9 @@ public enum HomebrewUpdates {
                 // Nothing arrived for 100 ms. Keep waiting while the command can still write; once
                 // it is gone, everything it wrote has already been read and its helpers no longer
                 // matter for the result.
-                if exit.hasExited { break }
+                if hasExited() { break }
                 if DispatchTime.now() >= cutOff {
-                    expired.markExpired()
-                    process.terminate()
+                    onDeadline()
                     cutOff = .distantFuture
                 }
                 continue
@@ -613,17 +641,20 @@ public actor HomebrewUpdateSession {
 
     private let brew: String?
     private let repository: URL?
+    private let runner: HomebrewUpdates.HomebrewCommandRunner
     private var isRunning = false
     private var idleWaiters: [CheckedContinuation<Void, Never>] = []
 
     public init() {
         self.brew = nil
         self.repository = nil
+        self.runner = .system
     }
 
-    init(brew: String?, repository: URL?) {
+    init(brew: String?, repository: URL?, runner: HomebrewUpdates.HomebrewCommandRunner = .system) {
         self.brew = brew
         self.repository = repository
+        self.runner = runner
     }
 
     #if DEBUG
@@ -640,6 +671,7 @@ public actor HomebrewUpdateSession {
         guard !isRunning else { return nil }
         isRunning = true
         let repository = self.repository
+        let runner = self.runner
         let dependency = brew.map(HomebrewUpdates.BrewDependency.installed)
             ?? HomebrewUpdates.brew.map(HomebrewUpdates.BrewDependency.installed)
             ?? .missing
@@ -648,7 +680,7 @@ public actor HomebrewUpdateSession {
             Self.produce(greedy: greedy, refresh: refresh,
                          excludingAppBundleNames: excludingAppBundleNames,
                          excludingTokens: excludingTokens,
-                         dependency: dependency, repository: repository,
+                         dependency: dependency, repository: repository, runner: runner,
                          continuation: continuation)
             await self.finish()
             continuation.finish()
@@ -674,6 +706,7 @@ public actor HomebrewUpdateSession {
     private static func produce(greedy: Bool, refresh: Bool,
                                 excludingAppBundleNames: Set<String>, excludingTokens: Set<String>,
                                 dependency: HomebrewUpdates.BrewDependency, repository: URL?,
+                                runner: HomebrewUpdates.HomebrewCommandRunner,
                                 continuation: AsyncStream<Snapshot>.Continuation) {
         // The dependency is resolved once by `check`. Every path below either uses this exact
         // executable or reports that it is missing; there is no second lookup to fall back to.
@@ -687,12 +720,13 @@ public actor HomebrewUpdateSession {
         }
 
         func currentIndexUpdatedAt() -> Date? {
-            (repository ?? HomebrewUpdates.repositoryPath(for: brew))
+            (repository ?? HomebrewUpdates.repositoryPath(for: brew, runner: runner))
                 .flatMap(HomebrewUpdates.indexUpdatedAt(repository:))
         }
 
         func readList() -> Result<HomebrewUpdates.OutdatedList, HomebrewUpdates.Failure> {
-            HomebrewUpdates.list(greedy: greedy, autoUpdate: false, brew: brew, repository: repository)
+            HomebrewUpdates.list(greedy: greedy, autoUpdate: false, brew: brew, repository: repository,
+                                 runner: runner)
         }
 
         func emit(_ list: HomebrewUpdates.OutdatedList, refreshed: Bool, refreshAttempted: Bool,
@@ -701,7 +735,7 @@ public actor HomebrewUpdateSession {
             let tokens = list.rows.map(\.token).filter(HomebrewUpdates.isValidToken)
             let (details, detailsFailure) = detailsPending
                 ? ([:], nil)
-                : HomebrewUpdates.details(for: tokens, brew: brew)
+                : HomebrewUpdates.details(for: tokens, brew: brew, runner: runner)
             let check = HomebrewUpdates.makeCheck(list, details: details, detailsFailure: detailsFailure,
                                                   refreshed: refreshed, refreshFailure: refreshFailure,
                                                   refreshWarning: refreshWarning,
@@ -738,7 +772,7 @@ public actor HomebrewUpdateSession {
         var refreshAttempted = false
         if refresh {
             refreshAttempted = true
-            let update = HomebrewUpdates.refreshIndex(brew: brew)
+            let update = HomebrewUpdates.refreshIndex(brew: brew, runner: runner)
             refreshFailure = update.message
             refreshWarning = update.warning
             refreshed = update.ok
@@ -791,7 +825,7 @@ public actor HomebrewUpdateSession {
              refreshWarning: nil, detailsPending: true, willRefresh: true, isFinal: false)
         guard !Task.isCancelled else { return }
         refreshAttempted = true
-        let update = HomebrewUpdates.refreshIndex(brew: brew)
+        let update = HomebrewUpdates.refreshIndex(brew: brew, runner: runner)
         guard !Task.isCancelled else { return }
         refreshFailure = update.message
         refreshWarning = update.warning

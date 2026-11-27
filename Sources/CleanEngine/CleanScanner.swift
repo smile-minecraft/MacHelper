@@ -39,16 +39,39 @@ public struct CleanPlan: Codable, Sendable {
     public var selectedCandidates: [CleanCandidate] { results.flatMap { $0.candidates.filter(\.selected) } }
 }
 
+/// Where the guard checks read the live system: which apps and executables are running.
+///
+/// Production reads the process table and AppKit. Tests supply their own answer, so a guard can be
+/// proven without starting a process or depending on what else runs on the machine.
+public struct RunningApplications: Sendable {
+    public let bundleIDs: @Sendable () -> Set<String>
+    public let processNames: @Sendable () -> Set<String>
+
+    public init(bundleIDs: @escaping @Sendable () -> Set<String>,
+                processNames: @escaping @Sendable () -> Set<String>) {
+        self.bundleIDs = bundleIDs
+        self.processNames = processNames
+    }
+
+    public static let system = RunningApplications(
+        bundleIDs: { CleanScanner.runningBundleIDs() },
+        processNames: { CleanScanner.runningProcessNames() })
+}
+
 /// Evaluates rules into a preview plan. Read-only: never removes anything.
 public struct CleanScanner: Sendable {
     public let rules: [CleanRule]
     public let safety: PathSafety
     public let now: Date
+    /// Where "is its app running?" is read from. Production reads the system.
+    public let running: RunningApplications
 
-    public init(rules: [CleanRule], safety: PathSafety = .forCleaning(), now: Date = Date()) {
+    public init(rules: [CleanRule], safety: PathSafety = .forCleaning(), now: Date = Date(),
+                running: RunningApplications = .system) {
         self.rules = rules
         self.safety = safety
         self.now = now
+        self.running = running
     }
 
     public func scan() -> CleanPlan { scan(progress: { _, _ in }, shouldStop: { false }) }
@@ -59,13 +82,13 @@ public struct CleanScanner: Sendable {
         var claimed: [String] = []   // earlier (more specific) rules win overlapping paths
         var results: [RuleResult] = []
 
-        let running = Self.runningBundleIDs()
+        let appBundleIDs = running.bundleIDs()
         let processes = rules.contains { !$0.skipIfProcessRunning.isEmpty }
-            ? Set(Self.runningProcessNames().map { $0.lowercased() }) : []
+            ? Set(running.processNames().map { $0.lowercased() }) : []
         for (index, rule) in rules.enumerated() {
             if shouldStop() { break }
             progress(index, rules.count)
-            let busy = rule.skipIfRunning.first(where: running.contains)
+            let busy = rule.skipIfRunning.first(where: appBundleIDs.contains)
                 ?? rule.skipIfProcessRunning.first { processes.contains(String($0.prefix(Self.processNameLength)).lowercased()) }
             if let app = busy {
                 // Reserve the rule's paths so a broader rule (e.g. all of ~/Library/Caches) cannot take them.
@@ -91,7 +114,7 @@ public struct CleanScanner: Sendable {
                 if minAge > 0, let m = item.modified, now.timeIntervalSince(m) < minAge { return nil }
                 // Folders named after a running app's bundle id (~/Library/Caches/com.foo.App) are its live data.
                 let owner = (item.path as NSString).lastPathComponent
-                let ownerRunning = running.contains(owner)
+                let ownerRunning = appBundleIDs.contains(owner)
                 return CleanCandidate(ruleID: rule.id, path: item.path, size: item.size, modified: item.modified,
                                       isDirectory: item.isDirectory, selected: rule.selectedByDefault && !ownerRunning,
                                       note: ownerRunning ? String(localized: "App is running", bundle: .module) : nil)
