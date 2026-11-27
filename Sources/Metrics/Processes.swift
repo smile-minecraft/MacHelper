@@ -84,7 +84,12 @@ public final class ProcessSampler: @unchecked Sendable {
             // One proc_pidpath per process: the name comes from the same lookup,
             // so a sample does not resolve every path twice.
             let executablePath = Self.path(pid)
-            usages.append(ProcessUsage(pid: pid, name: Self.name(pid, path: executablePath), path: executablePath, cpu: cpu,
+            let name = Self.name(pid, path: executablePath)
+            // A process that ended between its counters and its path lookup has no name left to
+            // show, and no next sample either. Dropping it keeps a blank row out of the list
+            // instead of counting it as a process this user cannot inspect.
+            guard !name.isEmpty else { continue }
+            usages.append(ProcessUsage(pid: pid, name: name, path: executablePath, cpu: cpu,
                                        memoryBytes: footprint))
         }
         last = seen.mapValues { (cpuNanos: $0.0, at: $0.1) }
