@@ -66,9 +66,6 @@ import Testing
         return config
     }
 
-    /// Holds SQLite's writer lock from a second connection until `releaseBlocker` is
-    /// signalled. This is the same lock the agent's capacity insert waits on. The blocker
-    /// gets its own thread so a waiting test never starves a bounded thread pool.
     /// Waits until the in-flight capacity apply holds the shared profile lock. The sampler
     /// signals when the sample starts, but the apply takes the lock only after the sample
     /// returns, on another thread, so one exclusive attempt can arrive first, get the lock and
@@ -91,6 +88,9 @@ import Testing
         return false
     }
 
+    /// Holds SQLite's writer lock from a second connection until `releaseBlocker` is
+    /// signalled. This is the same lock the agent's capacity insert waits on. The blocker
+    /// gets its own thread so a waiting test never starves a bounded thread pool.
     private func holdWriterLock(url: URL,
                                 ready: DispatchSemaphore,
                                 release: DispatchSemaphore,
