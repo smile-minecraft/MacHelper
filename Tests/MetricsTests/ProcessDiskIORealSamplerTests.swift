@@ -18,6 +18,8 @@ import Testing
         let sampler = ProcessDiskIOSampler()
         // The first sample only establishes the baseline; rates need two samples of one process.
         let before = try #require(sampler.sample())
+        // Live-only (MACHELPER_LIVE_DISK_SAMPLE): the sleep lets this machine's real I/O counters
+        // move between two samples; a fake would defeat the point of the test.
         try await Task.sleep(for: .milliseconds(250))
 
         let url = FileManager.default.temporaryDirectory
@@ -30,6 +32,8 @@ import Testing
         }
         try bytes.write(to: url)
 
+        // Live-only (MACHELPER_LIVE_DISK_SAMPLE): the sleep lets this machine's real I/O counters
+        // move between two samples; a fake would defeat the point of the test.
         try await Task.sleep(for: .milliseconds(250))
         let after = try #require(sampler.sample())
         let interval = after.capturedAt.timeIntervalSince(before.capturedAt)
