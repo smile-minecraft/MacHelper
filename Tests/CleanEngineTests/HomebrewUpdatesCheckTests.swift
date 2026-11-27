@@ -275,13 +275,21 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let t = try TempDir()
         let bin = try TempDir()
         let script = bin.url.appending(path: "brew")
+        let outdatedJSON = bin.url.appending(path: "outdated.json")
+        let infoJSON = bin.url.appending(path: "info.json")
+        try Data(outdatedFixture.utf8).write(to: outdatedJSON)
+        try Data(infoFixture.utf8).write(to: infoJSON)
         // The shell prints the list, leaves a child holding the pipe, and exits.
         try Data("""
         #!/bin/sh
         case "$1" in
         outdated)
           sleep 5 &
-          printf '%s' '{"formulae":[],"casks":[]}'
+          cat '\(outdatedJSON.path)'
+          exit 0
+          ;;
+        info)
+          cat '\(infoJSON.path)'
           exit 0
           ;;
         esac
@@ -297,7 +305,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let result = try HomebrewUpdates.check(greedy: false, brew: script.path, repository: repository).get()
         #expect(Date().timeIntervalSince(start) < 3,
                 "a helper left behind must not hold the check for its whole lifetime")
-        #expect(result.casks.isEmpty)
+        #expect(result.casks.map(\.token).sorted() == ["gstreamer-runtime", "obs"])
     }
 
     @Test func emptyCatalogIsSuccessAndSkipsInfo() throws {
@@ -442,7 +450,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.setInfoAfter(infoAfterFixture)
         try brew.setIndexAge(hours: 48)
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -469,7 +477,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.setUpdateError("offline")
         try brew.setIndexAge(hours: 48)
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -491,7 +499,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.setUpdateWarning("update failed, falling back to cached version.")
         try brew.setIndexAge(hours: 48)
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -510,7 +518,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.setInfoError("Could not load cask metadata")
         try brew.setIndexAge(hours: 48)
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -552,7 +560,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         """)
         try brew.setIndexAge(hours: 48)
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false,
                                                       excludingAppBundleNames: ["MacHelper.app"]))
@@ -571,7 +579,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.setInfo(infoFixture)
         try brew.setIndexAge(hours: 1)
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -592,7 +600,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.setOutdated(#"{"formulae":[],"casks":[]}"#)
         try brew.setIndexAge(hours: 1)
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -614,7 +622,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let gate = DispatchSemaphore(value: 0)
         brew.outdatedGate = gate
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let first = await session.check(greedy: false, refresh: false)
         let second = await session.check(greedy: false, refresh: false)
@@ -641,7 +649,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         let gate = DispatchSemaphore(value: 0)
         brew.outdatedGate = gate
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let first = try #require(await session.check(greedy: false, refresh: false))
         Task.detached { gate.signal() }
@@ -663,7 +671,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.updateStatus = 1
         brew.setUpdateError("offline")
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: true))
         let all = await snapshots(stream)
@@ -684,7 +692,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.setOutdated(outdatedFixture)
         brew.setInfo(infoFixture)
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: true))
         let all = await snapshots(stream)
@@ -704,7 +712,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.outdatedStatus = 1
         brew.setOutdatedError("the list could not be read")
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: true))
         let all = await snapshots(stream)
@@ -729,7 +737,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.outdatedAfterStatus = 1
         brew.setOutdatedError("network is down")
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
@@ -758,7 +766,7 @@ private func snapshots(_ stream: AsyncStream<HomebrewUpdateSession.Snapshot>)
         brew.outdatedAfterStatus = 1
         brew.setOutdatedError("the list could not be read")
         let session = HomebrewUpdateSession(brew: brew.executable.path, repository: brew.repository,
-                                     runner: brew.runner)
+                                            runner: brew.runner)
 
         let stream = try #require(await session.check(greedy: false, refresh: false))
         let all = await snapshots(stream)
