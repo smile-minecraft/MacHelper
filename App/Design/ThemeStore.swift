@@ -25,8 +25,10 @@ final class ThemeStore: @unchecked Sendable {
     }
 
     private(set) var customThemes: [ThemeDefinition] = []
-    /// Snapshot instances run beside the real app and must never write its settings.
-    @ObservationIgnored private let persists = !CommandLine.arguments.contains { $0.hasPrefix("--snapshot") || $0 == "--export-icon-template" }
+    /// Snapshot instances run beside the real app and must never write its settings; a test
+    /// host has its own throwaway domain (`TestHost.defaults`).
+    @ObservationIgnored private let persists = !TestHost.isRunningTests
+        && !CommandLine.arguments.contains { $0.hasPrefix("--snapshot") || $0 == "--export-icon-template" }
     /// Resolved colors for the current theme (dynamic for themes with light and dark variants).
     private(set) var palette: [ThemeColors.Role: Color] = [:]
     /// Semantic control, chart and glass colors derived from the theme (dynamic like `palette`).
@@ -44,13 +46,13 @@ final class ThemeStore: @unchecked Sendable {
     @ObservationIgnored var exportTemplateOnLaunch: URL?
 
     private init() {
-        if let data = UserDefaults.standard.data(forKey: Self.settingsKey),
+        if let data = TestHost.defaults.data(forKey: Self.settingsKey),
            let saved = try? JSONDecoder().decode(AppearanceSettings.self, from: data) {
             settings = saved
         } else {
             var fresh = AppearanceSettings()
             // An existing install (monitor settings already saved) keeps every page: start in advanced mode.
-            if UserDefaults.standard.data(forKey: MonitorSettingsStore.key) != nil { fresh.mode = .advanced }
+            if TestHost.defaults.data(forKey: MonitorSettingsStore.key) != nil { fresh.mode = .advanced }
             settings = fresh
         }
         // Snapshot previews only (never saved): `--snapshot-symbols`, `--snapshot-preset standard|pixel|neumorphic`, `--snapshot-simple`.
@@ -166,7 +168,7 @@ final class ThemeStore: @unchecked Sendable {
     }
 
     func reloadFromDisk() {
-        if let data = UserDefaults.standard.data(forKey: Self.settingsKey),
+        if let data = TestHost.defaults.data(forKey: Self.settingsKey),
            let saved = try? JSONDecoder().decode(AppearanceSettings.self, from: data) { settings = saved }
         customThemes = library.load()
         rebuild()
@@ -414,7 +416,7 @@ final class ThemeStore: @unchecked Sendable {
 
     private func save() {
         guard persists else { return }
-        if let data = try? JSONEncoder().encode(settings) { UserDefaults.standard.set(data, forKey: Self.settingsKey) }
+        if let data = try? JSONEncoder().encode(settings) { TestHost.defaults.set(data, forKey: Self.settingsKey) }
     }
 
     private func rebuild() {

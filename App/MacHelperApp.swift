@@ -1,7 +1,6 @@
 import AppKit
 import SwiftUI
 
-@main
 struct MacHelperApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 

@@ -39,7 +39,7 @@ struct MonitorPanel: View {
     let actions: PanelActions
     /// false only for offscreen snapshots (ImageRenderer cannot draw ScrollView content).
     var scrollable = true
-    @AppStorage("panel.module") private var tab: PanelPage = .cpu
+    @AppStorage("panel.module", store: TestHost.defaults) private var tab: PanelPage = .cpu
     /// Kept above the tab switch so the selected disk survives moving between tabs while the
     /// panel is open.
     @State private var diskSelection = DiskCapacitySelectionModel()
@@ -47,14 +47,14 @@ struct MonitorPanel: View {
     typealias Tab = PanelPage
 
     /// Pages to show, in the user's order, minus the hidden ones and the ones this Mac cannot show.
-    @MainActor private var tabs: [PanelPage] {
+    @MainActor var tabs: [PanelPage] {
         store.settings.configuration.panelLayout.visiblePages {
             $0.isAvailable(in: store.availableModules, hasAccessories: !store.accessories.isEmpty)
         }
     }
 
     /// The stored page this Mac cannot show (or the user hid) falls back to the first visible page.
-    @MainActor private var shownTab: PanelPage? { tabs.contains(tab) ? tab : tabs.first }
+    @MainActor var shownTab: PanelPage? { tabs.contains(tab) ? tab : tabs.first }
 
     /// The strip and the content must highlight and show the same page, so the strip receives
     /// this resolved binding instead of the raw stored page. Reads fall back to the first
@@ -500,6 +500,35 @@ private struct DiskTab: View {
     let selection: DiskCapacitySelectionModel
 
     var body: some View {
+        // The content is a view of its own so the page can be drawn without running the
+        // lifecycle below (offscreen snapshots and the unit tests render just the content).
+        DiskTabContent(store: store, selection: selection)
+            .task {
+                // Every appearance refreshes immediately, so points written while another tab was
+                // visible are picked up when this page returns.
+                selection.connect(reader: DiskCapacitySelectionModel.historyReader(for: store.persistentHistory))
+                // Disk Arbitration has no timeout and capacity points arrive hourly, so refresh on
+                // a slow cadence while visible instead of every second. The model also refreshes
+                // the history window on this tick, which notices clears from other processes.
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(60))
+                    if Task.isCancelled { break }
+                    selection.refreshAll(forceHistory: false)
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .monitoringHistoryCleared)) { _ in
+                // Settings posts this only after the delete succeeds. A failed clear keeps the
+                // old points on screen and shows its error instead.
+                selection.historyDidClear()
+            }
+    }
+}
+
+struct DiskTabContent: View {
+    let store: MonitorStore
+    let selection: DiskCapacitySelectionModel
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 12) {
                 volumeSection
@@ -513,24 +542,6 @@ private struct DiskTab: View {
             // DiskIOSection owns its sampler and `.task`; it stops sampling when the page goes
             // away.
             DiskIOSection()
-        }
-        .task {
-            // Every appearance refreshes immediately, so points written while another tab was
-            // visible are picked up when this page returns.
-            selection.connect(reader: DiskCapacitySelectionModel.historyReader(for: store.persistentHistory))
-            // Disk Arbitration has no timeout and capacity points arrive hourly, so refresh on
-            // a slow cadence while visible instead of every second. The model also refreshes
-            // the history window on this tick, which notices clears from other processes.
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(60))
-                if Task.isCancelled { break }
-                selection.refreshAll(forceHistory: false)
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .monitoringHistoryCleared)) { _ in
-            // Settings posts this only after the delete succeeds. A failed clear keeps the
-            // old points on screen and shows its error instead.
-            selection.historyDidClear()
         }
     }
 
@@ -792,7 +803,7 @@ private struct DiskTab: View {
 
 /// A section title whose text lives in the dedicated `DiskVolumeSelection` catalog. The shared
 /// `HairlineHeader` only takes a `LocalizedStringKey`, which would look in `Localizable`.
-private struct DiskSectionHeader: View {
+struct DiskSectionHeader: View {
     let text: DiskVolumeSelectionText
     @Environment(\.insideGlassCard) private var insideGlassCard
 
@@ -830,7 +841,7 @@ private struct DiskSectionHeader: View {
 /// The internal battery leads with a drawn battery and its charge, then the four numbers people
 /// check (health, cycles, temperature, power) as tiles, then the charge history. Accessories
 /// follow as rows with their own small battery bars, least charged first.
-private struct BatteryTab: View {
+struct BatteryTab: View {
     let store: MonitorStore
 
     var body: some View {

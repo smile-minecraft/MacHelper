@@ -255,6 +255,36 @@ final class MonitorStore {
         startVolumeCapacityCollection()
     }
 
+    #if DEBUG
+    /// A store for the hosted unit tests: no hardware samplers, no history database and no
+    /// background loops. Tests fill it with fixed readings, and nothing here reads the Mac or
+    /// the person's data. Production always uses `init(settings:)`.
+    static func makeForTests(settings: MonitorSettingsStore = MonitorSettingsStore(),
+                             modules: Set<MonitorModule> = [],
+                             history: MetricsHistory? = nil) -> MonitorStore {
+        MonitorStore(settings: settings, modules: modules, history: history)
+    }
+
+    /// Delivers a reading through the same path a real sample takes, so the live series and the
+    /// menu bar cache fill in exactly as they do in the app.
+    func seed(_ sample: ModuleSample) {
+        apply(sample)
+    }
+
+    /// `true` calls minus `false` calls a view made to `watchProcesses`; 0 while nothing observes.
+    var processWatchBalance: Int {
+        processWatchers
+    }
+
+    private init(settings: MonitorSettingsStore, modules: Set<MonitorModule>, history: MetricsHistory?) {
+        self.settings = settings
+        sources = nil
+        persistentHistory = history
+        availableModules = modules
+        observeSettings()
+    }
+    #endif
+
     private static func openHistory() -> MetricsHistory? {
         do {
             return try MetricsHistory()

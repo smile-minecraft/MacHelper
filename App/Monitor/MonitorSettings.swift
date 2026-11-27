@@ -234,10 +234,15 @@ final class MonitorSettingsStore {
         didSet { save() }
     }
 
-    init() {
+    /// The domain the configuration lives in. The test host gets its own throwaway domain so a
+    /// test that changes the configuration never changes the person's menu bar or panel.
+    @ObservationIgnored private let defaults: UserDefaults
+
+    init(defaults: UserDefaults = TestHost.defaults) {
+        self.defaults = defaults
         // The synthetic `--snapshot-demo` run shows the default menu bar (CPU sparkline, memory,
         // temperature) whatever this Mac's settings are, and never saves.
-        configuration = DemoData.snapshot ? .default : Self.load()
+        configuration = DemoData.snapshot ? .default : Self.load(defaults)
     }
 
     subscript(module: MonitorModule) -> ModuleConfig {
@@ -247,14 +252,14 @@ final class MonitorSettingsStore {
 
     /// Re-reads the stored configuration after settings are imported.
     func reload() {
-        configuration = Self.load()
+        configuration = Self.load(defaults)
     }
 
     /// Decodes the stored configuration, going through the shared upgrade path: modules that
     /// older versions did not have are filled with their defaults and the panel layout is
     /// normalized.
-    private static func load() -> MonitorConfiguration {
-        guard let data = UserDefaults.standard.data(forKey: key),
+    private static func load(_ defaults: UserDefaults) -> MonitorConfiguration {
+        guard let data = defaults.data(forKey: key),
               let saved = MonitorConfiguration.upgraded(from: data) else {
             return .default
         }
@@ -264,7 +269,7 @@ final class MonitorSettingsStore {
     private func save() {
         guard !DemoData.snapshot else { return }
         if let data = try? JSONEncoder().encode(configuration) {
-            UserDefaults.standard.set(data, forKey: Self.key)
+            defaults.set(data, forKey: Self.key)
         }
     }
 }
