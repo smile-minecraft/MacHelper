@@ -718,15 +718,25 @@ struct HairlinePanel<Content: View>: View {
 /// Centres a page's fixed-shape content (an empty state, say) and scrolls it instead of squeezing
 /// it when the window is short: with the Helper warning on screen a 520 pt window leaves the page
 /// under 400 pt, which is less than an illustration, a title and its buttons need.
+///
+/// Uses `ViewThatFits` rather than a `GeometryReader` + `ScrollView` pinned to `geo.size.height`:
+/// matching the scroll document's minimum height to the exact viewport height sits on the vertical
+/// overflow threshold, so during a page-in vertical offset transition macOS toggles the vertical
+/// scroller on and off across frames and shakes the centered layout. When the window is tall enough
+/// no scroll view is created; short windows fall back to `ScrollView`.
 struct ScrollingCenter<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {
-        GeometryReader { geo in
+        ViewThatFits(in: .vertical) {
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             ScrollView {
-                content.frame(minHeight: geo.size.height)
+                content
+                    .frame(maxWidth: .infinity)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

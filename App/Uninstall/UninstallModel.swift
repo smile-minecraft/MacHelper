@@ -17,20 +17,36 @@ final class UninstallModel {
     var sort: Sort = .name
     var search = "" { didSet { dropNotice = nil } }
     private(set) var apps: [InstalledApp] = []
+    /// False until the first installed-app scan finishes, so the list pane can start on the
+    /// spinner instead of flashing an empty list for one frame before `.task` runs.
+    private(set) var hasLoadedApps = false
     private(set) var loadingApps = false
     /// True while the old list stays on screen and a newer one is being read.
     private(set) var refreshingApps = false
     @ObservationIgnored private var appsLoadedAt: Date?
+    @ObservationIgnored private let installedAppsLoader: @Sendable () -> [InstalledApp]
+    @ObservationIgnored private let planLoader: @Sendable (InstalledApp, Bool, [InstalledApp]) -> UninstallPlan
+    @ObservationIgnored private let helperStatusProvider: @MainActor () -> Bool
     /// Distinguishes plan reads, so a slow read of an app the page has left cannot replace the
     /// plan of the app on screen.
     @ObservationIgnored private var planGeneration = 0
     var selectedAppID: InstalledApp.ID? {
         didSet {
             dropNotice = nil
-            // A plan belongs to one app. Drop the previous one as the selection changes, so the
-            // app just picked never shows the sizes of the app before it while its own plan is read.
+            guard selectedAppID != oldValue else { return }
+            // A plan belongs to one app. Drop the previous one and enter the loading state
+            // synchronously as the selection changes, so the app just picked never shows another
+            // app's sizes or flashes a blank frame before its own plan task starts.
+            planGeneration += 1
+            let generation = planGeneration
+            message = nil
             plan = nil
-            Task { await loadPlan() }
+            guard let app = selectedApp else {
+                loadingPlan = false
+                return
+            }
+            loadingPlan = true
+            Task { await loadPlan(for: app, generation: generation) }
         }
     }
     private(set) var plan: UninstallPlan?
@@ -43,6 +59,18 @@ final class UninstallModel {
 
     private(set) var orphans: [UninstallItem]?
     private(set) var loadingOrphans = false
+
+    init(
+        installedAppsLoader: @escaping @Sendable () -> [InstalledApp] = { AppUninstaller.installedApps() },
+        planLoader: @escaping @Sendable (InstalledApp, Bool, [InstalledApp]) -> UninstallPlan = { app, includeUserData, others in
+            AppUninstaller.plan(for: app, includeUserData: includeUserData, otherApps: others)
+        },
+        helperStatusProvider: @escaping @MainActor () -> Bool = { HelperClient.shared.status == .enabled }
+    ) {
+        self.installedAppsLoader = installedAppsLoader
+        self.planLoader = planLoader
+        self.helperStatusProvider = helperStatusProvider
+    }
 
     var selectedApp: InstalledApp? { apps.first { $0.id == selectedAppID } }
 
@@ -85,7 +113,10 @@ final class UninstallModel {
             loadingApps = false
             refreshingApps = false
         }
-        apps = await Task.detached(priority: .userInitiated) { AppUninstaller.installedApps() }.value
+        apps = await Task.detached(priority: .userInitiated) { [installedAppsLoader] in
+            installedAppsLoader()
+        }.value
+        hasLoadedApps = true
         appsLoadedAt = Date()
         PageLoadProbe.mark(.uninstall, "apps")
         PageLoadProbe.mark(.uninstall, "refresh")
@@ -139,16 +170,21 @@ final class UninstallModel {
             return
         }
         loadingPlan = true
+        await loadPlan(for: app, generation: generation)
+    }
+
+    private func loadPlan(for app: InstalledApp, generation: Int) async {
         let others = apps
         let withData = includeUserData
+        let loader = planLoader
         let p = await Task.detached(priority: .userInitiated) {
-            AppUninstaller.plan(for: app, includeUserData: withData, otherApps: others)
+            loader(app, withData, others)
         }.value
         // Only the newest request owns the plan and the spinner: an older one finishing late would
         // otherwise leave the page spinning for good (or show another app's leftovers).
         guard planGeneration == generation, selectedAppID == app.id else { return }
         plan = p
-        helperEnabled = HelperClient.shared.status == .enabled
+        helperEnabled = helperStatusProvider()
         systemSelection = helperEnabled ? Set(p.systemItems.filter { Self.isStrongSystemMatch($0, bundleID: app.bundleID) }) : []
         loadingPlan = false
     }

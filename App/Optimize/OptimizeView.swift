@@ -25,7 +25,11 @@ struct OptimizeView: View {
                 case .idle: start
                 case .scanning: scanning
                 case .running: progress(String(localized: "Cleaning…"))
-                case .ready: preview
+                case .ready:
+                    // The search filters the preview list only, so it stays out of the toolbar on
+                    // the start, scanning and results screens.
+                    preview
+                        .searchable(text: $model.filter.text, placement: .toolbar, prompt: Text("Search names and paths"))
                 case .finished: results
                 }
             }
@@ -36,14 +40,16 @@ struct OptimizeView: View {
         // this page's own lists and panes scroll inside whatever height it is given.
         // The scan, clean and options buttons live in the window toolbar and the Actions menu,
         // built from the same state as the buttons on the page.
-        .focusedSceneValue(\.pageCommands, pageCommands.withSearch())
-        .searchable(text: $model.filter.text, placement: .toolbar, prompt: Text("Search names and paths"))
+        .focusedSceneValue(\.pageCommands, pageCommands.withSearch(showsToolbarSearch))
         .sheet(isPresented: $showAutoClean) { AutoCleanView(model: autoClean) }
         .sheet(isPresented: $showExclusions) { ExclusionsView(model: model) }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             model.recheckFullDiskAccess()
         }
     }
+
+    /// The toolbar search field only filters the scanned preview list, never the start or progress screens.
+    var showsToolbarSearch: Bool { model.phase == .ready }
 
     // MARK: Page commands
 
